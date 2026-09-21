@@ -148,12 +148,14 @@ a {
   flex-shrink: 0;
 }
 
-/* The Platform lockup, matched to platform.metix.ai: logo, hairline at 14% ink,
-   then "Platform" in mono uppercase. The full logo never drops below 24px. */
+/* The Platform lockup, after platform.metix.ai: logo, hairline, then "Platform" in
+   mono caps. The full logo never drops below 24px. Measured at that size, the
+   wordmark's caps are 14.1px tall, its x-height is 10.4px, and its baseline sits
+   19px down the logo; the hairline and the label are fitted to those three. */
 .lockup {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: var(--ink);
 }
 
@@ -163,19 +165,29 @@ a {
   width: auto;
 }
 
+/* As tall as the wordmark's caps. */
 .lockup-rule {
   width: 1px;
-  height: 16px;
-  background: rgb(11 10 31 / 0.14);
+  height: 14px;
+  background: rgb(16 13 53 / 0.24);
 }
 
+/* Geist Mono caps are 0.75em, so 13.85px caps match the wordmark's x-height. The line
+   box is centered on the logo, and the offset drops its baseline onto the wordmark's,
+   19px into the 24px logo. Text snaps to whole pixels: any offset from 2.6 to 3.4px
+   lands exactly on it at both label sizes, at 2x and 3x, so 3px sits in the middle.
+   Color is the wordmark's navy. */
 .lockup-platform {
+  position: relative;
+  top: 3px;
+  margin-right: -0.14em;
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: 13.85px;
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: #100d35;
 }
 
 .brand-name {
@@ -183,7 +195,7 @@ a {
   font-weight: 700;
   font-size: 17px;
   letter-spacing: -0.02em;
-  margin-left: 8px;
+  margin-left: 16px;
 }
 
 .header-actions {
@@ -279,7 +291,7 @@ a {
 
 /* Phone: the lockup keeps its 24px logo, so the header gives up the rest.
    The language switch shows only the other language. */
-@media (max-width: 560px) {
+@media (max-width: 600px) {
   .brand-name,
   .lang-switch a[aria-current="true"] {
     display: none;
@@ -288,10 +300,12 @@ a {
     gap: 8px;
   }
   .lockup {
-    gap: 8px;
+    gap: 9px;
   }
   .lockup-platform {
-    font-size: 10.5px;
+    margin-right: -0.1em;
+    font-size: 12px;
+    letter-spacing: 0.1em;
   }
   .header-actions {
     gap: 8px;
@@ -302,8 +316,15 @@ a {
 }
 
 @media (max-width: 380px) {
+  .lang-switch {
+    padding: 0;
+    border-color: transparent;
+    background: none;
+  }
   .lang-switch a {
-    padding: 7px 9px;
+    padding: 7px 6px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   .pill {
     padding: 0 10px;
