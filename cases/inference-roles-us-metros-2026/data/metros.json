@@ -1,0 +1,47 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/us-postings.json",
+  "rows": [
+    {
+      "group": "sf-bay-area",
+      "count": 176,
+      "share": 0.4986
+    },
+    {
+      "group": "new-york",
+      "count": 43,
+      "share": 0.1218
+    },
+    {
+      "group": "seattle",
+      "count": 38,
+      "share": 0.1076
+    },
+    {
+      "group": "washington-baltimore",
+      "count": 16,
+      "share": 0.0453
+    },
+    {
+      "group": "boston",
+      "count": 11,
+      "share": 0.0312
+    },
+    {
+      "group": "austin",
+      "count": 9,
+      "share": 0.0255
+    },
+    {
+      "group": "elsewhere",
+      "count": 23,
+      "share": 0.0652
+    },
+    {
+      "group": "no-city",
+      "count": 37,
+      "share": 0.1048
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+---
+import type { Receipt } from "@site/cases";
+import { REPO, number, ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  slug: string;
+  receipt: Receipt;
+  exploration?: number;
+}
+
+const { lang, slug, receipt, exploration } = Astro.props;
+const t = ui[lang];
+const ranAt = receipt.ran_at.replace("T", " ").replace(/:\d\dZ$/, " UTC");
+const command = `export METIX_KEY=metix_xxxxxxxxxxxx\npython3 cases/${slug}/fetch.py`;
+---
+
+<section class="block" aria-labelledby="receipt-title">
+  <h2 id="receipt-title">{t.receiptTitle}</h2>
+  <p class="lede">{t.receiptLede}</p>
+  <dl class="receipt-grid">
+    <div><dt>{t.ranAt}</dt><dd>{ranAt}</dd></div>
+    <div><dt>{t.callsLabel}</dt><dd>{number(lang, receipt.calls)}</dd></div>
+    <div><dt>{t.resultsLabel}</dt><dd>{number(lang, receipt.results)}</dd></div>
+    <div><dt>{t.recordsLabel}</dt><dd>{number(lang, receipt.records)}</dd></div>
+    <div><dt>{t.creditsLabel}</dt><dd>{number(lang, receipt.credits)}</dd></div>
+  </dl>
+  {exploration !== undefined && <p class="receipt-note">{t.exploration(exploration)}</p>}
+
+  <div class="rerun" data-copy-root>
+    <div class="rerun-head">
+      <h3>{t.rerun}</h3>
+      <button class="btn" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
+        {t.copy}
+      </button>
+    </div>
+    <pre class="code">{command}</pre>
+  </div>
+  <p class="links-line">
+    <a href={`${REPO}/tree/main/cases/${slug}`}>{t.caseFolder}</a>
+    <a href="https://mira-api.metix.ai/docs/credits.md">{t.pricing}</a>
+  </p>
+</section>

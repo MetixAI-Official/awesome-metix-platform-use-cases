@@ -1,0 +1,104 @@
+---
+import "@fontsource-variable/sora";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "@site/styles/shell.css";
+import { REPO, asset, href, ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  /** Path relative to the language root, used by the language switch, e.g. "cases/x/". */
+  path: string;
+  title?: string;
+  description?: string;
+}
+
+const { lang, path, title, description } = Astro.props;
+const t = ui[lang];
+const pageTitle = title ? `${title} · ${t.siteName}` : t.siteName;
+const isCatalog = path === "";
+---
+
+<!doctype html>
+<html lang={t.htmlLang} class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description ?? t.siteDescription} />
+    <link rel="icon" type="image/png" href={asset("favicon.png")} />
+    <link rel="alternate" hreflang="en" href={new URL(href("en", path), Astro.site)} />
+    <link rel="alternate" hreflang="zh" href={new URL(href("zh", path), Astro.site)} />
+    <meta property="og:title" content={title ?? t.siteName} />
+    <meta property="og:description" content={description ?? t.siteDescription} />
+    <script is:inline>document.documentElement.classList.replace("no-js", "js");</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href={href(lang)}>
+          <img src={asset("brand/metix-logo.svg")} alt="Metix AI" width="129" height="24" />
+          <span class="brand-sub">Platform</span>
+        </a>
+        <nav class="primary-nav" aria-label={t.navCases}>
+          <a href={href(lang)} aria-current={isCatalog ? "page" : undefined}>{t.navCases}</a>
+        </nav>
+        <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label={t.langLabel}>
+            <a href={href("en", path)} hreflang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>EN</a>
+            <a href={href("zh", path)} hreflang="zh" lang="zh-CN" aria-current={lang === "zh" ? "true" : undefined}>中文</a>
+          </div>
+          <a class="gh-link" href={REPO}>{t.navGithub}</a>
+          <a class="pill" href="https://platform.metix.ai/api-keys">
+            <span class="long">{t.navKey}</span><span class="short">{t.navKeyShort}</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <img src={asset("brand/metix-logo.svg")} alt="Metix AI" width="129" height="24" />
+        <nav class="links" aria-label="Metix AI Platform">
+          <a href="https://platform.metix.ai">Metix AI Platform</a>
+          <a href="https://platform.metix.ai/docs">{t.footerDocs}</a>
+          <a href="https://platform.metix.ai/api-keys">{t.footerKeys}</a>
+          <a href={`${REPO}/blob/main/docs/public-data-policy.md`}>{t.footerPolicy}</a>
+          <a href={REPO}>{t.footerSource}</a>
+        </nav>
+        <p class="legal">{t.legal}</p>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Copy buttons: data-copy holds a selector inside the nearest [data-copy-root].
+      document.addEventListener("click", async (event) => {
+        const button = event.target.closest("button[data-copy]");
+        if (!button) return;
+        const root = button.closest("[data-copy-root]");
+        const source = root && root.querySelector(button.dataset.copy);
+        if (!source) return;
+        const label = button.dataset.label || button.textContent;
+        button.dataset.label = label;
+        try {
+          await navigator.clipboard.writeText(source.textContent.trim());
+          button.textContent = button.dataset.done;
+        } catch {
+          const range = document.createRange();
+          range.selectNodeContents(source);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+          button.textContent = button.dataset.fail.replace("Ctrl+C", mac ? "Cmd+C" : "Ctrl+C");
+        }
+        clearTimeout(button._reset);
+        button._reset = setTimeout(() => (button.textContent = label), 1500);
+      });
+    </script>
+  </body>
+</html>

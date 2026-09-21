@@ -1,0 +1,59 @@
+{
+  "note": "Metro areas as groups of cities, by state. A posting whose city is not listed counts as elsewhere in the US. A posting with no city, or with a state name in the city field, counts as no city given.",
+  "metros": [
+    {
+      "id": "sf-bay-area",
+      "cities": {
+        "California": [
+          "San Francisco", "San Jose", "Santa Clara", "Sunnyvale", "Palo Alto",
+          "Mountain View", "Cupertino", "Redwood City", "San Mateo", "Menlo Park",
+          "Milpitas", "Foster City", "Oakland", "Berkeley", "Fremont",
+          "South San Francisco", "Emeryville", "Burlingame", "Los Altos",
+          "Los Gatos", "Campbell", "San Bruno", "Hayward", "Pleasanton",
+          "San Carlos", "Belmont", "Newark"
+        ]
+      }
+    },
+    {
+      "id": "new-york",
+      "cities": {
+        "New York": ["New York", "Brooklyn", "Long Island City"],
+        "New Jersey": ["Jersey City", "Hoboken", "Newark", "Livingston"]
+      }
+    },
+    {
+      "id": "seattle",
+      "cities": {
+        "Washington": ["Seattle", "Bellevue", "Redmond", "Kirkland", "Bothell", "Everett", "Tacoma"]
+      }
+    },
+    {
+      "id": "washington-baltimore",
+      "cities": {
+        "District of Columbia": ["Washington"],
+        "Virginia": ["McLean", "Arlington", "Reston", "Herndon", "Alexandria", "Fairfax", "Chantilly", "Tysons"],
+        "Maryland": [
+          "Bethesda", "Rockville", "Laurel", "Columbia", "Capitol Heights",
+          "Silver Spring", "College Park", "Gaithersburg", "Annapolis Junction",
+          "Fort Meade", "Baltimore"
+        ]
+      },
+      "city_only": ["District of Columbia"]
+    },
+    {
+      "id": "boston",
+      "cities": {
+        "Massachusetts": [
+          "Boston", "Cambridge", "Somerville", "Waltham", "Burlington",
+          "Lexington", "Woburn", "Needham", "Bedford", "Framingham"
+        ]
+      }
+    },
+    {
+      "id": "austin",
+      "cities": {
+        "Texas": ["Austin", "Round Rock"]
+      }
+    }
+  ]
+}

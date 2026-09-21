@@ -1,0 +1,13 @@
+slug: inference-pnl-2026
+type: study
+status: planned
+title:
+  en: Inference as a P&L function
+  zh: 推理正在变成一门算账的业务
+dek:
+  en: Inference and serving providers, and the serving teams inside frontier labs, across profiles, postings, and company records.
+  zh: 推理与模型服务公司，以及前沿实验室里的推理团队，结合人才、岗位和公司数据。
+datasets: [people, jobs, companies]
+integration: [rest]
+topics: [inference, ai-talent]
+regions: [global]

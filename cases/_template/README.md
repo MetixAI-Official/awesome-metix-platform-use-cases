@@ -28,3 +28,7 @@ python3 cases/replace-with-slug-2026/fetch.py
 ```
 
 The last run's calls, results, records, and Credits are in `data/receipt.json`.
+
+## Also in this folder
+
+`PROMPT.md` and `PROMPT.zh.md` hold the bootstrap prompt; start from the skeleton here. The report page goes in `report/Report.astro`; `cases/inference-roles-us-metros-2026/report/Report.astro` is a working example of the component contract (`lang`, `section`, `entry`) and of the design note it opens with.

@@ -120,7 +120,8 @@ LINE_RULES: tuple[LineRule, ...] = (
         "credential",
         re.compile(
             r"(?i)(?:key|token|secret|password|passwd)[\"']?\s*[:=]\s*"
-            r"(?:[\"'][^\"'\s]{16,}[\"']|[^\s\"'#,;]{16,})"
+            # Unquoted values exclude brackets, so code such as key = value.strip() passes.
+            r"(?:[\"'][^\"'\s]{16,}[\"']|[^\s\"'#,;()\[\]{}]{16,})"
         ),
         "secret-looking assignment",
         _placeholder_ok,

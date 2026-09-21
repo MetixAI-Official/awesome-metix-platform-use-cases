@@ -1,0 +1,20 @@
+{
+  "where": {
+    "all": [
+      {
+        "any": [
+          { "field": "title", "match": "inference" },
+          { "field": "title", "match": "model serving" },
+          { "field": "title", "match": "llm serving" }
+        ]
+      },
+      {
+        "not": [
+          { "field": "title", "match": "causal" },
+          { "field": "title", "match": "statistical" }
+        ]
+      }
+    ]
+  },
+  "size": 1
+}

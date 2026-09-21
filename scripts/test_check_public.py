@@ -34,6 +34,7 @@ def aggregate(unit: str, rows: list[dict], **extra: object) -> str:
         "METIX_KEY=metix_xxxxxxxxxxxx",
         'export METIX_KEY="' + "metix_xxxxxxxxxxxx" + '"',
         '"credits_source": "GET /auth/key/status before and after the run"',
+        "                key = value.strip().strip(quotes)",
         'Call metix_get_contract first, then send "Authorization: Bearer $METIX_KEY".',
         "Metix AI Platform, by Metix AI. Legal entity: " + "Open" + "Jobs AI Inc.",
         "git clone git@github.com:MetixAI-Official/awesome-metix-platform-use-cases.git",

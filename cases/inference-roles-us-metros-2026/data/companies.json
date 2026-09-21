@@ -1,0 +1,27 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/us-postings.json",
+  "rows": [
+    {
+      "company": "NVIDIA",
+      "count": 44
+    },
+    {
+      "company": "Capital One",
+      "count": 21
+    },
+    {
+      "company": "Anthropic",
+      "count": 20
+    },
+    {
+      "company": "Amazon Web Services (AWS)",
+      "count": 19
+    },
+    {
+      "company": "CoreWeave",
+      "count": 14
+    }
+  ]
+}

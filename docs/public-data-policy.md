@@ -6,6 +6,12 @@ So the rule is simple: if it should not be on the open web, it never reaches `gi
 
 This page lists what may be published, what may not, and how the repository enforces it. When a case needs something this page does not cover, ask before publishing, and extend this page in the same pull request.
 
+## Where the data may come from
+
+Only from the public Metix AI Platform, through the REST API, the MCP server, or the metix-skills, with a normal Platform key. No case uses an internal database, export, or pipeline, and no case describes one. A number that someone with a key cannot reproduce does not belong here.
+
+Prompts in `PROMPT.md` are published like everything else: they name public endpoints and fields only, and never contain a key, an internal term, or a customer.
+
 ## What may be published
 
 Aggregates computed from the Metix AI Platform, provided they meet the small-cell rule below: counts, shares, medians, rankings, and flows between groups.

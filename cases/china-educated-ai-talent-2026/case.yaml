@@ -1,0 +1,13 @@
+slug: china-educated-ai-talent-2026
+type: study
+status: planned
+title:
+  en: China-educated AI talent in industry
+  zh: 中国本科背景的 AI 人才在产业界的分布
+dek:
+  en: Where AI engineers and researchers with an undergraduate degree from an institution in China work, and who returns. Defined by institution location only.
+  zh: 本科院校位于中国的 AI 工程师和研究员在哪里工作、谁在回流。口径只看院校所在地。
+datasets: [people, companies]
+integration: [rest]
+topics: [ai-talent, education]
+regions: [global]

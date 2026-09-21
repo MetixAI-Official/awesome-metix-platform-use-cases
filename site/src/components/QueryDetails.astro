@@ -1,0 +1,45 @@
+---
+import { ui, type Lang } from "@site/i18n";
+
+export interface QueryItem {
+  /** File name under the case's queries/ folder. */
+  file: string;
+  endpoint: string;
+  spec: unknown;
+}
+
+interface Props {
+  lang: Lang;
+  items: QueryItem[];
+  /** Short cost label shown on the closed disclosure, e.g. "95 Credits for the full run". */
+  cost: string;
+}
+
+const { lang, items, cost } = Astro.props;
+const t = ui[lang];
+---
+
+<details class="query">
+  <summary>
+    <span class="q-label">{items.length > 1 ? t.queries : t.query}</span>
+    <span class="q-files">{items.map((item) => item.file).join(" · ")}</span>
+    <span class="cost">{cost}</span>
+  </summary>
+  <div class="query-body">
+    {
+      items.map((item) => (
+        <div class="query-item" data-copy-root>
+          <div class="query-item-head">
+            <span>
+              <strong>{item.endpoint}</strong> · queries/{item.file}
+            </span>
+            <button class="btn" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
+              {t.copy}
+            </button>
+          </div>
+          <pre class="code">{JSON.stringify(item.spec, null, 2)}</pre>
+        </div>
+      ))
+    }
+  </div>
+</details>

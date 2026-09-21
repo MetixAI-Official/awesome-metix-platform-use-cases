@@ -1,0 +1,13 @@
+slug: coding-agent-companies-2026
+type: study
+status: planned
+title:
+  en: Coding-agent companies and who they hire
+  zh: 编程 Agent 公司都在招什么人
+dek:
+  en: Companies that sell a coding agent, including people whose titles never say "Agent", across profiles, postings, and company records.
+  zh: 以编程 Agent 为产品的公司，包括职位里从不出现 Agent 的人，结合人才、岗位和公司数据。
+datasets: [people, jobs, companies]
+integration: [rest]
+topics: [coding-agents, ai-hiring]
+regions: [US]

@@ -1,0 +1,4 @@
+{
+  "job_ids": "<the job_ids returned by us-postings.json, 100 per request>",
+  "_source": ["title", "company.name", "location.city", "location.state"]
+}

@@ -1,0 +1,29 @@
+slug: inference-roles-us-metros-2026
+type: snapshot
+status: published
+title:
+  en: Nearly half of US inference openings are in the Bay Area
+  zh: 美国近一半推理岗位集中在旧金山湾区
+dek:
+  en: Open postings with inference or model serving in the title, grouped by US metro, as listed on the Metix AI Platform on September 21, 2026.
+  zh: 2026 年 9 月 21 日 Metix AI Platform 上标题含 inference 或 model serving 的美国在招岗位，按都市区统计。
+datasets: [jobs]
+integration: [rest]
+topics: [inference, ai-hiring]
+regions: [US]
+snapshot: 2026-09-21
+published: 2026-09-21
+exploration_credits: 111
+highlights:
+  - value: "49.9%"
+    label:
+      en: of distinct US postings are in the Bay Area
+      zh: 的美国去重岗位在旧金山湾区
+  - value: "353"
+    label:
+      en: distinct US postings
+      zh: 个美国去重岗位
+  - value: "120"
+    label:
+      en: companies posting them
+      zh: 家公司在招

@@ -1,0 +1,107 @@
+---
+import { getCollection } from "astro:content";
+import Base from "@site/layouts/Base.astro";
+import { receipts } from "@site/cases";
+import { href, isoDate, number, ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const all = await getCollection("cases");
+const byNewest = (a: (typeof all)[number], b: (typeof all)[number]) =>
+  (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0);
+const published = all.filter((c) => c.data.status === "published").sort(byNewest);
+const planned = all.filter((c) => c.data.status === "planned");
+---
+
+<Base lang={lang} path="">
+  <div class="wrap catalog">
+    <section class="catalog-intro">
+      <p class="eyebrow">{t.catalogEyebrow}</p>
+      <h1>{t.catalogTitle}</h1>
+      <p class="lede">{t.catalogLede}</p>
+    </section>
+
+    <section class="catalog-section" aria-labelledby="published-title">
+      <h2 class="section-label" id="published-title">
+        {t.published} <span class="count">{published.length}</span>
+      </h2>
+      <ol class="rows">
+        {
+          published.map(({ data }) => {
+            const receipt = receipts[data.slug];
+            return (
+              <li>
+                <a class="case-row" href={href(lang, `cases/${data.slug}/`)}>
+                  <p class="meta">
+                    <span class="type">{t.types[data.type]}</span>
+                    {" · "}
+                    {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+                    {data.snapshot && ` · ${isoDate(data.snapshot)}`}
+                  </p>
+                  <div>
+                    <h3>{data.title[lang]}</h3>
+                    <p class="dek">{data.dek[lang]}</p>
+                    <p class="cost">
+                      {receipt && (
+                        <>
+                          <span>{`${number(lang, receipt.calls)} ${t.calls}`}</span>
+                          {" · "}
+                          <span>{`${number(lang, receipt.records)} ${t.records}`}</span>
+                          {" · "}
+                          <span>{`${number(lang, receipt.credits)} ${t.creditsToRerun}`}</span>
+                        </>
+                      )}
+                      <span class="read">{t.read} →</span>
+                    </p>
+                  </div>
+                  {data.highlights && (
+                    <dl class="highlights">
+                      {data.highlights.map((h) => (
+                        <div>
+                          <dt>{h.value}</dt>
+                          <dd>{h.label[lang]}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  )}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </section>
+
+    {
+      planned.length > 0 && (
+        <section class="catalog-section" aria-labelledby="next-title">
+          <h2 class="section-label" id="next-title">
+            {t.comingNext} <span class="count">{planned.length}</span>
+          </h2>
+          <p class="section-note">{t.comingNextNote}</p>
+          <ul class="rows">
+            {planned.map(({ data }) => (
+              <li>
+                <div class="case-row planned">
+                  <p class="meta">
+                    <span class="type">{t.types[data.type]}</span>
+                    {" · "}
+                    {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+                  </p>
+                  <div>
+                    <h3>{data.title[lang]}</h3>
+                    <p class="dek">{data.dek[lang]}</p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</Base>

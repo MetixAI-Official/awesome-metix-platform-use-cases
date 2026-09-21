@@ -1,13 +1,18 @@
 # Copy this folder to cases/<slug>/ and fill in every field.
 # Field rules are in docs/framework.md under "The case contract".
 slug: replace-with-slug-2026
-title: Working title until the data exists
-dek: One sentence with the scope, the population, and the period.
-type: study # study | snapshot | recipe | agent
-status: draft # draft | published
-datasets: [people, jobs, companies] # any of people, jobs, companies
+type: snapshot # study | snapshot | recipe | agent
+status: draft # planned | draft | published
+title:
+  en: Working title until the data exists
+  zh: 数据出来之前先写工作标题
+dek:
+  en: One sentence with the scope, the population, and the period.
+  zh: 一句话写清范围、人群和时间。
+datasets: [jobs] # any of people, jobs, companies
 integration: [rest] # any of rest, mcp, skills
 topics: []
-regions: [global] # ISO country codes, or global
-snapshot: # YYYY-MM-DD, the day the queries ran
-published: # YYYY-MM-DD, set when status becomes published
+regions: [US] # ISO country codes, or global
+# snapshot: YYYY-MM-DD, the day the replay ran
+# published: YYYY-MM-DD, set when status becomes published
+# exploration_credits: Credits the agent spent before the replay

@@ -1,0 +1,27 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/world-total.json",
+  "rows": [
+    {
+      "group": "world-postings",
+      "count": 585
+    },
+    {
+      "group": "us-postings",
+      "count": 386
+    },
+    {
+      "group": "us-records-read",
+      "count": 386
+    },
+    {
+      "group": "us-distinct-postings",
+      "count": 353
+    },
+    {
+      "group": "us-companies",
+      "count": 120
+    }
+  ]
+}
