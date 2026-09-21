@@ -82,7 +82,8 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
         const label = button.dataset.label || button.textContent;
         button.dataset.label = label;
         try {
-          await navigator.clipboard.writeText(source.textContent.trim());
+          // innerText keeps the line breaks between the per-line spans of a code block.
+          await navigator.clipboard.writeText((source.innerText || source.textContent).trim());
           button.textContent = button.dataset.done;
         } catch {
           const range = document.createRange();

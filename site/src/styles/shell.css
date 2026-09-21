@@ -1295,7 +1295,10 @@ pre.code {
 
 /* ---------- query disclosure ---------- */
 
+/* min-width: 0 lets the disclosure shrink inside any grid or flex parent; without it
+   the longest code line sets the width of the whole figure footer. */
 details.query {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
@@ -1387,11 +1390,41 @@ details.query[open]::details-content {
   font-weight: 500;
 }
 
+/* Long lines wrap with a hanging indent: each line starts at its own indent, and a
+   wrapped continuation sits two characters further in, so the JSON shape stays
+   readable without sideways scrolling. */
 .query-item pre.code {
-  white-space: pre;
-  overflow: auto;
   max-height: 26rem;
-  overflow-wrap: normal;
+  overflow: hidden auto;
+  padding: 16px 18px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  scrollbar-width: thin;
+}
+
+.code .ln {
+  display: block;
+  padding-left: calc((var(--i) + 2) * 1ch);
+  text-indent: calc((var(--i) + 2) * -1ch);
+}
+
+.code .key {
+  color: var(--ink);
+}
+
+.code .str {
+  color: #07545e;
+}
+
+.code .num,
+.code .lit {
+  color: var(--accent-ink);
+}
+
+.code .punct {
+  color: var(--ink-3);
 }
 
 @media (max-width: 640px) {

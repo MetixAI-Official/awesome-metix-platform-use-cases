@@ -17,6 +17,35 @@ interface Props {
 
 const { lang, items, cost } = Astro.props;
 const t = ui[lang];
+
+/*
+ * The spec as display lines: each keeps its indent as leading spaces (so copying
+ * gives back the exact JSON) and is tokenized for a quiet syntax tint.
+ */
+type Token = { text: string; kind?: "key" | "str" | "num" | "lit" | "punct" };
+const TOKEN = /("(?:[^"\\]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false|null)\b|([{}[\],:])/g;
+function tokenize(text: string): Token[] {
+  const out: Token[] = [];
+  let last = 0;
+  for (const m of text.matchAll(TOKEN)) {
+    if (m.index > last) out.push({ text: text.slice(last, m.index) });
+    if (m[1] && m[2]) out.push({ text: m[1], kind: "key" }, { text: m[2], kind: "punct" });
+    else if (m[1]) out.push({ text: m[1], kind: "str" });
+    else if (m[3]) out.push({ text: m[3], kind: "num" });
+    else if (m[4]) out.push({ text: m[4], kind: "lit" });
+    else out.push({ text: m[5], kind: "punct" });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push({ text: text.slice(last) });
+  return out;
+}
+const linesOf = (spec: unknown) =>
+  JSON.stringify(spec, null, 2)
+    .split("\n")
+    .map((line) => {
+      const indent = line.length - line.trimStart().length;
+      return { indent, tokens: tokenize(line.slice(indent)) };
+    });
 ---
 
 <details class="query">
@@ -37,7 +66,7 @@ const t = ui[lang];
               {t.copy}
             </button>
           </div>
-          <pre class="code">{JSON.stringify(item.spec, null, 2)}</pre>
+          <pre class="code json">{linesOf(item.spec).map((line) => <span class="ln" style={`--i: ${line.indent}`}>{" ".repeat(line.indent)}{line.tokens.map((tok) => (tok.kind ? <span class={tok.kind}>{tok.text}</span> : tok.text))}</span>)}</pre>
         </div>
       ))
     }
