@@ -3,7 +3,7 @@
  * Design
  * Field: blue #1E79C2 with white text; the US in ink #0B0A1F, other countries in #C9F6FF.
  * Detail chart on white: bars scaled to the world total, so the US bar takes two thirds of the width.
- * Signature: the 100% strip on the card, one segment per country, the US filling most of it.
+ * Signature: the 100% strip on the card: the US against every other country, the next three named in text.
  */
 import BarList from "@site/components/charts/BarList.astro";
 import Figure from "@site/components/charts/Figure.astro";
@@ -54,15 +54,14 @@ const barRows = rows.map((r) => ({
   width: r.share,
   kind: r.group === "United States" ? ("focus" as const) : r.group === "rest-of-world" ? ("residual" as const) : ("other" as const),
 }));
-// The card strip: the US, the next three countries, and one "other" segment for everything else,
-// so every segment has a legend entry.
+// The card strip: two segments, the US and every other country, so no two neighbors share a
+// color; the next three countries are named in text rather than drawn as look-alike slivers.
 const leaders = named.filter((r) => r.group !== "United States").slice(0, 3);
-const otherCount = world - us.count - leaders.reduce((s, r) => s + r.count, 0);
 const strip = [
   { key: "us", label: name(us.group), count: us.count },
-  ...leaders.map((r) => ({ key: "country", label: name(r.group), count: r.count })),
-  { key: "other", label: zh ? "其他" : "Other", count: otherCount },
+  { key: "rest", label: zh ? "其他所有国家" : "Every other country", count: world - us.count },
 ];
+const nextThree = leaders.map((r) => `${name(r.group)} ${pct(r.share, 0)}`).join(zh ? "、" : ", ");
 ---
 
 {
@@ -89,6 +88,7 @@ const strip = [
           </li>
         ))}
       </ul>
+      <p class="strip-next">{zh ? `其次是${nextThree}。` : `Next: ${nextThree}.`}</p>
     </div>
   )
 }
@@ -112,7 +112,6 @@ const strip = [
         alt={rows.map((r) => `${name(r.group)} ${r.count}`).join(zh ? "，" : ", ")}
         source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
         queries={[{ file: "forward-deployed.json", endpoint: "POST /v1/jobs/query", spec: fde }]}
-        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
       >
         <BarList rows={barRows} label={zh ? "各国岗位数" : "Postings by country"} />
       </Figure>
@@ -221,9 +220,10 @@ const strip = [
     background: var(--f-focus);
   }
 
-  .seg.other {
-    background: repeating-linear-gradient(135deg, var(--f-mark) 0 3px, transparent 3px 7px);
-    box-shadow: inset 0 0 0 1.5px var(--f-mark);
+  .strip-next {
+    margin-top: 6px;
+    font: 12px/1.4 var(--mono);
+    color: var(--f-ink-2);
   }
 
   .strip-legend {
@@ -250,11 +250,6 @@ const strip = [
 
   .strip-legend .us::before {
     background: var(--f-focus);
-  }
-
-  .strip-legend .other::before {
-    background: repeating-linear-gradient(135deg, var(--f-mark) 0 2px, transparent 2px 4px);
-    box-shadow: inset 0 0 0 1.5px var(--f-mark);
   }
 
   /* In the catalog this card is wider than its row mates and so shorter; the strip,

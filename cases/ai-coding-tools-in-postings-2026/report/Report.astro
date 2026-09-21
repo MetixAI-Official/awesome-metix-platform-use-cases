@@ -78,6 +78,9 @@ const lowestUs = byUs[byUs.length - 1];
           </li>
         ))}
       </ul>
+      <p class="mb-key">
+        {zh ? "斜线条是下限：只在同时提到另一个 AI 编程工具时才计入" : "Hatched bars are lower bounds, counted only when another AI coding tool is named too"}
+      </p>
     </div>
   )
 }
@@ -108,7 +111,6 @@ const lowestUs = byUs[byUs.length - 1];
           { file: "windsurf.json", endpoint: "POST /v1/jobs/query", spec: windsurf },
           { file: "any-tool.json", endpoint: "POST /v1/jobs/query", spec: anyTool },
         ]}
-        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
       >
         <BarList rows={barRows} label={zh ? "各工具被提到的岗位数" : "Postings naming each tool"} />
       </Figure>

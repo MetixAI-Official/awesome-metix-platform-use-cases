@@ -355,8 +355,8 @@ a {
   margin-top: 12px;
   font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(52px, 16.5vw, 212px);
-  line-height: 0.84;
+  font-size: clamp(48px, 8vw, 112px);
+  line-height: 0.9;
   letter-spacing: -0.06em;
   margin-left: -0.04em;
 }
@@ -558,18 +558,6 @@ a {
   grid-column: span 2;
 }
 
-/* The make-your-own tile fills whatever its row has left (spans set by the catalog). */
-@media (min-width: 1081px) {
-  .card-grid > li.make {
-    grid-column: span var(--fill-3, 1);
-  }
-}
-
-@media (min-width: 681px) and (max-width: 1080px) {
-  .card-grid > li.make {
-    grid-column: span var(--fill-2, 1);
-  }
-}
 
 @media (max-width: 1080px) {
   .card-grid {
@@ -813,7 +801,7 @@ a {
 
 .mb-key {
   margin-top: 10px;
-  font: 11px/1.4 var(--mono);
+  font: 12px/1.4 var(--mono);
   color: var(--f-ink-2);
 }
 
@@ -829,8 +817,8 @@ a {
   background: var(--f-focus);
 }
 
-.mini-bars .lower .mb-fill,
-.mini-bars .residual .mb-fill {
+/* Hatching means one thing on this site: a lower bound. Leftover buckets are plain. */
+.mini-bars .lower .mb-fill {
   background: repeating-linear-gradient(135deg, var(--f-mark) 0 3px, transparent 3px 6px);
   box-shadow: inset 0 0 0 1.5px var(--f-mark);
 }
@@ -843,80 +831,6 @@ a {
   white-space: nowrap;
 }
 
-/* The make-your-own tile */
-
-.card-make {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 460px;
-  padding: 24px;
-  border-radius: 20px;
-  border: 2px dashed var(--line);
-  background: transparent;
-  color: var(--ink);
-  text-decoration: none;
-  transition: border-color 160ms var(--ease), background-color 160ms var(--ease);
-}
-
-.card-make:hover {
-  border-color: var(--ink-3);
-  background: rgb(255 255 255 / 0.5);
-}
-
-@media (max-width: 680px) {
-  .card-make {
-    min-height: 0;
-    gap: 24px;
-  }
-}
-
-.card-make h3 {
-  margin-top: 16px;
-  font-size: 26px;
-}
-
-.card-make p {
-  margin-top: 12px;
-  color: var(--ink-2);
-  font-size: 15px;
-}
-
-/* The ten steps every bootstrap prompt follows, from cases/_template/PROMPT.md. */
-.make-steps {
-  margin: 22px 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-  gap: 8px 20px;
-  font: 13px/1.35 var(--mono);
-  color: var(--ink-2);
-}
-
-.make-steps li {
-  counter-increment: step;
-  padding-top: 8px;
-  border-top: 1px solid var(--line);
-}
-
-.make-steps li::before {
-  content: counter(step, decimal-leading-zero) " ";
-  color: var(--ink-3);
-}
-
-@media (max-width: 680px) {
-  .make-steps {
-    display: none;
-  }
-}
-
-.card-make .cm-cta {
-  font: 500 14px/1 var(--mono);
-  color: var(--accent-ink);
-}
 
 /* Coming next */
 
@@ -1235,7 +1149,7 @@ pre.code {
 }
 
 .pq-label {
-  font: 500 11px/1 var(--mono);
+  font: 500 12px/1 var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #0defc8;
@@ -1443,8 +1357,13 @@ pre.code {
   background: var(--ink);
 }
 
+.receipt-grid dt:lang(zh) {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .receipt-grid dt {
-  font: 500 11px/1.3 var(--mono);
+  font: 500 12px/1.3 var(--mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-3);
@@ -1819,7 +1738,7 @@ details.query[open]::details-content {
 
 .bl-note {
   display: block;
-  font: 11px/1.35 var(--mono);
+  font: 12px/1.35 var(--mono);
   color: var(--ink-3);
 }
 
@@ -1850,7 +1769,6 @@ details.query[open]::details-content {
   background: var(--bl-focus);
 }
 
-.bl-row.residual .bl-fill,
 .bl-row.lower .bl-fill {
   background: repeating-linear-gradient(135deg, var(--bl-mark) 0 3px, transparent 3px 6px);
   box-shadow: inset 0 0 0 1.5px var(--bl-mark);
@@ -1924,7 +1842,7 @@ details.query[open]::details-content {
 
 /* Chinese display titles break at spaces and punctuation first, anywhere only when
    a phrase cannot fit; CJK lines need more leading than Latin display type. */
-:is(.cf-title, .report-band h3, .planned-list h3, .card-hero h1, .report-hero h1):lang(zh) {
+:is(.cf-title, .report-band h3, .planned-list h3, .card-hero h1, .report-hero h1, .fig h2, .figure h2, .ci-title, .cn-title):lang(zh) {
   word-break: keep-all;
   overflow-wrap: anywhere;
   line-height: 1.25;
@@ -2037,6 +1955,14 @@ details.query[open]::details-content {
   color: var(--ink-2);
 }
 
+/* Grid items default to their content's width; without this a long command widens its
+   step past a phone screen instead of scrolling inside its own box. */
+.run-panel,
+.run-steps > li,
+.start-steps > li {
+  min-width: 0;
+}
+
 .run-steps {
   display: grid;
   gap: 36px;
@@ -2126,16 +2052,25 @@ details.query[open]::details-content {
   margin-top: 10px;
 }
 
-/* A command with its Copy button in the corner. */
+/* A command with its Copy button in a column of its own, so the text can never run
+   under the button, whatever the width. The box is the container, not the pre. */
 .code-copy {
-  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
 }
 
 /* Shell commands keep their lines and scroll sideways on narrow screens: a command
    broken mid-URL is hard to read and easy to mistype. Prose-like prompts wrap. */
 .code-copy pre.code {
   overflow-x: auto;
-  padding-right: 88px;
+  padding: 14px 8px 14px 16px;
+  border: 0;
+  border-radius: 10px 0 0 10px;
+  background: none;
   white-space: pre;
   scrollbar-width: thin;
 }
@@ -2146,9 +2081,7 @@ details.query[open]::details-content {
 }
 
 .code-copy > .btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  margin: 8px 8px 8px 0;
 }
 
 .btn-small {
@@ -2268,5 +2201,405 @@ details.query[open]::details-content {
 
   .rp-cost {
     margin-top: 2px;
+  }
+}
+
+/* ---------- home ---------- */
+
+.mast-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  margin-top: 28px;
+}
+
+.mast-actions .pill {
+  min-height: 48px;
+  padding: 0 24px;
+  font-size: 16px;
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ink) 30%, transparent);
+  text-underline-offset: 4px;
+}
+
+.text-link:hover {
+  text-decoration-color: var(--ink);
+}
+
+/* The start strip: the one place the home page asks for action, so it gets the
+   surface; everything else sits on the ground. */
+.start {
+  padding-block: clamp(32px, 5vw, 56px);
+  background: var(--surface);
+  border-block: 1px solid var(--line);
+}
+
+.start-steps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.start-steps h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+}
+
+.start-steps p {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+.start-steps .code-copy,
+.start-steps .agent-setup {
+  margin-top: 14px;
+}
+
+.start-steps .text-link {
+  margin-top: 6px;
+}
+
+.start-pick {
+  margin-top: 14px !important;
+}
+
+@media (max-width: 1080px) {
+  .start-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.featured-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 20px;
+}
+
+@media (max-width: 1080px) {
+  .featured-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- index ---------- */
+
+.index-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.no-js .index-controls {
+  display: none;
+}
+
+.ic-search {
+  flex: 1 1 260px;
+}
+
+.ic-search input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font: 15px/1 var(--sans);
+  color: var(--ink);
+}
+
+.ic-search input:focus {
+  border-color: var(--ink-3);
+}
+
+.ic-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ic-group legend {
+  float: left;
+  margin-right: 6px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.ic-group label {
+  position: relative;
+}
+
+.ic-group input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.ic-group label span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.ic-group input:checked + span {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.ic-group input:focus-visible + span {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ic-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.ic-sort select {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  font: 14px/1 var(--sans);
+  color: var(--ink);
+}
+
+.index-count {
+  margin-top: 16px;
+  font: 13px/1.4 var(--mono);
+  color: var(--ink-3);
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+
+.case-index {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.case-index li {
+  border-bottom: 1px solid var(--line);
+}
+
+.ci-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-areas: "dots title cost" "dots meta cost";
+  gap: 4px 16px;
+  align-items: baseline;
+  padding: 16px 4px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 120ms var(--ease);
+}
+
+.ci-row:hover {
+  background: rgb(255 255 255 / 0.6);
+}
+
+.ci-dots {
+  grid-area: dots;
+  display: flex;
+  gap: 3px;
+  padding-top: 5px;
+}
+
+.ci-title {
+  grid-area: title;
+  font: 600 17px/1.35 var(--sans);
+}
+
+.ci-meta {
+  grid-area: meta;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.ci-cost {
+  grid-area: cost;
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+  font: 13px/1.4 var(--mono);
+  color: var(--ink-2);
+}
+
+@media (max-width: 640px) {
+  .ci-row {
+    grid-template-columns: 22px minmax(0, 1fr);
+    grid-template-areas: "dots title" "dots meta" "dots cost";
+  }
+
+  .ci-cost {
+    justify-items: start;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+  }
+}
+
+.index-empty {
+  padding: 32px 4px;
+  color: var(--ink-2);
+}
+
+.index-empty .btn {
+  margin-top: 12px;
+}
+
+.make-own {
+  display: grid;
+  gap: 4px;
+  margin-top: 24px;
+  padding: 18px 20px;
+  border: 1px dashed var(--ink-3);
+  border-radius: 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.make-own:hover {
+  border-style: solid;
+}
+
+.mo-title {
+  font-weight: 600;
+}
+
+.mo-body {
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* ---------- case page navigation ---------- */
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font: 500 13px/1.3 var(--mono);
+}
+
+.crumbs a,
+.ch-meta a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+.case-nav {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  margin-top: 56px;
+  padding-top: 32px;
+  border-top: 1px solid var(--line);
+}
+
+.cn-link {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.cn-link:hover {
+  border-color: var(--ink-3);
+}
+
+.cn-next {
+  text-align: right;
+}
+
+.cn-label {
+  font: 500 13px/1.3 var(--mono);
+  color: var(--ink-3);
+}
+
+.cn-title {
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.cn-all {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font: 500 14px/1 var(--mono);
+}
+
+@media (max-width: 640px) {
+  .case-nav {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cn-next {
+    text-align: left;
+  }
+
+  .cn-all {
+    order: 3;
+  }
+}
+
+/* Touch targets: on phones every link a thumb is meant to hit gets 44px of height. */
+@media (max-width: 640px) {
+  .crumbs a,
+  .ch-meta a,
+  .chips a,
+  .site-footer .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
   }
 }

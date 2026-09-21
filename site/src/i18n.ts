@@ -9,6 +9,52 @@ const UNBROKEN = /\b(?:Claude Code|GitHub Copilot|Model Context Protocol)\b/g;
 /** A title with non-breaking spaces inside product names, for display only. */
 export const keepNames = (text: string) => text.replace(UNBROKEN, (name) => name.replaceAll(" ", "\u00a0"));
 
+const CJK = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/;
+const CLOSING = /^[，。、：；！？）」』》％…]/;
+const OPENING = /[（「『《]$/;
+/** Chinese words ICU segments wrongly in these titles; add a term when a title needs it. */
+const PROTECTED = ["旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署"];
+const escapeHtml = (text: string) =>
+  text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] ?? c);
+
+/**
+ * A display title as HTML. Chinese has no spaces to break at, so the browser breaks
+ * anywhere, splitting words such as 旧金山湾区. Here ICU word segmentation (Intl.Segmenter,
+ * at build time) puts a <wbr> between words; with word-break: keep-all the browser breaks
+ * only there and at spaces. Latin runs stay whole, closing punctuation stays with the word
+ * before it, and opening punctuation with the word after.
+ */
+export function titleHtml(text: string, lang: Lang): string {
+  const kept = keepNames(text);
+  if (lang !== "zh") return escapeHtml(kept);
+  const units: string[] = [];
+  for (const { segment } of new Intl.Segmenter("zh", { granularity: "word" }).segment(kept)) {
+    const prev = units[units.length - 1];
+    const latin = !CJK.test(segment);
+    if (prev !== undefined && ((latin && !CJK.test(prev.slice(-1))) || CLOSING.test(segment) || OPENING.test(prev))) {
+      units[units.length - 1] = prev + segment;
+    } else {
+      units.push(segment);
+    }
+  }
+  // ICU's dictionary splits some domain words (旧金山湾|区, 工程|师, 预|训练); never break inside these.
+  let at = 0;
+  const cuts = new Set(units.slice(0, -1).map((u) => (at += u.length)));
+  for (const term of PROTECTED) {
+    for (let i = kept.indexOf(term); i !== -1; i = kept.indexOf(term, i + 1)) {
+      for (let c = i + 1; c < i + term.length; c += 1) cuts.delete(c);
+    }
+  }
+  const pieces: string[] = [];
+  let from = 0;
+  for (const cut of [...cuts].sort((a, b) => a - b)) {
+    pieces.push(kept.slice(from, cut));
+    from = cut;
+  }
+  pieces.push(kept.slice(from));
+  return pieces.map(escapeHtml).join("<wbr>");
+}
+
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
 /** Site-relative link in a language. `path` is relative to the language root, e.g. "cases/x/". */
@@ -96,6 +142,36 @@ export const ui = {
     records: "records",
     countsOnly: "counts only, no records read",
     creditsToRerun: "Credits to rerun",
+    home: {
+      lede:
+        "Job-market questions answered by AI agents on the Metix AI Platform, a data API for professional profiles, job postings, and companies that agents reach through MCP, skills, or REST. Each case publishes the finding, the queries behind it, what it cost, and the prompt that produced it.",
+      ctaStart: "Run your first case",
+      ctaBrowse: "Browse all cases",
+      statCases: "published cases",
+      statCheapest: "Credits for the cheapest agent run",
+      statFree: "free Credits for a new account",
+      featured: "Featured",
+      featuredNote: "The newest report and three cards. Every case is in the index below.",
+      index: "All cases",
+      indexNote: "Search by title, filter by format and data, sort by cost.",
+      search: "Search cases",
+      searchPlaceholder: "Search titles",
+      format: "Format",
+      formatAll: "All",
+      data: "Data",
+      sort: "Sort",
+      sortNewest: "Newest",
+      sortReproduce: "Cheapest to reproduce",
+      sortAgent: "Cheapest in an agent",
+      count: (n: number) => (n === 1 ? "1 case" : `${n} cases`),
+      noResults: "No case matches these filters.",
+      clear: "Clear filters",
+      reproduceShort: (n: string) => `reproduce ${n}`,
+      agentShort: (range: string) => `agent ${range}`,
+      makeOwn: "Make your own case",
+      makeOwnBody: "Start from the prompt template: change the question, keep the ten steps, run it on your key.",
+    },
+    caseNav: { prev: "Previous case", next: "Next case", all: "All cases" },
     run: {
       title: "Run it",
       lede: "Three ways in, from the cheapest to the fullest. Each says what it costs before you start.",
@@ -238,6 +314,35 @@ export const ui = {
     records: "条记录",
     countsOnly: "只计数，未读取记录",
     creditsToRerun: "Credits 可重跑",
+    home: {
+      lede: "由 AI agent 在 Metix AI Platform 上回答的就业市场问题。Metix AI Platform 是职业档案、招聘岗位和公司的数据 API，agent 可以通过 MCP、skills 或 REST 访问。每个案例都公开结论、背后的查询、花了多少，以及生成它的提示词。",
+      ctaStart: "跑你的第一个案例",
+      ctaBrowse: "浏览全部案例",
+      statCases: "个已发布案例",
+      statCheapest: "Credits，交给 agent 跑最便宜的一个",
+      statFree: "Credits，新账户一次性赠送",
+      featured: "精选",
+      featuredNote: "最新的一份报告和三张卡片。全部案例都在下面的索引里。",
+      index: "全部案例",
+      indexNote: "按标题搜索，按形式和数据筛选，按花费排序。",
+      search: "搜索案例",
+      searchPlaceholder: "搜索标题",
+      format: "形式",
+      formatAll: "全部",
+      data: "数据",
+      sort: "排序",
+      sortNewest: "最新",
+      sortReproduce: "复现最便宜",
+      sortAgent: "交给 agent 最便宜",
+      count: (n: number) => `${n} 个案例`,
+      noResults: "没有符合这些筛选条件的案例。",
+      clear: "清除筛选",
+      reproduceShort: (n: string) => `复现 ${n}`,
+      agentShort: (range: string) => `agent ${range}`,
+      makeOwn: "做你自己的案例",
+      makeOwnBody: "从提示词模板开始：换成你的问题，保留十个步骤，用你自己的 key 运行。",
+    },
+    caseNav: { prev: "上一个案例", next: "下一个案例", all: "全部案例" },
     run: {
       title: "运行这个案例",
       lede: "三种方式，从最省到最完整。每一种都先告诉你要花多少。",

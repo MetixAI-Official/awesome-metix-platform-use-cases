@@ -107,7 +107,6 @@ const rows = order.map((r) => ({
           { file: "fine-tuning.json", endpoint: "POST /v1/jobs/query", spec: fine },
           { file: "inference.json", endpoint: "POST /v1/jobs/query", spec: inference },
         ]}
-        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
       >
         <BarList rows={rows} label={zh ? "各阶段岗位数" : "Postings by stage"} />
         <p class="chart-legend" aria-hidden="true">

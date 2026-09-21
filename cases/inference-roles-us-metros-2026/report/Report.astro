@@ -3,12 +3,12 @@
  * Design
  * Field: navy #100D35 (card and hero); sky #A3E4FF focus; #8C8AA8 other metros.
  * Detail chart on white: teal ink #07545E focus bar; grey #7E8787 other metros;
- *   hatched outlines for elsewhere and no city.
+ *   elsewhere and no city in the same grey, labelled and placed last.
  * Signature: bars scaled to the share of all distinct postings, not to the longest bar,
  *   with a dashed marker at 50%. The Bay Area bar stops just short of it.
  */
 import QueryDetails from "@site/components/QueryDetails.astro";
-import { REPO, isoDate, longDate, number, type Lang } from "@site/i18n";
+import { REPO, isoDate, titleHtml, longDate, number, type Lang } from "@site/i18n";
 import companies from "../data/companies.json";
 import context from "../data/context.json";
 import metros from "../data/metros.json";
@@ -127,7 +127,7 @@ const altText = zh
     <div class="wrap body">
       <figure class="figure" aria-labelledby="fig-title" aria-describedby="fig-alt">
         <figcaption>
-          <h2 id="fig-title">{figureHeading}</h2>
+          <h2 id="fig-title" set:html={titleHtml(figureHeading, lang)} />
           <p class="figure-sub">{figureSub}</p>
           <p class="visually-hidden" id="fig-alt">
             {altText}
@@ -170,7 +170,6 @@ const altText = zh
           </p>
           <QueryDetails
             lang={lang}
-            cost={zh ? `整次运行 ${receipt.credits} Credits` : `${receipt.credits} Credits for the run`}
             items={[
               { file: "world-total.json", endpoint: "POST /v1/jobs/query", spec: worldQuery },
               { file: "us-postings.json", endpoint: "POST /v1/jobs/query", spec: usQuery },
@@ -392,11 +391,6 @@ const altText = zh
     background: #07545e;
   }
 
-  .residual .fill {
-    background: repeating-linear-gradient(135deg, transparent 0 4px, rgb(126 135 135 / 0.38) 4px 6px);
-    box-shadow: inset 0 0 0 1.5px #7e8787;
-  }
-
   .residual .label {
     color: var(--ink-2);
   }
@@ -428,7 +422,7 @@ const altText = zh
     left: 50%;
     bottom: 8px;
     transform: translateX(-50%);
-    font: 500 11px/1 var(--mono);
+    font: 500 12px/1 var(--mono);
     letter-spacing: 0.04em;
     color: #4e4d4b;
     white-space: nowrap;

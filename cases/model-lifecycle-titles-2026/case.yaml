@@ -1,8 +1,6 @@
 slug: model-lifecycle-titles-2026
 type: snapshot
 format: card
-color: teal
-span: 1
 status: published
 title:
   en: Job titles name inference eight times as often as pre-training

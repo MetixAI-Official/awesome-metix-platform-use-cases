@@ -1,7 +1,7 @@
 ---
 /*
  * Design
- * Field: signal #FF6614 with ink text; the $150k to $200k band in ink, the others in rust #7A2E0B.
+ * Field: the jobs family (blue or sky), set by fieldColor(); the $150k to $200k band in the field's focus color.
  * Detail chart on white: vertical columns, because the bands are ordered and the eye reads a
  *   distribution left to right.
  * Signature: the count of postings that state pay at all (61 of 386) sits next to the number,
@@ -89,7 +89,6 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
         alt={rows.map((r) => `${bandLabel[r.group][lang]} ${r.count}`).join(zh ? "，" : ", ")}
         source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
         queries={[{ file: "us-inference-usd.json", endpoint: "POST /v1/jobs/query", spec: usd }]}
-        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
       >
         <div class="cols" role="list" aria-label={zh ? "按起薪分档的岗位数" : "Postings by posted minimum"}>
           {rows.map((r) => (
@@ -230,7 +229,7 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
   }
 
   .col.focus .col-bar {
-    background: #c24a08;
+    background: #07545e;
   }
 
   .col.focus .col-value {
@@ -286,14 +285,14 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
   .mc-label {
     margin-top: 6px;
     text-align: center;
-    font: 11px/1.2 var(--mono);
+    font: 12px/1.2 var(--mono);
     color: var(--f-ink);
     white-space: nowrap;
   }
 
   .mc-axis {
     margin-top: 8px;
-    font: 11px/1.3 var(--mono);
+    font: 12px/1.3 var(--mono);
     color: var(--f-ink-2);
   }
 
@@ -318,7 +317,7 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
       height: 240px;
     }
     .col-label {
-      font-size: 11px;
+      font-size: 12px;
     }
   }
 </style>

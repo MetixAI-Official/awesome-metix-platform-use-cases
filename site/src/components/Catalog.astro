@@ -1,9 +1,16 @@
 ---
+/*
+ * The home page, in the order a first visit needs it: what the Platform is and what a
+ * case is, how to get one running (key, connect, check), a few featured cases, then the
+ * whole index with search, filters, and sort. The index is a list, not a wall of tiles,
+ * so it stays usable at sixty cases; without JavaScript it is simply the full list.
+ */
 import { getCollection } from "astro:content";
+import AgentSetup from "@site/components/AgentSetup.astro";
 import CardFrame from "@site/components/CardFrame.astro";
 import Base from "@site/layouts/Base.astro";
-import { byCardOrder, receipts, reports } from "@site/cases";
-import { REPO, href, isoDate, keepNames, number, ui, type Lang } from "@site/i18n";
+import { DATASET_INK, byCardOrder, fieldColor, receipts, reports } from "@site/cases";
+import { FREE_CREDITS, REPO, href, isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
@@ -16,16 +23,19 @@ const byNewest = (a: (typeof all)[number], b: (typeof all)[number]) =>
   (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0) || a.data.slug.localeCompare(b.data.slug);
 const published = all.filter((c) => c.data.status === "published").sort(byNewest);
 const reportCases = published.filter((c) => c.data.format === "report");
-const cards = published
-  .filter((c) => c.data.format === "card")
-  .sort(byCardOrder);
+const cards = published.filter((c) => c.data.format === "card").sort(byCardOrder);
 const planned = all.filter((c) => c.data.status === "planned");
-// Columns the make-your-own tile spans so the last card row has no hole, at three and two columns.
-const used = cards.reduce((sum, c) => sum + (c.data.span === 2 ? 2 : 1), 0);
-const fill = (cols: number) => cols - (used % cols);
-
-const totalCredits = published.reduce((sum, c) => sum + (receipts[c.data.slug]?.credits ?? 0), 0);
-const latest = published.map((c) => c.data.snapshot).filter(Boolean).sort((a, b) => b!.getTime() - a!.getTime())[0];
+const featuredReport = reportCases[0];
+const featuredCards = cards.slice(0, 3);
+const cheapest = Math.min(...published.map((c) => c.data.agent_run?.low ?? Infinity));
+const cardPosition = (slug: string) => cards.findIndex((c) => c.data.slug === slug);
+const range = (lo: number, hi: number) => (lo === hi ? `${lo}` : lang === "zh" ? `${lo} 到 ${hi}` : `${lo} to ${hi}`);
+const rows = published.map(({ data }) => ({
+  data,
+  replay: receipts[data.slug]?.credits ?? 0,
+  low: data.agent_run?.low ?? 0,
+  high: data.agent_run?.high ?? 0,
+}));
 ---
 
 <Base lang={lang} path="">
@@ -33,103 +43,204 @@ const latest = published.map((c) => c.data.snapshot).filter(Boolean).sort((a, b)
     <p class="eyebrow as-written">Metix AI Platform</p>
     <h1 class="mast-title" id="mast-title">{t.casebook}</h1>
     <div class="mast-row">
-      <p class="mast-lede">{t.mastLede}</p>
+      <div>
+        <p class="mast-lede">{t.home.lede}</p>
+        <div class="mast-actions">
+          <a class="pill" href="#start">{t.home.ctaStart}</a>
+          <a class="text-link" href="#index">{t.home.ctaBrowse} →</a>
+        </div>
+      </div>
       <dl class="mast-stats">
-        <div><dt>{published.length}</dt><dd>{t.mastCases}</dd></div>
-        <div><dt>{number(lang, totalCredits)}</dt><dd>{t.mastCredits}</dd></div>
-        <div><dt>{latest ? isoDate(latest) : ""}</dt><dd>{t.mastRun}</dd></div>
+        <div><dt>{published.length}</dt><dd>{t.home.statCases}</dd></div>
+        <div><dt>{cheapest}</dt><dd>{t.home.statCheapest}</dd></div>
+        <div><dt>{FREE_CREDITS}</dt><dd>{t.home.statFree}</dd></div>
       </dl>
     </div>
   </section>
 
-  {
-    reportCases.length > 0 && (
-      <section class="wrap shelf" aria-labelledby="reports-title">
-        <div class="shelf-head">
-          <h2 id="reports-title">
-            {t.reportsLabel}
-            <span class="count">{reportCases.length}</span>
-          </h2>
-          <p>{t.reportsNote}</p>
-        </div>
-        {reportCases.map(({ data }) => {
-          const receipt = receipts[data.slug];
-          return (
-            <a class="report-band" href={href(lang, `cases/${data.slug}/`)}>
-              <p class="rb-meta">
-                {t.formats.report} · {data.datasets.map((d) => t.datasets[d]).join(" · ")}
-                {data.snapshot && ` · ${isoDate(data.snapshot)}`}
-              </p>
-              <div>
-                <h3>{keepNames(data.title[lang])}</h3>
-                <p class="rb-dek">{data.dek[lang]}</p>
-                {receipt && (
-                  <p class="rb-foot">
-                    <span>{`${number(lang, receipt.calls)} ${t.calls}`}</span>
-                    {" · "}
-                    <span>{receipt.records > 0 ? `${number(lang, receipt.records)} ${t.records}` : t.countsOnly}</span>
-                    {" · "}
-                    <span>{t.toRerun(number(lang, receipt.credits))}</span>
-                  </p>
-                )}
-                <span class="rb-cta">{t.readReport} →</span>
-              </div>
-              {data.highlights && (
-                <dl class="rb-highlights">
-                  {data.highlights.map((h) => (
-                    <div>
-                      <dt>{h.value}</dt>
-                      <dd>{h.label[lang]}</dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-            </a>
-          );
-        })}
-      </section>
-    )
-  }
-
-  <section class="wrap shelf" aria-labelledby="cards-title">
-    <div class="shelf-head">
-      <h2 id="cards-title">
-        {t.cardsLabel}
-        <span class="count">{cards.length}</span>
-      </h2>
-      <p>{t.cardsNote}</p>
+  <section class="start" id="start" aria-labelledby="start-title">
+    <div class="wrap">
+      <div class="shelf-head">
+        <h2 id="start-title">{t.start.title}</h2>
+        <p>{t.start.lede}</p>
+      </div>
+      <ol class="start-steps">
+        <li data-copy-root>
+          <h3><span class="rs-n">1</span>{t.run.stepKey}</h3>
+          <p>{t.run.keyBody}</p>
+          <div class="code-copy">
+            <pre class="code">export METIX_KEY=metix_xxxxxxxx</pre>
+            <button class="btn btn-small" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
+              {t.copy}
+            </button>
+          </div>
+          <a class="text-link" href="https://platform.metix.ai/api-keys">{t.run.createKey} →</a>
+        </li>
+        <li>
+          <h3><span class="rs-n">2</span>{t.run.stepConnect}</h3>
+          <AgentSetup lang={lang} id="home-setup" />
+        </li>
+        <li data-copy-root>
+          <h3><span class="rs-n">3</span>{t.run.stepCheck}</h3>
+          <p>{t.run.checkBody}</p>
+          <div class="code-copy">
+            <pre class="code prompt-line">{t.run.checkPrompt}</pre>
+            <button class="btn btn-small" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
+              {t.copy}
+            </button>
+          </div>
+          <p class="start-pick">
+            {t.start.pickBody} {t.start.cheapest(cheapest)}
+          </p>
+          <a class="text-link" href="#index">{t.home.ctaBrowse} →</a>
+        </li>
+      </ol>
     </div>
-    <ul class="card-grid">
+  </section>
+
+  <section class="wrap shelf" aria-labelledby="featured-title">
+    <div class="shelf-head">
+      <h2 id="featured-title">{t.home.featured}</h2>
+      <p>{t.home.featuredNote}</p>
+    </div>
+    {
+      featuredReport && (
+        <a
+          class="report-band"
+          href={href(lang, `cases/${featuredReport.data.slug}/`)}
+          aria-label={`${t.formats.report}: ${featuredReport.data.title[lang]}`}
+        >
+          <p class="rb-meta">
+            {t.formats.report} · {featuredReport.data.datasets.map((d) => t.datasets[d]).join(" · ")}
+            {featuredReport.data.snapshot && ` · ${isoDate(featuredReport.data.snapshot)}`}
+          </p>
+          <div>
+            <h3 set:html={titleHtml(featuredReport.data.title[lang], lang)} />
+            <p class="rb-dek">{featuredReport.data.dek[lang]}</p>
+            <span class="rb-cta">{t.readReport} →</span>
+          </div>
+          {featuredReport.data.highlights && (
+            <dl class="rb-highlights">
+              {featuredReport.data.highlights.map((h) => (
+                <div>
+                  <dt>{h.value}</dt>
+                  <dd>{h.label[lang]}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </a>
+      )
+    }
+    <ul class="card-grid featured-cards">
       {
-        cards.map(({ data }, i) => {
-          const Report = reports[data.slug];
+        featuredCards.map(({ data }) => {
+          const Card = reports[data.slug];
+          const position = cardPosition(data.slug);
           return (
-            <li class={data.span === 2 ? "span-2" : undefined}>
-              <a class="card-link" href={href(lang, `cases/${data.slug}/`)}>
-                <CardFrame lang={lang} entry={data} receipt={receipts[data.slug]} index={i + 1}>
-                  <Report lang={lang} section="card" size="compact" entry={data} />
+            <li>
+              <a
+                class="card-link"
+                href={href(lang, `cases/${data.slug}/`)}
+                aria-label={`${t.formats.card} ${String(position + 1).padStart(2, "0")}: ${data.title[lang]}`}
+              >
+                <CardFrame lang={lang} entry={data} receipt={receipts[data.slug]} index={position + 1} color={fieldColor(data.datasets, position)}>
+                  <Card lang={lang} section="card" size="compact" entry={data} />
                 </CardFrame>
               </a>
             </li>
           );
         })
       }
-      <li class="make" style={`--fill-3: ${fill(3)}; --fill-2: ${fill(2)}`}>
-        <a class="card-make" href={`${REPO}/blob/main/cases/_template/PROMPT.md`}>
-          <div>
-            <p class="eyebrow">{t.makeEyebrow}</p>
-            <h3>{t.makeTitle}</h3>
-            <p>{t.makeBody}</p>
-            <ol class="make-steps">
-              {t.makeSteps.map((step) => (
-                <li>{step}</li>
-              ))}
-            </ol>
-          </div>
-          <span class="cm-cta">{t.makeCta} →</span>
-        </a>
-      </li>
     </ul>
+  </section>
+
+  <section class="wrap shelf" id="index" aria-labelledby="index-title">
+    <div class="shelf-head">
+      <h2 id="index-title">
+        {t.home.index}
+        <span class="count">{published.length}</span>
+      </h2>
+      <p>{t.home.indexNote}</p>
+    </div>
+
+    <form class="index-controls" role="search" data-index-controls onsubmit="return false">
+      <label class="ic-search">
+        <span class="visually-hidden">{t.home.search}</span>
+        <input type="search" name="q" placeholder={t.home.searchPlaceholder} autocomplete="off" />
+      </label>
+      <fieldset class="ic-group">
+        <legend>{t.home.format}</legend>
+        <label><input type="radio" name="format" value="" checked /><span>{t.home.formatAll}</span></label>
+        <label><input type="radio" name="format" value="report" /><span>{t.reportsLabel}</span></label>
+        <label><input type="radio" name="format" value="card" /><span>{t.cardsLabel}</span></label>
+      </fieldset>
+      <fieldset class="ic-group">
+        <legend>{t.home.data}</legend>
+        {
+          (["jobs", "people", "companies"] as const).map((d) => (
+            <label>
+              <input type="checkbox" name="data" value={d} />
+              <span>
+                <i class="dot" style={`--dot: ${DATASET_INK[d]}`} aria-hidden="true" />
+                {t.datasets[d]}
+              </span>
+            </label>
+          ))
+        }
+      </fieldset>
+      <label class="ic-sort">
+        <span>{t.home.sort}</span>
+        <select name="sort">
+          <option value="newest">{t.home.sortNewest}</option>
+          <option value="reproduce">{t.home.sortReproduce}</option>
+          <option value="agent">{t.home.sortAgent}</option>
+        </select>
+      </label>
+    </form>
+    <p class="index-count" aria-live="polite" data-index-count data-one={t.home.count(1)} data-many={t.home.count(2)}>
+      {t.home.count(published.length)}
+    </p>
+
+    <ol class="case-index" data-index>
+      {
+        rows.map(({ data, replay, low, high }, i) => (
+          <li
+            data-format={data.format}
+            data-datasets={data.datasets.join(" ")}
+            data-title={`${data.title.en} ${data.title.zh}`.toLowerCase()}
+            data-order={i}
+            data-replay={replay}
+            data-agent={low}
+          >
+            <a class="ci-row" href={href(lang, `cases/${data.slug}/`)}>
+              <span class="ci-dots" aria-hidden="true">
+                {data.datasets.map((d) => (
+                  <i class="dot" style={`--dot: ${DATASET_INK[d]}`} />
+                ))}
+              </span>
+              <span class="ci-title" set:html={titleHtml(data.title[lang], lang)} />
+              <span class="ci-meta">
+                {t.formats[data.format]} · {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+                {data.snapshot && <span class="nowrap"> · {isoDate(data.snapshot)}</span>}
+              </span>
+              <span class="ci-cost">
+                <span class="nowrap">{t.home.reproduceShort(number(lang, replay))}</span>
+                <span class="nowrap">{t.home.agentShort(range(low, high))}</span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+    <div class="index-empty" data-index-empty hidden>
+      <p>{t.home.noResults}</p>
+      <button class="btn" type="button" data-index-clear>{t.home.clear}</button>
+    </div>
+    <a class="make-own" href={`${REPO}/blob/main/cases/_template/PROMPT.md`}>
+      <span class="mo-title">{t.home.makeOwn} →</span>
+      <span class="mo-body">{t.home.makeOwnBody}</span>
+    </a>
   </section>
 
   {
@@ -148,7 +259,7 @@ const latest = published.map((c) => c.data.snapshot).filter(Boolean).sort((a, b)
               <p class="meta">
                 {t.formats[data.format]} · {data.datasets.map((d) => t.datasets[d]).join(" · ")}
               </p>
-              <h3>{keepNames(data.title[lang])}</h3>
+              <h3 set:html={titleHtml(data.title[lang], lang)} />
               <p>{data.dek[lang]}</p>
             </li>
           ))}
@@ -157,3 +268,60 @@ const latest = published.map((c) => c.data.snapshot).filter(Boolean).sort((a, b)
     )
   }
 </Base>
+
+<script is:inline>
+  // The index: search, format, data, and sort, mirrored in the URL so a tag on a case
+  // page can link straight to a filtered list. Without JavaScript it is the full list.
+  (() => {
+    const form = document.querySelector("[data-index-controls]");
+    const list = document.querySelector("[data-index]");
+    if (!form || !list) return;
+    const items = [...list.children];
+    const count = document.querySelector("[data-index-count]");
+    const empty = document.querySelector("[data-index-empty]");
+    const params = new URLSearchParams(location.search);
+    form.q.value = params.get("q") || "";
+    const format = params.get("format") || "";
+    for (const radio of form.querySelectorAll('input[name="format"]')) radio.checked = radio.value === format;
+    const data = (params.get("data") || "").split(",").filter(Boolean);
+    for (const box of form.querySelectorAll('input[name="data"]')) box.checked = data.includes(box.value);
+    if (["newest", "reproduce", "agent"].includes(params.get("sort"))) form.sort.value = params.get("sort");
+
+    const apply = () => {
+      const q = form.q.value.trim().toLowerCase();
+      const fmt = form.querySelector('input[name="format"]:checked')?.value || "";
+      const sets = [...form.querySelectorAll('input[name="data"]:checked')].map((box) => box.value);
+      const sort = form.sort.value;
+      let shown = 0;
+      for (const item of items) {
+        const match =
+          (!q || item.dataset.title.includes(q)) &&
+          (!fmt || item.dataset.format === fmt) &&
+          (!sets.length || sets.some((set) => item.dataset.datasets.split(" ").includes(set)));
+        item.hidden = !match;
+        if (match) shown += 1;
+      }
+      const key = { newest: "order", reproduce: "replay", agent: "agent" }[sort] || "order";
+      items
+        .sort((a, b) => Number(a.dataset[key]) - Number(b.dataset[key]) || Number(a.dataset.order) - Number(b.dataset.order))
+        .forEach((item) => list.appendChild(item));
+      count.textContent = shown === 1 ? count.dataset.one : count.dataset.many.replace(/\d+/, String(shown));
+      empty.hidden = shown > 0;
+      const next = new URLSearchParams();
+      if (q) next.set("q", q);
+      if (fmt) next.set("format", fmt);
+      if (sets.length) next.set("data", sets.join(","));
+      if (sort !== "newest") next.set("sort", sort);
+      const query = next.toString();
+      history.replaceState(null, "", `${location.pathname}${query ? `?${query}` : ""}${location.hash}`);
+    };
+    form.addEventListener("input", apply);
+    form.addEventListener("change", apply);
+    document.querySelector("[data-index-clear]")?.addEventListener("click", () => {
+      form.reset();
+      apply();
+      form.q.focus();
+    });
+    apply();
+  })();
+</script>

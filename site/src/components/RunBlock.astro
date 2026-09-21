@@ -31,7 +31,7 @@ const fits = (n: number) => (n <= FREE_CREDITS ? t.cost.free : t.cost.notFree);
 const reproduceCommand = [
   "git clone https://github.com/MetixAI-Official/awesome-metix-platform-use-cases",
   "cd awesome-metix-platform-use-cases",
-  "export METIX_KEY=metix_xxxxxxxxxxxx",
+  "export METIX_KEY=metix_xxxxxxxx",
   `python3 cases/${slug}/fetch.py`,
 ].join("\n");
 const copy = { "data-done": t.copied, "data-fail": t.copyFailed, "aria-live": "polite" };
@@ -81,7 +81,7 @@ const paths = [
             <a href="https://platform.metix.ai/api-keys">{t.run.createKey} →</a>
           </p>
           <div class="code-copy" data-copy-root>
-            <pre class="code">export METIX_KEY=metix_xxxxxxxxxxxx</pre>
+            <pre class="code">export METIX_KEY=metix_xxxxxxxx</pre>
             <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
           </div>
         </li>

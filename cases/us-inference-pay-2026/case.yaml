@@ -1,8 +1,6 @@
 slug: us-inference-pay-2026
 type: snapshot
 format: card
-color: signal
-span: 1
 status: published
 title:
   en: Half of US inference roles that state pay start between $150k and $200k

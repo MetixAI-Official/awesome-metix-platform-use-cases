@@ -3,8 +3,6 @@
 slug: replace-with-slug-2026
 type: snapshot # study | snapshot | recipe | agent
 format: card # card | report
-color: violet # violet | blue | navy | teal | sky | periwinkle | signal
-span: 1 # catalog columns, 1 or 2 (cards only)
 status: draft # planned | draft | published
 title:
   en: Working title until the data exists

@@ -1,7 +1,7 @@
 ---
 /* A chart with its finding as the heading, a text alternative, a source line, and its queries. */
 import QueryDetails, { type QueryItem } from "@site/components/QueryDetails.astro";
-import type { Lang } from "@site/i18n";
+import { titleHtml, type Lang } from "@site/i18n";
 
 interface Props {
   id: string;
@@ -21,13 +21,13 @@ const { id, lang, heading, sub, alt, source, queries, cost, number } = Astro.pro
 <figure class="fig" id={id} aria-labelledby={`${id}-title`} aria-describedby={`${id}-alt`}>
   <figcaption>
     {number && <p class="fig-number">{number}</p>}
-    <h2 id={`${id}-title`}>{heading}</h2>
+    <h2 id={`${id}-title`} set:html={titleHtml(heading, lang)} />
     {sub && <p class="fig-sub">{sub}</p>}
     <p class="visually-hidden" id={`${id}-alt`}>{alt}</p>
   </figcaption>
   <div class="fig-chart"><slot /></div>
   <div class="fig-foot">
     <p class="fig-source">{source}</p>
-    {queries && cost && <QueryDetails lang={lang} items={queries} cost={cost} />}
+    {queries && <QueryDetails lang={lang} items={queries} />}
   </div>
 </figure>

@@ -11,8 +11,8 @@ export interface QueryItem {
 interface Props {
   lang: Lang;
   items: QueryItem[];
-  /** Short cost label shown on the closed disclosure, e.g. "95 Credits for the full run". */
-  cost: string;
+  /** Optional label on the closed disclosure; cost lives in the Run it section, so figures omit it. */
+  cost?: string;
 }
 
 const { lang, items, cost } = Astro.props;
@@ -52,7 +52,7 @@ const linesOf = (spec: unknown) =>
   <summary>
     <span class="q-label">{items.length > 1 ? t.queries : t.query}</span>
     <span class="q-files">{items.map((item) => item.file).join(" · ")}</span>
-    <span class="cost">{cost}</span>
+    {cost && <span class="cost">{cost}</span>}
   </summary>
   <div class="query-body">
     {

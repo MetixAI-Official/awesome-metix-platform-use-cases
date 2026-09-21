@@ -51,3 +51,21 @@ export function byCardOrder(a: { data: { slug: string } }, b: { data: { slug: st
   const rank = (slug: string) => (CARD_ORDER.includes(slug) ? CARD_ORDER.indexOf(slug) : CARD_ORDER.length);
   return rank(a.data.slug) - rank(b.data.slug) || a.data.slug.localeCompare(b.data.slug);
 }
+
+/**
+ * Color follows data: jobs blue, profiles violet, companies teal, several datasets navy.
+ * Cards alternate the deep and light tone of their family by catalog position, so a card
+ * looks the same on the catalog and on its own page.
+ */
+export function fieldColor(datasets: readonly string[], position = 0): string {
+  if (datasets.length !== 1) return "navy";
+  const family: Record<string, [string, string]> = {
+    jobs: ["blue", "sky"],
+    people: ["violet", "periwinkle"],
+    companies: ["teal", "teal"],
+  };
+  return (family[datasets[0]] ?? ["navy", "navy"])[position % 2];
+}
+
+/** Dataset marks on light ground: the darker shade of each family, for 3:1 contrast. */
+export const DATASET_INK: Record<string, string> = { jobs: "#1e79c2", people: "#5b54ef", companies: "#07545e" };

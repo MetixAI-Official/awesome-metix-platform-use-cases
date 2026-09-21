@@ -4,8 +4,8 @@ import Base from "@site/layouts/Base.astro";
 import FoldSections from "@site/components/FoldSections.astro";
 import RunBlock from "@site/components/RunBlock.astro";
 import Receipt from "@site/components/Receipt.astro";
-import { byCardOrder, prompts, receipts, reports } from "@site/cases";
-import { href, isoDate, keepNames, number, ui, type Lang } from "@site/i18n";
+import { byCardOrder, fieldColor, prompts, receipts, reports } from "@site/cases";
+import { href, isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
@@ -24,23 +24,39 @@ const cards = (await getCollection("cases", (c) => c.data.status === "published"
   byCardOrder,
 );
 const cardIndex = cards.findIndex((c) => c.data.slug === data.slug) + 1;
+
+// Previous and next follow the index's default order, newest first.
+const ordered = (await getCollection("cases", (c) => c.data.status === "published")).sort(
+  (a, b) => (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0) || a.data.slug.localeCompare(b.data.slug),
+);
+const at = ordered.findIndex((c) => c.data.slug === data.slug);
+const prev = at > 0 ? ordered[at - 1].data : undefined;
+const next = at >= 0 && at < ordered.length - 1 ? ordered[at + 1].data : undefined;
+const indexHref = (query: string) => `${href(lang)}?${query}#index`;
 ---
 
 <Base lang={lang} path={`cases/${data.slug}/`} title={data.title[lang]} description={data.dek[lang]}>
   {
     data.format === "card" && (
-      <header class={`card-hero field-${data.color ?? "violet"}`}>
+      <header class={`card-hero field-${fieldColor(data.datasets, cardIndex - 1)}`}>
         <div class="wrap card-hero-grid">
           <div>
+            <nav class="crumbs" aria-label="Breadcrumb">
+              <a href={href(lang)}>{t.casebook}</a>
+              <span aria-hidden="true">/</span>
+              <a href={indexHref("format=card")}>{t.cardsLabel}</a>
+            </nav>
             <p class="ch-meta">
-              <a href={href(lang)} style="color: inherit">
-                {t.casebook}
-              </a>
-              {` · ${t.formats.card} ${String(cardIndex).padStart(2, "0")} · `}
-              {data.datasets.map((d) => t.datasets[d]).join(" · ")}
-              {data.snapshot && ` · ${isoDate(data.snapshot)}`}
+              {`${t.formats.card} ${String(cardIndex).padStart(2, "0")}`}
+              {data.datasets.map((d) => (
+                <>
+                  {" · "}
+                  <a href={indexHref(`data=${d}`)}>{t.datasets[d]}</a>
+                </>
+              ))}
+              {data.snapshot && <span class="nowrap">{` · ${isoDate(data.snapshot)}`}</span>}
             </p>
-            <h1>{keepNames(data.title[lang])}</h1>
+            <h1 set:html={titleHtml(data.title[lang], lang)} />
             <p class="ch-dek">{data.dek[lang]}</p>
             <ul class="chips">
               <li>
@@ -78,7 +94,27 @@ const cardIndex = cards.findIndex((c) => c.data.slug === data.slug) + 1;
         </div>
       </section>
       {receipt && <Receipt lang={lang} slug={data.slug} receipt={receipt} exploration={data.exploration_credits} />}
-      <a class="back-link" href={href(lang)}>← {t.allCases}</a>
+      <nav class="case-nav" aria-label={t.caseNav.all}>
+        {prev ? (
+          <a class="cn-link cn-prev" href={href(lang, `cases/${prev.slug}/`)}>
+            <span class="cn-label">← {t.caseNav.prev}</span>
+            <span class="cn-title" set:html={titleHtml(prev.title[lang], lang)} />
+          </a>
+        ) : (
+          <span />
+        )}
+        <a class="cn-all" href={`${href(lang)}#index`}>
+          {t.caseNav.all}
+        </a>
+        {next ? (
+          <a class="cn-link cn-next" href={href(lang, `cases/${next.slug}/`)}>
+            <span class="cn-label">{t.caseNav.next} →</span>
+            <span class="cn-title" set:html={titleHtml(next.title[lang], lang)} />
+          </a>
+        ) : (
+          <span />
+        )}
+      </nav>
     </div>
   </div>
 </Base>

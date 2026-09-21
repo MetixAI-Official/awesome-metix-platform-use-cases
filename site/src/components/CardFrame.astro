@@ -5,26 +5,28 @@
  */
 import type { CollectionEntry } from "astro:content";
 import type { Receipt } from "@site/cases";
-import { isoDate, keepNames, number, ui, type Lang } from "@site/i18n";
+import { isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
   entry: CollectionEntry<"cases">["data"];
   receipt?: Receipt;
   index: number;
+  /** The field color, from fieldColor() in cases.ts. */
+  color: string;
 }
 
-const { lang, entry, receipt, index } = Astro.props;
+const { lang, entry, receipt, index, color } = Astro.props;
 const t = ui[lang];
 const label = `${t.formats.card} ${String(index).padStart(2, "0")}`;
 ---
 
-<article class={`card field-${entry.color ?? "violet"}`}>
+<article class={`card field-${color}`}>
   <p class="cf-meta">
     <span>{label}</span>
     <span>{entry.datasets.map((d) => t.datasets[d]).join(" · ")}</span>
   </p>
-  <h3 class="cf-title">{keepNames(entry.title[lang])}</h3>
+  <h3 class="cf-title" set:html={titleHtml(entry.title[lang], lang)} />
   <div class="cf-body"><slot /></div>
   <p class="cf-stub">
     {receipt && <span>{t.toRerun(number(lang, receipt.credits))}</span>}
