@@ -191,7 +191,10 @@ def load_denylist(
 ) -> list[str]:
     """Read internal terms from the environment and the local ignored file."""
     env = os.environ if env is None else env
-    raw = env.get(DENYLIST_ENV, "").replace(",", "\n").splitlines()
+    # One term per line in both sources, as the module docstring says. Splitting the
+    # variable on commas as well turned the words after a comma in a comment into
+    # terms, so CI and a local run disagreed.
+    raw = env.get(DENYLIST_ENV, "").splitlines()
     path = (ROOT if root is None else root) / DENYLIST_FILE
     if path.is_file():
         raw += path.read_text(encoding="utf-8").splitlines()

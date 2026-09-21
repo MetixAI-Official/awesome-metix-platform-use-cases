@@ -126,6 +126,14 @@ def test_denylist_matches_whole_terms_and_is_not_printed(
     assert term not in out.out + out.err
 
 
+def test_denylist_comment_with_a_comma_adds_no_terms(tmp_path) -> None:
+    listing = "# hosts, tables, and vendors\n" + "quokka" + "ingest\n"
+    from_env = cp.load_denylist(env={cp.DENYLIST_ENV: listing}, root=tmp_path)
+    (tmp_path / cp.DENYLIST_FILE).write_text(listing, encoding="utf-8")
+    from_file = cp.load_denylist(env={}, root=tmp_path)
+    assert from_env == from_file == ["quokka" + "ingest"]
+
+
 def test_denylist_file_is_read(tmp_path) -> None:
     (tmp_path / cp.DENYLIST_FILE).write_text(
         "alpha-host.internal\n\n", encoding="utf-8"
