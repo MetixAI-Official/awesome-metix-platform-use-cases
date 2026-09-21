@@ -1,29 +1,108 @@
 ---
-import type { AstroComponentFactory } from "astro/runtime/server/index.js";
+/*
+ * The bootstrap prompt, laid out for the three things a reader comes here to do:
+ * copy it (the rail button copies the exact committed text, nothing needs opening),
+ * see what the agent will do (the question, then the ten steps as a folded
+ * timeline), and adapt it (the prompt's own "Adapt it" and "ask before running"
+ * sections, folded underneath).
+ */
+import type { PromptModule } from "@site/cases";
 import { ui, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
-  Content: AstroComponentFactory;
+  slug: string;
+  prompt: PromptModule;
 }
 
-const { lang, Content } = Astro.props;
+const { lang, slug, prompt } = Astro.props;
 const t = ui[lang];
+const file = `cases/${slug}/PROMPT${lang === "zh" ? ".zh" : ""}.md`;
+
+// The prompt exactly as committed: the one fenced text block.
+const raw = prompt.rawContent().match(/```text\n([\s\S]*?)\n```/)?.[1];
+if (!raw) throw new Error(`${file} has no text block`);
+const [question, ...paragraphs] = raw.split(/\n{2,}/);
+
+// Every step is "N. Title. Body" ("N. 标题。正文" in Chinese), as cases/_template/PROMPT.md asks.
+const steps = paragraphs.map((para) => {
+  const m = para.match(/^(\d+)\.\s+(.+?)(?:\.\s|。)([\s\S]*)$/);
+  if (!m) throw new Error(`${file}: a step does not read "N. Title. Body": ${para.slice(0, 60)}`);
+  return { n: Number(m[1]), title: m[2], body: m[3].trim() };
+});
+
+// The intro and the sections after the prompt, as the Markdown renders them.
+const html = (await prompt.compiledContent()).replace(/<h1[^>]*>[\s\S]*?<\/h1>/, "");
+const intro = html.slice(0, html.indexOf("<pre"));
+const folds = html
+  .slice(html.indexOf("</pre>") + "</pre>".length)
+  .split(/(?=<h2[\s>])/)
+  .map((part) => part.match(/^<h2[^>]*>([\s\S]*?)<\/h2>([\s\S]*)$/))
+  .filter((m): m is RegExpMatchArray => m !== null)
+  .map((m) => ({ title: m[1], body: m[2] }));
+const stepsId = `${slug}-steps`;
+const copyAttrs = { "data-copy": ".prompt-raw", "data-done": t.copied, "data-fail": t.copyFailed, "aria-live": "polite" };
 ---
 
-<section class="block" id="prompt" aria-labelledby="prompt-title" data-copy-root>
-  <div class="block-head">
+<section class="block rail-block" id="prompt" aria-labelledby="prompt-title" data-copy-root>
+  <div class="rail">
     <h2 id="prompt-title">{t.promptTitle}</h2>
-    <button class="btn" type="button" data-copy=".prompt-body pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
-      {t.copyPrompt}
-    </button>
+    <div class="rail-lede prose" set:html={intro} />
+    <div class="rail-actions">
+      <button class="btn btn-primary" type="button" {...copyAttrs}>{t.copyPrompt}</button>
+      <button
+        class="btn"
+        type="button"
+        data-fold-toggle
+        aria-controls={stepsId}
+        aria-expanded="false"
+        data-expand={t.expandAll}
+        data-collapse={t.collapseAll}
+      >
+        {t.expandAll}
+      </button>
+    </div>
   </div>
-  <div class="prose prompt-body">
-    <Content />
-  </div>
-  <div class="prompt-foot">
-    <button class="btn" type="button" data-copy=".prompt-body pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
-      {t.copyPrompt}
-    </button>
+
+  <div class="rail-main">
+    <div class="prompt-question">
+      <p class="pq-label">{t.questionLabel}</p>
+      <p class="pq-text">{question}</p>
+    </div>
+
+    <ol class="steps" id={stepsId} aria-label={t.stepsLabel(steps.length)}>
+      {
+        steps.map((step) => (
+          <li id={`step-${step.n}`}>
+            <details class="step">
+              <summary>
+                <span class="step-n">{String(step.n).padStart(2, "0")}</span>
+                <span class="step-title">{step.title}</span>
+              </summary>
+              <p class="step-body">{step.body}</p>
+            </details>
+          </li>
+        ))
+      }
+    </ol>
+
+    {
+      folds.length > 0 && (
+        <div class="folds">
+          <p class="folds-label">{t.makeItYours}</p>
+          {folds.map((fold) => (
+            <details class="fold">
+              <summary set:html={fold.title} />
+              <div class="fold-body prose" set:html={fold.body} />
+            </details>
+          ))}
+        </div>
+      )
+    }
+
+    <div class="prompt-foot">
+      <button class="btn btn-primary" type="button" {...copyAttrs}>{t.copyPrompt}</button>
+    </div>
+    <pre class="prompt-raw" hidden>{raw}</pre>
   </div>
 </section>

@@ -1,0 +1,29 @@
+---
+/*
+ * Folds rendered content at its h3 headings: each heading becomes a summary and
+ * everything up to the next heading its body. The titles stay visible as an index
+ * of the section; `open` names the sections that start unfolded.
+ */
+interface Props {
+  open?: RegExp;
+}
+
+const { open } = Astro.props;
+const html = await Astro.slots.render("default");
+const parts = html.split(/(?=<h3[\s>])/);
+const lead = parts[0].startsWith("<h3") ? "" : parts[0].trim();
+const sections = parts
+  .map((part) => part.match(/^<h3[^>]*>([\s\S]*?)<\/h3>([\s\S]*)$/))
+  .filter((m): m is RegExpMatchArray => m !== null)
+  .map((m) => ({ title: m[1], body: m[2], plain: m[1].replace(/<[^>]+>/g, "").trim() }));
+---
+
+{lead && <div class="prose" set:html={lead} />}
+{
+  sections.map((section) => (
+    <details class="fold" open={open?.test(section.plain) || undefined}>
+      <summary set:html={section.title} />
+      <div class="fold-body prose" set:html={section.body} />
+    </details>
+  ))
+}

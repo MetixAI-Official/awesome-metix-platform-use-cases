@@ -11,15 +11,18 @@ interface Props {
 
 const { lang, slug, receipt, exploration } = Astro.props;
 const t = ui[lang];
-const ranAt = receipt.ran_at.replace("T", " ").replace(/:\d\dZ$/, " UTC");
+const [ranDate, ranTime] = receipt.ran_at.replace(/:\d\dZ$/, "").split("T");
 const command = `export METIX_KEY=metix_xxxxxxxxxxxx\npython3 cases/${slug}/fetch.py`;
 ---
 
-<section class="block" id="receipt" aria-labelledby="receipt-title">
-  <h2 id="receipt-title">{t.receiptTitle}</h2>
-  <p class="lede">{t.receiptLede}</p>
+<section class="block rail-block" id="receipt" aria-labelledby="receipt-title">
+  <div class="rail">
+    <h2 id="receipt-title">{t.receiptTitle}</h2>
+    <p class="rail-lede">{t.receiptLede}</p>
+  </div>
+  <div class="rail-main">
   <dl class="receipt-grid">
-    <div><dt>{t.ranAt}</dt><dd>{ranAt}</dd></div>
+    <div><dt>{t.ranAt}</dt><dd><span class="nowrap">{ranDate}</span> <span class="nowrap">{ranTime} UTC</span></dd></div>
     <div><dt>{t.callsLabel}</dt><dd>{number(lang, receipt.calls)}</dd></div>
     <div><dt>{t.resultsLabel}</dt><dd>{number(lang, receipt.results)}</dd></div>
     <div><dt>{t.recordsLabel}</dt><dd>{number(lang, receipt.records)}</dd></div>
@@ -41,4 +44,5 @@ const command = `export METIX_KEY=metix_xxxxxxxxxxxx\npython3 cases/${slug}/fetc
     <a href={`${REPO}/tree/main/cases/${slug}`}>{t.caseFolder}</a>
     <a href="https://mira-api.metix.ai/docs/credits.md">{t.pricing}</a>
   </p>
+  </div>
 </section>

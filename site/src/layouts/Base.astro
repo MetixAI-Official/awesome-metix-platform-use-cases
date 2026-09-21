@@ -97,6 +97,33 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
         clearTimeout(button._reset);
         button._reset = setTimeout(() => (button.textContent = label), 1500);
       });
+
+      // Expand all / Collapse all: the label follows the folds, including ones opened by hand.
+      for (const button of document.querySelectorAll("[data-fold-toggle]")) {
+        const list = document.getElementById(button.getAttribute("aria-controls"));
+        if (!list) continue;
+        const folds = () => [...list.querySelectorAll("details")];
+        const sync = () => {
+          const all = folds().every((d) => d.open);
+          button.textContent = all ? button.dataset.collapse : button.dataset.expand;
+          button.setAttribute("aria-expanded", String(all));
+        };
+        button.addEventListener("click", () => {
+          const open = !folds().every((d) => d.open);
+          for (const d of folds()) d.open = open;
+          sync();
+        });
+        list.addEventListener("toggle", sync, true);
+      }
+
+      // A link to a folded step (#step-3) opens it.
+      const openTarget = () => {
+        const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        const fold = target && target.querySelector("details");
+        if (fold) fold.open = true;
+      };
+      openTarget();
+      window.addEventListener("hashchange", openTarget);
     </script>
   </body>
 </html>

@@ -9,7 +9,12 @@ export type Receipt = {
   credits_source: string;
 };
 
-type MarkdownModule = { Content: AstroComponentFactory };
+/** A case's PROMPT.md: the fenced prompt comes from the source, the rest from the rendered HTML. */
+export type PromptModule = {
+  Content: AstroComponentFactory;
+  rawContent: () => string;
+  compiledContent: () => Promise<string>;
+};
 
 const slugOf = (path: string) => path.split("/cases/")[1].split("/")[0];
 
@@ -29,8 +34,8 @@ export const reports = bySlug(
 );
 
 export const prompts = {
-  en: bySlug(import.meta.glob<MarkdownModule>("../../cases/*/PROMPT.md", { eager: true })),
-  zh: bySlug(import.meta.glob<MarkdownModule>("../../cases/*/PROMPT.zh.md", { eager: true })),
+  en: bySlug(import.meta.glob<PromptModule>("../../cases/*/PROMPT.md", { eager: true })),
+  zh: bySlug(import.meta.glob<PromptModule>("../../cases/*/PROMPT.zh.md", { eager: true })),
 };
 
 /** Catalog order for cards: wide cards lead their rows so the three-column grid stays full. */

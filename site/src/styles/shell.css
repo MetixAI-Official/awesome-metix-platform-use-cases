@@ -118,6 +118,7 @@ a {
   white-space: nowrap;
 }
 
+.no-js [data-fold-toggle],
 .no-js [data-copy] {
   display: none;
 }
@@ -1045,24 +1046,54 @@ a {
   padding-top: 40px;
   margin-top: 40px;
   border-top: 1px solid var(--line);
-  max-width: 900px;
-}
-
-.block-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
 }
 
 .block h2 {
   font-size: clamp(22px, 2.4vw, 28px);
 }
 
-.block .lede {
-  margin-top: 10px;
+/* Closing blocks span the same width as the figures: a rail with the heading, the
+   explanation, and the actions, then the content. On wide screens the rail stays in
+   view while the content scrolls, so Copy is always one click away. */
+.rail-block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+.rail-lede {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.6;
   color: var(--ink-2);
+}
+
+.rail-lede.prose > * + * {
+  margin-top: 10px;
+}
+
+.rail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.rail-main > :first-child {
+  margin-top: 0;
+}
+
+@media (min-width: 960px) {
+  .rail-block {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 56px;
+  }
+
+  .rail {
+    position: sticky;
+    top: 92px;
+    align-self: start;
+  }
 }
 
 .btn {
@@ -1082,6 +1113,17 @@ a {
 .btn:hover {
   border-color: var(--ink-3);
   background: var(--surface-muted);
+}
+
+.btn-primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  border-color: #2a2850;
+  background: #2a2850;
 }
 
 .prose {
@@ -1184,30 +1226,214 @@ pre.code {
   min-width: 8.5rem;
 }
 
-/* The prompt: a readable measure, a gap between steps, Copy at both ends. */
-.prompt-body pre {
-  max-width: 88ch;
-  line-height: 1.75;
+/* The prompt. The question is where the run starts, so it reads like a terminal. */
+.prompt-question {
+  padding: 18px 20px 20px;
+  border-radius: 14px;
+  background: var(--ink);
+  color: #fff;
 }
 
+.pq-label {
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0defc8;
+}
+
+.pq-text {
+  margin-top: 12px;
+  max-width: 78ch;
+  font: 14px/1.7 var(--mono);
+}
+
+/* The ten steps as a timeline: numbered stops on one line, each folding open to the
+   exact words the agent gets. The titles alone tell the run. */
+.steps {
+  position: relative;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.steps::before {
+  content: "";
+  position: absolute;
+  left: 15.5px;
+  top: 24px;
+  bottom: 24px;
+  width: 1px;
+  background: var(--line);
+}
+
+.step summary {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 12px;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.step-n {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  font: 600 12px/1 var(--mono);
+  color: var(--ink-2);
+  transition: background-color 150ms var(--ease), border-color 150ms var(--ease), color 150ms var(--ease);
+}
+
+.step summary:hover .step-n {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+/* After the hover rule and as specific, so an open stop keeps its number under the pointer. */
+.step[open] summary .step-n {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.step-title {
+  font: 600 16px/1.35 var(--sans);
+  color: var(--ink);
+}
+
+.step-body {
+  margin: 2px 0 12px 46px;
+  padding: 14px 16px;
+  max-width: 76ch;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-muted);
+  font: 13px/1.7 var(--mono);
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* Section folds: one row per section, so the titles read as its index. */
+.folds {
+  margin-top: 36px;
+}
+
+.folds-label {
+  margin-bottom: 4px;
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.fold {
+  border-bottom: 1px solid var(--line);
+}
+
+.folds-label + .fold,
+.rail-main > .fold:first-child {
+  border-top: 1px solid var(--line);
+}
+
+.fold summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 0;
+  cursor: pointer;
+  list-style: none;
+  font: 600 16px/1.35 var(--sans);
+  color: var(--ink);
+}
+
+.fold summary:hover {
+  color: var(--accent-ink);
+}
+
+.fold-body {
+  padding-bottom: 22px;
+}
+
+.step summary::-webkit-details-marker,
+.fold summary::-webkit-details-marker {
+  display: none;
+}
+
+.step summary::after,
+.fold summary::after {
+  content: "";
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 1.5px solid var(--ink-3);
+  border-bottom: 1.5px solid var(--ink-3);
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 180ms var(--ease);
+}
+
+.step[open] summary::after,
+.fold[open] summary::after {
+  transform: translateY(2px) rotate(225deg);
+}
+
+.step::details-content,
+.fold::details-content {
+  height: 0;
+  overflow: clip;
+  transition: height 220ms var(--ease), content-visibility 220ms allow-discrete;
+}
+
+.step[open]::details-content,
+.fold[open]::details-content {
+  height: auto;
+}
+
+/* A second Copy at the end, for phones, where the rail has scrolled away. */
 .prompt-foot {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
-  max-width: 88ch;
+  margin-top: 20px;
 }
 
+@media (min-width: 960px) {
+  .prompt-foot {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .step-body {
+    margin-left: 0;
+  }
+}
+
+/* The run time gets the room to stay two lines: date, then time. */
 .receipt-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin: 24px 0 0;
+  grid-template-columns: minmax(10.5rem, 1.5fr) repeat(4, minmax(0, 1fr));
+  margin: 0;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
   overflow: hidden;
 }
 
+/* Labels at the top, values at the bottom, so the numbers share one line even
+   where a label wraps. */
 .receipt-grid div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
   padding: 16px 18px;
   border-right: 1px solid var(--line);
 }
@@ -1225,7 +1451,7 @@ pre.code {
 }
 
 .receipt-grid dd {
-  margin: 8px 0 0;
+  margin: 0;
   font: 500 20px/1.2 var(--mono);
   color: var(--ink);
 }
@@ -1467,7 +1693,8 @@ details.query[open]::details-content {
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
-  *::after {
+  *::after,
+  details::details-content {
     transition: none !important;
   }
   .card-link:hover,

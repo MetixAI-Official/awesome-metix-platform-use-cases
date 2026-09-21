@@ -17,7 +17,7 @@ Answer one question with the Metix AI Platform: where in the United States are c
 
 6. Clean. A posting with the same lowercased title, company, city, and state as an earlier one counts once. Report how many reposts this removed.
 
-7. Group by metro: San Francisco Bay Area, New York, Seattle, Washington and Baltimore, Boston, and Austin, each an explicit list of city and state pairs written to metros.json. Check the lists against the cities you actually read, so no large suburb falls outside its metro. A city on no list counts as "elsewhere in the US"; a missing city, or a state name in the city field, counts as "no city given". Keep both buckets.
+7. Group by metro. Use six metros, San Francisco Bay Area, New York, Seattle, Washington and Baltimore, Boston, and Austin, each an explicit list of city and state pairs written to metros.json. Check the lists against the cities you actually read, so no large suburb falls outside its metro. A city on no list counts as "elsewhere in the US"; a missing city, or a state name in the city field, counts as "no city given". Keep both buckets.
 
 8. Outputs. Write data/metros.json (distinct postings and share by metro), data/companies.json (the five companies with the most distinct postings), and data/context.json (worldwide total, US total, records read, distinct postings), each with "unit": "jobs", the snapshot date, and the query file it came from. Keep the records in data/raw/ and never publish them.
 

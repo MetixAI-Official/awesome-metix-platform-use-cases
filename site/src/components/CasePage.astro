@@ -1,6 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
 import Base from "@site/layouts/Base.astro";
+import FoldSections from "@site/components/FoldSections.astro";
 import PromptBlock from "@site/components/PromptBlock.astro";
 import Receipt from "@site/components/Receipt.astro";
 import { byCardOrder, prompts, receipts, reports } from "@site/cases";
@@ -64,11 +65,16 @@ const cardIndex = cards.findIndex((c) => c.data.slug === data.slug) + 1;
   <div class="page-body">
     <Report lang={lang} section="body" entry={data} />
     <div class="wrap closing">
-      {prompt && <PromptBlock lang={lang} Content={prompt.Content} />}
-      <section class="block" aria-labelledby="method-title">
-        <h2 id="method-title">{t.methodTitle}</h2>
-        <div class="prose" style="margin-top: 20px">
-          <Report lang={lang} section="method" entry={data} />
+      {prompt && <PromptBlock lang={lang} slug={data.slug} prompt={prompt} />}
+      <section class="block rail-block" id="method" aria-labelledby="method-title">
+        <div class="rail">
+          <h2 id="method-title">{t.methodTitle}</h2>
+          <p class="rail-lede">{t.methodLede}</p>
+        </div>
+        <div class="rail-main">
+          <FoldSections open={/^(Limits|局限)/}>
+            <Report lang={lang} section="method" entry={data} />
+          </FoldSections>
         </div>
       </section>
       {receipt && <Receipt lang={lang} slug={data.slug} receipt={receipt} exploration={data.exploration_credits} />}
