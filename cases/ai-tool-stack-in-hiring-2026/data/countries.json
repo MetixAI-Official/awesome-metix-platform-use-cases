@@ -1,0 +1,52 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/dimensions.json",
+  "world_count": 36208,
+  "rows": [
+    {
+      "group": "United States",
+      "count": 14388
+    },
+    {
+      "group": "India",
+      "count": 3762
+    },
+    {
+      "group": "United Kingdom",
+      "count": 1463
+    },
+    {
+      "group": "Germany",
+      "count": 1530
+    },
+    {
+      "group": "Canada",
+      "count": 1563
+    },
+    {
+      "group": "France",
+      "count": 685
+    },
+    {
+      "group": "Netherlands",
+      "count": 324
+    },
+    {
+      "group": "Singapore",
+      "count": 359
+    },
+    {
+      "group": "Australia",
+      "count": 298
+    },
+    {
+      "group": "Japan",
+      "count": 413
+    },
+    {
+      "group": "rest-of-world",
+      "count": 11423
+    }
+  ]
+}

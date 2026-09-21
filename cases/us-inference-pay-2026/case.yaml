@@ -1,0 +1,32 @@
+slug: us-inference-pay-2026
+type: snapshot
+format: card
+color: signal
+span: 1
+status: published
+title:
+  en: Half of US inference roles that state pay start between $150k and $200k
+  zh: 写明薪资的美国推理岗位里，一半起薪在 15 万到 20 万美元之间
+dek:
+  en: US postings with inference or model serving in the title that state an annual salary in USD, by posted minimum, on the Metix AI Platform on September 21, 2026.
+  zh: 2026 年 9 月 21 日 Metix AI Platform 上标题含 inference 或 model serving、写明美元年薪的美国岗位，按起薪分档。
+datasets: [jobs]
+integration: [rest]
+topics: [inference, pay]
+regions: [US]
+snapshot: 2026-09-21
+published: 2026-09-21
+exploration_credits: 11
+highlights:
+  - value: "61"
+    label:
+      en: of 386 US postings state pay
+      zh: 个岗位写明薪资（共 386 个）
+  - value: "31"
+    label:
+      en: start between $150k and $200k
+      zh: 个起薪在 15 万到 20 万美元
+  - value: "2"
+    label:
+      en: start at $300k or more
+      zh: 个起薪 30 万美元以上

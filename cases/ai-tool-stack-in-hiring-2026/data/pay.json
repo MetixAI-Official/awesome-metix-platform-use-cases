@@ -1,0 +1,27 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/dimensions.json",
+  "rows": [
+    {
+      "group": "any-assistant",
+      "count": 2688,
+      "at_least": {
+        "100000": 2160,
+        "150000": 1287,
+        "200000": 533,
+        "250000": 168
+      }
+    },
+    {
+      "group": "software-engineer",
+      "count": 6198,
+      "at_least": {
+        "100000": 5500,
+        "150000": 3246,
+        "200000": 1142,
+        "250000": 323
+      }
+    }
+  ]
+}

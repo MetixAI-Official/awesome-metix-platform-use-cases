@@ -1,19 +1,28 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。它会从头复现这个案例，大约花 100 Credits。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。它会从头复现这个案例，花费不到 100 Credits。
 
 ```text
 用 Metix AI Platform 回答一个问题：现在美国哪些地方在招模型推理（inference）方向的人？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
 
 1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.job 里的字段。阅读 https://mira-api.metix.ai/docs/credits.md 了解价格：搜索按 ceil(返回的 ID 数 / 25) 计费，详情按 ceil(找到的记录数 / 5) 计费，没有结果的搜索不收费。
+
 2. 人群定义。在招岗位，标题匹配 "inference"、"model serving"、"llm serving" 中任意一个，并排除标题匹配 "causal" 或 "statistical" 的岗位（这些是统计岗位，不是模型部署）。关键词放在一个 any 节点里，排除词放在一个 not 节点里。
+
 3. 先计数。用 size 1 分别记录全球总数和 location.country eq "United States" 的总数，每次计数花 1 Credit。
+
 4. 预算。现在和结束时各调用一次 GET /auth/key/status（免费），两次余额之差就是本次花费。如果美国总数少于 1,000，就读取全部美国岗位：先用 size 10000 搜索，再按每批 100 个调用 POST /entity/v1/jobs/detail-by-id，_source 取 ["title", "company.name", "location.city", "location.state"]。任何会让总花费超过 150 Credits 的步骤，先停下来问我。
+
 5. 抽检。列出出现最多的 40 个标题，标出与生产环境模型部署或推理优化无关的。如果无关岗位超过 5%，在第 2 步补充排除词，重跑，并说明改了什么。
+
 6. 清洗。标题（转小写）、公司、城市、州都相同的岗位只算一次，报告去掉了多少条重复发布。
+
 7. 按都市区分组：旧金山湾区、纽约、西雅图、华盛顿和巴尔的摩、波士顿、奥斯汀。每个都市区写成明确的"城市加州名"列表，保存到 metros.json。用实际读到的城市核对列表，避免大的卫星城被漏掉。不在任何列表里的城市记为"美国其他城市"；没有城市、或城市字段里写的是州名的，记为"未注明城市"。这两类都要保留。
+
 8. 输出。写出 data/metros.json（各都市区的去重岗位数和占比）、data/companies.json（去重岗位数最多的 5 家公司）、data/context.json（全球总数、美国总数、读取记录数、去重岗位数），每个文件都带 "unit": "jobs"、快照日期和来源查询文件。原始记录放在 data/raw/，永远不公开。
+
 9. 图表。一张横向条形图，按去重岗位数排序，"美国其他城市"和"未注明城市"放在最后并用灰色。条形长度按占全部美国去重岗位的比例画，不按最长的那条缩放，并在 50% 处画一条标记线。每根条形直接标出数量和占比。图表标题写结论，不写主题。
+
 10. 局限。写清楚这些数字不能说明什么：岗位数衡量的是需求，不是在职人数；同一个岗位挂在几个城市就按城市各算一次；索引里是快照当天仍在招的岗位，发布日期是估算值。
 ```
 

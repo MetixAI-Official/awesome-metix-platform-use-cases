@@ -1,0 +1,32 @@
+slug: ai-coding-tools-in-postings-2026
+type: snapshot
+format: card
+color: violet
+span: 2
+status: published
+title:
+  en: Claude Code is named in more job postings than any other AI coding tool
+  zh: 招聘描述里，Claude Code 被提到的次数多过其他所有 AI 编程工具
+dek:
+  en: Open postings whose description names an AI coding tool, worldwide, on the Metix AI Platform on September 21, 2026.
+  zh: 2026 年 9 月 21 日 Metix AI Platform 上，职位描述里提到 AI 编程工具的全球在招岗位。
+datasets: [jobs]
+integration: [rest]
+topics: [ai-tools, ai-hiring]
+regions: [global]
+snapshot: 2026-09-21
+published: 2026-09-21
+exploration_credits: 152
+highlights:
+  - value: "27,679"
+    label:
+      en: postings name Claude Code
+      zh: 个岗位提到 Claude Code
+  - value: "36,208"
+    label:
+      en: name at least one of the five tools
+      zh: 个岗位至少提到五个工具之一
+  - value: "41%"
+    label:
+      en: of the Claude Code postings are in the US
+      zh: 的 Claude Code 岗位在美国

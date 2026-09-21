@@ -105,7 +105,9 @@ def _placeholder_ok(text: str) -> bool:
 
 LINE_RULES: tuple[LineRule, ...] = (
     LineRule(
-        "key", re.compile(r"\b(?:metix|mira)_[A-Za-z0-9]{24,}\b"), "Metix AI API key"
+        "key",
+        re.compile(r"\b(?:metix|mira)_[A-Za-z0-9]{24,}\b"),
+        "Metix AI Platform API key",
     ),
     LineRule(
         "credential",
@@ -162,9 +164,15 @@ LINE_RULES: tuple[LineRule, ...] = (
         ),
         "private network address",
     ),
-    LineRule("brand", re.compile(r"\bMETIX\b"), "write Metix AI"),
-    LineRule("brand", re.compile(r"\bMetix\b(?! AI)"), "write Metix AI"),
-    LineRule("brand", re.compile(r"\bMetixAI\b(?!-Official)"), "write Metix AI"),
+    # The product is always "Metix AI Platform". The shorter forms name the company
+    # and the main site at metix.ai, and this repository belongs to neither.
+    LineRule("brand", re.compile(r"\bMETIX\b"), "write Metix AI Platform"),
+    LineRule(
+        "brand", re.compile(r"\bMetix\b(?! AI Platform\b)"), "write Metix AI Platform"
+    ),
+    LineRule(
+        "brand", re.compile(r"\bMetixAI\b(?!-Official)"), "write Metix AI Platform"
+    ),
     LineRule(
         "brand",
         re.compile(r"\bOpenJobs\b(?! AI Inc)"),

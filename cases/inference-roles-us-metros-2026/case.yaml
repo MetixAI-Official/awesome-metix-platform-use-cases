@@ -1,5 +1,8 @@
 slug: inference-roles-us-metros-2026
 type: snapshot
+format: card
+color: navy
+span: 1
 status: published
 title:
   en: Nearly half of US inference openings are in the Bay Area
@@ -13,7 +16,7 @@ topics: [inference, ai-hiring]
 regions: [US]
 snapshot: 2026-09-21
 published: 2026-09-21
-exploration_credits: 111
+exploration_credits: 206
 highlights:
   - value: "49.9%"
     label:

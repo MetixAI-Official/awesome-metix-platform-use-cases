@@ -1,0 +1,73 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/dimensions.json",
+  "world_count": 36208,
+  "rows": [
+    {
+      "group": "IT Services and IT Consulting",
+      "sector": "tech",
+      "count": 10794
+    },
+    {
+      "group": "Software Development",
+      "sector": "tech",
+      "count": 9214
+    },
+    {
+      "group": "Technology, Information and Internet",
+      "sector": "tech",
+      "count": 3101
+    },
+    {
+      "group": "Financial Services",
+      "sector": "beyond",
+      "count": 4092
+    },
+    {
+      "group": "Banking",
+      "sector": "beyond",
+      "count": 674
+    },
+    {
+      "group": "Insurance",
+      "sector": "beyond",
+      "count": 531
+    },
+    {
+      "group": "Manufacturing",
+      "sector": "beyond",
+      "count": 1780
+    },
+    {
+      "group": "Hospitals and Health Care",
+      "sector": "beyond",
+      "count": 450
+    },
+    {
+      "group": "Retail",
+      "sector": "beyond",
+      "count": 404
+    },
+    {
+      "group": "Telecommunications",
+      "sector": "beyond",
+      "count": 355
+    },
+    {
+      "group": "Motor Vehicle Manufacturing",
+      "sector": "beyond",
+      "count": 129
+    },
+    {
+      "group": "Higher Education",
+      "sector": "beyond",
+      "count": 122
+    },
+    {
+      "group": "Government Administration",
+      "sector": "beyond",
+      "count": 52
+    }
+  ]
+}

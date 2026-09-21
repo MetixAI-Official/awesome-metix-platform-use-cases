@@ -21,4 +21,9 @@ const t = ui[lang];
   <div class="prose prompt-body">
     <Content />
   </div>
+  <div class="prompt-foot">
+    <button class="btn" type="button" data-copy=".prompt-body pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
+      {t.copyPrompt}
+    </button>
+  </div>
 </section>

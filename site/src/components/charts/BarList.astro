@@ -1,0 +1,44 @@
+---
+/*
+ * Labelled horizontal bars. Width is a share of the scale the caller chose, so a
+ * report decides whether bars are scaled to a total or to the longest bar.
+ * kind: focus (the series the finding is about), other, residual (leftover
+ * buckets, hatched), lower (a strict count that is a lower bound, hatched).
+ * ghost: an outline behind the bar, for a larger total the bar is part of
+ * (a looser count of the same thing, or the worldwide count behind a US fill).
+ */
+export interface BarRow {
+  label: string;
+  display: string;
+  width: number;
+  kind?: "focus" | "other" | "residual" | "lower";
+  ghost?: number;
+  note?: string;
+}
+
+interface Props {
+  rows: BarRow[];
+  label: string;
+}
+
+const { rows, label } = Astro.props;
+const pct = (w: number) => `${Math.max(0, Math.min(1, w)) * 100}%`;
+---
+
+<ol class="bl" aria-label={label}>
+  {
+    rows.map((r) => (
+      <li class={`bl-row ${r.kind ?? "other"}`}>
+        <span class="bl-label">
+          {r.label}
+          {r.note && <span class="bl-note">{r.note}</span>}
+        </span>
+        <span class="bl-track" aria-hidden="true">
+          {r.ghost !== undefined && <span class="bl-ghost" style={`--w: ${pct(r.ghost)}`} />}
+          <span class="bl-fill" style={`--w: ${pct(r.width)}`} />
+        </span>
+        <span class="bl-value">{r.display}</span>
+      </li>
+    ))
+  }
+</ol>

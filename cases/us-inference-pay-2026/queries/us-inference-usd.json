@@ -1,0 +1,47 @@
+{
+  "where": {
+    "all": [
+      {
+        "any": [
+          {
+            "field": "title",
+            "match": "inference"
+          },
+          {
+            "field": "title",
+            "match": "model serving"
+          },
+          {
+            "field": "title",
+            "match": "llm serving"
+          }
+        ]
+      },
+      {
+        "not": [
+          {
+            "field": "title",
+            "match": "causal"
+          },
+          {
+            "field": "title",
+            "match": "statistical"
+          }
+        ]
+      },
+      {
+        "field": "location.country",
+        "eq": "United States"
+      },
+      {
+        "field": "salary.currency",
+        "eq": "USD"
+      },
+      {
+        "field": "salary.annual_min",
+        "exists": true
+      }
+    ]
+  },
+  "size": 1
+}

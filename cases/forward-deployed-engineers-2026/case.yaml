@@ -1,0 +1,32 @@
+slug: forward-deployed-engineers-2026
+type: snapshot
+format: card
+color: blue
+span: 2
+status: published
+title:
+  en: Nearly two in three forward-deployed engineering openings are in the US
+  zh: 近三分之二的前线部署工程师岗位在美国
+dek:
+  en: Open postings with forward deployed in the title, by country, on the Metix AI Platform on September 21, 2026.
+  zh: 2026 年 9 月 21 日 Metix AI Platform 上标题含 forward deployed 的在招岗位，按国家统计。
+datasets: [jobs]
+integration: [rest]
+topics: [forward-deployed, ai-hiring]
+regions: [global]
+snapshot: 2026-09-21
+published: 2026-09-21
+exploration_credits: 137
+highlights:
+  - value: "5,868"
+    label:
+      en: open postings worldwide
+      zh: 个全球在招岗位
+  - value: "64.8%"
+    label:
+      en: are in the US
+      zh: 在美国
+  - value: "309"
+    label:
+      en: in India, the next largest
+      zh: 个在印度，排第二

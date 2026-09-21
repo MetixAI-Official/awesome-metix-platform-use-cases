@@ -18,7 +18,7 @@ Aggregates computed from the Metix AI Platform, provided they meet the small-cel
 
 Query Spec trees, the JSON that each chart or table was computed from, so that anyone with a key can rerun it. A query must describe a population, never an individual.
 
-Company names, used to refer to the company and nothing more. Counts attached to a company describe what is visible in the Metix AI index, not the company's headcount (see "Wording" below).
+Company names, used to refer to the company and nothing more. Counts attached to a company describe what is visible through the Metix AI Platform, not the company's headcount (see "Wording" below).
 
 Facts from job postings, in aggregate: posting counts, locations, titles grouped into families, and salary ranges stated in the postings.
 
@@ -52,13 +52,13 @@ Where a study is about geography of education or work, it uses the stated locati
 
 ### Internal information
 
-This repository describes the Metix AI Platform as a customer sees it. It does not describe how Metix AI is built or run. That excludes:
+This repository describes the Metix AI Platform as a customer sees it. It does not describe how the Platform is built or run. That excludes:
 
 - hostnames, IP addresses, and URLs that are not published on metix.ai or platform.metix.ai.
 - names of internal services, pipelines, databases, tables, buckets, repositories, and fields that are not part of the public API contract (`GET /contract`).
 - names of customers, prospects, trials, or deals, and any note on why a study was commissioned or who it was for.
 - internal prices, costs, margins, coverage figures, or roadmap items that metix.ai does not publish.
-- names and addresses of Metix AI employees. The contact for this repository is `support@metix.ai`.
+- names and addresses of the people who build the Platform. The contact for this repository is `support@metix.ai`.
 - local file paths, machine names, and agent or editor scratch files.
 
 Because this page is itself public, it names these categories and never the internal terms. The concrete list of internal terms lives outside the repository (see "Enforcement").
@@ -81,13 +81,13 @@ The checker enforces the 1 to 9 rule on every aggregate file whose `unit` is `pr
 
 ## Named people and public events
 
-A case never names an individual from Metix AI data.
+A case never names an individual from Metix AI Platform data.
 
-A case may refer to a public event involving a person, such as an executive hire reported by the press, only by linking to the publisher and attributing the claim to it. Describe the role rather than the name wherever the point survives without it ("a post-training lead moved from one lab to another, according to Bloomberg"). A case never adds Metix AI data about that person, never places them in a chart, and never infers anything about them.
+A case may refer to a public event involving a person, such as an executive hire reported by the press, only by linking to the publisher and attributing the claim to it. Describe the role rather than the name wherever the point survives without it ("a post-training lead moved from one lab to another, according to Bloomberg"). A case never adds Metix AI Platform data about that person, never places them in a chart, and never infers anything about them.
 
 ## Wording
 
-A count of profiles is "visible in the Metix AI index", a lower bound, and never a company's headcount. "412 visible profiles in inference roles at the company as of 2026-09-18" is right. "The company has 412 inference engineers" is wrong.
+A count of profiles is "visible through the Metix AI Platform", a lower bound, and never a company's headcount. "412 visible profiles in inference roles at the company as of 2026-09-18" is right. "The company has 412 inference engineers" is wrong.
 
 Job counts describe demand and profile counts describe supply. A chart never mixes the two under one label.
 
@@ -99,7 +99,7 @@ Claims about a company's intent ("is cutting", "is pivoting to") need a public s
 
 ## Brand and third parties
 
-Write the product as Metix AI Platform and the company as Metix AI. The legal entity is OpenJobs AI Inc., in footers and legal text only. The full rules are in `docs/style.md` and on [brand.metix.ai](https://brand.metix.ai).
+Write the product as Metix AI Platform, in full, on every page and in both languages. This repository belongs to the Platform, not to the main site, so it refers to the main site by its domain, metix.ai. The legal entity is OpenJobs AI Inc., in the copyright line only. The full rules are in `docs/style.md` and on [brand.metix.ai](https://brand.metix.ai).
 
 Third-party names are used only to refer to those companies. No third-party logos, and no wording that suggests a company endorses, partners with, or supplied data to this repository.
 
@@ -114,7 +114,7 @@ Third-party names are used only to refer to those companies. No third-party logo
 - phone numbers, profile URLs, local home-directory paths, and private IP addresses.
 - person-level fields (names, profile URLs, contact fields, person ids) in files under `cases/*/data/`.
 - cells from 1 to 9 in aggregate files whose `unit` is `profiles`.
-- brand spellings other than Metix AI, and em or en dashes in prose.
+- the product name written any way other than Metix AI Platform, and em or en dashes in prose.
 - any term from the private denylist.
 
 It prints the file, line, and rule for each finding and never prints the matched text, because Actions logs on a public repository are public too.
@@ -142,6 +142,7 @@ The checker catches patterns. A reviewer other than the author checks meaning:
 4. Definitions of sensitive populations use institution or employer location only.
 5. Company-level wording is a visible lower bound, and intent claims have a source.
 6. Nothing describes internal systems, customers, or why the study exists.
+7. On the rendered page, in both languages, the product reads Metix AI Platform everywhere, including uppercase labels. The checker reads source text and cannot see a CSS `text-transform`.
 
 ## If something leaks
 

@@ -1,0 +1,34 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/us-inference-usd.json",
+  "stated_count": 61,
+  "us_postings_count": 386,
+  "rows": [
+    {
+      "group": "under-150k",
+      "min_usd": 0,
+      "count": 3
+    },
+    {
+      "group": "150k-200k",
+      "min_usd": 150000,
+      "count": 31
+    },
+    {
+      "group": "200k-250k",
+      "min_usd": 200000,
+      "count": 17
+    },
+    {
+      "group": "250k-300k",
+      "min_usd": 250000,
+      "count": 8
+    },
+    {
+      "group": "300k+",
+      "min_usd": 300000,
+      "count": 2
+    }
+  ]
+}

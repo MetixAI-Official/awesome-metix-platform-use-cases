@@ -28,7 +28,7 @@ Metros are the city lists in [`metros.json`](metros.json). A city on no list cou
 
 ## How it was made
 
-An AI agent working through the public REST API built this case. Before writing the replay, it spent 111 Credits exploring: 7 on counts to size the question, and 104 to read every matching US posting once. That read found two things the queries now handle. First, 40 of 426 postings were statistics roles ("causal inference", "statistical"), so those terms are excluded. Second, 33 postings repeated a title, company, and city, so reposts are collapsed. It also showed how the index spells cities, and the metro lists were checked against those spellings. The published numbers come from one replay of the final queries, which cost 95 Credits.
+An AI agent working through the public REST API built this case. Before writing the replay, it spent 111 Credits exploring: 7 on counts to size the question, and 104 to read every matching US posting once. That read found two things the queries now handle. First, 40 of 426 postings were statistics roles ("causal inference", "statistical"), so those terms are excluded. Second, 33 postings repeated a title, company, and city, so reposts are collapsed. It also showed how the index spells cities, and the metro lists were checked against those spellings. A first replay (95 Credits) was later rerun so that its receipt counts calls the same way as every other case, which brings the cost of exploring to about 206 Credits. The published numbers come from the final replay, which cost 96.
 
 ## Limits
 

@@ -1,9 +1,9 @@
 ---
 /*
  * Design
- * Palette: navy #100D35 hero ground; sky #A3E4FF key number on navy; teal ink #07545E
- *   focus bar; grey #7E8787 other metros; hatched outline for elsewhere and no city.
- * Type: the shell faces; the key number in Sora 600 at 96 px (56 px on phones).
+ * Field: navy #100D35 (card and hero); sky #A3E4FF focus; #8C8AA8 other metros.
+ * Detail chart on white: teal ink #07545E focus bar; grey #7E8787 other metros;
+ *   hatched outlines for elsewhere and no city.
  * Signature: bars scaled to the share of all distinct postings, not to the longest bar,
  *   with a dashed marker at 50%. The Bay Area bar stops just short of it.
  */
@@ -19,17 +19,12 @@ import worldQuery from "../queries/world-total.json";
 
 interface Props {
   lang: Lang;
-  section: "body" | "method";
-  entry: {
-    slug: string;
-    title: Record<Lang, string>;
-    dek: Record<Lang, string>;
-    snapshot?: Date;
-    exploration_credits?: number;
-  };
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: { slug: string; snapshot?: Date; exploration_credits?: number };
 }
 
-const { lang, section, entry } = Astro.props;
+const { lang, section, size = "compact", entry } = Astro.props;
 const zh = lang === "zh";
 
 const count = (group: string) => context.rows.find((r) => r.group === group)?.count ?? 0;
@@ -44,6 +39,8 @@ const metro = (id: string) => metros.rows.find((r) => r.group === id)!;
 const bay = metro("sf-bay-area");
 const ny = metro("new-york");
 const sea = metro("seattle");
+const noCity = metro("no-city");
+const withCity = distinct - noCity.count;
 const pct = (share: number, digits = 1) => `${number(lang, share * 100, digits)}%`;
 const nextTwo = (ny.count + sea.count) / distinct;
 const top = companies.rows;
@@ -67,8 +64,24 @@ const labels: Record<string, Record<Lang, string>> = {
 const snapshot = entry.snapshot ?? new Date(metros.snapshot);
 const snapshotIso = isoDate(snapshot);
 const companyList = top
-  .map((r) => `${r.company.replace("Amazon Web Services (AWS)", "Amazon Web Services")} (${r.count})`)
+  .map((r) => {
+    const name = r.company.replace("Amazon Web Services (AWS)", "Amazon Web Services");
+    return zh ? `${name}（${r.count}）` : `${name} (${r.count})`;
+  })
   .join(zh ? "、" : ", ");
+
+// The card: the headline share, then the three largest metros and everything else.
+const miniRows = [
+  bay,
+  ny,
+  sea,
+  {
+    group: "rest",
+    count: distinct - bay.count - ny.count - sea.count,
+    share: (distinct - bay.count - ny.count - sea.count) / distinct,
+  },
+];
+const miniLabel = (g: string) => (g === "rest" ? (zh ? "其余" : "Everywhere else") : labels[g][lang]);
 
 const figureHeading = zh
   ? `一个都市区就占了近一半，接下来两个再占 ${pct(nextTwo, 0)}`
@@ -82,134 +95,138 @@ const altText = zh
 ---
 
 {
+  section === "card" && (
+    <div class={`card-body size-${size}`}>
+      <p class="big-number">
+        {number(lang, bay.share * 100, 1)}
+        <small>%</small>
+      </p>
+      <p class="big-label">
+        {zh
+          ? `美国 ${number(lang, distinct)} 个去重推理岗位中，有 ${bay.count} 个在旧金山湾区。`
+          : `${bay.count} of ${number(lang, distinct)} distinct US inference postings are in the San Francisco Bay Area.`}
+      </p>
+      <ul class="mini-bars half" aria-label={zh ? "按都市区的占比" : "Share by metro"}>
+        {miniRows.map((r) => (
+          <li class={r.group === "sf-bay-area" ? "focus" : r.group === "rest" ? "residual" : undefined}>
+            <span>{miniLabel(r.group)}</span>
+            <span class="mb-track">
+              <span class="mb-fill" style={`--w: ${(r.share * 100).toFixed(2)}%`} />
+            </span>
+            <span class="mb-value">{pct(r.share)}</span>
+          </li>
+        ))}
+      </ul>
+      <p class="mb-key">{zh ? "条形按占全部去重岗位的比例画，虚线是一半" : "Bars are shares of all distinct postings; the dashed line is half"}</p>
+    </div>
+  )
+}
+
+{
   section === "body" && (
-    <article class="report">
-      <header class="hero">
-        <div class="wrap hero-grid">
-          <div>
-            <p class="hero-eyebrow">
-              {zh ? "快照" : "Snapshot"} · {zh ? "岗位" : "Jobs"} · {snapshotIso}
-            </p>
-            <h1>{entry.title[lang]}</h1>
-            <p class="hero-dek">{entry.dek[lang]}</p>
-            <ul class="hero-meta">
-              <li>REST API</li>
-              <li>
-                {number(lang, receipt.credits)} {zh ? "Credits 可重跑" : "Credits to rerun"}
+    <div class="wrap body">
+      <figure class="figure" aria-labelledby="fig-title" aria-describedby="fig-alt">
+        <figcaption>
+          <h2 id="fig-title">{figureHeading}</h2>
+          <p class="figure-sub">{figureSub}</p>
+          <p class="visually-hidden" id="fig-alt">
+            {altText}
+          </p>
+        </figcaption>
+
+        <ol class="bars">
+          <li class="scale" aria-hidden="true">
+            <span />
+            <span class="scale-track">
+              <span class="scale-mark">{zh ? "一半" : "Half of all postings"}</span>
+            </span>
+            <span />
+          </li>
+          {metros.rows.map((row) => {
+            const kind =
+              row.group === "sf-bay-area"
+                ? "focus"
+                : ["elsewhere", "no-city"].includes(row.group)
+                  ? "residual"
+                  : "other";
+            return (
+              <li class={kind}>
+                <span class="label">{labels[row.group][lang]}</span>
+                <span class="track" aria-hidden="true">
+                  <span class="fill" style={`--w: ${(row.share * 100).toFixed(2)}%`} />
+                </span>
+                <span class="value">
+                  {number(lang, row.count)}
+                  <span class="share"> · {pct(row.share)}</span>
+                </span>
               </li>
-              <li>
-                <a href="#prompt">{zh ? "查看提示词" : "See the prompt"}</a>
-              </li>
-            </ul>
-          </div>
-          <div class="hero-key">
-            <p class="key-num">
-              {number(lang, bay.share * 100, 1)}
-              <span>%</span>
-            </p>
-            <p class="key-label">
-              {zh
-                ? `美国 ${number(lang, distinct)} 个去重推理岗位中，有 ${bay.count} 个在旧金山湾区。`
-                : `${bay.count} of ${number(lang, distinct)} distinct US inference postings are in the San Francisco Bay Area.`}
-            </p>
-          </div>
+            );
+          })}
+        </ol>
+
+        <div class="figure-foot">
+          <p class="source">
+            {zh ? `来源：Metix AI Platform 岗位数据，${snapshotIso}。` : `Source: Metix AI Platform, jobs, ${snapshotIso}.`}
+          </p>
+          <QueryDetails
+            lang={lang}
+            cost={zh ? `整次运行 ${receipt.credits} Credits` : `${receipt.credits} Credits for the run`}
+            items={[
+              { file: "world-total.json", endpoint: "POST /v1/jobs/query", spec: worldQuery },
+              { file: "us-postings.json", endpoint: "POST /v1/jobs/query", spec: usQuery },
+              { file: "us-postings-detail.json", endpoint: "POST /entity/v1/jobs/detail-by-id", spec: detailQuery },
+            ]}
+          />
         </div>
-      </header>
+      </figure>
 
-      <div class="wrap body">
-        <figure class="figure" aria-labelledby="fig-title" aria-describedby="fig-alt">
-          <figcaption>
-            <h2 id="fig-title">{figureHeading}</h2>
-            <p class="figure-sub">{figureSub}</p>
-            <p class="visually-hidden" id="fig-alt">
-              {altText}
+      <section class="findings" aria-labelledby="findings-title">
+        <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
+        {zh ? (
+          <>
+            <p>
+              美国标题含 inference 或 model serving 的去重岗位共 {number(lang, distinct)} 个，旧金山湾区占 {bay.count} 个，即{" "}
+              {pct(bay.share)}。纽约（{ny.count} 个）和西雅图（{sea.count} 个）合计再占 {pct(nextTwo, 0)}，其余都市区都不到{" "}
+              {pct(largestSmall, 0)}。
             </p>
-          </figcaption>
-
-          <ol class="bars">
-            <li class="scale" aria-hidden="true">
-              <span />
-              <span class="scale-track">
-                <span class="scale-mark">{zh ? "一半" : "Half of all postings"}</span>
-              </span>
-              <span />
-            </li>
-            {metros.rows.map((row) => {
-              const kind =
-                row.group === "sf-bay-area" ? "focus" : ["elsewhere", "no-city"].includes(row.group) ? "residual" : "other";
-              return (
-                <li class={kind}>
-                  <span class="label">{labels[row.group][lang]}</span>
-                  <span class="track" aria-hidden="true">
-                    <span class="fill" style={`--w: ${(row.share * 100).toFixed(2)}%`} />
-                  </span>
-                  <span class="value">
-                    {number(lang, row.count)}
-                    <span class="share"> · {pct(row.share)}</span>
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-
-          <div class="figure-foot">
-            <p class="source">
-              {zh
-                ? `来源：Metix AI Platform 岗位数据，${snapshotIso}。`
-                : `Source: Metix AI Platform, jobs, ${snapshotIso}.`}
+            <p>
+              这个 {pct(bay.share)} 是下限：分母里包含 {noCity.count} 个未注明城市的岗位。只看写了城市的 {number(lang, withCity)}{" "}
+              个岗位，湾区的占比是 {pct(bay.count / withCity)}。
             </p>
-            <QueryDetails
-              lang={lang}
-              cost={zh ? `整次运行 ${receipt.credits} Credits` : `${receipt.credits} Credits for the full run`}
-              items={[
-                { file: "world-total.json", endpoint: "POST /v1/jobs/query", spec: worldQuery },
-                { file: "us-postings.json", endpoint: "POST /v1/jobs/query", spec: usQuery },
-                { file: "us-postings-detail.json", endpoint: "POST /entity/v1/jobs/detail-by-id", spec: detailQuery },
-              ]}
-            />
-          </div>
-        </figure>
-
-        <section class="findings" aria-labelledby="findings-title">
-          <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
-          {zh ? (
-            <>
-              <p>
-                美国标题含 inference 或 model serving 的去重岗位共 {number(lang, distinct)} 个，旧金山湾区占 {bay.count} 个，即{" "}
-                {pct(bay.share)}。纽约（{ny.count} 个）和西雅图（{sea.count} 个）合计再占 {pct(nextTwo, 0)}，其余都市区都不到{" "}
-                {pct(largestSmall, 0)}。
-              </p>
-              <p>
-                共有 {companyCount} 家公司在招这类岗位，前五家占了 {topSum} 个，约三分之一：{companyList}。名单里有一家芯片公司、两家云服务商、一家模型公司和一家银行。
-              </p>
-              <p>
-                放到全球看，Platform 上符合同一标题条件的在招岗位共 {number(lang, world)} 个，其中 {number(lang, usPostings)} 个在美国，约占{" "}
-                {pct(usPostings / world, 0)}。这两个数都是去重前的数字，所以要和读取的 {number(lang, read)} 个美国岗位比，而不是和去重后的{" "}
-                {number(lang, distinct)} 个比。
-              </p>
-            </>
-          ) : (
-            <>
-              <p>
-                The San Francisco Bay Area holds {bay.count} of the {number(lang, distinct)} distinct US postings with inference or
-                model serving in the title, {pct(bay.share)}. New York ({ny.count}) and Seattle ({sea.count}) together hold another{" "}
-                {pct(nextTwo, 0)}. No other metro reaches {pct(largestSmall, 0)}.
-              </p>
-              <p>
-                {companyCount} companies posted these roles, and five of them account for {topSum}, about a third: {companyList}. The
-                list mixes a chip maker, two cloud providers, a model lab, and a bank.
-              </p>
-              <p>
-                Worldwide, the Platform lists {number(lang, world)} open postings that match the same title filter, and{" "}
-                {number(lang, usPostings)} of them, about {pct(usPostings / world, 0)}, are in the United States. Both counts are
-                before reposts are collapsed, so they compare with the {number(lang, read)} US postings read, not with the{" "}
-                {number(lang, distinct)} distinct ones.
-              </p>
-            </>
-          )}
-        </section>
-      </div>
-    </article>
+            <p>
+              共有 {companyCount} 家公司在招这类岗位，前五家占了 {topSum} 个，约三分之一：{companyList}。名单里有一家芯片公司、两家云服务商、一家模型公司和一家银行。
+            </p>
+            <p>
+              放到全球看，Platform 上符合同一标题条件的在招岗位共 {number(lang, world)} 个，其中 {number(lang, usPostings)} 个在美国，约占{" "}
+              {pct(usPostings / world, 0)}。这两个数都是去重前的数字，所以要和读取的 {number(lang, read)} 个美国岗位比，而不是和去重后的{" "}
+              {number(lang, distinct)} 个比。
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              The San Francisco Bay Area holds {bay.count} of the {number(lang, distinct)} distinct US postings with inference or
+              model serving in the title, {pct(bay.share)}. New York ({ny.count}) and Seattle ({sea.count}) together hold another{" "}
+              {pct(nextTwo, 0)}. No other metro reaches {pct(largestSmall, 0)}.
+            </p>
+            <p>
+              That {pct(bay.share)} is a lower bound: the {noCity.count} postings that name no city are in the denominator. Among the{" "}
+              {number(lang, withCity)} postings that do name a city, the Bay Area's share is {pct(bay.count / withCity)}.
+            </p>
+            <p>
+              {companyCount} companies posted these roles, and five of them account for {topSum}, about a third: {companyList}. The
+              list mixes a chip maker, two cloud providers, a model lab, and a bank.
+            </p>
+            <p>
+              Worldwide, the Platform lists {number(lang, world)} open postings that match the same title filter, and{" "}
+              {number(lang, usPostings)} of them, about {pct(usPostings / world, 0)}, are in the United States. Both counts are
+              before reposts are collapsed, so they compare with the {number(lang, read)} US postings read, not with the{" "}
+              {number(lang, distinct)} distinct ones.
+            </p>
+          </>
+        )}
+      </section>
+    </div>
   )
 }
 
@@ -234,14 +251,14 @@ const altText = zh
         </p>
         <h3>怎么做出来的</h3>
         <p>
-          一个 AI agent 通过公开的 REST API 完成了这个案例。写重跑脚本之前，它先花了 {entry.exploration_credits}{" "}
-          Credits 探索：先用计数估计规模，再把所有符合条件的美国岗位读了一遍。这一遍发现 426 个里有 40
-          个是统计岗位，也发现重复发布会抬高城市计数。最终确定的查询放在 queries/ 目录，fetch.py 不需要 agent 就能重跑它们。
+          一个 AI agent 通过公开的 REST API 完成了这个案例。写重跑脚本之前，它先把所有符合条件的美国岗位读了一遍，发现 426
+          个里有 40 个是统计岗位，也发现重复发布会抬高城市计数。最终确定的查询放在 queries/ 目录，fetch.py 不需要 agent 就能重跑它们。
         </p>
         <h3>局限</h3>
         <p>
-          岗位数衡量的是需求，不是在职人数。同一家公司把一个岗位挂在几个都市区，就在每个都市区各算一次。索引里是快照当天仍在招的岗位，发布日期是估算值，所以这是某一天的截面，不是趋势。标题里没有这些词的推理工作（比如
-          "ML performance engineer"）没有被算进来，所以总数是下限。
+          岗位数衡量的是需求，不是在职人数。同一家公司把一个岗位挂在几个都市区，就在每个都市区各算一次。未注明城市的 {noCity.count}{" "}
+          个岗位留在分母里，所以各都市区的占比都是下限。索引里是快照当天仍在招的岗位，发布日期是估算值，所以这是某一天的截面，不是趋势。标题里没有这些词的推理工作（比如
+          "ML performance engineer"）没有被算进来，所以总数也是下限。
         </p>
       </>
     ) : (
@@ -266,109 +283,33 @@ const altText = zh
         </p>
         <h3>How it was made</h3>
         <p>
-          An AI agent built this case through the public REST API. Before writing the replay it spent{" "}
-          {entry.exploration_credits} Credits exploring: counts to size the question, then one read of every matching US
-          posting. That read showed that 40 of 426 were statistics roles and that reposts inflate city counts. The queries it
+          An AI agent built this case through the public REST API. Before writing the replay it read every matching US posting
+          once. That read showed that 40 of 426 were statistics roles and that reposts inflate city counts. The queries it
           settled on are in queries/, and fetch.py replays them without an agent.
         </p>
         <h3>Limits</h3>
         <p>
-          Postings measure demand, not headcount. A company that lists one role in several metros counts once in each. The
-          index holds postings open on the snapshot day, and their posted dates are estimated, so this is one day, not a trend.
-          Inference work under other titles ("ML performance engineer", for example) is not counted, so the totals are a lower
-          bound.
+          Postings measure demand, not headcount. A company that lists one role in several metros counts once in each. The{" "}
+          {noCity.count} postings with no city stay in the denominator, so every metro's share is a lower bound. The index holds
+          postings open on the snapshot day, and their posted dates are estimated, so this is one day, not a trend. Inference
+          work under other titles ("ML performance engineer", for example) is not counted, so the totals are a lower bound too.
         </p>
       </>
     ))
 }
 
 <style>
-  .hero {
-    background: #100d35;
-    color: #fff;
+  .card-body.size-full .big-number {
+    color: var(--f-focus);
   }
 
-  .hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-    gap: 64px;
-    align-items: end;
-    padding-block: clamp(48px, 7vw, 88px) clamp(40px, 6vw, 72px);
+  .card-body.size-full .big-label {
+    font-size: 17px;
+    color: var(--f-ink);
   }
 
-  .hero-eyebrow {
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: #a3e4ff;
-  }
-
-  .hero h1 {
-    margin-top: 18px;
-    font-size: clamp(32px, 4.4vw, 50px);
-    line-height: 1.1;
-    letter-spacing: -0.025em;
-  }
-
-  .hero-dek {
-    margin-top: 20px;
-    max-width: 60ch;
-    font-size: clamp(16px, 1.5vw, 18px);
-    color: rgb(255 255 255 / 0.74);
-  }
-
-  .hero-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 28px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .hero-meta li {
-    padding: 6px 12px;
-    border: 1px solid rgb(255 255 255 / 0.22);
-    border-radius: 999px;
-    font: 500 12px/1.3 var(--mono);
-    color: rgb(255 255 255 / 0.84);
-  }
-
-  .hero-meta a {
-    color: #a3e4ff;
-    text-decoration: none;
-  }
-
-  .hero-meta a:hover {
-    text-decoration: underline;
-  }
-
-  .hero-key {
-    padding-left: 32px;
-    border-left: 1px solid rgb(255 255 255 / 0.18);
-  }
-
-  .key-num {
-    font-family: var(--display);
-    font-weight: 600;
-    font-size: clamp(56px, 8vw, 96px);
-    line-height: 0.95;
-    letter-spacing: -0.04em;
-    color: #a3e4ff;
-  }
-
-  .key-num span {
-    font-size: 0.5em;
-    margin-left: 0.05em;
-    letter-spacing: 0;
-  }
-
-  .key-label {
-    margin-top: 16px;
-    max-width: 30ch;
-    font-size: 16px;
-    color: rgb(255 255 255 / 0.8);
+  .card-body.size-full .mini-bars li {
+    font-size: 14px;
   }
 
   .body {
@@ -380,7 +321,7 @@ const altText = zh
     padding: clamp(20px, 3vw, 36px);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 14px;
+    border-radius: 16px;
   }
 
   .figure h2 {
@@ -525,33 +466,6 @@ const altText = zh
     margin-top: 16px;
     max-width: 72ch;
     color: var(--ink-2);
-  }
-
-  h3 {
-    font-size: 16px;
-    color: var(--ink);
-    margin-top: 28px;
-  }
-
-  h3:first-child {
-    margin-top: 0;
-  }
-
-  h3 + p {
-    margin-top: 8px;
-  }
-
-  @media (max-width: 900px) {
-    .hero-grid {
-      grid-template-columns: 1fr;
-      gap: 36px;
-    }
-    .hero-key {
-      padding-left: 0;
-      padding-top: 28px;
-      border-left: 0;
-      border-top: 1px solid rgb(255 255 255 / 0.18);
-    }
   }
 
   @media (max-width: 640px) {

@@ -1,0 +1,47 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/tools.json",
+  "rows": [
+    {
+      "group": "claude-code+cursor",
+      "count": 12733
+    },
+    {
+      "group": "claude-code+github-copilot",
+      "count": 7015
+    },
+    {
+      "group": "claude-code+codex",
+      "count": 6662
+    },
+    {
+      "group": "claude-code+windsurf",
+      "count": 1947
+    },
+    {
+      "group": "cursor+github-copilot",
+      "count": 5168
+    },
+    {
+      "group": "cursor+codex",
+      "count": 4509
+    },
+    {
+      "group": "cursor+windsurf",
+      "count": 2023
+    },
+    {
+      "group": "github-copilot+codex",
+      "count": 1581
+    },
+    {
+      "group": "github-copilot+windsurf",
+      "count": 683
+    },
+    {
+      "group": "codex+windsurf",
+      "count": 1470
+    }
+  ]
+}

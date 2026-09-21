@@ -1,0 +1,27 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/<stage>.json",
+  "rows": [
+    {
+      "group": "pre-training",
+      "count": 63,
+      "us_count": 35
+    },
+    {
+      "group": "post-training",
+      "count": 175,
+      "us_count": 138
+    },
+    {
+      "group": "fine-tuning",
+      "count": 47,
+      "us_count": 31
+    },
+    {
+      "group": "inference",
+      "count": 516,
+      "us_count": 336
+    }
+  ]
+}

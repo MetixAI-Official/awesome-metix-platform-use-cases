@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import { getCollection, type CollectionEntry } from "astro:content";
 import Base from "@site/layouts/Base.astro";
 import PromptBlock from "@site/components/PromptBlock.astro";
 import Receipt from "@site/components/Receipt.astro";
-import { prompts, receipts, reports } from "@site/cases";
-import { href, ui, type Lang } from "@site/i18n";
+import { byCardOrder, prompts, receipts, reports } from "@site/cases";
+import { href, isoDate, keepNames, number, ui, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
@@ -17,19 +17,62 @@ const t = ui[lang];
 const Report = reports[data.slug];
 const prompt = prompts[lang][data.slug];
 const receipt = receipts[data.slug];
+
+// A card's number in the catalog, so the page and the grid agree.
+const cards = (await getCollection("cases", (c) => c.data.status === "published" && c.data.format === "card")).sort(
+  byCardOrder,
+);
+const cardIndex = cards.findIndex((c) => c.data.slug === data.slug) + 1;
 ---
 
 <Base lang={lang} path={`cases/${data.slug}/`} title={data.title[lang]} description={data.dek[lang]}>
-  <Report lang={lang} section="body" entry={data} />
-  <div class="wrap closing">
-    {prompt && <PromptBlock lang={lang} Content={prompt.Content} />}
-    <section class="block" aria-labelledby="method-title">
-      <h2 id="method-title">{t.methodTitle}</h2>
-      <div class="prose" style="margin-top: 20px">
-        <Report lang={lang} section="method" entry={data} />
-      </div>
-    </section>
-    {receipt && <Receipt lang={lang} slug={data.slug} receipt={receipt} exploration={data.exploration_credits} />}
-    <a class="back-link" href={href(lang)}>← {t.allCases}</a>
+  {
+    data.format === "card" && (
+      <header class={`card-hero field-${data.color ?? "violet"}`}>
+        <div class="wrap card-hero-grid">
+          <div>
+            <p class="ch-meta">
+              <a href={href(lang)} style="color: inherit">
+                {t.casebook}
+              </a>
+              {` · ${t.formats.card} ${String(cardIndex).padStart(2, "0")} · `}
+              {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+              {data.snapshot && ` · ${isoDate(data.snapshot)}`}
+            </p>
+            <h1>{keepNames(data.title[lang])}</h1>
+            <p class="ch-dek">{data.dek[lang]}</p>
+            <ul class="chips">
+              <li>
+                <a href="#prompt">{t.seePrompt}</a>
+              </li>
+              {receipt && (
+                <li>
+                  <a href="#receipt">
+                    {number(lang, receipt.credits)} {t.toRerun}
+                  </a>
+                </li>
+              )}
+            </ul>
+          </div>
+          <div>
+            <Report lang={lang} section="card" size="full" entry={data} />
+          </div>
+        </div>
+      </header>
+    )
+  }
+  <div class="page-body">
+    <Report lang={lang} section="body" entry={data} />
+    <div class="wrap closing">
+      {prompt && <PromptBlock lang={lang} Content={prompt.Content} />}
+      <section class="block" aria-labelledby="method-title">
+        <h2 id="method-title">{t.methodTitle}</h2>
+        <div class="prose" style="margin-top: 20px">
+          <Report lang={lang} section="method" entry={data} />
+        </div>
+      </section>
+      {receipt && <Receipt lang={lang} slug={data.slug} receipt={receipt} exploration={data.exploration_credits} />}
+      <a class="back-link" href={href(lang)}>← {t.allCases}</a>
+    </div>
   </div>
 </Base>

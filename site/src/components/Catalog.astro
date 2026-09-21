@@ -1,8 +1,9 @@
 ---
 import { getCollection } from "astro:content";
+import CardFrame from "@site/components/CardFrame.astro";
 import Base from "@site/layouts/Base.astro";
-import { receipts } from "@site/cases";
-import { href, isoDate, number, ui, type Lang } from "@site/i18n";
+import { byCardOrder, receipts, reports } from "@site/cases";
+import { REPO, href, isoDate, keepNames, number, ui, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
@@ -12,96 +13,147 @@ const { lang } = Astro.props;
 const t = ui[lang];
 const all = await getCollection("cases");
 const byNewest = (a: (typeof all)[number], b: (typeof all)[number]) =>
-  (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0);
+  (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0) || a.data.slug.localeCompare(b.data.slug);
 const published = all.filter((c) => c.data.status === "published").sort(byNewest);
+const reportCases = published.filter((c) => c.data.format === "report");
+const cards = published
+  .filter((c) => c.data.format === "card")
+  .sort(byCardOrder);
 const planned = all.filter((c) => c.data.status === "planned");
+// Columns the make-your-own tile spans so the last card row has no hole, at three and two columns.
+const used = cards.reduce((sum, c) => sum + (c.data.span === 2 ? 2 : 1), 0);
+const fill = (cols: number) => cols - (used % cols);
+
+const totalCredits = published.reduce((sum, c) => sum + (receipts[c.data.slug]?.credits ?? 0), 0);
+const latest = published.map((c) => c.data.snapshot).filter(Boolean).sort((a, b) => b!.getTime() - a!.getTime())[0];
 ---
 
 <Base lang={lang} path="">
-  <div class="wrap catalog">
-    <section class="catalog-intro">
-      <p class="eyebrow">{t.catalogEyebrow}</p>
-      <h1>{t.catalogTitle}</h1>
-      <p class="lede">{t.catalogLede}</p>
-    </section>
+  <section class="wrap masthead" aria-labelledby="mast-title">
+    <p class="eyebrow as-written">Metix AI Platform</p>
+    <h1 class="mast-title" id="mast-title">{t.casebook}</h1>
+    <div class="mast-row">
+      <p class="mast-lede">{t.mastLede}</p>
+      <dl class="mast-stats">
+        <div><dt>{published.length}</dt><dd>{t.mastCases}</dd></div>
+        <div><dt>{number(lang, totalCredits)}</dt><dd>{t.mastCredits}</dd></div>
+        <div><dt>{latest ? isoDate(latest) : ""}</dt><dd>{t.mastRun}</dd></div>
+      </dl>
+    </div>
+  </section>
 
-    <section class="catalog-section" aria-labelledby="published-title">
-      <h2 class="section-label" id="published-title">
-        {t.published} <span class="count">{published.length}</span>
-      </h2>
-      <ol class="rows">
-        {
-          published.map(({ data }) => {
-            const receipt = receipts[data.slug];
-            return (
-              <li>
-                <a class="case-row" href={href(lang, `cases/${data.slug}/`)}>
-                  <p class="meta">
-                    <span class="type">{t.types[data.type]}</span>
-                    {" · "}
-                    {data.datasets.map((d) => t.datasets[d]).join(" · ")}
-                    {data.snapshot && ` · ${isoDate(data.snapshot)}`}
-                  </p>
-                  <div>
-                    <h3>{data.title[lang]}</h3>
-                    <p class="dek">{data.dek[lang]}</p>
-                    <p class="cost">
-                      {receipt && (
-                        <>
-                          <span>{`${number(lang, receipt.calls)} ${t.calls}`}</span>
-                          {" · "}
-                          <span>{`${number(lang, receipt.records)} ${t.records}`}</span>
-                          {" · "}
-                          <span>{`${number(lang, receipt.credits)} ${t.creditsToRerun}`}</span>
-                        </>
-                      )}
-                      <span class="read">{t.read} →</span>
-                    </p>
-                  </div>
-                  {data.highlights && (
-                    <dl class="highlights">
-                      {data.highlights.map((h) => (
-                        <div>
-                          <dt>{h.value}</dt>
-                          <dd>{h.label[lang]}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  )}
-                </a>
-              </li>
-            );
-          })
-        }
-      </ol>
-    </section>
-
-    {
-      planned.length > 0 && (
-        <section class="catalog-section" aria-labelledby="next-title">
-          <h2 class="section-label" id="next-title">
-            {t.comingNext} <span class="count">{planned.length}</span>
+  {
+    reportCases.length > 0 && (
+      <section class="wrap shelf" aria-labelledby="reports-title">
+        <div class="shelf-head">
+          <h2 id="reports-title">
+            {t.reportsLabel}
+            <span class="count">{reportCases.length}</span>
           </h2>
-          <p class="section-note">{t.comingNextNote}</p>
-          <ul class="rows">
-            {planned.map(({ data }) => (
-              <li>
-                <div class="case-row planned">
-                  <p class="meta">
-                    <span class="type">{t.types[data.type]}</span>
+          <p>{t.reportsNote}</p>
+        </div>
+        {reportCases.map(({ data }) => {
+          const receipt = receipts[data.slug];
+          return (
+            <a class="report-band" href={href(lang, `cases/${data.slug}/`)}>
+              <p class="rb-meta">
+                {t.formats.report} · {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+                {data.snapshot && ` · ${isoDate(data.snapshot)}`}
+              </p>
+              <div>
+                <h3>{keepNames(data.title[lang])}</h3>
+                <p class="rb-dek">{data.dek[lang]}</p>
+                {receipt && (
+                  <p class="rb-foot">
+                    <span>{`${number(lang, receipt.calls)} ${t.calls}`}</span>
                     {" · "}
-                    {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+                    <span>{receipt.records > 0 ? `${number(lang, receipt.records)} ${t.records}` : t.countsOnly}</span>
+                    {" · "}
+                    <span>{`${number(lang, receipt.credits)} ${t.toRerun}`}</span>
                   </p>
-                  <div>
-                    <h3>{data.title[lang]}</h3>
-                    <p class="dek">{data.dek[lang]}</p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )
-    }
-  </div>
+                )}
+                <span class="rb-cta">{t.readReport} →</span>
+              </div>
+              {data.highlights && (
+                <dl class="rb-highlights">
+                  {data.highlights.map((h) => (
+                    <div>
+                      <dt>{h.value}</dt>
+                      <dd>{h.label[lang]}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </a>
+          );
+        })}
+      </section>
+    )
+  }
+
+  <section class="wrap shelf" aria-labelledby="cards-title">
+    <div class="shelf-head">
+      <h2 id="cards-title">
+        {t.cardsLabel}
+        <span class="count">{cards.length}</span>
+      </h2>
+      <p>{t.cardsNote}</p>
+    </div>
+    <ul class="card-grid">
+      {
+        cards.map(({ data }, i) => {
+          const Report = reports[data.slug];
+          return (
+            <li class={data.span === 2 ? "span-2" : undefined}>
+              <a class="card-link" href={href(lang, `cases/${data.slug}/`)}>
+                <CardFrame lang={lang} entry={data} receipt={receipts[data.slug]} index={i + 1}>
+                  <Report lang={lang} section="card" size="compact" entry={data} />
+                </CardFrame>
+              </a>
+            </li>
+          );
+        })
+      }
+      <li class="make" style={`--fill-3: ${fill(3)}; --fill-2: ${fill(2)}`}>
+        <a class="card-make" href={`${REPO}/blob/main/cases/_template/PROMPT.md`}>
+          <div>
+            <p class="eyebrow">{t.makeEyebrow}</p>
+            <h3>{t.makeTitle}</h3>
+            <p>{t.makeBody}</p>
+            <ol class="make-steps">
+              {t.makeSteps.map((step) => (
+                <li>{step}</li>
+              ))}
+            </ol>
+          </div>
+          <span class="cm-cta">{t.makeCta} →</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  {
+    planned.length > 0 && (
+      <section class="wrap shelf" aria-labelledby="next-title">
+        <div class="shelf-head">
+          <h2 id="next-title">
+            {t.comingNext}
+            <span class="count">{planned.length}</span>
+          </h2>
+          <p>{t.comingNextNote}</p>
+        </div>
+        <ul class="planned-list">
+          {planned.map(({ data }) => (
+            <li>
+              <p class="meta">
+                {t.formats[data.format]} · {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+              </p>
+              <h3>{keepNames(data.title[lang])}</h3>
+              <p>{data.dek[lang]}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 </Base>

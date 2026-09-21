@@ -1,0 +1,79 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/tools.json",
+  "rows": [
+    {
+      "group": "claude-code",
+      "family": "assistant",
+      "count": 27679,
+      "us_count": 11255
+    },
+    {
+      "group": "cursor",
+      "family": "assistant",
+      "count": 15676,
+      "us_count": 5776
+    },
+    {
+      "group": "github-copilot",
+      "family": "assistant",
+      "count": 12790,
+      "us_count": 4302
+    },
+    {
+      "group": "codex",
+      "family": "assistant",
+      "count": 7878,
+      "us_count": 3135
+    },
+    {
+      "group": "windsurf",
+      "family": "assistant",
+      "count": 2234,
+      "us_count": 429
+    },
+    {
+      "group": "langchain",
+      "family": "framework",
+      "count": 14099,
+      "us_count": 4438
+    },
+    {
+      "group": "langgraph",
+      "family": "framework",
+      "count": 9002,
+      "us_count": 2943
+    },
+    {
+      "group": "mcp",
+      "family": "framework",
+      "count": 5777,
+      "us_count": 2823
+    },
+    {
+      "group": "llamaindex",
+      "family": "framework",
+      "count": 5120,
+      "us_count": 1459
+    },
+    {
+      "group": "crewai",
+      "family": "framework",
+      "count": 3570,
+      "us_count": 1095
+    },
+    {
+      "group": "autogen",
+      "family": "framework",
+      "count": 3464,
+      "us_count": 1000
+    },
+    {
+      "group": "dspy",
+      "family": "framework",
+      "count": 205,
+      "us_count": 70
+    }
+  ]
+}

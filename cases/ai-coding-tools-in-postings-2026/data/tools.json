@@ -1,0 +1,36 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/<tool>.json",
+  "any_tool_count": 36208,
+  "rows": [
+    {
+      "group": "claude-code",
+      "count": 27679,
+      "us_count": 11255
+    },
+    {
+      "group": "cursor",
+      "count": 15676,
+      "us_count": 5776,
+      "word_count": 17681
+    },
+    {
+      "group": "github-copilot",
+      "count": 12790,
+      "us_count": 4302
+    },
+    {
+      "group": "codex",
+      "count": 7878,
+      "us_count": 3135,
+      "word_count": 8290
+    },
+    {
+      "group": "windsurf",
+      "count": 2234,
+      "us_count": 429,
+      "word_count": 2302
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+slug: model-lifecycle-titles-2026
+type: snapshot
+format: card
+color: teal
+span: 1
+status: published
+title:
+  en: Job titles name inference eight times as often as pre-training
+  zh: 招聘标题里，推理出现的次数是预训练的八倍
+dek:
+  en: Open postings whose title names a stage of the model lifecycle, worldwide and in the US, on the Metix AI Platform on September 21, 2026.
+  zh: 2026 年 9 月 21 日 Metix AI Platform 上，标题写明模型生命周期某个阶段的在招岗位，全球与美国。
+datasets: [jobs]
+integration: [rest]
+topics: [ai-hiring, model-lifecycle]
+regions: [global]
+snapshot: 2026-09-21
+published: 2026-09-21
+exploration_credits: 93
+highlights:
+  - value: "8.2×"
+    label:
+      en: as many postings name inference as pre-training
+      zh: 推理岗位数是预训练的倍数
+  - value: "516"
+    label:
+      en: open inference postings worldwide
+      zh: 个全球在招推理岗位
+  - value: "79%"
+    label:
+      en: of post-training postings are in the US
+      zh: 的后训练岗位在美国

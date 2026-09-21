@@ -15,7 +15,7 @@ const ranAt = receipt.ran_at.replace("T", " ").replace(/:\d\dZ$/, " UTC");
 const command = `export METIX_KEY=metix_xxxxxxxxxxxx\npython3 cases/${slug}/fetch.py`;
 ---
 
-<section class="block" aria-labelledby="receipt-title">
+<section class="block" id="receipt" aria-labelledby="receipt-title">
   <h2 id="receipt-title">{t.receiptTitle}</h2>
   <p class="lede">{t.receiptLede}</p>
   <dl class="receipt-grid">
@@ -25,6 +25,7 @@ const command = `export METIX_KEY=metix_xxxxxxxxxxxx\npython3 cases/${slug}/fetc
     <div><dt>{t.recordsLabel}</dt><dd>{number(lang, receipt.records)}</dd></div>
     <div><dt>{t.creditsLabel}</dt><dd>{number(lang, receipt.credits)}</dd></div>
   </dl>
+  <p class="receipt-note">{t.resultsNote(receipt.records)}</p>
   {exploration !== undefined && <p class="receipt-note">{t.exploration(exploration)}</p>}
 
   <div class="rerun" data-copy-root>

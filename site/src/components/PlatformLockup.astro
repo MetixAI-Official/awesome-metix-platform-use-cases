@@ -1,0 +1,19 @@
+---
+import { asset } from "@site/i18n";
+
+/**
+ * The lockup platform.metix.ai uses: the official logo file, a 1px hairline,
+ * then "Platform" as text. The Platform has no logo artwork of its own, and
+ * brand.metix.ai forbids rebuilding the wordmark in another font, so the name
+ * is never typed out beside the mark.
+ *
+ * Decorative on its own: the element around it carries the accessible name
+ * "Metix AI Platform", so a screen reader says the name once.
+ */
+---
+
+<span class="lockup" aria-hidden="true">
+  <img src={asset("brand/metix-logo.svg")} alt="" width="129" height="24" />
+  <span class="lockup-rule"></span>
+  <span class="lockup-platform">Platform</span>
+</span>

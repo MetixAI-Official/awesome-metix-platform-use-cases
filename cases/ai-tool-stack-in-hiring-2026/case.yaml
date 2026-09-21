@@ -1,0 +1,31 @@
+slug: ai-tool-stack-in-hiring-2026
+type: study
+format: report
+color: violet
+status: published
+title:
+  en: Job postings ask for Claude Code five times as often as profiles list it
+  zh: 招聘需求里的 Claude Code，是个人档案里列出它的五倍
+dek:
+  en: Twelve AI coding assistants and agent frameworks, counted in open job postings and in profile skills on the Metix AI Platform on September 21, 2026.
+  zh: 2026 年 9 月 21 日 Metix AI Platform 上，12 个 AI 编程助手和 Agent 框架在在招岗位与个人技能中的出现次数。
+datasets: [jobs, people]
+integration: [rest]
+topics: [ai-tools, ai-hiring, skills]
+regions: [global]
+snapshot: 2026-09-21
+published: 2026-09-21
+exploration_credits: 236
+highlights:
+  - value: "5.1×"
+    label:
+      en: Claude Code postings per profile that lists it
+      zh: 每个列出 Claude Code 的档案对应的岗位数
+  - value: "36,208"
+    label:
+      en: postings name an AI coding assistant
+      zh: 个岗位提到 AI 编程助手
+  - value: "46"
+    label:
+      en: LangChain postings per 100 profiles, the other way round
+      zh: LangChain 每 100 个档案对应的岗位数，方向相反

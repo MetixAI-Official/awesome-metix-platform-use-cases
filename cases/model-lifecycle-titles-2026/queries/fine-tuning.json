@@ -1,0 +1,99 @@
+{
+  "where": {
+    "all": [
+      {
+        "any": [
+          {
+            "field": "title",
+            "match": "fine-tuning"
+          },
+          {
+            "field": "title",
+            "match": "finetuning"
+          }
+        ]
+      },
+      {
+        "any": [
+          {
+            "field": "title",
+            "match": "research"
+          },
+          {
+            "field": "title",
+            "match": "engineer"
+          },
+          {
+            "field": "title",
+            "match": "scientist"
+          },
+          {
+            "field": "title",
+            "match": "llm"
+          },
+          {
+            "field": "title",
+            "match": "model"
+          },
+          {
+            "field": "title",
+            "match": "ai"
+          },
+          {
+            "field": "title",
+            "match": "ml"
+          },
+          {
+            "field": "title",
+            "match": "technical"
+          }
+        ]
+      },
+      {
+        "not": [
+          {
+            "field": "title",
+            "match": "sales"
+          },
+          {
+            "field": "title",
+            "match": "customer"
+          },
+          {
+            "field": "title",
+            "match": "teacher"
+          },
+          {
+            "field": "title",
+            "match": "trainer"
+          },
+          {
+            "field": "title",
+            "match": "doctoral"
+          },
+          {
+            "field": "title",
+            "match": "pharmacy"
+          },
+          {
+            "field": "title",
+            "match": "licensing"
+          },
+          {
+            "field": "title",
+            "match": "licensed"
+          },
+          {
+            "field": "title",
+            "match": "causal"
+          },
+          {
+            "field": "title",
+            "match": "statistical"
+          }
+        ]
+      }
+    ]
+  },
+  "size": 1
+}

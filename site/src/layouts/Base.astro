@@ -3,6 +3,7 @@ import "@fontsource-variable/sora";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 import "@site/styles/shell.css";
+import PlatformLockup from "@site/components/PlatformLockup.astro";
 import { REPO, asset, href, ui, type Lang } from "@site/i18n";
 
 interface Props {
@@ -15,8 +16,7 @@ interface Props {
 
 const { lang, path, title, description } = Astro.props;
 const t = ui[lang];
-const pageTitle = title ? `${title} · ${t.siteName}` : t.siteName;
-const isCatalog = path === "";
+const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.casebook}, ${t.siteName}`;
 ---
 
 <!doctype html>
@@ -36,13 +36,10 @@ const isCatalog = path === "";
   <body>
     <header class="site-header">
       <div class="wrap bar">
-        <a class="brand" href={href(lang)}>
-          <img src={asset("brand/metix-logo.svg")} alt="Metix AI" width="129" height="24" />
-          <span class="brand-sub">Platform</span>
+        <a class="brand" href={href(lang)} aria-label={`Metix AI Platform ${t.casebook}`}>
+          <PlatformLockup />
+          <span class="brand-name" aria-hidden="true">{t.casebook}</span>
         </a>
-        <nav class="primary-nav" aria-label={t.navCases}>
-          <a href={href(lang)} aria-current={isCatalog ? "page" : undefined}>{t.navCases}</a>
-        </nav>
         <div class="header-actions">
           <div class="lang-switch" role="group" aria-label={t.langLabel}>
             <a href={href("en", path)} hreflang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>EN</a>
@@ -62,7 +59,7 @@ const isCatalog = path === "";
 
     <footer class="site-footer">
       <div class="wrap">
-        <img src={asset("brand/metix-logo.svg")} alt="Metix AI" width="129" height="24" />
+        <p class="footer-brand" role="img" aria-label="Metix AI Platform"><PlatformLockup /></p>
         <nav class="links" aria-label="Metix AI Platform">
           <a href="https://platform.metix.ai">Metix AI Platform</a>
           <a href="https://platform.metix.ai/docs">{t.footerDocs}</a>

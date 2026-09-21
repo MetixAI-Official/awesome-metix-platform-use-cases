@@ -29,6 +29,8 @@ An agent does the work: it reads the live contract and docs, writes the queries,
 
 No single type should make up more than half of the published cases. Each study should also produce at least one smaller case from the same queries.
 
+Types say what a case is; formats say how it is shown. A **card** is one question, one number, and one small chart, shown in the catalog as a field of color with a receipt stub; snapshots and most recipes are cards. A **report** is a long read with many figures, shown in the catalog as a full-width band; studies are reports. `docs/style.md` describes both.
+
 ## The bootstrap prompt
 
 Every case ships `PROMPT.md` (and `PROMPT.zh.md`): one prompt, precise enough that an agent with Platform access reproduces the case from it. It is the case's source code in the sense that matters to a reader. It follows the same order every time, because that order is also what an agent should ask a user who arrives with a vague question:
@@ -60,7 +62,9 @@ Below the prompt, an "Adapt it" table names the parameters a reader is most like
 ├── scripts/
 │   ├── check_public.py         leak and small-cell check
 │   └── test_check_public.py
-├── site/                       the Astro site that renders the catalog and every report
+├── tools/
+│   └── metix_client.py         the Platform client every fetch.py uses
+├── site/                       the Astro site (Casebook) that renders the catalog and every case
 └── .github/workflows/
     ├── public-check.yml        runs the check on every push and pull request
     └── pages.yml               builds the site and deploys it to GitHub Pages from main
@@ -81,7 +85,7 @@ cases/<slug>/
 │   ├── receipt.json      what the last replay cost
 │   └── raw/              records read during a run; ignored by git
 └── report/
-    └── Report.astro      the report body, in both languages, with its own styles
+    └── Report.astro      the case's own page content, in both languages, with its own styles
 ```
 
 The slug is lowercase words joined by hyphens. Studies and snapshots end with the snapshot year because their numbers describe a point in time; recipes and agent sessions do not.
@@ -92,6 +96,9 @@ The slug is lowercase words joined by hyphens. Studies and snapshots end with th
 | --- | --- | --- |
 | `slug` | string | Matches the folder name |
 | `type` | `study`, `snapshot`, `recipe`, `agent` | |
+| `format` | `card`, `report` | How the catalog and the page show it |
+| `color` | `violet`, `blue`, `navy`, `teal`, `sky`, `periwinkle`, `signal` | A card's field color |
+| `span` | `1`, `2` | Catalog columns a card takes; wide charts take two |
 | `status` | `planned`, `draft`, `published` | Planned cases appear in the catalog as "Coming next", without a link. Drafts do not build. All three are public once pushed |
 | `title` | `en`, `zh` | The finding, in sentence case, at most 90 characters. A working title until the data exists |
 | `dek` | `en`, `zh` | One sentence: scope, population, and period |
@@ -101,7 +108,8 @@ The slug is lowercase words joined by hyphens. Studies and snapshots end with th
 | `regions` | list of ISO country codes, or `global` | |
 | `snapshot` | date | The day the replay ran |
 | `published` | date | Set when `status` becomes `published` |
-| `exploration_credits` | number | Credits the agent spent exploring before the replay, so the full cost of making the case is on record |
+| `exploration_credits` | number | Credits the agent spent exploring before the replay, runs it replaced included, so the full cost of making the case is on record |
+| `highlights` | up to three `value` and `label` pairs | Figures shown on the catalog, copied from the case's aggregates |
 
 The site validates this file at build time and fails on a missing or unknown field.
 
@@ -159,7 +167,7 @@ agent explores the Platform  ─> queries/*.json, <config>.json, PROMPT.md
 
 `fetch.py` uses the Python standard library only, reads `METIX_KEY` from the environment or the repository's `.env`, never prints it, and stops before reading records if the run would pass its Credit ceiling. Every Search response carries a `total`, exact below a threshold and a banded string above it (the threshold is on `GET /contract`), so code built on totals must handle the banded form.
 
-A shared client for `fetch.py` scripts will move to `tools/` once a second case needs the same code.
+Every `fetch.py` uses `tools/metix_client.py`: it loads the key, counts with `size: 1`, pages a search after counting it first, reads records in batches of 100, applies the small-cell rule, and writes the receipt. It stops before any call whose worst case would take the run past its Credit ceiling, and it counts only search and detail calls, not the free balance reads.
 
 ## The site
 
@@ -167,7 +175,8 @@ Astro, built as static HTML and deployed to GitHub Pages from `main`. Astro is w
 
 - `site/src/content.config.ts` loads every `cases/*/case.yaml` with the `glob()` loader and a schema.
 - Routes: `/` and `/zh/` for the catalog; `/cases/<slug>/` and `/zh/cases/<slug>/` for reports. English is the default locale and has no prefix.
-- Each report page renders the shell and the case's own `report/Report.astro`, passing the language. Shell components (header, footer, prompt block, query disclosure, receipt) are imported from `@site/components/`.
+- Each case's `report/Report.astro` takes `lang`, `entry`, and a `section`: `card` (the card's number and mini chart, at `size` compact or full), `body` (the figures and findings; a report also renders its own hero here), and `method`. The shell calls each section where it belongs, so every case ends with the same three blocks in the same order. Shared components (`Figure`, `BarList`, the query disclosure, the prompt block, the receipt) come from `@site/components/`.
+- The catalog order of cards is `CARD_ORDER` in `site/src/cases.ts`; wide cards lead their rows so the grid stays full.
 - The default address is `https://metixai-official.github.io/awesome-metix-platform-use-cases/`, so the Astro `base` is the repository name. A custom domain later changes `base` and adds a `CNAME`.
 
 Catalog filters and a method page arrive when the catalog is large enough to need them.

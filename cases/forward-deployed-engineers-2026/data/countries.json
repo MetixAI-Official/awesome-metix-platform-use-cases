@@ -1,0 +1,73 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-21",
+  "query": "queries/forward-deployed.json",
+  "world_count": 5868,
+  "rows": [
+    {
+      "group": "United States",
+      "count": 3801,
+      "share": 0.6478
+    },
+    {
+      "group": "India",
+      "count": 309,
+      "share": 0.0527
+    },
+    {
+      "group": "United Kingdom",
+      "count": 274,
+      "share": 0.0467
+    },
+    {
+      "group": "Germany",
+      "count": 241,
+      "share": 0.0411
+    },
+    {
+      "group": "Canada",
+      "count": 116,
+      "share": 0.0198
+    },
+    {
+      "group": "Japan",
+      "count": 86,
+      "share": 0.0147
+    },
+    {
+      "group": "Singapore",
+      "count": 82,
+      "share": 0.014
+    },
+    {
+      "group": "France",
+      "count": 80,
+      "share": 0.0136
+    },
+    {
+      "group": "Australia",
+      "count": 71,
+      "share": 0.0121
+    },
+    {
+      "group": "Spain",
+      "count": 57,
+      "share": 0.0097
+    },
+    {
+      "group": "Netherlands",
+      "count": 39,
+      "share": 0.0066
+    },
+    {
+      "group": "Israel",
+      "count": 19,
+      "share": 0.0032
+    },
+    {
+      "group": "rest-of-world",
+      "count": 693,
+      "share": 0.1181
+    }
+  ]
+}

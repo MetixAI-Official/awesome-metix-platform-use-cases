@@ -1,0 +1,214 @@
+---
+/*
+ * Design
+ * Field: violet #5B54EF with white text; Claude Code in teal #0DEFC8, the others in #D9D7FF.
+ * Detail chart on white: teal ink #07545E for the leader; grey for the rest.
+ * Signature: strict counts drawn solid or hatched, with an outline behind showing the
+ *   looser plain-word count, so the reader sees how much the definition moves each tool.
+ */
+import BarList from "@site/components/charts/BarList.astro";
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, isoDate, longDate, number, type Lang } from "@site/i18n";
+import receipt from "../data/receipt.json";
+import tools from "../data/tools.json";
+import anyTool from "../queries/any-tool.json";
+import claude from "../queries/claude-code.json";
+import codex from "../queries/codex.json";
+import copilot from "../queries/github-copilot.json";
+import cursor from "../queries/cursor.json";
+import windsurf from "../queries/windsurf.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: { slug: string; snapshot?: Date; exploration_credits?: number };
+}
+
+const { lang, section, size = "compact", entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(tools.snapshot);
+
+const names: Record<string, string> = {
+  "claude-code": "Claude Code",
+  cursor: "Cursor",
+  "github-copilot": "GitHub Copilot",
+  codex: "Codex",
+  windsurf: "Windsurf",
+};
+const rows = tools.rows as { group: string; count: number; us_count: number; word_count?: number }[];
+const max = Math.max(...rows.map((r) => r.word_count ?? r.count));
+const lead = rows[0];
+const pct = (x: number) => `${number(lang, x * 100, 0)}%`;
+const any = tools.any_tool_count;
+const barRows = rows.map((r) => ({
+  label: names[r.group],
+  note:
+    r.word_count !== undefined
+      ? zh
+        ? `下限：需同时提到另一个工具；只看这个词 ${number(lang, r.word_count)}`
+        : `lower bound: another tool named too; the word alone ${number(lang, r.word_count)}`
+      : undefined,
+  display: number(lang, r.count),
+  width: r.count / max,
+  ghost: r.word_count !== undefined ? r.word_count / max : undefined,
+  kind: r.group === lead.group ? ("focus" as const) : r.word_count !== undefined ? ("lower" as const) : ("other" as const),
+}));
+const byUs = [...rows].sort((a, b) => b.us_count / b.count - a.us_count / a.count);
+const lowestUs = byUs[byUs.length - 1];
+---
+
+{
+  section === "card" && (
+    <div class={`card-body size-${size}`}>
+      <p class="big-number">{number(lang, lead.count)}</p>
+      <p class="big-label">
+        {zh
+          ? `个在招岗位的职位描述里提到 Claude Code，共 ${number(lang, any)} 个岗位至少提到五个工具之一。`
+          : `open postings name Claude Code in the description. ${number(lang, any)} name at least one of the five tools.`}
+      </p>
+      <ul class="mini-bars" aria-label={zh ? "各工具被提到的岗位数" : "Postings naming each tool"}>
+        {rows.map((r) => (
+          <li class={r.group === lead.group ? "focus" : r.word_count !== undefined ? "lower" : undefined}>
+            <span>{names[r.group]}</span>
+            <span class="mb-track">
+              <span class="mb-fill" style={`--w: ${((r.count / max) * 100).toFixed(2)}%`} />
+            </span>
+            <span class="mb-value">{number(lang, r.count)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+{
+  section === "body" && (
+    <div class="wrap report-body">
+      <Figure
+        id="tools"
+        lang={lang}
+        heading={
+          zh
+            ? `Claude Code 被提到的次数领先，Cursor 和 GitHub Copilot 紧随其后`
+            : `Claude Code leads. Cursor and GitHub Copilot follow.`
+        }
+        sub={
+          zh
+            ? "职位描述里提到各工具的全球在招岗位数。斜线条是下限，背后的轮廓是只看这个词时的数量"
+            : "Open postings worldwide whose description names each tool. Hatched bars are lower bounds; the outline behind shows the count for the word alone"
+        }
+        alt={rows.map((r) => `${names[r.group]} ${r.count}`).join(", ")}
+        source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
+        queries={[
+          { file: "claude-code.json", endpoint: "POST /v1/jobs/query", spec: claude },
+          { file: "cursor.json", endpoint: "POST /v1/jobs/query", spec: cursor },
+          { file: "github-copilot.json", endpoint: "POST /v1/jobs/query", spec: copilot },
+          { file: "codex.json", endpoint: "POST /v1/jobs/query", spec: codex },
+          { file: "windsurf.json", endpoint: "POST /v1/jobs/query", spec: windsurf },
+          { file: "any-tool.json", endpoint: "POST /v1/jobs/query", spec: anyTool },
+        ]}
+        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
+      >
+        <BarList rows={barRows} label={zh ? "各工具被提到的岗位数" : "Postings naming each tool"} />
+      </Figure>
+
+      <section class="findings" aria-labelledby="findings-title">
+        <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
+        {zh ? (
+          <>
+            <p>
+              全球有 {number(lang, any)} 个在招岗位的职位描述至少提到五个 AI 编程工具之一，其中 {number(lang, lead.count)} 个提到 Claude
+              Code，占 {pct(lead.count / any)}。
+            </p>
+            <p>
+              各工具在美国的占比不同：Claude Code 是 {pct(lead.us_count / lead.count)}，{names[lowestUs.group]} 只有{" "}
+              {pct(lowestUs.us_count / lowestUs.count)}。美国以外的招聘方同样在点名这些工具。
+            </p>
+            <p>
+              Cursor、Codex 和 Windsurf 这几个词本身有别的意思（数据库游标、食品法典、帆板运动），抽检里只有九成多是指编程工具，所以只在同一段描述里还提到另一个 AI 编程工具时才计入。它们的数字是下限，图里的轮廓是只看这个词时的数量。
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Worldwide, {number(lang, any)} open postings name at least one of five AI coding tools in the job description, and{" "}
+              {number(lang, lead.count)} of them name Claude Code, {pct(lead.count / any)}.
+            </p>
+            <p>
+              The tools differ in where they are asked for: {pct(lead.us_count / lead.count)} of the Claude Code postings are in
+              the US, against {pct(lowestUs.us_count / lowestUs.count)} for {names[lowestUs.group]}. Employers outside the US name
+              these tools too.
+            </p>
+            <p>
+              Cursor, Codex, and Windsurf are also ordinary words (a database cursor, a food standard, a water sport), and in the
+              audit only about nine in ten matches meant the tool. So they count only when the same description names another AI
+              coding tool. Their numbers are lower bounds, and the outline in the chart shows the count for the word alone.
+            </p>
+          </>
+        )}
+      </section>
+    </div>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>人群</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上职位描述提到某个 AI 编程工具的在招岗位。Claude Code 和 GitHub Copilot
+          按名称匹配。Cursor、Codex、Windsurf 需要同一段描述里还提到另一个 AI 编程工具。
+        </p>
+        <h3>抽检</h3>
+        <p>
+          agent 为每个工具读了 40 到 60 条描述，检查名称附近是否是 AI 编程的上下文。Claude Code 和 GitHub Copilot 都是 40 条里 40
+          条。只看单词时，Cursor 60 条里 55 条，Codex 60 条里 55 条，Windsurf 60 条里 56 条，超过 5% 的误差线，所以收紧了条件；收紧后
+          Cursor 60 条里 60 条。
+        </p>
+        <h3>计数</h3>
+        <p>
+          每个工具算全球和美国两次，另外三个工具再算一次只看单词的数量，最后算一次"至少提到一个"。全部是计数，每次 1 Credit，不读取岗位。重复发布没有合并。条件在{" "}
+          <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>。
+        </p>
+        <h3>局限</h3>
+        <p>
+          提到一个工具不等于要求会用它，有的描述只是介绍团队在用什么。匹配要求词都出现，不要求连在一起，抽检里没有发现因此误判的。这是快照当天的截面。
+        </p>
+      </>
+    ) : (
+      <>
+        <h3>Population</h3>
+        <p>
+          Open postings on the Metix AI Platform on {longDate(lang, snapshot)} whose description names an AI coding tool. Claude
+          Code and GitHub Copilot match by name. Cursor, Codex, and Windsurf count only when the same description also names
+          another AI coding tool.
+        </p>
+        <h3>Audit</h3>
+        <p>
+          The agent read 40 to 60 descriptions per tool and checked the words around each name for AI-coding context. Claude Code
+          and GitHub Copilot held in 40 of 40. The plain words held in 55 of 60 for Cursor, 55 of 60 for Codex, and 56 of 60 for
+          Windsurf, past the 5% error line, so their condition was tightened; tightened, Cursor held in 60 of 60.
+        </p>
+        <h3>Counting</h3>
+        <p>
+          Each tool is counted worldwide and in the US, the three ambiguous words once more on their own, and once for postings
+          that name any of the five. All counts, one Credit each, and no posting is read. Reposts are not collapsed. The
+          conditions are in <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          Naming a tool is not the same as requiring it; some descriptions only say what the team uses. A match needs every word
+          but not side by side, and the audit found no case where that misled. This is one day, not a trend.
+        </p>
+      </>
+    ))
+}
+
+<style>
+  .card-body.size-full .big-label {
+    font-size: 17px;
+    color: var(--f-ink);
+  }
+</style>

@@ -1,0 +1,215 @@
+---
+/*
+ * Design
+ * Field: teal #0DEFC8 with ink text; the inference bar in ink, the other stages in #5E5C78.
+ * Detail chart on white: teal ink #07545E for inference, grey for the other stages.
+ * Signature: the ratio as the number, 8.2×, because the finding is the gap, not the count.
+ */
+import BarList from "@site/components/charts/BarList.astro";
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, isoDate, longDate, number, type Lang } from "@site/i18n";
+import receipt from "../data/receipt.json";
+import stages from "../data/stages.json";
+import fine from "../queries/fine-tuning.json";
+import inference from "../queries/inference.json";
+import post from "../queries/post-training.json";
+import pre from "../queries/pre-training.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: { slug: string; snapshot?: Date; exploration_credits?: number };
+}
+
+const { lang, section, size = "compact", entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(stages.snapshot);
+
+const labels: Record<string, Record<Lang, string>> = {
+  "pre-training": { en: "Pre-training", zh: "预训练" },
+  "post-training": { en: "Post-training", zh: "后训练" },
+  "fine-tuning": { en: "Fine-tuning", zh: "微调" },
+  inference: { en: "Inference and serving", zh: "推理与部署" },
+};
+const row = (g: string) => stages.rows.find((r) => r.group === g)!;
+const inf = row("inference");
+const preT = row("pre-training");
+const postT = row("post-training");
+const fineT = row("fine-tuning");
+const ratio = inf.count / preT.count;
+const max = Math.max(...stages.rows.map((r) => r.count));
+const pct = (x: number) => `${number(lang, x * 100, 0)}%`;
+const order = [...stages.rows].sort((a, b) => b.count - a.count);
+const mostUs = [...stages.rows].sort((a, b) => b.us_count / b.count - a.us_count / a.count)[0];
+// Outline: the worldwide count. Fill: the part of it in the US, so US concentration is drawn, not footnoted.
+const rows = order.map((r) => ({
+  label: labels[r.group][lang],
+  display: zh ? `${number(lang, r.count)} · 美国 ${pct(r.us_count / r.count)}` : `${number(lang, r.count)} · ${pct(r.us_count / r.count)} US`,
+  width: r.us_count / max,
+  ghost: r.count / max,
+  kind: r.group === mostUs.group ? ("focus" as const) : ("other" as const),
+}));
+---
+
+{
+  section === "card" && (
+    <div class={`card-body size-${size}`}>
+      <p class="big-number">
+        {number(lang, ratio, 1)}
+        <small>×</small>
+      </p>
+      <p class="big-label">
+        {zh
+          ? `标题写推理的在招岗位是写预训练的 ${number(lang, ratio, 1)} 倍（${inf.count} 比 ${preT.count}）。`
+          : `as many open postings name inference in the title as pre-training (${inf.count} to ${preT.count}).`}
+      </p>
+      <ul class="mini-bars" aria-label={zh ? "各阶段岗位数" : "Postings by stage"}>
+        {order.map((r) => (
+          <li class={r.group === "inference" ? "focus" : undefined}>
+            <span>{labels[r.group][lang]}</span>
+            <span class="mb-track">
+              <span class="mb-fill" style={`--w: ${((r.count / max) * 100).toFixed(2)}%`} />
+            </span>
+            <span class="mb-value">{number(lang, r.count)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+{
+  section === "body" && (
+    <div class="wrap report-body">
+      <Figure
+        id="stages"
+        lang={lang}
+        heading={
+          zh
+            ? `推理岗位多过其他所有阶段，${labels[mostUs.group].zh}最集中在美国`
+            : `Inference outnumbers every other stage. ${labels[mostUs.group].en} is the most concentrated in the US.`
+        }
+        sub={
+          zh
+            ? "标题写明模型生命周期某个阶段的在招岗位：轮廓是全球总数，实心部分是其中在美国的岗位"
+            : "Open postings whose title names a model-lifecycle stage: the outline is the worldwide count, the fill is the part in the US"
+        }
+        alt={
+          zh
+            ? `推理 ${inf.count}，后训练 ${postT.count}，预训练 ${preT.count}，微调 ${fineT.count}。`
+            : `Inference ${inf.count}, post-training ${postT.count}, pre-training ${preT.count}, fine-tuning ${fineT.count}.`
+        }
+        source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
+        queries={[
+          { file: "pre-training.json", endpoint: "POST /v1/jobs/query", spec: pre },
+          { file: "post-training.json", endpoint: "POST /v1/jobs/query", spec: post },
+          { file: "fine-tuning.json", endpoint: "POST /v1/jobs/query", spec: fine },
+          { file: "inference.json", endpoint: "POST /v1/jobs/query", spec: inference },
+        ]}
+        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
+      >
+        <BarList rows={rows} label={zh ? "各阶段岗位数" : "Postings by stage"} />
+        <p class="chart-legend" aria-hidden="true">
+          <span class="fill">{zh ? "在美国" : "In the US"}</span>
+          <span class="outline">{zh ? "全球" : "Worldwide"}</span>
+        </p>
+      </Figure>
+
+      <section class="findings" aria-labelledby="findings-title">
+        <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
+        {zh ? (
+          <>
+            <p>
+              全球标题写明推理或模型部署的在招岗位有 {inf.count} 个，是预训练（{preT.count} 个）的 {number(lang, ratio, 1)} 倍。后训练有{" "}
+              {postT.count} 个，微调 {fineT.count} 个。按标题看，招人的重心在把模型跑起来，而不是把模型训出来。
+            </p>
+            <p>
+              各阶段在美国的比例不同。{labels[mostUs.group].zh}最集中，{mostUs.us_count} 个在美国，占{" "}
+              {pct(mostUs.us_count / mostUs.count)}；预训练只有 {pct(preT.us_count / preT.count)}。
+            </p>
+            <p>
+              这些数字只看标题。前沿实验室的很多人挂的是 "Member of Technical Staff" 这类通用头衔，不会被算进来，所以每一项都是下限，比较的是招聘标题怎么写，不是团队规模。
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Worldwide, {inf.count} open postings name inference or model serving in the title, {number(lang, ratio, 1)} times the{" "}
+              {preT.count} that name pre-training. Post-training has {postT.count} and fine-tuning {fineT.count}. By job title, the
+              hiring is about running models, not training them.
+            </p>
+            <p>
+              The stages differ in where they hire. {labels[mostUs.group].en} is the most concentrated in the US, with{" "}
+              {mostUs.us_count} postings there, {pct(mostUs.us_count / mostUs.count)}; pre-training has{" "}
+              {pct(preT.us_count / preT.count)}.
+            </p>
+            <p>
+              These counts read titles only. Many people at frontier labs hold generic titles such as "Member of Technical Staff",
+              which none of these filters match, so every number is a lower bound. The comparison is about how postings are titled,
+              not about the size of teams.
+            </p>
+          </>
+        )}
+      </section>
+    </div>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>人群</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上的在招岗位。每个阶段是一组标题关键词：预训练（pretraining、pre-training）、后训练（post-training、posttraining）、微调（fine-tuning、finetuning）、推理（inference、model
+          serving、llm serving）。每一组还要求标题里有一个机器学习相关的词（research、engineer、scientist、llm、model、ai、ml、technical），并排除 sales、customer、teacher、trainer、doctoral、pharmacy、licensing、licensed、causal、statistical。
+        </p>
+        <h3>为什么要加这些条件</h3>
+        <p>
+          关键词匹配要求每个词都出现，但不要求连在一起，所以 "Pre-licensed Training Provided"（房产销售）和 "Pharmacy Technician in
+          Training" 都会命中预训练。agent 把预训练的 72 个标题全部读了一遍，把这类岗位排除掉，再重读确认。后训练如果加上 "RLHF"，会被一家人力公司反复发布的数据标注岗位淹没，所以不用这个词。四个阶段用同一套条件，比较才公平。
+        </p>
+        <h3>计数</h3>
+        <p>
+          每个阶段做两次计数（全球、美国），每次 1 Credit，不读取任何岗位记录。同一岗位的重复发布没有合并。条件定义在{" "}
+          <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>。
+        </p>
+        <h3>局限</h3>
+        <p>只看标题，所以都是下限。岗位数衡量需求，不是在职人数。这是快照当天的截面。</p>
+      </>
+    ) : (
+      <>
+        <h3>Population</h3>
+        <p>
+          Open postings on the Metix AI Platform on {longDate(lang, snapshot)}. Each stage is a set of title words: pre-training
+          (pretraining, pre-training), post-training (post-training, posttraining), fine-tuning (fine-tuning, finetuning), and
+          inference (inference, model serving, llm serving). Every stage also needs a machine-learning word in the title
+          (research, engineer, scientist, llm, model, ai, ml, technical) and excludes sales, customer, teacher, trainer,
+          doctoral, pharmacy, licensing, licensed, causal, and statistical.
+        </p>
+        <h3>Why the extra conditions</h3>
+        <p>
+          A match needs every word to appear but not next to each other, so "Pre-licensed Training Provided" (real estate) and
+          "Pharmacy Technician in Training" both matched pre-training. The agent read all 72 pre-training titles, excluded that
+          kind of posting, and read them again to check. Adding "RLHF" to post-training would have let one staffing firm's
+          repeated data-labelling postings dominate the stage, so that word is not used. All four stages share the same
+          conditions so the comparison is fair.
+        </p>
+        <h3>Counting</h3>
+        <p>
+          Two counts per stage (worldwide and US), one Credit each, and no posting is read. Reposts of the same role are not
+          collapsed. The conditions are in <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>.
+        </p>
+        <h3>Limits</h3>
+        <p>Titles only, so every count is a lower bound. Postings measure demand, not headcount. This is one day, not a trend.</p>
+      </>
+    ))
+}
+
+<style>
+  .card-body.size-full .big-label {
+    font-size: 17px;
+    color: var(--f-ink);
+  }
+</style>

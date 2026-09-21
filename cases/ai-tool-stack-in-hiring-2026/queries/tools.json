@@ -1,0 +1,305 @@
+{
+  "note": "Each tool's condition on job postings (description) and on profiles (skills). Cursor, Codex, and Windsurf count only when another AI coding tool is named alongside, because the plain words have other meanings.",
+  "tools": [
+    {
+      "id": "claude-code",
+      "family": "assistant",
+      "postings": {
+        "field": "description",
+        "match": "claude code"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "claude code"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "cursor",
+      "family": "assistant",
+      "postings": {
+        "all": [
+          {
+            "field": "description",
+            "match": "cursor"
+          },
+          {
+            "any": [
+              {
+                "field": "description",
+                "match": "claude"
+              },
+              {
+                "field": "description",
+                "match": "copilot"
+              },
+              {
+                "field": "description",
+                "match": "windsurf"
+              },
+              {
+                "field": "description",
+                "match": "codex"
+              }
+            ]
+          }
+        ]
+      },
+      "profiles": {
+        "all": [
+          {
+            "field": "skills",
+            "match": "cursor"
+          },
+          {
+            "any": [
+              {
+                "field": "skills",
+                "match": "claude"
+              },
+              {
+                "field": "skills",
+                "match": "copilot"
+              },
+              {
+                "field": "skills",
+                "match": "windsurf"
+              },
+              {
+                "field": "skills",
+                "match": "codex"
+              }
+            ]
+          }
+        ]
+      },
+      "unambiguous": false
+    },
+    {
+      "id": "github-copilot",
+      "family": "assistant",
+      "postings": {
+        "field": "description",
+        "match": "github copilot"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "github copilot"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "codex",
+      "family": "assistant",
+      "postings": {
+        "all": [
+          {
+            "field": "description",
+            "match": "codex"
+          },
+          {
+            "any": [
+              {
+                "field": "description",
+                "match": "openai"
+              },
+              {
+                "field": "description",
+                "match": "claude"
+              },
+              {
+                "field": "description",
+                "match": "copilot"
+              },
+              {
+                "field": "description",
+                "match": "cursor"
+              }
+            ]
+          }
+        ]
+      },
+      "profiles": {
+        "all": [
+          {
+            "field": "skills",
+            "match": "codex"
+          },
+          {
+            "any": [
+              {
+                "field": "skills",
+                "match": "openai"
+              },
+              {
+                "field": "skills",
+                "match": "claude"
+              },
+              {
+                "field": "skills",
+                "match": "copilot"
+              },
+              {
+                "field": "skills",
+                "match": "cursor"
+              }
+            ]
+          }
+        ]
+      },
+      "unambiguous": false
+    },
+    {
+      "id": "windsurf",
+      "family": "assistant",
+      "postings": {
+        "all": [
+          {
+            "field": "description",
+            "match": "windsurf"
+          },
+          {
+            "any": [
+              {
+                "field": "description",
+                "match": "cursor"
+              },
+              {
+                "field": "description",
+                "match": "copilot"
+              },
+              {
+                "field": "description",
+                "match": "claude"
+              },
+              {
+                "field": "description",
+                "match": "codex"
+              }
+            ]
+          }
+        ]
+      },
+      "profiles": {
+        "all": [
+          {
+            "field": "skills",
+            "match": "windsurf"
+          },
+          {
+            "any": [
+              {
+                "field": "skills",
+                "match": "cursor"
+              },
+              {
+                "field": "skills",
+                "match": "copilot"
+              },
+              {
+                "field": "skills",
+                "match": "claude"
+              },
+              {
+                "field": "skills",
+                "match": "codex"
+              }
+            ]
+          }
+        ]
+      },
+      "unambiguous": false
+    },
+    {
+      "id": "langchain",
+      "family": "framework",
+      "postings": {
+        "field": "description",
+        "match": "langchain"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "langchain"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "langgraph",
+      "family": "framework",
+      "postings": {
+        "field": "description",
+        "match": "langgraph"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "langgraph"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "mcp",
+      "family": "framework",
+      "postings": {
+        "field": "description",
+        "match": "model context protocol"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "model context protocol"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "llamaindex",
+      "family": "framework",
+      "postings": {
+        "field": "description",
+        "match": "llamaindex"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "llamaindex"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "crewai",
+      "family": "framework",
+      "postings": {
+        "field": "description",
+        "match": "crewai"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "crewai"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "autogen",
+      "family": "framework",
+      "postings": {
+        "field": "description",
+        "match": "autogen"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "autogen"
+      },
+      "unambiguous": true
+    },
+    {
+      "id": "dspy",
+      "family": "framework",
+      "postings": {
+        "field": "description",
+        "match": "dspy"
+      },
+      "profiles": {
+        "field": "skills",
+        "match": "dspy"
+      },
+      "unambiguous": true
+    }
+  ]
+}

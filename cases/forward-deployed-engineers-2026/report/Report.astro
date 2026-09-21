@@ -1,0 +1,280 @@
+---
+/*
+ * Design
+ * Field: blue #1E79C2 with white text; the US in ink #0B0A1F, other countries in #C9F6FF.
+ * Detail chart on white: bars scaled to the world total, so the US bar takes two thirds of the width.
+ * Signature: the 100% strip on the card, one segment per country, the US filling most of it.
+ */
+import BarList from "@site/components/charts/BarList.astro";
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, isoDate, longDate, number, type Lang } from "@site/i18n";
+import countries from "../data/countries.json";
+import receipt from "../data/receipt.json";
+import fde from "../queries/forward-deployed.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: { slug: string; snapshot?: Date; exploration_credits?: number };
+}
+
+const { lang, section, size = "compact", entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(countries.snapshot);
+const world = countries.world_count;
+const rows = countries.rows;
+const us = rows.find((r) => r.group === "United States")!;
+const named = rows.filter((r) => r.group !== "rest-of-world");
+const rest = rows.find((r) => r.group === "rest-of-world")!;
+const second = named.filter((r) => r.group !== "United States")[0];
+const europe = named.filter((r) => ["United Kingdom", "Germany", "France", "Netherlands", "Spain"].includes(r.group));
+const europeCount = europe.reduce((s, r) => s + r.count, 0);
+const pct = (x: number, d = 1) => `${number(lang, x * 100, d)}%`;
+
+const zhNames: Record<string, string> = {
+  "United States": "美国",
+  India: "印度",
+  "United Kingdom": "英国",
+  Germany: "德国",
+  Canada: "加拿大",
+  Japan: "日本",
+  Singapore: "新加坡",
+  France: "法国",
+  Australia: "澳大利亚",
+  Spain: "西班牙",
+  Netherlands: "荷兰",
+  Israel: "以色列",
+  "rest-of-world": "其他国家和地区",
+};
+const name = (g: string) => (zh ? zhNames[g] : g === "rest-of-world" ? "Rest of the world" : g);
+const barRows = rows.map((r) => ({
+  label: name(r.group),
+  display: `${number(lang, r.count)} · ${pct(r.share)}`,
+  width: r.share,
+  kind: r.group === "United States" ? ("focus" as const) : r.group === "rest-of-world" ? ("residual" as const) : ("other" as const),
+}));
+// The card strip: the US, the next three countries, and one "other" segment for everything else,
+// so every segment has a legend entry.
+const leaders = named.filter((r) => r.group !== "United States").slice(0, 3);
+const otherCount = world - us.count - leaders.reduce((s, r) => s + r.count, 0);
+const strip = [
+  { key: "us", label: name(us.group), count: us.count },
+  ...leaders.map((r) => ({ key: "country", label: name(r.group), count: r.count })),
+  { key: "other", label: zh ? "其他" : "Other", count: otherCount },
+];
+---
+
+{
+  section === "card" && (
+    <div class={`card-body size-${size} fde-card`}>
+      <p class="big-number">
+        {number(lang, us.share * 100, 1)}
+        <small>%</small>
+      </p>
+      <p class="big-label">
+        {zh
+          ? `全球 ${number(lang, world)} 个前线部署工程师（FDE）在招岗位中，${number(lang, us.count)} 个在美国。`
+          : `of ${number(lang, world)} open forward-deployed engineering postings are in the US (${number(lang, us.count)}).`}
+      </p>
+      <div class="strip" aria-hidden="true">
+        {strip.map((r) => (
+          <span class={`seg ${r.key}`} style={`flex: ${r.count}`} />
+        ))}
+      </div>
+      <ul class="strip-legend">
+        {strip.map((r) => (
+          <li class={r.key}>
+            {r.label} {pct(r.count / world, 0)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+{
+  section === "body" && (
+    <div class="wrap report-body">
+      <Figure
+        id="countries"
+        lang={lang}
+        heading={
+          zh
+            ? `美国占了近三分之二，印度第二，但只有 ${pct(second.share, 0)}`
+            : `The US holds nearly two thirds. India is second, with ${pct(second.share, 0)}.`
+        }
+        sub={
+          zh
+            ? `标题含 forward deployed 的在招岗位，按国家统计，条形按占全球 ${number(lang, world)} 个的比例画`
+            : `Open postings with forward deployed in the title, by country, drawn as a share of all ${number(lang, world)} worldwide`
+        }
+        alt={rows.map((r) => `${name(r.group)} ${r.count}`).join(zh ? "，" : ", ")}
+        source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
+        queries={[{ file: "forward-deployed.json", endpoint: "POST /v1/jobs/query", spec: fde }]}
+        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
+      >
+        <BarList rows={barRows} label={zh ? "各国岗位数" : "Postings by country"} />
+      </Figure>
+
+      <section class="findings" aria-labelledby="findings-title">
+        <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
+        {zh ? (
+          <>
+            <p>
+              全球标题含 forward deployed 的在招岗位有 {number(lang, world)} 个，美国 {number(lang, us.count)} 个，占 {pct(us.share)}。印度（
+              {second.count} 个）排第二，然后是英国和德国。
+            </p>
+            <p>
+              欧洲五国（英国、德国、法国、荷兰、西班牙）合计 {number(lang, europeCount)} 个，占 {pct(europeCount / world)}，和列表之外的其他国家和地区（
+              {number(lang, rest.count)} 个）差不多。这个头衔还主要是美国的现象。
+            </p>
+            <p>
+              一个岗位挂在多个城市或反复发布，会被计为多个岗位，所以这些数字衡量的是招聘的声量，不是职位数。
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Worldwide, {number(lang, world)} open postings have forward deployed in the title, and {number(lang, us.count)} of them,{" "}
+              {pct(us.share)}, are in the US. India is second with {second.count}, then the United Kingdom and Germany.
+            </p>
+            <p>
+              Five European countries (the United Kingdom, Germany, France, the Netherlands, and Spain) have{" "}
+              {number(lang, europeCount)} together, {pct(europeCount / world)}, about as many as every country outside the list
+              combined ({number(lang, rest.count)}). The title is still mostly an American one.
+            </p>
+            <p>
+              A role listed in several cities or reposted counts more than once, so these numbers measure how loudly the title is
+              advertised, not how many seats exist.
+            </p>
+          </>
+        )}
+      </section>
+    </div>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>人群</h3>
+        <p>{longDate(lang, snapshot)} Metix AI Platform 上标题含 "forward deployed" 的在招岗位。这个词组很少有别的意思，不需要排除词。</p>
+        <h3>选国家</h3>
+        <p>
+          agent 先读了 500 个岗位看国家分布，从中取前 12 个国家。搜索结果有它自己的排序，不是随机样本，所以这 500 个只用来挑国家，数字全部来自重跑时对每个国家的计数，列表之外的记为其他国家和地区。样本里美国是
+          51%，完整计数是 {pct(us.share)}，这就是不能用样本出数字的原因。
+        </p>
+        <h3>计数</h3>
+        <p>
+          一次全球计数，加上每个国家一次，每次 1 Credit，不读取岗位。重复发布没有合并。条件在{" "}
+          <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>，国家列表在 fetch.py。
+        </p>
+        <h3>局限</h3>
+        <p>只看标题；做同样工作但头衔不同的岗位（比如 solutions engineer）没有被算进来。这是快照当天的截面。</p>
+      </>
+    ) : (
+      <>
+        <h3>Population</h3>
+        <p>
+          Open postings on the Metix AI Platform on {longDate(lang, snapshot)} with "forward deployed" in the title. The phrase
+          rarely means anything else, so no exclusions are needed.
+        </p>
+        <h3>Choosing the countries</h3>
+        <p>
+          The agent first read 500 postings to see which countries appear, and took the top 12. Search results come in their own
+          order, not a random one, so those 500 only chose the countries; every number comes from a count per country in the
+          replay, and everything outside the list is the rest of the world. The sample put the US at 51%; the full count says{" "}
+          {pct(us.share)}, which is why a sample never sets a number here.
+        </p>
+        <h3>Counting</h3>
+        <p>
+          One worldwide count and one per country, one Credit each, and no posting is read. Reposts are not collapsed. The
+          condition is in <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a> and the country list in
+          fetch.py.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          Titles only; the same work under another title (solutions engineer, for example) is not counted. This is one day, not a
+          trend.
+        </p>
+      </>
+    ))
+}
+
+<style>
+  .strip {
+    display: flex;
+    gap: 2px;
+    height: 72px;
+    margin-top: 22px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .seg {
+    background: var(--f-mark);
+  }
+
+  .seg.us {
+    background: var(--f-focus);
+  }
+
+  .seg.other {
+    background: repeating-linear-gradient(135deg, var(--f-mark) 0 3px, transparent 3px 7px);
+    box-shadow: inset 0 0 0 1.5px var(--f-mark);
+  }
+
+  .strip-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    font: 12px/1.4 var(--mono);
+    color: var(--f-ink);
+  }
+
+  .strip-legend li::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    vertical-align: -1px;
+    border-radius: 2px;
+    background: var(--f-mark);
+  }
+
+  .strip-legend .us::before {
+    background: var(--f-focus);
+  }
+
+  .strip-legend .other::before {
+    background: repeating-linear-gradient(135deg, var(--f-mark) 0 2px, transparent 2px 4px);
+    box-shadow: inset 0 0 0 1.5px var(--f-mark);
+  }
+
+  /* In the catalog this card is wider than its row mates and so shorter; the strip,
+     the card's signature, takes up the spare height instead of leaving it empty. */
+  .fde-card.size-compact {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fde-card.size-compact .strip {
+    flex: 1 0 72px;
+  }
+
+  .card-body.size-full .big-label {
+    font-size: 17px;
+    color: var(--f-ink);
+  }
+
+  .card-body.size-full .strip {
+    height: 88px;
+  }
+</style>

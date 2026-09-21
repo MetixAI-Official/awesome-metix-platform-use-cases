@@ -1,0 +1,34 @@
+---
+/*
+ * The frame every card shares in the catalog: field color, meta line, the
+ * finding as its title, the card's own body in the slot, and the receipt stub.
+ */
+import type { CollectionEntry } from "astro:content";
+import type { Receipt } from "@site/cases";
+import { isoDate, keepNames, number, ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  entry: CollectionEntry<"cases">["data"];
+  receipt?: Receipt;
+  index: number;
+}
+
+const { lang, entry, receipt, index } = Astro.props;
+const t = ui[lang];
+const label = `${t.formats.card} ${String(index).padStart(2, "0")}`;
+---
+
+<article class={`card field-${entry.color ?? "violet"}`}>
+  <p class="cf-meta">
+    <span>{label}</span>
+    <span>{entry.datasets.map((d) => t.datasets[d]).join(" · ")}</span>
+  </p>
+  <h3 class="cf-title">{keepNames(entry.title[lang])}</h3>
+  <div class="cf-body"><slot /></div>
+  <p class="cf-stub">
+    {receipt && <span>{number(lang, receipt.credits)} {t.toRerun}</span>}
+    {entry.snapshot && <span>{isoDate(entry.snapshot)}</span>}
+    <span class="open">{t.openCard} →</span>
+  </p>
+</article>

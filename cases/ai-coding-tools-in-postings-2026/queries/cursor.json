@@ -1,0 +1,31 @@
+{
+  "where": {
+    "all": [
+      {
+        "field": "description",
+        "match": "cursor"
+      },
+      {
+        "any": [
+          {
+            "field": "description",
+            "match": "claude"
+          },
+          {
+            "field": "description",
+            "match": "copilot"
+          },
+          {
+            "field": "description",
+            "match": "windsurf"
+          },
+          {
+            "field": "description",
+            "match": "codex"
+          }
+        ]
+      }
+    ]
+  },
+  "size": 1
+}

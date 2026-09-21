@@ -1,0 +1,99 @@
+{
+  "where": {
+    "any": [
+      {
+        "field": "description",
+        "match": "claude code"
+      },
+      {
+        "field": "description",
+        "match": "github copilot"
+      },
+      {
+        "all": [
+          {
+            "field": "description",
+            "match": "cursor"
+          },
+          {
+            "any": [
+              {
+                "field": "description",
+                "match": "claude"
+              },
+              {
+                "field": "description",
+                "match": "copilot"
+              },
+              {
+                "field": "description",
+                "match": "windsurf"
+              },
+              {
+                "field": "description",
+                "match": "codex"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "all": [
+          {
+            "field": "description",
+            "match": "codex"
+          },
+          {
+            "any": [
+              {
+                "field": "description",
+                "match": "openai"
+              },
+              {
+                "field": "description",
+                "match": "claude"
+              },
+              {
+                "field": "description",
+                "match": "copilot"
+              },
+              {
+                "field": "description",
+                "match": "cursor"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "all": [
+          {
+            "field": "description",
+            "match": "windsurf"
+          },
+          {
+            "any": [
+              {
+                "field": "description",
+                "match": "cursor"
+              },
+              {
+                "field": "description",
+                "match": "copilot"
+              },
+              {
+                "field": "description",
+                "match": "claude"
+              },
+              {
+                "field": "description",
+                "match": "codex"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "size": 1
+}

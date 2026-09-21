@@ -1,0 +1,60 @@
+{
+  "countries": [
+    "United States",
+    "India",
+    "United Kingdom",
+    "Germany",
+    "Canada",
+    "France",
+    "Netherlands",
+    "Singapore",
+    "Australia",
+    "Japan"
+  ],
+  "industries": {
+    "tech": [
+      "IT Services and IT Consulting",
+      "Software Development",
+      "Technology, Information and Internet"
+    ],
+    "beyond": [
+      "Financial Services",
+      "Banking",
+      "Insurance",
+      "Manufacturing",
+      "Hospitals and Health Care",
+      "Retail",
+      "Telecommunications",
+      "Motor Vehicle Manufacturing",
+      "Higher Education",
+      "Government Administration"
+    ],
+    "note": "Selected industries, not a ranking. A posting can list several industries, so shares overlap."
+  },
+  "pay_thresholds_usd": [
+    100000,
+    150000,
+    200000,
+    250000
+  ],
+  "pay_baseline": {
+    "field": "title",
+    "match": "software engineer"
+  },
+  "us": {
+    "field": "location.country",
+    "eq": "United States"
+  },
+  "usd_stated": {
+    "all": [
+      {
+        "field": "salary.currency",
+        "eq": "USD"
+      },
+      {
+        "field": "salary.annual_min",
+        "exists": true
+      }
+    ]
+  }
+}

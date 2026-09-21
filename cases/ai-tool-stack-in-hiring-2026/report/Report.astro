@@ -1,0 +1,1294 @@
+---
+/*
+ * Design
+ * Hero: deep violet-navy #14112E, white type; demand in teal #0DEFC8, supply in lilac #9A95FF.
+ * Body on white: demand in teal ink #07545E, supply in violet #5B54EF, context in grey #7E8787.
+ * Type: the shell faces; the ratio in Sora 700 at 120 px on desktop.
+ * Signature: the two-sided chart. Profiles grow left, postings grow right, from one spine,
+ *   so demand and supply for every tool are read on the same scale at a glance.
+ */
+import BarList from "@site/components/charts/BarList.astro";
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, href, isoDate, keepNames, longDate, number, type Lang } from "@site/i18n";
+import coMentions from "../data/co-mentions.json";
+import countries from "../data/countries.json";
+import demand from "../data/demand.json";
+import industries from "../data/industries.json";
+import pay from "../data/pay.json";
+import receipt from "../data/receipt.json";
+import supply from "../data/supply.json";
+import dimensions from "../queries/dimensions.json";
+import tools from "../queries/tools.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: {
+    slug: string;
+    title: Record<Lang, string>;
+    dek: Record<Lang, string>;
+    snapshot?: Date;
+    exploration_credits?: number;
+  };
+}
+
+const { lang, section, entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(demand.snapshot);
+const iso = isoDate(snapshot);
+const source = zh ? `来源：Metix AI Platform 岗位与人才数据，${iso}。` : `Source: Metix AI Platform, jobs and profiles, ${iso}.`;
+const toolQuery = [{ file: "tools.json", endpoint: "POST /v1/jobs/query · POST /v1/people/query", spec: tools }];
+const dimQuery = [
+  { file: "tools.json", endpoint: "POST /v1/jobs/query", spec: tools },
+  { file: "dimensions.json", endpoint: "POST /v1/jobs/query", spec: dimensions },
+];
+const cost = zh ? `整份报告 ${receipt.credits} Credits` : `${receipt.credits} Credits for the whole report`;
+
+const names: Record<string, string> = {
+  "claude-code": "Claude Code",
+  cursor: "Cursor",
+  "github-copilot": "GitHub Copilot",
+  codex: "Codex",
+  windsurf: "Windsurf",
+  langchain: "LangChain",
+  langgraph: "LangGraph",
+  mcp: "Model Context Protocol",
+  llamaindex: "LlamaIndex",
+  crewai: "CrewAI",
+  autogen: "AutoGen",
+  dspy: "DSPy",
+};
+const num = (v: number | string) => (typeof v === "number" ? v : null);
+const pct = (x: number, d = 0) => `${number(lang, x * 100, d)}%`;
+const times = (x: number) => `${number(lang, x, x < 1 ? 2 : 1)}×`;
+
+const unambiguous = tools.tools.filter((t) => t.unambiguous).map((t) => t.id);
+const dem = (id: string) => demand.rows.find((r) => r.group === id)!;
+const sup = (id: string) => supply.rows.find((r) => r.group === id)!;
+
+type Pair = { id: string; d: number; s: number; dUs: number; sUs: number };
+const pairs: Pair[] = unambiguous
+  .map((id) => ({
+    id,
+    d: dem(id).count,
+    s: num(sup(id).count) ?? 0,
+    dUs: dem(id).us_count,
+    sUs: num(sup(id).us_count) ?? 0,
+  }))
+  .sort((a, b) => b.d - a.d);
+const sideMax = Math.max(...pairs.flatMap((p) => [p.d, p.s]));
+const ratios = pairs.map((p) => ({ ...p, r: p.d / p.s })).sort((a, b) => b.r - a.r);
+const leader = ratios[0];
+const lowest = ratios[ratios.length - 1];
+const secondLowest = ratios[ratios.length - 2];
+const nearParity = ratios.filter((p) => p.r >= 0.9 && p.r <= 1.1).map((p) => names[p.id]);
+const split = pairs
+  .map((p) => ({ ...p, us: p.dUs / p.sUs, out: (p.d - p.dUs) / (p.s - p.sUs) }))
+  .sort((a, b) => b.out - a.out);
+const cc = split.find((p) => p.id === "claude-code")!;
+// Figure 01's finding: the two largest tools on either side, and whether they lean opposite ways.
+const biggest = [...ratios].sort((a, b) => Math.max(b.d, b.s) - Math.max(a.d, a.s)).slice(0, 2);
+const opposite = (biggest[0].r - 1) * (biggest[1].r - 1) < 0;
+
+// Log scale for postings per profile, shared by the ratio charts.
+const LO = 0.25;
+const HI = 10;
+const pos = (v: number) => ((Math.log(v) - Math.log(LO)) / (Math.log(HI) - Math.log(LO))) * 100;
+const ticks = [0.25, 0.5, 1, 2, 4, 8];
+
+// Coding assistants.
+const assistants = demand.rows.filter((r) => r.family === "assistant").sort((a, b) => b.count - a.count);
+const anyAssistant = countries.world_count;
+const strict = new Set(tools.tools.filter((t) => !t.unambiguous).map((t) => t.id));
+const assistantRows = assistants.map((r) => ({
+  label: names[r.group],
+  note: strict.has(r.group) ? (zh ? "下限：需同时提到另一个工具" : "lower bound: another tool named too") : undefined,
+  display: `${number(lang, r.count)} · ${pct(r.count / anyAssistant)}`,
+  width: r.count / anyAssistant,
+  kind: r.group === "claude-code" ? ("focus" as const) : strict.has(r.group) ? ("lower" as const) : ("other" as const),
+}));
+
+// Co-mentions: only rows whose own definition does not already require another tool.
+const pairCount = (a: string, b: string) =>
+  coMentions.rows.find((r) => r.group === `${a}+${b}` || r.group === `${b}+${a}`)?.count ?? 0;
+const matrixRows = ["claude-code", "github-copilot"];
+const matrixCols = assistants.map((r) => r.group);
+const withCopilot = pairCount("claude-code", "github-copilot");
+
+const ind = (g: string) => industries.rows.find((r) => r.group === g)?.count ?? 0;
+const countryZh: Record<string, string> = {
+  "United States": "美国",
+  India: "印度",
+  "United Kingdom": "英国",
+  Germany: "德国",
+  Canada: "加拿大",
+  France: "法国",
+  Netherlands: "荷兰",
+  Singapore: "新加坡",
+  Australia: "澳大利亚",
+  Japan: "日本",
+  "rest-of-world": "其他国家和地区",
+};
+const industryZh: Record<string, string> = {
+  "IT Services and IT Consulting": "IT 服务与咨询",
+  "Software Development": "软件开发",
+  "Technology, Information and Internet": "科技、信息与互联网",
+  "Financial Services": "金融服务",
+  Banking: "银行",
+  Insurance: "保险",
+  Manufacturing: "制造业",
+  "Hospitals and Health Care": "医院与医疗",
+  Retail: "零售",
+  Telecommunications: "电信",
+  "Motor Vehicle Manufacturing": "汽车制造",
+  "Higher Education": "高等教育",
+  "Government Administration": "政府管理",
+};
+---
+
+{section === "card" && null}
+
+{
+  section === "body" && (
+    <>
+      <header class="report-hero">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="hero-eyebrow">
+              <a href={href(lang)}>Casebook</a> · {zh ? "报告" : "Report"} · {zh ? "岗位 · 人才" : "Jobs · People"} ·{" "}
+              <span class="nowrap">{iso}</span>
+            </p>
+            <h1>{keepNames(entry.title[lang])}</h1>
+            <p class="hero-dek">{entry.dek[lang]}</p>
+            <div class="hero-actions">
+              <a class="hero-chip" href="#prompt">{zh ? "查看提示词" : "See the prompt"}</a>
+              <a class="hero-chip" href="#receipt">
+                {receipt.credits} {zh ? "Credits 可重跑" : "Credits to rerun"}
+              </a>
+              <span class="hero-note">{zh ? "只计数，没有读取任何岗位或档案" : "Counts only: no posting or profile read"}</span>
+            </div>
+          </div>
+          <div class="hero-key">
+            <p class="key-num">
+              {number(lang, leader.r, 1)}
+              <span>×</span>
+            </p>
+            <p class="key-label">
+              {zh
+                ? `每个在技能里列出 Claude Code 的档案，对应 ${number(lang, leader.r, 1)} 个提到它的在招岗位（${number(lang, leader.d)} 比 ${number(lang, leader.s)}）。`
+                : `open postings name Claude Code for every profile that lists it as a skill (${number(lang, leader.d)} to ${number(lang, leader.s)}).`}
+            </p>
+            <div class="key-scale" aria-hidden="true">
+              <span class="ks-line" />
+              <span class="ks-parity" style={`left: ${pos(1)}%`} />
+              {[lowest, ratios.find((p) => p.id === "github-copilot")!, leader].map((p, i) => (
+                <span class={i === 1 ? "ks-dot above" : "ks-dot"} style={`left: ${pos(p.r)}%`}>
+                  <span class="ks-name">{names[p.id]}</span>
+                  <span class="ks-val">{times(p.r)}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="wrap report-body">
+        <section class="brief" aria-labelledby="brief-title">
+          <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
+          <ol>
+            {zh ? (
+              <>
+                <li>
+                  九个名称不会有歧义的工具里，Claude Code 的缺口最大：{number(lang, leader.d)} 个在招岗位提到它，只有 {number(lang, leader.s)}{" "}
+                  个档案把它列为技能，每个档案对应 {number(lang, leader.r, 1)} 个岗位。
+                </li>
+                <li>
+                  {names[lowest.id]} 正好相反：{number(lang, lowest.s)} 个档案，{number(lang, lowest.d)} 个岗位。{names[secondLowest.id]} 也是档案多于岗位（
+                  {number(lang, secondLowest.s)} 比 {number(lang, secondLowest.d)}）。
+                </li>
+                <li>
+                  缺口在美国以外更大。Claude Code 在美国是每个档案 {number(lang, cc.us, 1)} 个岗位，在美国以外是 {number(lang, cc.out, 1)} 个。
+                </li>
+                <li>提到 AI 编程工具不会抬高薪资下限：这类美国岗位里起薪 15 万美元以上的占 {pct(pay.rows[0].at_least["150000"] / pay.rows[0].count)}，软件工程师岗位是 {pct(pay.rows[1].at_least["150000"] / pay.rows[1].count)}。</li>
+              </>
+            ) : (
+              <>
+                <li>
+                  Of nine tools whose names cannot mean anything else, Claude Code has the widest gap: {number(lang, leader.d)} open
+                  postings name it and {number(lang, leader.s)} profiles list it, {number(lang, leader.r, 1)} postings per profile.
+                </li>
+                <li>
+                  {names[lowest.id]} runs the other way, with {number(lang, lowest.s)} profiles to {number(lang, lowest.d)} postings.{" "}
+                  {names[secondLowest.id]} does too: {number(lang, secondLowest.s)} profiles to {number(lang, secondLowest.d)} postings.
+                </li>
+                <li>
+                  The gap is wider outside the US. For Claude Code it is {number(lang, cc.us, 1)} postings per profile in the US and{" "}
+                  {number(lang, cc.out, 1)} everywhere else.
+                </li>
+                <li>
+                  Naming a coding tool does not raise the posted pay floor: {pct(pay.rows[0].at_least["150000"] / pay.rows[0].count)}{" "}
+                  of such US postings start at $150k or more, against {pct(pay.rows[1].at_least["150000"] / pay.rows[1].count)} for
+                  software engineer titles.
+                </li>
+              </>
+            )}
+          </ol>
+          <p class="caveat">
+            {zh
+              ? "读这份报告之前要记住一点：岗位每天都在刷新，个人档案的技能栏却可能几个月才更新一次。越新的工具，档案越跟不上，所以越新的工具缺口看起来越大。这里的比值是需求和已公开技能之间的差距，不是劳动力缺口的直接测量。"
+              : "One thing to hold while reading: postings refresh daily, while the skills on a profile may go months without an update. The newer the tool, the further profiles lag, so newer tools will look short of people partly for that reason. The ratios here compare demand with skills people have published, not with the skills people have."}
+          </p>
+        </section>
+
+        <Figure
+          id="both-sides"
+          number="01"
+          lang={lang}
+          heading={
+            zh
+              ? `${names[biggest[0].id]} 和 ${names[biggest[1].id]} 两边都是最大的${opposite ? "，但方向相反" : ""}`
+              : `${names[biggest[0].id]} and ${names[biggest[1].id]} are the largest on either side${opposite ? ", and they lean opposite ways" : ""}`
+          }
+          sub={
+            zh
+              ? "九个名称没有歧义的 AI 编程助手和 Agent 框架。左边是把它列为技能的档案，右边是提到它的在招岗位，同一刻度，按岗位数排序"
+              : "Nine AI coding assistants and agent frameworks whose names are unambiguous. Profiles that list each one on the left, open postings that name it on the right, on one scale, sorted by postings"
+          }
+          alt={pairs.map((p) => `${names[p.id]}: ${p.s} ${zh ? "个档案" : "profiles"}, ${p.d} ${zh ? "个岗位" : "postings"}`).join("; ")}
+          source={source}
+          queries={toolQuery}
+          cost={cost}
+        >
+          <div class="bf-head" aria-hidden="true">
+            <span class="bf-h supply">{zh ? "列出技能的档案" : "Profiles listing it"}</span>
+            <span />
+            <span class="bf-h demand">{zh ? "提到它的岗位" : "Postings naming it"}</span>
+          </div>
+          <ol class="butterfly">
+            {pairs.map((p) => (
+              <li>
+                <span class="bf-side supply">
+                  <span class="bf-track" style={`--w: ${((p.s / sideMax) * 100).toFixed(2)}%`}>
+                    <span class="bf-bar" />
+                    <span class="bf-val">{number(lang, p.s)}</span>
+                  </span>
+                </span>
+                <span class="bf-name">{names[p.id]}</span>
+                <span class="bf-side demand">
+                  <span class="bf-track" style={`--w: ${((p.d / sideMax) * 100).toFixed(2)}%`}>
+                    <span class="bf-bar" />
+                    <span class="bf-val">{number(lang, p.d)}</span>
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? `岗位和档案的数量级相近，所以放在同一刻度上。LangChain 是唯一一个档案数远超岗位数的大工具，Claude Code 则是岗位数远超档案数。`
+            : `Postings and profiles run to similar sizes, so they share one scale. LangChain is the one large tool with far more profiles than postings; Claude Code is the one with far more postings than profiles.`}
+        </p>
+
+        <Figure
+          id="gap"
+          number="02"
+          lang={lang}
+          heading={
+            zh
+              ? `Claude Code 每个档案对应 ${number(lang, leader.r, 1)} 个岗位，${nearParity.join("、")} 接近一比一`
+              : `Claude Code has ${number(lang, leader.r, 1)} postings per profile. ${nearParity.join(", ")} sit near one to one.`
+          }
+          sub={
+            zh
+              ? "每个列出该技能的档案对应多少个在招岗位，对数刻度，竖线是一比一"
+              : "Open postings per profile that lists the skill, on a log scale; the vertical line is one to one"
+          }
+          alt={ratios.map((p) => `${names[p.id]} ${number(lang, p.r, 2)}`).join(", ")}
+          source={source}
+          queries={toolQuery}
+          cost={cost}
+        >
+          <div class="dots">
+            <div class="dots-axis" aria-hidden="true">
+              <span />
+              <span class="axis-track">
+                {ticks.map((v) => (
+                  <span class={v === LO ? "tick edge" : "tick"} style={`left: ${pos(v)}%`}>
+                    {v < 1 ? number(lang, v, 2) : number(lang, v)}×
+                  </span>
+                ))}
+              </span>
+              <span />
+            </div>
+            {ratios.map((p) => (
+              <div class={p.id === "claude-code" ? "dot-row focus" : "dot-row"}>
+                <span class="dot-name">{names[p.id]}</span>
+                <span class="dot-track" aria-hidden="true">
+                  <span class="parity" style={`left: ${pos(1)}%`} />
+                  <span class="dot" style={`left: ${pos(p.r)}%`} />
+                </span>
+                <span class="dot-val">{times(p.r)}</span>
+              </div>
+            ))}
+          </div>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? `比值大于 1 表示岗位多于列出技能的档案。LlamaIndex、AutoGen、CrewAI 也在 1.7 倍以上；DSPy 和 LangChain 在 0.5 倍左右，档案比岗位多一倍。`
+            : `Above 1, postings outnumber the profiles that list the skill. LlamaIndex, AutoGen, and CrewAI are also above 1.7; DSPy and LangChain sit near 0.5, with twice as many profiles as postings.`}
+        </p>
+
+        <Figure
+          id="us-and-rest"
+          number="03"
+          lang={lang}
+          heading={
+            zh
+              ? `美国以外的缺口更大：Claude Code 在美国是 ${number(lang, cc.us, 1)} 倍，在其他地方是 ${number(lang, cc.out, 1)} 倍`
+              : `The gap is wider outside the US: ${number(lang, cc.us, 1)} postings per profile for Claude Code in the US, ${number(lang, cc.out, 1)} elsewhere`
+          }
+          sub={
+            zh
+              ? "每个档案对应的岗位数，美国（实心）和美国以外（空心）分开算，对数刻度"
+              : "Postings per profile in the US (filled) and outside it (open), on a log scale"
+          }
+          alt={split.map((p) => `${names[p.id]}: US ${number(lang, p.us, 2)}, outside ${number(lang, p.out, 2)}`).join("; ")}
+          source={source}
+          queries={toolQuery}
+          cost={cost}
+        >
+          <div class="dots">
+            <div class="dots-axis" aria-hidden="true">
+              <span />
+              <span class="axis-track">
+                {ticks.map((v) => (
+                  <span class={v === LO ? "tick edge" : "tick"} style={`left: ${pos(v)}%`}>
+                    {v < 1 ? number(lang, v, 2) : number(lang, v)}×
+                  </span>
+                ))}
+              </span>
+              <span />
+            </div>
+            {split.map((p) => (
+              <div class={p.id === "claude-code" ? "dot-row focus" : "dot-row"}>
+                <span class="dot-name">{names[p.id]}</span>
+                <span class="dot-track" aria-hidden="true">
+                  <span class="parity" style={`left: ${pos(1)}%`} />
+                  <span
+                    class="link"
+                    style={`left: ${Math.min(pos(p.us), pos(p.out))}%; width: ${Math.abs(pos(p.out) - pos(p.us))}%`}
+                  />
+                  <span class="dot us" style={`left: ${pos(p.us)}%`} />
+                  <span class="dot out" style={`left: ${pos(p.out)}%`} />
+                </span>
+                <span class="dot-val">
+                  {times(p.us)} / {times(p.out)}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p class="legend" aria-hidden="true">
+            <span class="lg us">{zh ? "美国" : "US"}</span>
+            <span class="lg out">{zh ? "美国以外" : "Outside the US"}</span>
+          </p>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? `列出 Claude Code 的档案有 ${pct(cc.sUs / cc.s)} 在美国，提到它的岗位只有 ${pct(cc.dUs / cc.d)} 在美国。美国以外的雇主在大量点名这个工具，而公开把它写进技能栏的人主要在美国。`
+            : `${pct(cc.sUs / cc.s)} of the profiles that list Claude Code are in the US, but only ${pct(cc.dUs / cc.d)} of the postings that name it. Employers outside the US ask for it at scale, while the people who publish it as a skill are mostly American.`}
+        </p>
+
+        <Figure
+          id="assistants"
+          number="04"
+          lang={lang}
+          heading={
+            zh
+              ? `${number(lang, anyAssistant)} 个岗位点名 AI 编程助手，Claude Code 出现在 ${pct(assistants[0].count / anyAssistant)} 里`
+              : `${number(lang, anyAssistant)} postings name an AI coding assistant, and ${pct(assistants[0].count / anyAssistant)} of them name Claude Code`
+          }
+          sub={
+            zh
+              ? "提到各编程助手的在招岗位数，以及占至少提到一个工具的岗位的比例。斜线条是下限"
+              : "Open postings naming each assistant, and their share of postings naming at least one. Hatched bars are lower bounds"
+          }
+          alt={assistants.map((r) => `${names[r.group]} ${r.count}`).join(", ")}
+          source={zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`}
+          queries={dimQuery}
+          cost={cost}
+        >
+          <BarList rows={assistantRows} label={zh ? "各编程助手的岗位数" : "Postings by assistant"} />
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? "Cursor、Codex 和 Windsurf 也是普通词，只在同一段描述里还提到另一个 AI 编程工具时才计入，所以是下限，也不参与上面的供需比较。"
+            : "Cursor, Codex, and Windsurf are also ordinary words, so they count only when the description names another AI coding tool as well. That makes them lower bounds, and keeps them out of the demand and supply comparison above."}
+        </p>
+        <Figure
+          id="together"
+          number="05"
+          lang={lang}
+          heading={
+            zh
+              ? `提到 GitHub Copilot 的岗位有 ${pct(withCopilot / dem("github-copilot").count)} 也提到 Claude Code，反过来只有 ${pct(withCopilot / dem("claude-code").count)}`
+              : `${pct(withCopilot / dem("github-copilot").count)} of GitHub Copilot postings also name Claude Code. Only ${pct(withCopilot / dem("claude-code").count)} of Claude Code postings name Copilot.`
+          }
+          sub={
+            zh
+              ? "每一列是提到该工具的岗位，格子是其中同时提到这一行工具的比例"
+              : "Each column is the postings that name one tool; each cell is the share of them that also name the tool in that row"
+          }
+          alt={matrixRows
+            .map((r) =>
+              matrixCols
+                .filter((c) => c !== r)
+                .map((c) => `${names[r]} with ${names[c]} ${pct(pairCount(r, c) / dem(r).count)}`)
+                .join(", "),
+            )
+            .join("; ")}
+          source={zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`}
+          queries={dimQuery}
+          cost={cost}
+        >
+          <table class="cm">
+            <thead>
+              <tr>
+                <th scope="col">{zh ? "同时提到" : "Also names"}</th>
+                {matrixRows.map((r) => (
+                  <th scope="col">
+                    {zh ? `提到 ${names[r]} 的岗位` : `Postings naming ${names[r]}`}
+                    <span class="cm-n">{number(lang, dem(r).count)}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {matrixCols.map((c) => (
+                <tr>
+                  <th scope="row">{names[c]}</th>
+                  {matrixRows.map((r) => {
+                    if (c === r) return <td class="self" aria-label={zh ? "同一个工具" : "same tool"} />;
+                    const share = pairCount(r, c) / dem(r).count;
+                    return <td style={`--v: ${share.toFixed(3)}`}>{pct(share)}</td>;
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? "只画 Claude Code 和 GitHub Copilot 两列，因为另外三个工具的定义本身就要求同时提到别的工具，它们的列会被这个定义抬高。点名 Copilot 的岗位多半也点名 Claude Code，点名 Claude Code 的岗位却很少再提 Copilot。"
+            : "Only two columns are drawn, because the other three tools are defined as named alongside another tool, which would inflate their columns by construction. Postings that name Copilot usually name Claude Code too; postings that name Claude Code seldom add Copilot."}
+        </p>
+
+        <Figure
+          id="countries"
+          number="06"
+          lang={lang}
+          heading={
+            zh
+              ? `美国占 ${pct(countries.rows[0].count / anyAssistant)}，印度第二`
+              : `The US holds ${pct(countries.rows[0].count / anyAssistant)} of these postings. India is second.`
+          }
+          sub={
+            zh
+              ? `至少提到一个 AI 编程助手的 ${number(lang, anyAssistant)} 个在招岗位，按国家统计，条形按占全部的比例画`
+              : `The ${number(lang, anyAssistant)} open postings that name at least one AI coding assistant, by country, drawn as a share of all of them`
+          }
+          alt={countries.rows.map((r) => `${r.group} ${r.count}`).join(", ")}
+          source={zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`}
+          queries={dimQuery}
+          cost={cost}
+        >
+          <BarList
+            label={zh ? "各国岗位数" : "Postings by country"}
+            rows={[...countries.rows]
+              .sort((a, b) => (a.group === "rest-of-world" ? 1 : b.group === "rest-of-world" ? -1 : b.count - a.count))
+              .map((r) => ({
+                label: zh ? (countryZh[r.group] ?? r.group) : r.group === "rest-of-world" ? "Rest of the world" : r.group,
+                display: `${number(lang, r.count)} · ${pct(r.count / anyAssistant, 1)}`,
+                width: r.count / anyAssistant,
+                kind: r.group === "United States" ? "focus" : r.group === "rest-of-world" ? "residual" : "other",
+              }))}
+          />
+        </Figure>
+
+        <Figure
+          id="industries"
+          number="07"
+          lang={lang}
+          heading={
+            zh
+              ? `IT 服务和软件公司领先，金融服务（${number(lang, ind("Financial Services"))}）多过互联网公司（${number(lang, ind("Technology, Information and Internet"))}）`
+              : `IT services and software lead. Financial services (${number(lang, ind("Financial Services"))}) outnumbers internet companies (${number(lang, ind("Technology, Information and Internet"))}).`
+          }
+          sub={
+            zh
+              ? "至少提到一个 AI 编程助手的岗位里，行业包含所列行业的比例。这是挑选出的行业，不是排名；一个岗位可以属于多个行业，所以比例会重叠"
+              : "Share of postings naming at least one AI coding assistant whose industries include each one listed. These are selected industries, not a ranking, and a posting can list several, so shares overlap"
+          }
+          alt={industries.rows.map((r) => `${r.group} ${r.count}`).join(", ")}
+          source={zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`}
+          queries={dimQuery}
+          cost={cost}
+        >
+          <div class="ind-groups">
+            {(["tech", "beyond"] as const).map((sector) => (
+              <div>
+                <h3 class="ind-head">{sector === "tech" ? (zh ? "科技行业" : "Technology") : zh ? "科技以外" : "Beyond technology"}</h3>
+                <BarList
+                  label={sector === "tech" ? "Technology" : "Beyond technology"}
+                  rows={industries.rows
+                    .filter((r) => r.sector === sector)
+                    .sort((a, b) => b.count - a.count)
+                    .map((r) => ({
+                      label: zh ? (industryZh[r.group] ?? r.group) : r.group,
+                      display: `${number(lang, r.count)} · ${pct(r.count / anyAssistant, 1)}`,
+                      width: r.count / anyAssistant,
+                      kind: r.group === "Financial Services" ? "focus" : "other",
+                    }))}
+                />
+              </div>
+            ))}
+          </div>
+        </Figure>
+
+        <Figure
+          id="pay"
+          number="08"
+          lang={lang}
+          heading={zh ? "点名 AI 编程工具并不会抬高薪资下限" : "Naming an AI coding tool does not raise the posted pay floor"}
+          sub={
+            zh
+              ? `写明美元年薪的美国岗位里，薪资下限达到各档的比例：提到 AI 编程助手的岗位（${number(lang, pay.rows[0].count)} 个）和标题含 software engineer 的岗位（${number(lang, pay.rows[1].count)} 个）`
+              : `Share of US postings that state an annual USD salary whose minimum reaches each level: postings naming an AI coding assistant (${number(lang, pay.rows[0].count)}) and software engineer titles (${number(lang, pay.rows[1].count)})`
+          }
+          alt={dimensions.pay_thresholds_usd
+            .map(
+              (t) =>
+                `$${t / 1000}k: ${pct(pay.rows[0].at_least[String(t) as keyof (typeof pay.rows)[0]["at_least"]] / pay.rows[0].count)} vs ${pct(pay.rows[1].at_least[String(t) as keyof (typeof pay.rows)[1]["at_least"]] / pay.rows[1].count)}`,
+            )
+            .join(", ")}
+          source={zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`}
+          queries={dimQuery}
+          cost={cost}
+        >
+          <div class="pay">
+            {dimensions.pay_thresholds_usd.map((t) => {
+              const key = String(t) as keyof (typeof pay.rows)[0]["at_least"];
+              const a = pay.rows[0].at_least[key] / pay.rows[0].count;
+              const s = pay.rows[1].at_least[key] / pay.rows[1].count;
+              return (
+                <div class="pay-row">
+                  <span class="pay-label">{zh ? `${t / 10000} 万美元以上` : `$${t / 1000}k or more`}</span>
+                  <span class="pay-bars">
+                    <span class="pay-bar assistant" style={`--w: ${(a * 100).toFixed(1)}%`}>
+                      <span>{pct(a)}</span>
+                    </span>
+                    <span class="pay-bar baseline" style={`--w: ${(s * 100).toFixed(1)}%`}>
+                      <span>{pct(s)}</span>
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <p class="legend" aria-hidden="true">
+            <span class="lg assistant">{zh ? "提到 AI 编程助手" : "Names an AI coding assistant"}</span>
+            <span class="lg baseline">{zh ? "软件工程师标题" : "Software engineer title"}</span>
+          </p>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? "两组的分布几乎重合。两组有重叠（很多软件工程师岗位也会点名工具），前一组还包括非工程岗位，所以这不是严格的对照，但足以说明点名工具不是高薪岗位的标志。"
+            : "The two distributions nearly match. The groups overlap (many software engineer postings name a tool) and the first includes roles outside engineering, so this is not a controlled comparison, but it is enough to say that naming a tool does not mark a better-paid job."}
+        </p>
+      </div>
+    </>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>需求：岗位</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上的在招岗位，职位描述里提到某个工具。Claude Code、GitHub Copilot、LangChain、LangGraph、LlamaIndex、CrewAI、AutoGen、DSPy
+          和 Model Context Protocol 按名称匹配；Cursor、Codex、Windsurf 需要同一段描述里还提到另一个 AI 编程工具。定义在{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/tools.json`}>tools.json</a>。
+        </p>
+        <h3>供给：档案</h3>
+        <p>
+          在技能栏里列出同一个工具的个人档案，条件和岗位一一对应。只做计数，没有读取任何档案，也没有读取任何岗位。所有人数都经过小格子规则：少于 10 的写成 "&lt;10"。
+        </p>
+        <h3>抽检</h3>
+        <p>
+          agent 读了职位描述样本来检查匹配：Claude Code 和 GitHub Copilot 40 条里 40 条是工具本身，AutoGen 40 条里 39 条。只看单词时 Cursor、Codex、Windsurf
+          分别是 60 条里 55、55、56 条，所以收紧了条件；收紧后这三个工具在档案里只剩 258、452、13 人，比值没有意义，因此不参与供需比较。
+        </p>
+        <h3>国家、行业和薪资</h3>
+        <p>
+          国家是至少提到一个编程助手的岗位按 location.country 计数，其余国家合并。行业是挑选出的列表，不是排名，一个岗位可以属于多个行业。薪资对照组是标题含 "software
+          engineer" 的美国岗位，两组可能重叠。维度定义在 <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/dimensions.json`}>dimensions.json</a>。
+        </p>
+        <h3>局限</h3>
+        <p>
+          档案的技能栏由本人填写、更新慢，越新的工具越可能被低估，所以比值衡量的是需求和已公开技能之间的差距。岗位的重复发布没有合并。提到一个工具不等于要求会用它。这是快照当天的截面。
+        </p>
+      </>
+    ) : (
+      <>
+        <h3>Demand: postings</h3>
+        <p>
+          Open postings on the Metix AI Platform on {longDate(lang, snapshot)} whose description names a tool. Claude Code, GitHub
+          Copilot, LangChain, LangGraph, LlamaIndex, CrewAI, AutoGen, DSPy, and the Model Context Protocol match by name; Cursor,
+          Codex, and Windsurf count only when the description names another AI coding tool as well. The definitions are in{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/tools.json`}>tools.json</a>.
+        </p>
+        <h3>Supply: profiles</h3>
+        <p>
+          Profiles that list the same tool among their skills, with conditions that mirror the postings. Everything is a count: no
+          profile and no posting is read. Every count of people passes the small-cell rule, so anything under 10 shows as "&lt;10".
+        </p>
+        <h3>Audit</h3>
+        <p>
+          The agent read samples of job descriptions to check the matches. Claude Code and GitHub Copilot meant the tool in 40 of
+          40, AutoGen in 39 of 40. The plain words held in 55, 55, and 56 of 60 for Cursor, Codex, and Windsurf, so their
+          condition was tightened. Tightened, those three leave only 258, 452, and 13 profiles, too few for a meaningful ratio, so
+          they stay out of the demand and supply comparison.
+        </p>
+        <h3>Countries, industries, and pay</h3>
+        <p>
+          Countries count postings that name at least one assistant by location.country, with the rest combined. Industries are
+          a selected list, not a ranking, and a posting can list several. The pay comparison uses US postings titled "software
+          engineer", which can overlap with the first group. The dimensions are in{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/dimensions.json`}>dimensions.json</a>.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          Skills on a profile are self-reported and updated slowly, and newer tools are the most likely to be missing, so the
+          ratios measure the gap between demand and published skills. Reposts are not collapsed. Naming a tool is not the same as
+          requiring it. This is one day, not a trend.
+        </p>
+      </>
+    ))
+}
+
+<style>
+  .report-hero {
+    background: #14112e;
+    color: #fff;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 48px 72px;
+    align-items: end;
+    padding-block: clamp(48px, 7vw, 96px) clamp(40px, 6vw, 80px);
+  }
+
+  .hero-eyebrow {
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0defc8;
+  }
+
+  .hero-eyebrow a {
+    color: inherit;
+  }
+
+  .report-hero h1 {
+    margin-top: 18px;
+    font-size: clamp(34px, 4.8vw, 62px);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .report-hero h1:lang(zh) {
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-dek {
+    margin-top: 20px;
+    max-width: 60ch;
+    color: rgb(255 255 255 / 0.74);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin-top: 26px;
+  }
+
+  /* The link is the pill, so the whole pill is the target and the focus ring sits outside it. */
+  .hero-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid rgb(13 239 200 / 0.5);
+    border-radius: 999px;
+    font: 500 12px/1.3 var(--mono);
+    color: #0defc8;
+    text-decoration: none;
+    transition: background-color 120ms var(--ease);
+  }
+
+  .hero-chip:hover {
+    background: rgb(13 239 200 / 0.12);
+  }
+
+  .hero-chip:focus-visible {
+    outline-offset: 3px;
+  }
+
+  .hero-note {
+    font: 12px/1.3 var(--mono);
+    color: rgb(255 255 255 / 0.84);
+  }
+
+  .report-hero :focus-visible {
+    outline-color: #0defc8;
+  }
+
+  .key-num {
+    font: 700 clamp(72px, 10vw, 128px) / 0.9 var(--display);
+    letter-spacing: -0.05em;
+    color: #0defc8;
+  }
+
+  .key-num span {
+    font-size: 0.5em;
+    margin-left: 0.04em;
+  }
+
+  .key-label {
+    margin-top: 14px;
+    max-width: 36ch;
+    color: rgb(255 255 255 / 0.82);
+  }
+
+  .key-scale {
+    position: relative;
+    height: 64px;
+    margin-top: 56px;
+  }
+
+  .ks-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 12px;
+    height: 2px;
+    background: rgb(255 255 255 / 0.18);
+  }
+
+  .ks-parity {
+    position: absolute;
+    top: 2px;
+    height: 22px;
+    border-left: 1.5px dashed rgb(255 255 255 / 0.5);
+  }
+
+  .ks-dot {
+    position: absolute;
+    top: 6px;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    border-radius: 50%;
+    background: #9a95ff;
+  }
+
+  .ks-dot:last-child {
+    background: #0defc8;
+  }
+
+  .ks-name,
+  .ks-val {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font: 11px/1.2 var(--mono);
+  }
+
+  .ks-name {
+    top: 22px;
+    color: rgb(255 255 255 / 0.7);
+  }
+
+  .ks-val {
+    top: 36px;
+    color: #fff;
+  }
+
+  /* The middle label sits above the line so neighboring labels never collide on a phone. */
+  .ks-dot.above .ks-name {
+    top: -34px;
+  }
+
+  .ks-dot.above .ks-val {
+    top: -20px;
+  }
+
+  .brief {
+    max-width: 900px;
+  }
+
+  .brief h2 {
+    font-size: clamp(22px, 2.4vw, 28px);
+  }
+
+  .brief ol {
+    margin: 18px 0 0;
+    padding-left: 1.4em;
+    display: grid;
+    gap: 10px;
+    color: var(--ink-2);
+  }
+
+  .brief li::marker {
+    font-family: var(--mono);
+    color: #07545e;
+  }
+
+  .caveat {
+    margin-top: 20px;
+    padding: 16px 18px;
+    border-left: 3px solid #5b54ef;
+    background: #f3f2ff;
+    border-radius: 0 10px 10px 0;
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  .fig-text {
+    max-width: 72ch;
+    margin-top: 14px !important;
+    color: var(--ink-2);
+  }
+
+  /* 01: the two-sided chart */
+  .bf-head,
+  .butterfly li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 11rem minmax(0, 1fr);
+    column-gap: 14px;
+    align-items: center;
+  }
+
+  .bf-h {
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .bf-h.supply {
+    text-align: right;
+    color: #5b54ef;
+  }
+
+  .bf-h.demand {
+    color: #07545e;
+  }
+
+  .butterfly {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  /* The value label gets its own reserved column, so every bar is measured against
+     the same track and a long label can never squeeze its bar. */
+  .bf-side {
+    height: 26px;
+  }
+
+  .bf-side.supply {
+    padding-left: 4rem;
+  }
+
+  .bf-side.demand {
+    padding-right: 4rem;
+  }
+
+  .bf-track {
+    position: relative;
+    display: block;
+    height: 100%;
+  }
+
+  .bf-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: max(var(--w), 2px);
+    border-radius: 4px;
+  }
+
+  .supply .bf-bar {
+    right: 0;
+  }
+
+  .demand .bf-bar {
+    left: 0;
+  }
+
+  .bf-val {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .supply .bf-val {
+    right: calc(var(--w) + 8px);
+  }
+
+  .demand .bf-val {
+    left: calc(var(--w) + 8px);
+  }
+
+  .supply .bf-bar {
+    background: #5b54ef;
+  }
+
+  .demand .bf-bar {
+    background: #07545e;
+  }
+
+  .bf-val {
+    font: 12px/1 var(--mono);
+    white-space: nowrap;
+    color: var(--ink-2);
+  }
+
+  .bf-name {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  /* 02 and 03: dots on a log scale */
+  .dots {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr) 7.5rem;
+    column-gap: 16px;
+    row-gap: 12px;
+  }
+
+  .dots-axis,
+  .dot-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+  }
+
+  .axis-track {
+    position: relative;
+    height: 16px;
+  }
+
+  .tick {
+    position: absolute;
+    transform: translateX(-50%);
+    font: 11px/1 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .dot-name {
+    font-size: 15px;
+  }
+
+  .dot-row.focus .dot-name {
+    font-weight: 600;
+  }
+
+  .dot-track {
+    position: relative;
+    height: 22px;
+    background: linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat;
+  }
+
+  .parity {
+    position: absolute;
+    top: -6px;
+    bottom: -6px;
+    border-left: 1.5px dashed #4e4d4b;
+  }
+
+  .dot {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: #7e8787;
+  }
+
+  .dot-row.focus .dot,
+  .dot.us {
+    background: #07545e;
+  }
+
+  .dot.out {
+    background: #fff;
+    box-shadow: inset 0 0 0 2.5px #07545e;
+  }
+
+  .dot-row:not(.focus) .dot.us {
+    background: #7e8787;
+  }
+
+  .dot-row:not(.focus) .dot.out {
+    box-shadow: inset 0 0 0 2.5px #7e8787;
+  }
+
+  .link {
+    position: absolute;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    background: #7e8787;
+  }
+
+  .dot-row.focus .link {
+    background: #07545e;
+  }
+
+  .dot-val {
+    font: 12px/1.3 var(--mono);
+    white-space: nowrap;
+  }
+
+  .dot-row.focus .dot-val {
+    color: #07545e;
+    font-weight: 600;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 16px;
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .lg::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -1px;
+    border-radius: 50%;
+  }
+
+  .lg.us::before {
+    background: #07545e;
+  }
+
+  .lg.out::before {
+    box-shadow: inset 0 0 0 2.5px #07545e;
+  }
+
+  .lg.assistant::before {
+    border-radius: 2px;
+    background: #07545e;
+  }
+
+  .lg.baseline::before {
+    border-radius: 2px;
+    background: #7e8787;
+  }
+
+  /* 05: co-mentions */
+  .cm {
+    width: 100%;
+    max-width: 640px;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 4px;
+    font-size: 14px;
+  }
+
+  .cm thead th:first-child {
+    width: 34%;
+  }
+
+  .cm th {
+    font: 500 12px/1.3 var(--mono);
+    color: var(--ink-3);
+    text-align: left;
+    padding: 6px 8px;
+  }
+
+  .cm thead th:not(:first-child) {
+    text-align: center;
+    vertical-align: bottom;
+  }
+
+  .cm tbody th {
+    font: 600 15px/1.3 var(--sans);
+    color: var(--ink);
+  }
+
+  .cm-n {
+    display: block;
+    font: 11px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .cm td {
+    padding: 14px 8px;
+    text-align: center;
+    font: 600 15px/1 var(--mono);
+    border-radius: 6px;
+    background: color-mix(in srgb, #07545e calc(var(--v) * 100%), #f4f5f8);
+    color: var(--ink);
+  }
+
+  .cm td[style*="--v: 0.7"],
+  .cm td[style*="--v: 0.8"],
+  .cm td[style*="--v: 0.9"] {
+    color: #fff;
+  }
+
+  .cm td.self {
+    background: repeating-linear-gradient(135deg, var(--line) 0 2px, transparent 2px 7px);
+  }
+
+  /* 07: industries */
+  .ind-groups {
+    display: grid;
+    gap: 28px;
+  }
+
+  .ind-head {
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 12px;
+  }
+
+  /* 08: pay */
+  .pay {
+    display: grid;
+    gap: 16px;
+    max-width: 820px;
+  }
+
+  .pay-row {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 16px;
+    align-items: center;
+  }
+
+  .pay-label {
+    font-size: 15px;
+  }
+
+  .pay-bars {
+    display: grid;
+    gap: 4px;
+  }
+
+  .pay-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: var(--w);
+    min-width: 3.2rem;
+    height: 22px;
+    padding-right: 8px;
+    border-radius: 4px;
+    font: 600 12px/1 var(--mono);
+    color: #fff;
+  }
+
+  .pay-bar.assistant {
+    background: #07545e;
+  }
+
+  .pay-bar.baseline {
+    background: #7e8787;
+    color: var(--ink);
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bf-head {
+      display: none;
+    }
+    .butterfly li {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      row-gap: 4px;
+    }
+    .bf-name {
+      grid-column: 1 / -1;
+      grid-row: 1;
+      text-align: left;
+      margin-top: 6px;
+    }
+    .dots {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+    .dot-name {
+      grid-column: 1 / -1;
+      margin-top: 6px;
+    }
+    .dots-axis > span:first-child,
+    .dots-axis > span:last-child {
+      display: none;
+    }
+    .dots-axis .axis-track {
+      grid-column: 1;
+    }
+
+    .tick.edge {
+      display: none;
+    }
+
+    /* US above the line, outside the US below it, so the two never hide each other. */
+    .dot {
+      width: 12px;
+      height: 12px;
+      margin: -6px 0 0 -6px;
+    }
+
+    .dot.us {
+      top: calc(50% - 4px);
+    }
+
+    .dot.out {
+      top: calc(50% + 4px);
+    }
+    .pay-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+  }
+</style>

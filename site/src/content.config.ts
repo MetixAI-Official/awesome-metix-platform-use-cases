@@ -15,6 +15,12 @@ const cases = defineCollection({
     .object({
       slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
       type: z.enum(["study", "snapshot", "recipe", "agent"]),
+      // card: one question, one number, one small chart. report: a long read with many charts.
+      format: z.enum(["card", "report"]),
+      // The card's field color, or the report's theme band on the catalog.
+      color: z.enum(["violet", "blue", "navy", "teal", "sky", "periwinkle", "signal"]).optional(),
+      // Catalog grid columns a card spans.
+      span: z.union([z.literal(1), z.literal(2)]).optional(),
       status: z.enum(["planned", "draft", "published"]),
       title: bilingual,
       dek: bilingual,

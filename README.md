@@ -2,18 +2,22 @@
 
 Job-market reports made by an AI agent on the [Metix AI Platform](https://platform.metix.ai): professional profiles, job postings, and companies behind one query API. Every report publishes the queries behind its numbers, what those queries cost in Credits, and the prompt that produced it, so you can check the work, run it again on your own key, and change it to answer your own question.
 
-Reports are published in English and Chinese at [metixai-official.github.io/awesome-metix-platform-use-cases](https://metixai-official.github.io/awesome-metix-platform-use-cases/).
+The cases are published in English and Chinese as **Casebook** at [metixai-official.github.io/awesome-metix-platform-use-cases](https://metixai-official.github.io/awesome-metix-platform-use-cases/).
 
 ## Use cases
 
-| Use case | Type | Data | Status |
-| --- | --- | --- | --- |
-| [Nearly half of US inference openings are in the Bay Area](cases/inference-roles-us-metros-2026/) | Snapshot | Jobs | Published, 95 Credits to rerun |
-| Coding-agent companies and who they hire | Study | People, jobs, companies | Planned |
-| China-educated AI talent in industry | Study | People, companies | Planned |
-| Inference as a P&L function | Study | People, jobs, companies | Planned |
+Reports are long reads with many figures. Cards are one question, one number, one chart.
 
-Planned titles are working titles. A published case is titled with its finding. The China-educated study defines its population by the country or region of each person's undergraduate institution, and by nothing else. It does not use names, languages, or any inferred ethnicity or nationality.
+| Use case | Format | Data | Credits to rerun |
+| --- | --- | --- | --- |
+| [Job postings ask for Claude Code five times as often as profiles list it](cases/ai-tool-stack-in-hiring-2026/) | Report | Jobs, people | 92 |
+| [Claude Code is named in more job postings than any other AI coding tool](cases/ai-coding-tools-in-postings-2026/) | Card | Jobs | 14 |
+| [Nearly half of US inference openings are in the Bay Area](cases/inference-roles-us-metros-2026/) | Card | Jobs | 96 |
+| [Job titles name inference eight times as often as pre-training](cases/model-lifecycle-titles-2026/) | Card | Jobs | 8 |
+| [Nearly two in three forward-deployed engineering openings are in the US](cases/forward-deployed-engineers-2026/) | Card | Jobs | 13 |
+| [Half of US inference roles that state pay start between $150k and $200k](cases/us-inference-pay-2026/) | Card | Jobs | 6 |
+
+Planned: coding-agent companies and who they hire, China-educated AI talent in industry, and inference as a P&L function. Their titles are working titles; a published case is titled with its finding. The China-educated study will define its population by the country or region of each person's undergraduate institution and by nothing else, never by names, languages, or any inferred ethnicity or nationality.
 
 ## How a case is made
 
@@ -52,7 +56,8 @@ Create a key at [platform.metix.ai/api-keys](https://platform.metix.ai/api-keys)
 ```text
 cases/<slug>/     one folder per use case: metadata, prompt, queries, replay, aggregates, report page
 cases/_template/  the folder to copy when starting a case
-site/             the Astro site that renders the catalog and every report, in English and Chinese
+tools/            the Platform client every fetch.py uses
+site/             the Astro site (Casebook) that renders the catalog and every case, in English and Chinese
 docs/             how the repository works and the rules every case follows
 scripts/          the public data check and its tests
 ```
@@ -94,10 +99,10 @@ chmod +x .git/hooks/pre-commit
 
 - [Metix AI Platform](https://platform.metix.ai) and its [docs](https://platform.metix.ai/docs)
 - [metix-skills](https://github.com/MetixAI-Official/metix-skills): agent skills for the same API
-- [metix.ai/reports](https://metix.ai/reports/): research reports from Metix AI
+- [metix.ai/reports](https://metix.ai/reports/): the research reports published on metix.ai
 
 ## License
 
-Code (the scripts, each case's `fetch.py`, and the site source) is licensed under the [Apache License 2.0](LICENSE). Written content, charts, and the published aggregates in `cases/*/data/` are licensed under [Creative Commons Attribution 4.0](LICENSE-CONTENT); credit Metix AI when you reuse them.
+Code (the scripts, each case's `fetch.py`, and the site source) is licensed under the [Apache License 2.0](LICENSE). Written content, charts, and the published aggregates in `cases/*/data/` are licensed under [Creative Commons Attribution 4.0](LICENSE-CONTENT); credit Metix AI Platform when you reuse them.
 
-Copyright 2026 OpenJobs AI Inc. Metix AI is a product of OpenJobs AI Inc.
+Copyright 2026 OpenJobs AI Inc. Metix AI Platform is a product of OpenJobs AI Inc.

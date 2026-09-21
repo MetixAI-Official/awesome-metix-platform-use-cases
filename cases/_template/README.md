@@ -18,7 +18,7 @@ Which queries run (one file each in `queries/`), what each one counts, and how t
 
 ## Limits
 
-What the data cannot show here. Counts of profiles are lower bounds: they cover what is visible in the Metix AI index on the snapshot date, not a company's headcount.
+What the data cannot show here. Counts of profiles are lower bounds: they cover what is visible through the Metix AI Platform on the snapshot date, not a company's headcount.
 
 ## Rerun
 

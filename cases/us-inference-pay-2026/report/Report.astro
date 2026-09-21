@@ -1,0 +1,324 @@
+---
+/*
+ * Design
+ * Field: signal #FF6614 with ink text; the $150k to $200k band in ink, the others in rust #7A2E0B.
+ * Detail chart on white: vertical columns, because the bands are ordered and the eye reads a
+ *   distribution left to right.
+ * Signature: the count of postings that state pay at all (61 of 386) sits next to the number,
+ *   so the band never reads as the whole market.
+ */
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, isoDate, longDate, number, type Lang } from "@site/i18n";
+import bands from "../data/bands.json";
+import receipt from "../data/receipt.json";
+import usd from "../queries/us-inference-usd.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: { slug: string; snapshot?: Date; exploration_credits?: number };
+}
+
+const { lang, section, size = "compact", entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(bands.snapshot);
+const stated = bands.stated_count;
+const usTotal = bands.us_postings_count;
+const rows = bands.rows;
+const peak = rows.reduce((a, b) => (b.count > a.count ? b : a));
+const max = peak.count;
+const pct = (x: number) => `${number(lang, x * 100, 0)}%`;
+const bandLabel: Record<string, Record<Lang, string>> = {
+  "under-150k": { en: "Under $150k", zh: "15 万以下" },
+  "150k-200k": { en: "$150k to $200k", zh: "15 万到 20 万" },
+  "200k-250k": { en: "$200k to $250k", zh: "20 万到 25 万" },
+  "250k-300k": { en: "$250k to $300k", zh: "25 万到 30 万" },
+  "300k+": { en: "$300k or more", zh: "30 万及以上" },
+};
+const bandStart: Record<string, Record<Lang, string>> = {
+  "under-150k": { en: "<$150k", zh: "<15 万" },
+  "150k-200k": { en: "$150k", zh: "15 万" },
+  "200k-250k": { en: "$200k", zh: "20 万" },
+  "250k-300k": { en: "$250k", zh: "25 万" },
+  "300k+": { en: "$300k+", zh: "30 万+" },
+};
+const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.count, 0);
+---
+
+{
+  section === "card" && (
+    <div class={`card-body size-${size}`}>
+      <p class="big-number">{pct(peak.count / stated)}</p>
+      <p class="big-label">
+        {zh
+          ? `写明美元年薪的 ${stated} 个美国推理岗位里，${peak.count} 个起薪在 15 万到 20 万美元之间。另外 ${usTotal - stated} 个没有写明美元年薪。`
+          : `of the ${stated} US inference postings that state pay start between $150k and $200k (${peak.count}). The other ${usTotal - stated} do not state an annual USD salary.`}
+      </p>
+      <ol class="mini-cols" aria-label={zh ? "按起薪分档的岗位数" : "Postings by posted minimum"}>
+        {rows.map((r) => (
+          <li class={r.group === peak.group ? "focus" : undefined} aria-label={`${bandLabel[r.group][lang]}: ${r.count}`}>
+            <span class="mc-plot" aria-hidden="true">
+              <span class="mc-bar" style={`--h: ${((r.count / max) * 100).toFixed(1)}%`}>
+                <span class="mc-value">{r.count}</span>
+              </span>
+            </span>
+            <span class="mc-label" aria-hidden="true">{bandStart[r.group][lang]}</span>
+          </li>
+        ))}
+      </ol>
+      <p class="mc-axis">{zh ? "薪资下限，按档起点，美元/年" : "Posted minimum by band, USD a year"}</p>
+    </div>
+  )
+}
+
+{
+  section === "body" && (
+    <div class="wrap report-body">
+      <Figure
+        id="pay"
+        lang={lang}
+        heading={
+          zh ? `起薪集中在 15 万到 20 万美元，超过 25 万的只有 ${above250} 个` : `Pay floors cluster at $150k to $200k. Only ${above250} start at $250k or more.`
+        }
+        sub={
+          zh
+            ? `写明美元年薪的美国推理岗位，按薪资下限分档（共 ${stated} 个，占美国同类岗位 ${usTotal} 个的 ${pct(stated / usTotal)}）`
+            : `US inference postings that state an annual salary in USD, by posted minimum (${stated} of the ${usTotal} US postings, ${pct(stated / usTotal)})`
+        }
+        alt={rows.map((r) => `${bandLabel[r.group][lang]} ${r.count}`).join(zh ? "，" : ", ")}
+        source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
+        queries={[{ file: "us-inference-usd.json", endpoint: "POST /v1/jobs/query", spec: usd }]}
+        cost={zh ? `${receipt.calls} 次计数，${receipt.credits} Credits` : `${receipt.calls} counts, ${receipt.credits} Credits`}
+      >
+        <div class="cols" role="list" aria-label={zh ? "按起薪分档的岗位数" : "Postings by posted minimum"}>
+          {rows.map((r) => (
+            <div class={r.group === peak.group ? "col focus" : "col"} role="listitem">
+              <span class="col-plot">
+                <span class="col-bar" style={`--h: ${((r.count / max) * 100).toFixed(1)}%`}>
+                  <span class="col-value">{r.count}</span>
+                </span>
+              </span>
+              <span class="col-label">{bandLabel[r.group][lang]}</span>
+            </div>
+          ))}
+        </div>
+      </Figure>
+
+      <section class="findings" aria-labelledby="findings-title">
+        <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
+        {zh ? (
+          <>
+            <p>
+              美国标题含 inference 或 model serving 的 {usTotal} 个在招岗位里，只有 {stated} 个写明了美元年薪，占 {pct(stated / usTotal)}。
+            </p>
+            <p>
+              这 {stated} 个里，{peak.count} 个的薪资下限在 15 万到 20 万美元之间，占一半；{above250} 个在 25 万以上，低于 15 万的只有{" "}
+              {rows[0].count} 个。
+            </p>
+            <p>
+              写出来的是底薪区间的下限，不含奖金和股票，不能当作总包。愿意写薪资的公司和不写的公司可能不一样，所以这不是整个市场的薪资分布。
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Of the {usTotal} open US postings with inference or model serving in the title, only {stated} state an annual salary
+              in USD, {pct(stated / usTotal)}.
+            </p>
+            <p>
+              Among those {stated}, {peak.count} have a posted minimum between $150k and $200k, half of them. {above250} start at
+              $250k or more, and {rows[0].count} start below $150k.
+            </p>
+            <p>
+              The figure is the bottom of the posted base range, without bonus or equity, so it is not total pay. Companies that
+              publish pay may differ from those that do not, so this is not the pay of the whole market.
+            </p>
+          </>
+        )}
+      </section>
+    </div>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>人群</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上的美国在招岗位，标题匹配 "inference"、"model serving" 或 "llm
+          serving"，排除 "causal" 和 "statistical"，并且写明了美元年薪（salary.currency 为 USD，salary.annual_min 存在）。和旧金山湾区那张卡片用的是同一组标题条件。
+        </p>
+        <h3>分档</h3>
+        <p>
+          先数写明薪资的岗位总数，再数 salary.annual_min 不低于 15 万、20 万、25 万、30 万美元的各有多少，相邻两个数相减就是每一档。Platform
+          按同一币种把时薪、月薪换算成年薪。
+        </p>
+        <h3>计数</h3>
+        <p>
+          六次计数，每次 1 Credit，不读取岗位。重复发布没有合并。条件在 <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>。
+        </p>
+        <h3>局限</h3>
+        <p>样本小（{stated} 个），只代表写了薪资的岗位。这是快照当天的截面。</p>
+      </>
+    ) : (
+      <>
+        <h3>Population</h3>
+        <p>
+          US open postings on the Metix AI Platform on {longDate(lang, snapshot)} whose title matches "inference", "model
+          serving", or "llm serving", excluding "causal" and "statistical", that state an annual salary in USD (salary.currency
+          is USD and salary.annual_min exists). The title condition is the same as in the Bay Area card.
+        </p>
+        <h3>Bands</h3>
+        <p>
+          One count of postings that state pay, then one count each for salary.annual_min at or above $150k, $200k, $250k, and
+          $300k. Each band is the difference between two neighboring counts. The Platform annualizes hourly and monthly pay
+          within one currency.
+        </p>
+        <h3>Counting</h3>
+        <p>
+          Six counts, one Credit each, and no posting is read. Reposts are not collapsed. The condition is in{" "}
+          <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>.
+        </p>
+        <h3>Limits</h3>
+        <p>A small set ({stated} postings) that speaks only for postings that state pay. This is one day, not a trend.</p>
+      </>
+    ))
+}
+
+<style>
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: clamp(8px, 2vw, 20px);
+    align-items: end;
+    height: 300px;
+    max-width: 760px;
+  }
+
+  .col {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+    text-align: center;
+  }
+
+  /* The top padding is the room for the tallest column's label; each count sits on its own bar. */
+  .col-plot {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 30px;
+  }
+
+  .col-bar {
+    position: relative;
+    height: var(--h);
+    min-height: 3px;
+    border-radius: 6px 6px 0 0;
+    background: #7e8787;
+  }
+
+  .col-value {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    padding-bottom: 6px;
+    font: 600 18px/1.2 var(--mono);
+  }
+
+  .col.focus .col-bar {
+    background: #c24a08;
+  }
+
+  .col.focus .col-value {
+    color: #0b0a1f;
+  }
+
+  .mini-cols {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    height: 132px;
+    margin: 22px 0 0;
+    padding: 0;
+  }
+
+  .mini-cols li {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .mc-plot {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-top: 18px;
+    border-bottom: 1.5px solid var(--f-ink);
+  }
+
+  .mc-bar {
+    position: relative;
+    height: var(--h);
+    min-height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--f-mark);
+  }
+
+  .mini-cols .focus .mc-bar {
+    background: var(--f-focus);
+  }
+
+  .mc-value {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    padding-bottom: 3px;
+    text-align: center;
+    font: 600 12px/1 var(--mono);
+    color: var(--f-ink);
+  }
+
+  .mc-label {
+    margin-top: 6px;
+    text-align: center;
+    font: 11px/1.2 var(--mono);
+    color: var(--f-ink);
+    white-space: nowrap;
+  }
+
+  .mc-axis {
+    margin-top: 8px;
+    font: 11px/1.3 var(--mono);
+    color: var(--f-ink-2);
+  }
+
+  .card-body.size-full .mini-cols {
+    height: 200px;
+  }
+
+  .col-label {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--ink-2);
+  }
+
+  .card-body.size-full .big-label {
+    font-size: 17px;
+    color: var(--f-ink);
+  }
+
+  @media (max-width: 640px) {
+    .cols {
+      height: 240px;
+    }
+    .col-label {
+      font-size: 11px;
+    }
+  }
+</style>
