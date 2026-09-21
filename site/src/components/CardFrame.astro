@@ -27,7 +27,7 @@ const label = `${t.formats.card} ${String(index).padStart(2, "0")}`;
   <h3 class="cf-title">{keepNames(entry.title[lang])}</h3>
   <div class="cf-body"><slot /></div>
   <p class="cf-stub">
-    {receipt && <span>{number(lang, receipt.credits)} {t.toRerun}</span>}
+    {receipt && <span>{t.toRerun(number(lang, receipt.credits))}</span>}
     {entry.snapshot && <span>{isoDate(entry.snapshot)}</span>}
     <span class="open">{t.openCard} →</span>
   </p>

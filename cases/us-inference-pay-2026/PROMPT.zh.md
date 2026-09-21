@@ -1,11 +1,11 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。它会复现这张卡片，花 6 Credits。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍花 6 Credits，全部是计数。超过 10 之前它会先停下来问你。
 
 ```text
 用 Metix AI Platform 回答一个问题：美国推理岗位写出来的薪资下限是多少？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
 
-1. 先读规则再查询。调用 GET /contract（免费），读薪资规则：对 salary.annual_min 做比较时，同一个 all 节点里必须用 eq 固定 salary.currency；金额是在同一币种内换算成年薪，不做跨币种换算。
+1. 先读规则再查询。调用 GET /contract（免费），读薪资规则：对 salary.annual_min 做比较时，同一个 all 节点里必须用 eq 固定 salary.currency；金额是在同一币种内换算成年薪，不做跨币种换算。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 10 Credits 之前先停下来问我。
 
 2. 人群。美国在招岗位，标题匹配 "inference"、"model serving"、"llm serving" 中任意一个，排除匹配 "causal" 或 "statistical" 的标题，并且 salary.currency eq "USD"、salary.annual_min 存在。
 

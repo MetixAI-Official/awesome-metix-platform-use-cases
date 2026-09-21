@@ -1,0 +1,85 @@
+---
+/*
+ * The agent picker: one set of setup commands per agent, with Copy. Only the setups
+ * platform.metix.ai documents and has run are shown (Claude Code, Codex, the skills
+ * installer); every other client gets the endpoint and the header. The reader's choice
+ * is remembered, so the home page and every case page show the same agent.
+ * Without JavaScript all four panels are shown, one under another.
+ */
+import { ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  /** Unique per page: the home page and a case page can both render one. */
+  id: string;
+}
+
+const { lang, id } = Astro.props;
+const t = ui[lang];
+const ENDPOINT = "https://mira-api.metix.ai";
+const agents = [
+  {
+    key: "claude",
+    label: t.setup.claude,
+    note: t.setup.claudeNote,
+    command: `claude mcp add --scope user --transport http metix \\\n  ${ENDPOINT}/mcp \\\n  --header "Authorization: Bearer $METIX_KEY"`,
+  },
+  {
+    key: "codex",
+    label: t.setup.codex,
+    note: t.setup.codexNote,
+    command: `codex mcp add metix \\\n  --url ${ENDPOINT}/mcp \\\n  --bearer-token-env-var METIX_KEY`,
+  },
+  {
+    key: "skills",
+    label: t.setup.skills,
+    note: t.setup.skillsNote,
+    command: "npx skills add MetixAI-Official/metix-skills",
+  },
+  {
+    key: "other",
+    label: t.setup.other,
+    note: t.setup.otherNote,
+    command: `${ENDPOINT}/mcp\nAuthorization: Bearer <your key>`,
+  },
+];
+---
+
+<div class="agent-setup" data-agent-setup>
+  <div class="as-tabs" role="tablist" aria-label={t.setup.label}>
+    {
+      agents.map((a, i) => (
+        <button
+          type="button"
+          role="tab"
+          id={`${id}-tab-${a.key}`}
+          aria-controls={`${id}-panel-${a.key}`}
+          aria-selected={i === 0 ? "true" : "false"}
+          tabindex={i === 0 ? 0 : -1}
+          data-agent={a.key}
+        >
+          {a.label}
+        </button>
+      ))
+    }
+  </div>
+  {
+    agents.map((a) => (
+      <div class="as-panel" role="tabpanel" id={`${id}-panel-${a.key}`} aria-labelledby={`${id}-tab-${a.key}`} data-agent-panel={a.key} data-copy-root>
+        <p class="as-no-js-label">{a.label}</p>
+        <p class="as-note">{a.note}</p>
+        <div class="code-copy">
+          <pre class="code">{a.command}</pre>
+          <button class="btn btn-small" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
+            {t.copy}
+          </button>
+        </div>
+        {a.key !== "skills" && (
+          <a class="as-docs" href="https://platform.metix.ai/docs/mcp">
+            {t.setup.docs} →
+          </a>
+        )}
+      </div>
+    ))
+  }
+</div>

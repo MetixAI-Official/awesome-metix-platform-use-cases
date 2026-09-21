@@ -86,17 +86,86 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
           await navigator.clipboard.writeText((source.innerText || source.textContent).trim());
           button.textContent = button.dataset.done;
         } catch {
-          const range = document.createRange();
-          range.selectNodeContents(source);
-          const selection = window.getSelection();
-          selection.removeAllRanges();
-          selection.addRange(range);
+          // The clipboard can be blocked, and the prompt's source is hidden, so selecting
+          // it would copy nothing. Show the text in a box, selected, next to the button.
+          const anchor = button.closest(".code-copy, .rs-head, .prompt-foot") || button.parentElement;
+          let box = anchor.nextElementSibling;
+          if (!box || !box.classList.contains("copy-fallback")) {
+            box = document.createElement("textarea");
+            box.className = "copy-fallback";
+            box.readOnly = true;
+            anchor.insertAdjacentElement("afterend", box);
+          }
+          box.value = (source.innerText || source.textContent).trim();
+          box.focus();
+          box.select();
           const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
           button.textContent = button.dataset.fail.replace("Ctrl+C", mac ? "Cmd+C" : "Ctrl+C");
+          clearTimeout(button._reset);
+          button._reset = setTimeout(() => (button.textContent = label), 6000);
+          return;
         }
         clearTimeout(button._reset);
         button._reset = setTimeout(() => (button.textContent = label), 1500);
       });
+
+      // Run it: the paths are links to their panels; with JavaScript one panel shows at a
+      // time. A hash naming a panel, or anything inside one (#prompt, #step-3), opens it.
+      const runRoots = [...document.querySelectorAll("[data-run]")];
+      const showRunPath = (root, key) => {
+        for (const panel of root.querySelectorAll("[data-panel]")) panel.hidden = panel.dataset.panel !== key;
+        for (const link of root.querySelectorAll("[data-path]")) link.setAttribute("aria-current", String(link.dataset.path === key));
+      };
+      const runFromHash = () => {
+        for (const root of runRoots) {
+          const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+          const panel = target && root.contains(target) && target.closest("[data-panel]");
+          showRunPath(root, panel ? panel.dataset.panel : root.querySelector("[data-path]").dataset.path);
+        }
+      };
+      for (const root of runRoots) {
+        for (const link of root.querySelectorAll("[data-path]")) {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            showRunPath(root, link.dataset.path);
+            history.replaceState(null, "", `#run-${link.dataset.path}`);
+          });
+        }
+      }
+      runFromHash();
+
+      // Agent tabs: arrow keys move between them, and the choice carries across pages.
+      let savedAgent = null;
+      try {
+        savedAgent = localStorage.getItem("metix-agent");
+      } catch {}
+      for (const box of document.querySelectorAll("[data-agent-setup]")) {
+        const tabs = [...box.querySelectorAll('[role="tab"]')];
+        const select = (key, focus) => {
+          for (const tab of tabs) {
+            const on = tab.dataset.agent === key;
+            tab.setAttribute("aria-selected", String(on));
+            tab.tabIndex = on ? 0 : -1;
+            if (on && focus) tab.focus();
+          }
+          for (const panel of box.querySelectorAll("[data-agent-panel]")) panel.hidden = panel.dataset.agentPanel !== key;
+        };
+        tabs.forEach((tab, i) => {
+          tab.addEventListener("click", () => {
+            select(tab.dataset.agent);
+            try {
+              localStorage.setItem("metix-agent", tab.dataset.agent);
+            } catch {}
+          });
+          tab.addEventListener("keydown", (event) => {
+            const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+            if (!step) return;
+            event.preventDefault();
+            select(tabs[(i + step + tabs.length) % tabs.length].dataset.agent, true);
+          });
+        });
+        select(tabs.some((tab) => tab.dataset.agent === savedAgent) ? savedAgent : tabs[0].dataset.agent);
+      }
 
       // Expand all / Collapse all: the label follows the folds, including ones opened by hand.
       for (const button of document.querySelectorAll("[data-fold-toggle]")) {
@@ -119,11 +188,14 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
       // A link to a folded step (#step-3) opens it.
       const openTarget = () => {
         const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
-        const fold = target && target.querySelector("details");
+        const fold = target && target.id.startsWith("step-") && target.querySelector("details");
         if (fold) fold.open = true;
       };
       openTarget();
-      window.addEventListener("hashchange", openTarget);
+      window.addEventListener("hashchange", () => {
+        runFromHash();
+        openTarget();
+      });
     </script>
   </body>
 </html>

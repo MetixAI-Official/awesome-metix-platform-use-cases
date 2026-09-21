@@ -1,6 +1,6 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. It reproduces this case end to end, for about N Credits.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about L to H Credits: C for the counts and the rest for the reads the prompt asks for. It stops and asks before CAP. Use the same three numbers as agent_run in case.yaml.
 
 Replace every line in the block, keep the order, and keep each step concrete: exact terms, exact fields, exact numbers. The finished prompt is what the case is made from, so a reader who runs it should get the published numbers. See `cases/inference-roles-us-metros-2026/PROMPT.md` for a complete one.
 

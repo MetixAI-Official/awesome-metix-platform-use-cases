@@ -12,7 +12,6 @@ interface Props {
 const { lang, slug, receipt, exploration } = Astro.props;
 const t = ui[lang];
 const [ranDate, ranTime] = receipt.ran_at.replace(/:\d\dZ$/, "").split("T");
-const command = `export METIX_KEY=metix_xxxxxxxxxxxx\npython3 cases/${slug}/fetch.py`;
 ---
 
 <section class="block rail-block" id="receipt" aria-labelledby="receipt-title">
@@ -31,15 +30,6 @@ const command = `export METIX_KEY=metix_xxxxxxxxxxxx\npython3 cases/${slug}/fetc
   <p class="receipt-note">{t.resultsNote(receipt.records)}</p>
   {exploration !== undefined && <p class="receipt-note">{t.exploration(exploration)}</p>}
 
-  <div class="rerun" data-copy-root>
-    <div class="rerun-head">
-      <h3>{t.rerun}</h3>
-      <button class="btn" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
-        {t.copy}
-      </button>
-    </div>
-    <pre class="code">{command}</pre>
-  </div>
   <p class="links-line">
     <a href={`${REPO}/tree/main/cases/${slug}`}>{t.caseFolder}</a>
     <a href="https://mira-api.metix.ai/docs/credits.md">{t.pricing}</a>

@@ -17,6 +17,7 @@ regions: [US]
 snapshot: 2026-09-21
 published: 2026-09-21
 exploration_credits: 11
+agent_run: { low: 6, high: 6, cap: 10 }
 highlights:
   - value: "61"
     label:

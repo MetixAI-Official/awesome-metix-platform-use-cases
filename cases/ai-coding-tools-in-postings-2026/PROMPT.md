@@ -1,11 +1,11 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. It reproduces this card for about 15 Credits, plus whatever the audit reads.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 95 to 135 Credits: about 15 for the counts and the rest for the audit reads. It stops and asks before 140.
 
 ```text
 Answer one question with the Metix AI Platform: which AI coding tools do job postings name, and how often? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A count with size 1 costs 1 Credit; a search that returns nothing is free.
+1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A count with size 1 costs 1 Credit; a search that returns nothing is free. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 140 Credits.
 
 2. Tools. Claude Code, Cursor, GitHub Copilot, Codex, and Windsurf, matched in the job description (field "description", operator match).
 

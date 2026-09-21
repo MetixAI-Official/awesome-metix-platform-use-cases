@@ -1,11 +1,11 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. It reproduces this card for about 13 Credits, plus the discovery read.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 130 to 145 Credits: 13 for the counts and the rest for the read that chooses the countries. It stops and asks before 150.
 
 ```text
 Answer one question with the Metix AI Platform: in which countries are companies hiring forward-deployed engineers? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A count with size 1 costs 1 Credit.
+1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A count with size 1 costs 1 Credit. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 150 Credits.
 
 2. Population. Open postings whose title matches "forward deployed". The phrase rarely means anything else; read 25 titles to confirm.
 

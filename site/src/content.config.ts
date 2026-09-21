@@ -31,6 +31,13 @@ const cases = defineCollection({
       snapshot: z.coerce.date().optional(),
       published: z.coerce.date().optional(),
       exploration_credits: z.number().int().nonnegative().optional(),
+      // What an agent following PROMPT.md spends: counts plus the reads the prompt asks
+      // for, and the ceiling the prompt stops at. The replay script's cost is receipt.json.
+      agent_run: z
+        .object({ low: z.number().int().nonnegative(), high: z.number().int().nonnegative(), cap: z.number().int().positive() })
+        .strict()
+        .refine((r) => r.low <= r.high && r.high <= r.cap, { message: "agent_run needs low <= high <= cap" })
+        .optional(),
       // Up to three figures shown on the catalog row, copied from the case's aggregates.
       highlights: z
         .array(z.object({ value: z.string().min(1), label: bilingual }).strict())
@@ -40,6 +47,9 @@ const cases = defineCollection({
     .strict()
     .refine((c) => c.status !== "published" || (c.snapshot && c.published), {
       message: "a published case needs snapshot and published dates",
+    })
+    .refine((c) => c.status !== "published" || c.agent_run, {
+      message: "a published case needs agent_run: the cost of following its prompt",
     }),
 });
 

@@ -1,11 +1,11 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. It reproduces this card for under 10 Credits, plus whatever the audit reads.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 56 to 64 Credits: 8 for the counts and the rest for the audit reads. It stops and asks before 70.
 
 ```text
 Answer one question with the Metix AI Platform: which stage of the model lifecycle do job titles name most often, and where is each stage hired? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A search costs ceil(returned IDs / 25) Credits, so a count with size 1 costs 1 Credit, and a search that returns nothing is free.
+1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A search costs ceil(returned IDs / 25) Credits, so a count with size 1 costs 1 Credit, and a search that returns nothing is free. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 70 Credits.
 
 2. Stages. Four title conditions: pre-training (pretraining, pre-training), post-training (post-training, posttraining), fine-tuning (fine-tuning, finetuning), and inference (inference, model serving, llm serving). Use one any node per stage.
 

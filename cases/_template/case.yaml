@@ -19,3 +19,4 @@ regions: [US] # ISO country codes, or global
 # snapshot: YYYY-MM-DD, the day the replay ran
 # published: YYYY-MM-DD, set when status becomes published
 # exploration_credits: Credits the agent spent before the replay
+# agent_run: { low: L, high: H, cap: CAP }  what following PROMPT.md costs (counts plus the reads it asks for) and the ceiling it stops at; required to publish

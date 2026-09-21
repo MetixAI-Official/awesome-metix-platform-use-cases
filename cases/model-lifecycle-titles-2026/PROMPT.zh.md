@@ -1,11 +1,11 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。它会复现这张卡片，计数部分不到 10 Credits，另加抽检读取的花费。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 56 到 64 Credits：计数 8，其余是抽检读取。超过 70 之前它会先停下来问你。
 
 ```text
 用 Metix AI Platform 回答一个问题：招聘标题里最常出现模型生命周期的哪个阶段，每个阶段在哪里招人？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
 
-1. 先读规则再查询。调用 GET /contract（免费），只用 querySpecByEntity.job 里的字段。搜索按 ceil(返回的 ID 数 / 25) 计费，所以 size 1 的计数花 1 Credit，没有结果的搜索不收费。
+1. 先读规则再查询。调用 GET /contract（免费），只用 querySpecByEntity.job 里的字段。搜索按 ceil(返回的 ID 数 / 25) 计费，所以 size 1 的计数花 1 Credit，没有结果的搜索不收费。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 70 Credits 之前先停下来问我。
 
 2. 阶段。四组标题条件：预训练（pretraining、pre-training）、后训练（post-training、posttraining）、微调（fine-tuning、finetuning）、推理（inference、model serving、llm serving）。每个阶段用一个 any 节点。
 

@@ -2,7 +2,7 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import Base from "@site/layouts/Base.astro";
 import FoldSections from "@site/components/FoldSections.astro";
-import PromptBlock from "@site/components/PromptBlock.astro";
+import RunBlock from "@site/components/RunBlock.astro";
 import Receipt from "@site/components/Receipt.astro";
 import { byCardOrder, prompts, receipts, reports } from "@site/cases";
 import { href, isoDate, keepNames, number, ui, type Lang } from "@site/i18n";
@@ -44,13 +44,11 @@ const cardIndex = cards.findIndex((c) => c.data.slug === data.slug) + 1;
             <p class="ch-dek">{data.dek[lang]}</p>
             <ul class="chips">
               <li>
-                <a href="#prompt">{t.seePrompt}</a>
+                <a href="#run">{t.run.title}</a>
               </li>
               {receipt && (
                 <li>
-                  <a href="#receipt">
-                    {number(lang, receipt.credits)} {t.toRerun}
-                  </a>
+                  <a href="#run-reproduce">{t.toRerun(number(lang, receipt.credits))}</a>
                 </li>
               )}
             </ul>
@@ -65,7 +63,9 @@ const cardIndex = cards.findIndex((c) => c.data.slug === data.slug) + 1;
   <div class="page-body">
     <Report lang={lang} section="body" entry={data} />
     <div class="wrap closing">
-      {prompt && <PromptBlock lang={lang} slug={data.slug} prompt={prompt} />}
+      {prompt && receipt && data.agent_run && (
+        <RunBlock lang={lang} slug={data.slug} prompt={prompt} receipt={receipt} agentRun={data.agent_run} />
+      )}
       <section class="block rail-block" id="method" aria-labelledby="method-title">
         <div class="rail">
           <h2 id="method-title">{t.methodTitle}</h2>

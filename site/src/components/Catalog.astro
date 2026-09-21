@@ -69,7 +69,7 @@ const latest = published.map((c) => c.data.snapshot).filter(Boolean).sort((a, b)
                     {" · "}
                     <span>{receipt.records > 0 ? `${number(lang, receipt.records)} ${t.records}` : t.countsOnly}</span>
                     {" · "}
-                    <span>{`${number(lang, receipt.credits)} ${t.toRerun}`}</span>
+                    <span>{t.toRerun(number(lang, receipt.credits))}</span>
                   </p>
                 )}
                 <span class="rb-cta">{t.readReport} →</span>
