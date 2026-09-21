@@ -2,7 +2,7 @@
 
 Job-market reports made by an AI agent on the [Metix AI Platform](https://platform.metix.ai): professional profiles, job postings, and companies behind one query API. Every report publishes the queries behind its numbers, what those queries cost in Credits, and the prompt that produced it, so you can check the work, run it again on your own key, and change it to answer your own question.
 
-The cases are published in English and Chinese as **Casebook** at [metixai-official.github.io/awesome-metix-platform-use-cases](https://metixai-official.github.io/awesome-metix-platform-use-cases/).
+The cases are published as **Casebook** at [metixai-official.github.io/awesome-metix-platform-use-cases](https://metixai-official.github.io/awesome-metix-platform-use-cases/), in English and in [Chinese](https://metixai-official.github.io/awesome-metix-platform-use-cases/zh/).
 
 ## Use cases
 
