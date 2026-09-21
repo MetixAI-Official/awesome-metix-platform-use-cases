@@ -172,14 +172,14 @@ a {
   background: rgb(16 13 53 / 0.24);
 }
 
-/* Geist Mono caps are 0.75em, so 13.85px caps match the wordmark's x-height. The line
-   box is centered on the logo, and the offset drops its baseline onto the wordmark's,
-   19px into the 24px logo. Text snaps to whole pixels: any offset from 2.6 to 3.4px
-   lands exactly on it at both label sizes, at 2x and 3x, so 3px sits in the middle.
-   Color is the wordmark's navy. */
+/* Geist Mono caps are 0.75em, so 13.85px caps match the wordmark's x-height. Every
+   part of the lockup shares one vertical center, the logo's (12px into the 24px
+   logo, which is also the wordmark caps' center), so the row reads level. The offset
+   puts the caps' center on it: text snaps to whole pixels, and 0.5 to 1px lands
+   exactly at 2x and 3x. Color is the wordmark's navy. */
 .lockup-platform {
   position: relative;
-  top: 3px;
+  top: 0.9px;
   margin-right: -0.14em;
   font-family: var(--mono);
   font-size: 13.85px;
@@ -196,6 +196,9 @@ a {
   font-size: 17px;
   letter-spacing: -0.02em;
   margin-left: 16px;
+  /* Centers the caps on the logo's center, within the half pixel an odd cap height allows. */
+  position: relative;
+  top: 1px;
 }
 
 .header-actions {
@@ -302,7 +305,9 @@ a {
   .lockup {
     gap: 9px;
   }
+  /* 12px caps are 9px tall, so the best any offset can do is a quarter pixel high. */
   .lockup-platform {
+    top: 0;
     margin-right: -0.1em;
     font-size: 12px;
     letter-spacing: 0.1em;
