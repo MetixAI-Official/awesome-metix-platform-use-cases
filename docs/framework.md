@@ -29,7 +29,7 @@ An agent does the work: it reads the live contract and docs, writes the queries,
 
 No single type should make up more than half of the published cases. Each study should also produce at least one smaller case from the same queries.
 
-Types say what a case is; formats say how it is shown. A **card** is one question, one number, and one small chart, shown in the catalog as a field of color with a receipt stub; snapshots and most recipes are cards. A **report** is a long read with many figures, shown in the catalog as a full-width band; studies are reports. `docs/style.md` describes both.
+Types say what a case is; formats say how it is shown. A **card** is one question, one number, and one small chart, shown as a field of color with a receipt stub; snapshots and most recipes are cards. A **report** is a long read with many figures, shown as a full-width band; studies are reports. Every published case is in the home page's index; the newest report and three cards are also featured. `docs/style.md` describes both.
 
 ## The bootstrap prompt
 
@@ -97,8 +97,6 @@ The slug is lowercase words joined by hyphens. Studies and snapshots end with th
 | `slug` | string | Matches the folder name |
 | `type` | `study`, `snapshot`, `recipe`, `agent` | |
 | `format` | `card`, `report` | How the catalog and the page show it |
-| `color` | `violet`, `blue`, `navy`, `teal`, `sky`, `periwinkle`, `signal` | A card's field color |
-| `span` | `1`, `2` | Catalog columns a card takes; wide charts take two |
 | `status` | `planned`, `draft`, `published` | Planned cases appear in the catalog as "Coming next", without a link. Drafts do not build. All three are public once pushed |
 | `title` | `en`, `zh` | The finding, in sentence case, at most 90 characters. A working title until the data exists |
 | `dek` | `en`, `zh` | One sentence: scope, population, and period |
@@ -109,9 +107,10 @@ The slug is lowercase words joined by hyphens. Studies and snapshots end with th
 | `snapshot` | date | The day the replay ran |
 | `published` | date | Set when `status` becomes `published` |
 | `exploration_credits` | number | Credits the agent spent exploring before the replay, runs it replaced included, so the full cost of making the case is on record |
+| `agent_run` | `{ low, high, cap }` | What an agent following `PROMPT.md` spends: the counts plus the reads the prompt asks for, and the ceiling the prompt stops at. Required to publish; the prompt must name the same ceiling in Credits, or the build fails |
 | `highlights` | up to three `value` and `label` pairs | Figures shown on the catalog, copied from the case's aggregates |
 
-The site validates this file at build time and fails on a missing or unknown field.
+The site validates this file at build time and fails on a missing or unknown field. A case's color is not a field: it follows the datasets (see `docs/style.md`).
 
 ### Aggregate files
 
@@ -171,15 +170,15 @@ Every `fetch.py` uses `tools/metix_client.py`: it loads the key, counts with `si
 
 ## The site
 
-Astro, built as static HTML and deployed to GitHub Pages from `main`. Astro is what metix.ai is built with; its content collections validate `case.yaml` at build time; and it ships no JavaScript unless a component asks for it. The only scripts on the page are the Copy buttons.
+Astro, built as static HTML and deployed to GitHub Pages from `main`. Astro is what metix.ai is built with; its content collections validate `case.yaml` at build time; and it ships no JavaScript unless a component asks for it. The scripts on the page are small and optional: Copy, the Run it paths, the agent tabs, the folds' Expand all, and the index's search and filters. Without them every panel and the full index are still shown.
 
 - `site/src/content.config.ts` loads every `cases/*/case.yaml` with the `glob()` loader and a schema.
 - Routes: `/` and `/zh/` for the catalog; `/cases/<slug>/` and `/zh/cases/<slug>/` for reports. English is the default locale and has no prefix.
-- Each case's `report/Report.astro` takes `lang`, `entry`, and a `section`: `card` (the card's number and mini chart, at `size` compact or full), `body` (the figures and findings; a report also renders its own hero here), and `method`. The shell calls each section where it belongs, so every case ends with the same three blocks in the same order. Shared components (`Figure`, `BarList`, the query disclosure, the prompt block, the receipt) come from `@site/components/`.
-- The catalog order of cards is `CARD_ORDER` in `site/src/cases.ts`; wide cards lead their rows so the grid stays full.
+- Each case's `report/Report.astro` takes `lang`, `entry`, and a `section`: `card` (the card's number and mini chart, at `size` compact or full), `body` (the figures and findings; a report also renders its own hero here), and `method`. The shell calls each section where it belongs, so every case ends with the same blocks in the same order: Run it, Method and limits, The last replay, then previous and next cases. Shared components (`Figure`, `BarList`, the query disclosure, `RunBlock` with `AgentSetup`, `FoldSections`, the receipt) come from `@site/components/`; `site/src/prompt.ts` splits a `PROMPT.md` into its question, ten steps, and sections, and enforces the template's shape.
+- The order of cards is `CARD_ORDER` in `site/src/cases.ts`; the first three are featured on the home page, and the index lists every case newest first.
 - The default address is `https://metixai-official.github.io/awesome-metix-platform-use-cases/`, so the Astro `base` is the repository name. A custom domain later changes `base` and adds a `CNAME`.
 
-Catalog filters and a method page arrive when the catalog is large enough to need them.
+The home page's index already has search, filters, and sort, with the state in the URL (`?q=`, `?format=`, `?data=`, `?sort=`), so a tag on a case page links to a filtered list.
 
 ```bash
 cd site
