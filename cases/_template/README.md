@@ -1,0 +1,30 @@
+# Working title until the data exists
+
+One sentence with the scope, the population, and the period.
+
+The site renders this file as the "Method and limits" section of the case page. Replace every paragraph below, and delete this one.
+
+## Question
+
+What this case answers, in one or two sentences, and who would ask it.
+
+## Population and definitions
+
+Which people, jobs, or companies are counted, with the filters written out in words. Define every group that a chart uses. A population defined by education or work location says which location it uses; see "Sensitive attributes and their proxies" in `docs/public-data-policy.md`.
+
+## Method
+
+Which queries run (one file each in `queries/`), what each one counts, and how the aggregates in `data/` are built from them. Say which numbers come from Search totals and which from records, and how small cells were suppressed.
+
+## Limits
+
+What the data cannot show here. Counts of profiles are lower bounds: they cover what is visible in the Metix AI index on the snapshot date, not a company's headcount.
+
+## Rerun
+
+```bash
+export METIX_KEY=metix_xxxxxxxxxxxx   # create one at https://platform.metix.ai/api-keys
+python3 cases/replace-with-slug-2026/fetch.py
+```
+
+The last run's calls, results, records, and Credits are in `data/receipt.json`.

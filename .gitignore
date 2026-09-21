@@ -1,0 +1,42 @@
+# Keys and local env. A real METIX_KEY never belongs in git.
+.env
+.env.*
+!.env.example
+
+# Internal terms for scripts/check_public.py. Local only; CI reads a secret.
+.public-denylist
+
+# Raw records a case needs while computing. Aggregates in data/ may be
+# committed; records may not. A pattern with a slash in it is anchored to the
+# repository root, so this one names the case folders explicitly.
+cases/*/data/raw/
+*.parquet
+*.pkl
+keys.json
+
+# Agent and editor scratch. These often hold absolute paths or captured output.
+.omc/
+.claude/
+.codex/
+.cursor/
+*.log
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Language runtimes
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+
+# Site build output
+site/dist/
+site/.astro/
