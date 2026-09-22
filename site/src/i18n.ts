@@ -13,13 +13,13 @@ const CJK = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/;
 const CLOSING = /^[，。、：；！？）」』》％…]/;
 const OPENING = /[（「『《]$/;
 /** Chinese words ICU segments wrongly in these titles; add a term when a title needs it. */
-const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名", "留给新人", "客户服务", "注册护士", "暴露度", "五分之一", "软件工程", "职业族"];
+const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名", "留给新人", "客户服务", "注册护士", "暴露度", "五分之一", "软件工程", "职业族", "百分点", "斜线"];
 /** A line never starts with these particles; they belong to the word before. */
 const NO_BREAK_BEFORE = /^[的地得了着过吗呢吧里]/;
 /** 被 and 把 bind to the verb that follows. */
 const NO_BREAK_AFTER = /[被把]$/;
 /** Measure words: a number, its classifier, and the noun after it stay on one line. */
-const CLASSIFIER = /[个份家名条位倍万亿岁]$/;
+const CLASSIFIER = /[个份家名条位倍万亿岁种类项]$/;
 const escapeHtml = (text: string) =>
   text.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c] ?? c);
 
@@ -47,14 +47,25 @@ export function titleHtml(text: string, lang: Lang): string {
   // ICU's dictionary splits some domain words (旧金山湾|区, 工程|师, 预|训练); never break inside these.
   let at = 0;
   const cuts = new Set(units.slice(0, -1).map((u) => (at += u.length)));
+  // ICU returns compounds it does not know as single characters (标|为, 占|比, 右|列); a line
+  // never breaks between two of them.
+  const single = (u: string) => (u.match(/[\u3400-\u9fff]/g) ?? []).length === 1 && !/[A-Za-z0-9]/.test(u);
+  const around = new Map<number, [string, string]>();
+  let edge = 0;
+  units.forEach((u, i) => {
+    edge += u.length;
+    if (i < units.length - 1) around.set(edge, [u, units[i + 1]]);
+  });
   for (const cut of [...cuts]) {
     const before = kept.slice(0, cut);
     const after = kept.slice(cut);
-    const numbered = CLASSIFIER.test(before) && /\d[\s\u00a0]?[个份家名条位倍万亿岁]$/.test(before);
+    const numbered = CLASSIFIER.test(before) && /\d[\s\u00a0]?[个份家名条位倍万亿岁种类项]$/.test(before);
     const unit =
       (/\d[\s\u00a0]$/.test(before) && /^[\u3400-\u9fff%]/.test(after)) ||
-      (/[一二三四五六七八九十两百千几每这那]$/.test(before) && /^[个份家名条位倍万亿岁成]/.test(after));
-    if (NO_BREAK_BEFORE.test(after) || NO_BREAK_AFTER.test(before) || numbered || unit) cuts.delete(cut);
+      (/[一二三四五六七八九十两百千几每这那]$/.test(before) && /^[个份家名条位倍万亿岁成种类项]/.test(after));
+    const [left, right] = around.get(cut) ?? ["", ""];
+    const pair = single(left) && single(right);
+    if (NO_BREAK_BEFORE.test(after) || NO_BREAK_AFTER.test(before) || numbered || unit || pair) cuts.delete(cut);
   }
   for (const term of PROTECTED) {
     for (let i = kept.indexOf(term); i !== -1; i = kept.indexOf(term, i + 1)) {

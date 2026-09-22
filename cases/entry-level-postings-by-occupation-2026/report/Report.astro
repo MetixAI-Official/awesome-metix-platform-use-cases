@@ -262,7 +262,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
             />
             <p class="ed-wall-key" aria-hidden="true">
               <span class="wk on">{zh ? "标为入门" : "Labelled entry"}</span>
-              <span class="wk hl">{zh ? "标题提到的" : "Named in the title"}</span>
+              <span class="wk hl">{zh ? "页面标题提到的" : "Named in the page title"}</span>
               <span class="wk off">{zh ? "其他" : "Any other label"}</span>
               <span class="wk q">{zh ? "Q = 论文中的暴露度档位" : "Q = exposure quintile in the paper"}</span>
             </p>
@@ -280,7 +280,12 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
                   </span>
                   <span class="wf-val">{pct(ls(r))}</span>
                   <span class="wf-name">{sname(r.group)}</span>
-                  {qTag(r) && <span class="wf-q">{qTag(r)}</span>}
+                  {qTag(r) && (
+                    <span class="wf-q">
+                      <span class="visually-hidden">{zh ? "论文中的暴露度档位 " : "Exposure quintile in the paper: "}</span>
+                      {qTag(r)}
+                    </span>
+                  )}
                 </li>
               );
             })}
@@ -615,6 +620,9 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
           source={source}
           queries={queries}
         >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-hl">{zh ? "标题提到的" : "Named in the title"}</span>
+          </p>
           <BarList
             label={zh ? "实习占入门岗位的比例" : "Internships as a share of the door"}
             rows={byIntern.map((r) => ({
@@ -1028,7 +1036,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     aspect-ratio: 1;
     border-radius: 1.5px;
     background: #fff;
-    box-shadow: inset 0 0 0 1px rgb(20 90 147 / 0.16);
+    box-shadow: inset 0 0 0 1px rgb(20 90 147 / 0.3);
   }
 
   .wf-grid span.on {
@@ -1265,6 +1273,11 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     display: none;
   }
 
+  .dr-name:lang(zh) {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
   /* Below 960px each track runs the full width under its name and values; the header keeps
      its column labels over the values and its axis over the tracks. */
   @media (max-width: 959px) {
@@ -1400,6 +1413,10 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
 
   .ref-layer.over {
     z-index: 1;
+  }
+
+  .ref-layer.over .ref {
+    box-shadow: 0 0 0 1.25px #fff;
   }
 
   .ref-layer > span {
@@ -1673,6 +1690,39 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     .rb-track {
       grid-column: 1 / -1;
       grid-row: 2;
+    }
+
+    /* the share stays on the name's line; its requirement note goes under the track, so the
+       name keeps the width */
+    .rb-name {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .rb-v {
+      display: contents;
+    }
+
+    .rb-v strong {
+      grid-column: 2;
+      grid-row: 1;
+      text-align: right;
+    }
+
+    .rb-v span {
+      grid-column: 1 / -1;
+      grid-row: 3;
+    }
+  }
+  @media (max-width: 359px) {
+    .dr-head,
+    .dr-row {
+      grid-template-columns: minmax(0, 1fr) 3rem 3rem 2.75rem;
+      column-gap: 8px;
+    }
+
+    .dr-v {
+      font-size: 12px;
     }
   }
 </style>

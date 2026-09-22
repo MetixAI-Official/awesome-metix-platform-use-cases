@@ -2073,8 +2073,17 @@ details.query[open]::details-content {
   text-wrap: balance;
 }
 
+/* Focus shows as the hover state made stronger (the accent bar over the part and a 2px
+   underline), since a ring around a link with no side padding would cross its first letters. */
 .contents a:focus-visible {
-  outline-offset: -2px;
+  outline: none;
+}
+
+.contents a:focus-visible .ct-title {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .contents a:hover .ct-title {

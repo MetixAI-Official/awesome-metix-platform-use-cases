@@ -130,7 +130,7 @@ Charts render at build time from committed aggregate files. They never read raw 
 
 ## Chinese typesetting
 
-Chinese has no spaces, so a browser left alone breaks titles anywhere, splitting words such as 旧金山湾区. Display titles go through `titleHtml()` in `site/src/i18n.ts`: ICU word segmentation at build time puts a break opportunity between words, product names and Latin runs stay whole, closing punctuation stays with the word before it, and `word-break: keep-all` stops the browser from breaking anywhere else. ICU splits a few domain words wrongly, so `PROTECTED` lists terms that never break (湾区, 工程师, 预训练, 薪资, and so on); add a term when a new title needs it. Body text uses the browser's normal Chinese line breaking.
+Chinese has no spaces, so a browser left alone breaks titles anywhere, splitting words such as 旧金山湾区. Display titles go through `titleHtml()` in `site/src/i18n.ts`: ICU word segmentation at build time puts a break opportunity between words, product names and Latin runs stay whole, closing punctuation stays with the word before it, and `word-break: keep-all` stops the browser from breaking anywhere else. ICU splits a few domain words wrongly, so `PROTECTED` lists terms that never break (湾区, 工程师, 预训练, 薪资, and so on); add a term when a new title needs it. ICU also returns compounds it does not know as single characters (标|为, 占|比), so a line never breaks between two one-character words, and a numeral stays with its measure word (两种, 三类). Body text uses the browser's normal Chinese line breaking.
 
 ## Size and touch
 
