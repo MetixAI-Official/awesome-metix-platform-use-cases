@@ -38,8 +38,11 @@ English is the default at `/`; Chinese lives at `/zh/`, and the language switch 
   --ink: #0B0A1F;             /* text, the primary pill */
   --ink-2: #3F3D56;
   --ink-3: #6A6880;           /* captions, mono labels (5.3:1 on white) */
-  --line: #D8DBE3;
+  --line: rgb(11 10 31 / 0.13); /* dividers; alpha, so they read on ground and surface */
+  --line-strong: #84829A;     /* input and filter borders, 3:1 on the ground */
   --accent: #5B54EF;          /* focus rings, links */
+  --ring: 0 0 0 1px rgb(11 10 31 / 0.08), 0 1px 2px -1px rgb(11 10 31 / 0.08), 0 2px 6px 0 rgb(11 10 31 / 0.04);
+  --control: 40px;            /* 44px under (pointer: coarse) */
 
   --display: "Sora Variable", "Geist Variable", system-ui, var(--cjk);
   --sans: "Geist Variable", system-ui, -apple-system, var(--cjk);
@@ -52,9 +55,25 @@ Sora carries titles and big numbers (700 for the masthead and the numbers, 600 f
 
 The shell owns the header (logo, Casebook, language switch, GitHub, Get an API key), the footer, the home page, and the blocks every case page ends with.
 
-The home page is ordered for a first visit: a masthead that says in one sentence what the Metix AI Platform is and what a case is, with "Run your first case" as the one primary action; a start strip (get a key, connect your agent, check the setup) that is the only part of the page on the white surface; a featured shelf (the newest report and three cards); the "All cases" index, a list rather than tiles so it stays usable at sixty cases, with search across both languages, format and dataset filters, sort by newest or by cost, and the state in the URL so a dataset tag on a case page lands on a filtered list; then coming next. Without JavaScript the index is simply the full list.
+### Grid, lines, and surfaces
 
-Every case page ends with, in this order: **Run it** (three paths, below), **Method and limits** (folded at its subsections, Limits open), **The last replay** (the measured cost of the replay script, then what making the case cost), and previous and next cases in index order. A breadcrumb (Casebook / Reports or Cards) opens the hero.
+One structural grid, the rail: a heading column of 4/12 and a content column of 8/12 with a 56 px gap from 960 px up, stacked below that. The start strip, every report intro (Who is counted, In brief), and every closing block (Run it, Method and limits, The last replay) hang on the same two lines, so a step's code, a report's findings, and a case's prompt all start at the same x and share the figures' right edge. Text in the content column is set to one measure on the column itself, not on each child, because `ch` resolves against each element's own font.
+
+Lines have three levels, each with one meaning: a 1 px ink rule under a section head; a 1 px `--line` divider between rows and blocks; and the `--ring` shadow as the edge of a container (figures, the pager, the agent picker, the start case). A section rule is never doubled by a divider directly under it.
+
+Radius follows the surface: 10 px for inputs and filters; 12 px for code panels and notes; 14 px for containers; 20 px for feature cards. Nested corners stay concentric (outer radius = inner radius + inset). Shape carries meaning: a pill is a button or a small status tag; a rounded rectangle is an input or a filter. One choice is a segmented control, several choices are toggles, and both are `--control` tall.
+
+Anything the reader pastes (a shell command, the MCP endpoint, a prompt) is a `CodeBlock`: a dark panel with its label and Copy on a bar above the text, so the text never runs under the button. Commands keep their lines and scroll, fading at the edge on phones; prompts wrap. The prompt's question on a case page uses the same panel and bar, so the site has one dark panel. Labels are uppercase in English only, because uppercasing a Chinese label turns its Latin words into capitals. A note is one style everywhere: a muted panel with a short label naming what it is about, and no side stripe.
+
+Dashes mean planned: the Planned tag on a case that is not published yet. A disabled filter is drawn with a quiet solid border, and an invitation (Make your own case) is a container like any other. A standalone action link (Create a key, MCP setup guide, All cases) is ink with a light underline; violet is for links inside running prose.
+
+Class names in the shell are prefixed by the component they belong to (`start-`, `tb-`, `pg-`, `cb-`), because a case's scoped styles and the shell share one page: a bare `.seg` or `.step` in the shell styles every case that uses the same word.
+
+Alignment is measured, not eyeballed. Counts beside a section heading sit on its baseline in `--ink-3` at the same size. The masthead's stats sit on the wordmark's baseline. An intro heading shares the first baseline of the text beside it. In a chart row, the label, the value, and its denominator share one baseline centered on the bar.
+
+The home page is ordered for a first visit: a masthead that says in one sentence what the Metix AI Platform is and what a case is, with "Run your first case" as the one primary action; a start strip (get a key, connect your agent, check the setup, open the cheapest case) that is the only part of the page on the white surface, each step on the rail with a hairline joining the numbers; a featured shelf (the newest report and three cards); the "All cases" index, a list rather than tiles so it stays usable at sixty cases, with a two-row toolbar (search and sort, then the format and dataset filters and the count), search across both languages, sort by newest or by cost, and the state in the URL so a dataset tag on a case page lands on a filtered list; then coming next, as rows on the index's grid marked Planned. Without JavaScript the index is simply the full list.
+
+Every case page ends with, in this order: **Run it** (three paths, below), **Method and limits** (folded at its subsections, Limits open), **The last replay** (the measured cost of the replay script, then what making the case cost), and a pager: one surface split by a hairline, previous and next in index order, titles left-aligned in both halves and the arrows on the outer edges (inside the labels on phones). A breadcrumb (Casebook / Reports or Cards) opens the hero.
 
 ### Run it and cost
 
@@ -73,7 +92,7 @@ The field comes from the case's datasets (see Brand and terms). The text and cha
 | blue | `#1E79C2` | white (4.6:1) | ink `#0B0A1F` (4.2:1) | `#C9F6FF` (4.0:1) |
 | teal | `#0DEFC8` | ink (13.2:1) | ink | `#5E5C78` (4.3:1) |
 
-Sky and periwinkle fields use ink text and `#3D3A8C` marks. On white, the focus color of every chart is teal ink `#07545E` and other marks are grey `#7E8787`.
+Sky and periwinkle fields use ink text and `#3D3A8C` marks. On white, a chart's focus color follows its dataset: jobs blue `#145A93`, profiles violet `#3D36C9`, companies teal ink `#07545E`. Other marks are grey `#7E8787`.
 
 ## Per-case design
 
@@ -92,6 +111,9 @@ Charts render at build time from committed aggregate files. They never read raw 
 - A log scale is allowed for ratios, with the one-to-one line drawn and labelled.
 - Do not draw a result that a definition forces. A tool counted only when named with another tool will always co-occur with another tool, so it does not get a co-mention row.
 - Every figure has a heading that states the finding, a source line, a text alternative, and its queries.
+- A value and its denominator are two right-aligned columns on one line, never a stacked pair beside a bar. On phones the denominator moves up beside the label so the bar keeps the width.
+- Reference lines and gridlines run continuously down a chart: the track fills its row and the lines reach half the row gap past each edge. On phones, where each label takes a row above its bar, the lines break at the label rows rather than run through text. Label reference lines directly where they fit; fall back to a legend where they do not. Tick labels center on their ticks.
+- Lead findings in Chinese (the In brief list) break only between words, like titles: they go through `titleHtml()`, and institution names are in `PROTECTED`.
 
 ## Chinese typesetting
 
@@ -99,7 +121,7 @@ Chinese has no spaces, so a browser left alone breaks titles anywhere, splitting
 
 ## Size and touch
 
-No text is smaller than 12 px. On phones, every link a thumb is meant to hit (breadcrumbs, dataset tags, hero chips, footer links, filters, tabs) is at least 44 px tall.
+No text is smaller than 12 px. Inputs and filters are 40 px tall for a mouse and 44 px under `(pointer: coarse)`. On phones, every link a thumb is meant to hit (breadcrumbs, dataset tags, hero chips, footer links, filters, tabs) is at least 44 px tall; a control that looks smaller (Copy, a segment) gets its 44 px from an `::after` hit area, and two hit areas never overlap. Search fields use 16 px text so iOS does not zoom on focus.
 
 ## Motion
 
