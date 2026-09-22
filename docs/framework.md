@@ -104,7 +104,7 @@ The slug is lowercase words joined by hyphens. Studies and snapshots end with th
 | `integration` | any of `rest`, `mcp`, `skills` | How the agent called the Platform |
 | `topics` | list of short slugs | |
 | `regions` | list of ISO country codes, or `global` | |
-| `snapshot` | date | The day the replay ran |
+| `snapshot` | date | The day the replay ran, as a UTC date: the same day as `ran_at` in `receipt.json`, which the receipt shows without the time |
 | `published` | date | Set when `status` becomes `published` |
 | `exploration_credits` | number | Credits the agent spent exploring before the replay, runs it replaced included, so the full cost of making the case is on record |
 | `agent_run` | `{ low, high, cap }` | What an agent following `PROMPT.md` spends: the counts plus the reads the prompt asks for, and the ceiling the prompt stops at. Required to publish; the prompt must name the same ceiling in Credits, or the build fails |

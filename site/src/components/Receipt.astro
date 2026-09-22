@@ -11,7 +11,8 @@ interface Props {
 
 const { lang, slug, receipt, exploration } = Astro.props;
 const t = ui[lang];
-const [ranDate, ranTime] = receipt.ran_at.replace(/:\d\dZ$/, "").split("T");
+// The day is enough: a reader checks which snapshot the numbers come from, not the minute.
+const ranDate = receipt.ran_at.slice(0, 10);
 ---
 
 <section class="block rail-block" id="receipt" aria-labelledby="receipt-title">
@@ -21,7 +22,7 @@ const [ranDate, ranTime] = receipt.ran_at.replace(/:\d\dZ$/, "").split("T");
   </div>
   <div class="rail-main">
   <dl class="receipt-grid">
-    <div><dt>{t.ranAt}</dt><dd><span class="nowrap">{ranDate}</span> <span class="nowrap">{ranTime} UTC</span></dd></div>
+    <div><dt>{t.ranAt}</dt><dd class="nowrap">{ranDate}</dd></div>
     <div><dt>{t.callsLabel}</dt><dd>{number(lang, receipt.calls)}</dd></div>
     <div><dt>{t.resultsLabel}</dt><dd>{number(lang, receipt.results)}</dd></div>
     <div><dt>{t.recordsLabel}</dt><dd>{number(lang, receipt.records)}</dd></div>

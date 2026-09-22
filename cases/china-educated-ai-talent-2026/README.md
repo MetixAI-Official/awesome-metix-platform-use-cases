@@ -1,6 +1,6 @@
 # 23.9% of US-based AI staff at ten labs who list a bachelor's earned it in mainland China
 
-AI roles at OpenAI, Anthropic, Google DeepMind, xAI, Meta, NVIDIA, Google, Microsoft, Apple, and Amazon, counted by where each person's bachelor's institution is located, on the Metix AI Platform on September 21, 2026.
+AI roles at OpenAI, Anthropic, Google DeepMind, xAI, Meta, NVIDIA, Google, Microsoft, Apple, and Amazon, counted by where each person's bachelor's institution is located, on the Metix AI Platform on September 22, 2026.
 
 ## Findings
 

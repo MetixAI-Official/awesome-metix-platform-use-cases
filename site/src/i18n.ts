@@ -280,7 +280,7 @@ export const ui = {
     receiptTitle: "The last reproduction",
     receiptLede:
       "What reproducing this case cost the last time the script ran, read from the Platform's own balance before and after.",
-    ranAt: "Ran at",
+    ranAt: "Ran on",
     callsLabel: "Calls",
     resultsLabel: "Search results",
     recordsLabel: "Records read",
@@ -461,7 +461,7 @@ export const ui = {
     methodTitle: "方法与局限",
     receiptTitle: "最近一次复现",
     receiptLede: "上一次复现花了多少，取自运行前后 Metix AI Platform 记录的余额。",
-    ranAt: "运行时间",
+    ranAt: "运行日期",
     callsLabel: "调用次数",
     resultsLabel: "搜索结果",
     recordsLabel: "读取记录",

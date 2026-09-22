@@ -6,13 +6,13 @@ title:
   en: "23.9% of US-based AI staff at ten labs who list a bachelor's earned it in mainland China"
   zh: 十家 AI 机构在美国、写有本科经历的 AI 员工中，近四分之一本科就读于中国大陆院校
 dek:
-  en: AI roles at OpenAI, Anthropic, Google DeepMind, xAI, Meta, NVIDIA, Google, Microsoft, Apple, and Amazon, counted by where each person's bachelor's institution is located, on the Metix AI Platform on September 21, 2026.
-  zh: 2026 年 9 月 21 日 Metix AI Platform 上，OpenAI、Anthropic、Google DeepMind、xAI、Meta、NVIDIA、Google、Microsoft、Apple、Amazon 的 AI 岗位，按本科院校所在地统计。
+  en: AI roles at OpenAI, Anthropic, Google DeepMind, xAI, Meta, NVIDIA, Google, Microsoft, Apple, and Amazon, counted by where each person's bachelor's institution is located, on the Metix AI Platform on September 22, 2026.
+  zh: 2026 年 9 月 22 日 Metix AI Platform 上，OpenAI、Anthropic、Google DeepMind、xAI、Meta、NVIDIA、Google、Microsoft、Apple、Amazon 的 AI 岗位，按本科院校所在地统计。
 datasets: [people]
 integration: [rest]
 topics: [ai-talent, education]
 regions: [us, global]
-snapshot: 2026-09-21
+snapshot: 2026-09-22
 published: 2026-09-21
 exploration_credits: 203
 agent_run: { low: 235, high: 265, cap: 300 }
