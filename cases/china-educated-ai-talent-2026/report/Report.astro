@@ -1,0 +1,1241 @@
+---
+/*
+ * Design
+ * Color follows data: this is a profiles report, so it lives in the violet family.
+ * Hero: deep violet #1C1747, white type, periwinkle #B5B5FF for the ten labs and pale lavender
+ *   #D9D7FF for the ten-lab share.
+ * Body on white: one 0 to 50% axis for every rate chart, so the figures compare directly;
+ *   focus in deep violet #3D36C9, other marks grey #7E8787, the all-US ceiling dashed.
+ * Signature: the ruler. Ten labs on one 0 to 50% line in the hero, from the lowest share to the
+ *   highest, with the ten-lab share and the all-US ceiling marked on the same line.
+ * Wording: the population is defined by where the bachelor's institution is, and only that.
+ *   Nothing here is inferred from names, languages, or nationality. Counts are lower bounds;
+ *   shares are ratios within visible profiles and can sit above or below the share among all staff.
+ */
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, href, isoDate, longDate, number, titleHtml, type Lang } from "@site/i18n";
+import context from "../data/context.json";
+import countries from "../data/countries.json";
+import institutions from "../data/institutions.json";
+import labsData from "../data/labs.json";
+import receipt from "../data/receipt.json";
+import instList from "../queries/institutions.json";
+import population from "../queries/population.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: {
+    slug: string;
+    title: Record<Lang, string>;
+    dek: Record<Lang, string>;
+    snapshot?: Date;
+    exploration_credits?: number;
+  };
+}
+
+const { lang, section, entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(labsData.snapshot);
+const iso = isoDate(snapshot);
+const pct = (x: number, d = 1) => `${number(lang, x * 100, d)}%`;
+// A bound keeps its direction when rounded: a floor rounds down, a ceiling rounds up.
+const pctUp = (x: number) => `${number(lang, Math.ceil(x * 1000) / 10, 1)}%`;
+const down1 = (x: number) => number(lang, Math.floor(x * 10) / 10, 1);
+const up1 = (x: number) => number(lang, Math.ceil(x * 10) / 10, 1);
+const int = (v: number | string) => (typeof v === "number" ? v : null);
+const join = (items: string[]) =>
+  zh ? items.join("、") : items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+const source = zh ? `来源：Metix AI Platform 个人档案数据，${iso}。` : `Source: Metix AI Platform, profiles, ${iso}.`;
+const queries = [
+  { file: "population.json", endpoint: "POST /v1/people/query", spec: population },
+  { file: "institutions.json", endpoint: "POST /v1/people/query", spec: instList },
+];
+
+const labNames: Record<string, Record<Lang, string>> = {
+  openai: { en: "OpenAI", zh: "OpenAI" },
+  anthropic: { en: "Anthropic", zh: "Anthropic" },
+  "google-deepmind": { en: "Google DeepMind", zh: "Google DeepMind" },
+  xai: { en: "xAI", zh: "xAI" },
+  meta: { en: "Meta", zh: "Meta" },
+  nvidia: { en: "NVIDIA", zh: "NVIDIA" },
+  google: { en: "Google (not DeepMind)", zh: "Google（不含 DeepMind）" },
+  microsoft: { en: "Microsoft", zh: "Microsoft" },
+  apple: { en: "Apple", zh: "Apple" },
+  amazon: { en: "Amazon", zh: "Amazon" },
+  "ten-labs": { en: "The ten labs", zh: "十家合计" },
+  pooled: { en: "These labs pooled", zh: "这几家合计" },
+};
+const name = (g: string) => labNames[g]?.[lang] ?? g;
+
+type Row = (typeof labsData.rows)[number];
+const labs = labsData.rows.filter((r) => r.group !== "ten-labs");
+// The lab rows do not overlap and the ten-lab row is their sum (see fetch.py).
+const all = labsData.rows.find((r) => r.group === "ten-labs")!;
+const share = (r: Row) => r.us_mainland_count / r.us_bachelor_count;
+const byShare = [...labs].sort((a, b) => share(b) - share(a));
+const highest = byShare[0];
+const lowest = byShare[byShare.length - 1];
+const visibleShare = all.us_bachelor_count / all.us_visible_count;
+const visibility = labs.map((r) => r.us_bachelor_count / r.us_visible_count);
+// If nobody without a Bachelor entry studied in mainland China, the share among all visible staff.
+const floorAllVisible = all.us_mainland_count / all.us_visible_count;
+
+// All US AI roles: the mainland count over a denominator known only as "100000+".
+const usMainland = int(context.rows.find((r) => r.group === "us-ai-mainland")!.count)!;
+const usBachelorFloor = 100000;
+const ceiling = usMainland / usBachelorFloor;
+// The all-US level is only known as a ceiling, so a lab can be placed above it only when its share
+// clears the ceiling; a lab below the ceiling cannot be placed either way.
+const aboveCeiling = labs.filter((r) => share(r) > ceiling);
+const belowCeiling = labs.filter((r) => share(r) <= ceiling);
+const minRatio = share(all) / ceiling;
+const worldM = int(context.rows.find((r) => r.group === "ten-labs-world-mainland")!.count)!;
+const worldB = int(context.rows.find((r) => r.group === "ten-labs-world-bachelor")!.count)!;
+
+// People whose current job started earlier against those whose current job started in the last
+// 24 months, per lab, with a two-proportion z on the pooled share (visible profiles as a sample).
+type Cohort = { row: Row; recent: number; earlier: number; rb: number; eb: number; z: number; significant: boolean };
+const cohortOf = (r: Row): Cohort | null => {
+  const rb = r.us_recent_bachelor_count;
+  const rm = int(r.us_recent_mainland_count);
+  const eb = r.us_bachelor_count - rb;
+  if (rm === null || rb < 100 || eb < 100) return null;
+  const em = r.us_mainland_count - rm;
+  const p = share(r);
+  const z = (em / eb - rm / rb) / Math.sqrt(p * (1 - p) * (1 / eb + 1 / rb));
+  return { row: r, recent: rm / rb, earlier: em / eb, rb, eb, z, significant: Math.abs(z) >= 1.96 };
+};
+const cohorts = labs.map(cohortOf).filter((c): c is Cohort => c !== null).sort((a, b) => a.recent - a.earlier - (b.recent - b.earlier));
+const skipped = labs.filter((r) => !cohorts.some((c) => c.row.group === r.group));
+const pooled = cohortOf(all)!;
+const gap = pooled.earlier - pooled.recent;
+const adjusted =
+  cohorts.reduce((s, c) => s + c.rb * (c.recent - c.earlier), 0) / cohorts.reduce((s, c) => s + c.rb, 0);
+const drops = cohorts.filter((c) => c.significant && c.recent < c.earlier);
+const chance = cohorts.filter((c) => !c.significant);
+const chanceMaxZ = Math.max(...chance.map((c) => Math.abs(c.z)));
+
+// Scientist and researcher titles against the lab's other AI titles, where there are at least 100
+// of each. No ten-lab research total is published (suppressed lab cells would come back by
+// subtraction), so the summary row pools the labs drawn.
+type Research = { row: Row; m: number; n: number; om: number; on: number; share: number; other: number; z: number };
+const research: Research[] = labs
+  .map((r) => ({ row: r, n: int(r.us_research_bachelor_count), m: int(r.us_research_mainland_count) }))
+  .filter((x): x is { row: Row; n: number; m: number } => x.n !== null && x.m !== null && x.n >= 100)
+  .map(({ row, n, m }) => {
+    const on = row.us_bachelor_count - n;
+    const om = row.us_mainland_count - m;
+    const p = (m + om) / (n + on);
+    return { row, m, n, om, on, share: m / n, other: om / on, z: (m / n - om / on) / Math.sqrt(p * (1 - p) * (1 / n + 1 / on)) };
+  })
+  .filter((x) => x.on >= 100)
+  .sort((a, b) => b.share - b.other - (a.share - a.other));
+const rsum = (k: "m" | "n" | "om" | "on") => research.reduce((s, x) => s + x[k], 0);
+const researchPooled = { share: rsum("m") / rsum("n"), other: rsum("om") / rsum("on"), m: rsum("m"), n: rsum("n") };
+// Seven comparisons: a gap passes 1.96 by chance about one time in three, so a gap between 1.96 and
+// the Bonferroni cut (2.69) is called marginal.
+const clearGap = research.filter((x) => Math.abs(x.z) >= 2.69).map((x) => name(x.row.group));
+const marginal = research.filter((x) => Math.abs(x.z) >= 1.96 && Math.abs(x.z) < 2.69).map((x) => name(x.row.group));
+const noGap = research.filter((x) => Math.abs(x.z) < 1.96).map((x) => name(x.row.group));
+const thinResearch = labs.filter((r) => !research.some((x) => x.row.group === r.group)).map((r) => name(r.group));
+const amazon = labs.find((r) => r.group === "amazon")!;
+
+// Institutions: counted one at a time. Rows with exclude words are strict counts (hatched).
+const instZh: Record<string, string> = {
+  tsinghua: "清华大学",
+  peking: "北京大学",
+  sjtu: "上海交通大学",
+  zju: "浙江大学",
+  ustc: "中国科学技术大学",
+  fudan: "复旦大学",
+  nju: "南京大学",
+  hust: "华中科技大学",
+  hit: "哈尔滨工业大学",
+  beihang: "北京航空航天大学",
+  xjtu: "西安交通大学",
+  uestc: "电子科技大学",
+};
+const instRows = [...institutions.rows].sort((a, b) => (int(b.count) ?? 0) - (int(a.count) ?? 0));
+const instName = (g: string, label: string) => (zh ? instZh[g] : label);
+const instBase = all.us_mainland_count;
+const rowSum = institutions.rows_sum_count;
+// The twelve rows can count one person twice, so everyone else on the list is at least this many.
+const elsewhereAtLeast = Math.max(0, instBase - rowSum);
+const ustc = instRows.find((r) => r.group === "ustc")!;
+const peking = instRows.find((r) => r.group === "peking")!;
+const ustcFirst = (int(ustc.count) ?? 0) > (int(peking.count) ?? 0);
+
+// Where people with a mainland-China bachelor in AI roles list themselves.
+const cWorld = countries.world_count;
+const cRow = (g: string) => countries.rows.find((r) => r.group === g)?.count ?? 0;
+const chinaListed = int(context.rows.find((r) => r.group === "china-ai-visible")!.count) ?? 0;
+const tencent = context.rows.find((r) => r.group === "visible-ai-staff-tencent")?.count;
+
+// One axis for every rate chart.
+const AXIS = 0.5;
+const x = (v: number) => `${Math.min(100, (v / AXIS) * 100).toFixed(2)}%`;
+const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
+---
+
+{section === "card" && null}
+
+{
+  section === "body" && (
+    <>
+      <header class="cn-hero">
+        <div class="wrap cn-grid">
+          <div>
+            <nav class="cn-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
+              <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
+              <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
+            </nav>
+            <p class="cn-meta">
+              {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=people#index`}>{zh ? "个人档案" : "Profiles"}</a> ·{" "}
+              <span class="nowrap">{iso}</span>
+            </p>
+            <h1 set:html={titleHtml(entry.title[lang], lang)} />
+            <p class="cn-dek">{entry.dek[lang]}</p>
+            <div class="cn-actions">
+              <a class="cn-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
+              <a class="cn-chip" href="#run-reproduce">
+                {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+              </a>
+              <span class="cn-note">{zh ? "复现只计数，不读取任何档案" : "Reproducing reads no profiles: every number is a count"}</span>
+            </div>
+          </div>
+          <div class="cn-key">
+            <p class="cn-num">{pct(share(all))}</p>
+            <p class="cn-label">
+              {zh
+                ? `十家机构在美国、档案里写有本科经历的 AI 员工中，本科院校在中国大陆的比例（${number(lang, all.us_bachelor_count)} 人中 ${number(lang, all.us_mainland_count)} 人）。`
+                : `of US-based AI staff at the ten labs whose profile shows a bachelor's degree earned it at an institution in mainland China (${number(lang, all.us_mainland_count)} of ${number(lang, all.us_bachelor_count)}).`}
+            </p>
+            <div class="ruler" role="img" aria-label={labs.map((r) => `${name(r.group)} ${pct(share(r))}`).join(zh ? "，" : ", ")}>
+              <span class="ru-line" />
+              <span class="ru-ceiling" style={`left: ${x(ceiling)}`}>
+                <span class="ru-tag">{zh ? `全美 AI 岗位 ≤${pctUp(ceiling)}` : `All US AI roles ≤${pctUp(ceiling)}`}</span>
+              </span>
+              <span class="ru-all" style={`left: ${x(share(all))}`}>
+                <span class="ru-tag">{zh ? `十家 ${pct(share(all))}` : `Ten labs ${pct(share(all))}`}</span>
+              </span>
+              {labs.map((r) => (
+                <span class="ru-dot" style={`left: ${x(share(r))}`} />
+              ))}
+              <span class="ru-end low" style={`left: ${x(share(lowest))}`}>
+                {name(lowest.group)} {pct(share(lowest))}
+              </span>
+              <span class="ru-end high" style={`left: ${x(share(highest))}`}>
+                {name(highest.group)} {pct(share(highest))}
+              </span>
+              <span class="ru-scale" aria-hidden="true">
+                <span>0%</span>
+                <span>50%</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="wrap report-body">
+        <section class="who" aria-labelledby="who-title">
+          <h2 id="who-title">{zh ? "统计的是谁" : "Who is counted"}</h2>
+          {zh ? (
+            <p>
+              十家机构当前职位属于 AI 岗位的人（职位名称含 machine learning、research scientist、member of technical staff 等{" "}
+              {population.ai_title_terms.length} 个词之一），档案所在国家为美国，并且档案里写有本科经历。本科院校位于中国大陆即计入，按一份由{" "}
+              {instList.match.length} 个匹配词（城市、省份和独有校名）和 {instList.exact.length} 个院校名称组成的清单判断，包括外国和香港高校在中国大陆设立的校区（如昆山杜克大学、香港中文大学（深圳））。只看院校所在地，不从姓名、语言或国籍推断任何东西；清单按设计不含港澳台院校。人数都是
+              Metix AI Platform 上可见档案的计数，是下限，不是这些机构的人数；比例是这些档案内部的比例，可能高于也可能低于全部员工中的实际比例。
+            </p>
+          ) : (
+            <p>
+              People whose current job at one of the ten labs is an AI role (the title matches one of {population.ai_title_terms.length}{" "}
+              terms such as machine learning, research scientist, or member of technical staff), whose profile lists the United States
+              as its country, and whose profile shows a bachelor's degree. They count when that bachelor's institution is located in
+              mainland China, judged against a list of {instList.match.length} match words (cities, provinces, and distinctive names)
+              and {instList.exact.length} institution names that includes mainland campuses of foreign and Hong Kong universities.
+              Only the institution's location decides: nothing is inferred from names, languages, or nationality, and the list is
+              built to leave out institutions in Hong Kong, Macau, and Taiwan. Every count is of profiles visible on the
+              Metix AI Platform, a lower bound rather than a headcount; shares are ratios within those profiles and can sit above or below the
+              share among all staff.
+            </p>
+          )}
+        </section>
+
+        <section class="brief" aria-labelledby="brief-title">
+          <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
+          <ol>
+            {zh ? (
+              <>
+                <li>
+                  十家机构合计 {pct(share(all))}，至少是全美 AI 岗位整体水平（按同一份清单不超过 {pctUp(ceiling)}）的 {down1(minRatio)}{" "}
+                  倍。各家差别很大，从 {name(lowest.group)} 的 {pct(share(lowest))} 到 {name(highest.group)} 的 {pct(share(highest))}。
+                </li>
+                <li>
+                  当前工作开始于最近 24 个月的人里，这一比例是 {pct(pooled.recent)}，当前工作开始得更早的人是 {pct(pooled.earlier)}。按机构分别比较后差距是{" "}
+                  {number(lang, Math.abs(adjusted) * 100, 1)} 个百分点，超出偶然波动的只有 {join(drops.map((c) => name(c.row.group)))}；其余机构的差距有高有低，都在偶然波动范围内。
+                </li>
+                <li>
+                  职位名称含 scientist 或 researcher 的是 {pct(researchPooled.share)}，同几家机构的其他 AI 职位是 {pct(researchPooled.other)}。差距在{" "}
+                  {join(clearGap)} 明显，在 {join(noGap)} 看不出来。
+                </li>
+                <li>
+                  十二所大学里人数最多的依次是{instRows.slice(0, 5).map((r) => instZh[r.group]).join("、")}。
+                  {ustcFirst && "中国科学技术大学排在北京大学之前，而且中国科学技术大学这一行是严格计数。"}
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  The ten labs together are at {pct(share(all))}, at least {down1(minRatio)} times the level across all US AI roles, which
+                  is at most {pctUp(ceiling)} by the same list. The labs differ widely, from {pct(share(lowest))} at {name(lowest.group)}{" "}
+                  to {pct(share(highest))} at {name(highest.group)}.
+                </li>
+                <li>
+                  Among people whose current job started in the last 24 months the share is {pct(pooled.recent)}, against{" "}
+                  {pct(pooled.earlier)} among people whose current job started earlier. Lab by lab the gap is{" "}
+                  {number(lang, Math.abs(adjusted) * 100, 1)} points, and only {join(drops.map((c) => name(c.row.group)))} differ by more
+                  than chance; the other labs differ within chance, in both directions.
+                </li>
+                <li>
+                  Titles with scientist or researcher are at {pct(researchPooled.share)}, against {pct(researchPooled.other)} for other AI
+                  titles at the same labs. The gap is clear at {join(clearGap)} and absent at {join(noGap)}.
+                </li>
+                <li>
+                  The most common of the twelve named institutions are {join(instRows.slice(0, 5).map((r) => r.label))}.
+                  {ustcFirst &&
+                    " The University of Science and Technology of China comes before Peking University, and its row is a strict count."}
+                </li>
+              </>
+            )}
+          </ol>
+          <p class="caveat">
+            {zh
+              ? `分母只包括档案里写了本科经历的人：十家机构在美国的 AI 员工中占 ${pct(visibleShare, 0)}，各家在 ${pct(Math.min(...visibility), 0)} 到 ${pct(Math.max(...visibility), 0)} 之间。写本科比例越高的机构，本科在中国大陆的比例往往也越高；如果本科在中国大陆的人更常写出本科经历，这些比例就偏高。如果没写本科经历的人都不是在中国大陆读的本科，按全部可见员工算，十家合计至少是 ${pct(floorAllVisible)}（${number(lang, all.us_visible_count)} 人中 ${number(lang, all.us_mainland_count)} 人）。`
+              : `The denominator is people whose profile shows a bachelor's degree: ${pct(visibleShare, 0)} of the ten labs' US-based AI staff, between ${pct(Math.min(...visibility), 0)} and ${pct(Math.max(...visibility), 0)} at each lab. Labs where more staff list a bachelor's also tend to have higher shares, so if people with a mainland-China bachelor's list education more often, these shares run high. Counted against all visible staff, the ten-lab figure is at least ${pct(floorAllVisible)} (${number(lang, all.us_mainland_count)} of ${number(lang, all.us_visible_count)}), if none of the people without a bachelor's entry studied in mainland China.`}
+          </p>
+        </section>
+
+        <Figure
+          id="labs"
+          number="01"
+          lang={lang}
+          heading={
+            zh
+              ? `从 ${name(lowest.group)} 的 ${pct(share(lowest))} 到 ${name(highest.group)} 的 ${pct(share(highest))}，${aboveCeiling.length} 家高于全美 AI 岗位的上限`
+              : `From ${pct(share(lowest))} at ${name(lowest.group)} to ${pct(share(highest))} at ${name(highest.group)}; ${aboveCeiling.length} of the ten are above the ceiling for all US AI roles`
+          }
+          sub={
+            zh
+              ? "在美国、写有本科经历的 AI 员工中，本科在中国大陆院校的比例。刻度 0% 到 50%；虚线是全美 AI 岗位的上限，实线是十家合计"
+              : "Share of US-based AI staff with a visible bachelor's whose bachelor's institution is in mainland China. Axis 0% to 50%; the dashed line is the ceiling for all US AI roles, the solid line the ten labs together"
+          }
+          alt={byShare
+            .map((r) =>
+              zh
+                ? `${name(r.group)} ${pct(share(r))}（${number(lang, r.us_bachelor_count)} 人中 ${number(lang, r.us_mainland_count)} 人）`
+                : `${name(r.group)} ${pct(share(r))} (${r.us_mainland_count} of ${r.us_bachelor_count})`,
+            )
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <div class="rate">
+            <div class="rate-axis" aria-hidden="true">
+              <span />
+              <span class="axis-track">
+                {ticks.map((t) => (
+                  <span class="tick" style={`left: ${x(t)}`}>
+                    {pct(t, 0)}
+                  </span>
+                ))}
+              </span>
+              <span />
+            </div>
+            {byShare.map((r, i) => (
+              <div class:list={["rate-row", { lead: i === 0 }]}>
+                <span class="rate-name">{name(r.group)}</span>
+                <span class="rate-track" aria-hidden="true">
+                  <span class="ref ceiling" style={`left: ${x(ceiling)}`} />
+                  <span class="ref all" style={`left: ${x(share(all))}`} />
+                  <span class="bar" style={`width: ${x(share(r))}`} />
+                </span>
+                <span class="rate-val">
+                  <strong>{pct(share(r))}</strong>
+                  <span>
+                    {number(lang, r.us_mainland_count)} / {number(lang, r.us_bachelor_count)}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <p class="legend" aria-hidden="true">
+            <span class="lg solid">{zh ? `十家合计 ${pct(share(all))}` : `Ten labs ${pct(share(all))}`}</span>
+            <span class="lg dashed">{zh ? `全美 AI 岗位上限 ${pctUp(ceiling)}` : `All US AI roles, at most ${pctUp(ceiling)}`}</span>
+          </p>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? `全美当前职位属于 AI 岗位、写有本科经历的人超过 10 万，其中 ${number(lang, usMainland)} 人本科在中国大陆院校，所以全美整体水平最多是 ${pctUp(ceiling)}。${aboveCeiling.length} 家机构高于这个上限${belowCeiling.length ? `；${belowCeiling.map((r) => `${name(r.group)}（${pct(share(r))}）`).join("、")}低于上限，数据无法判断它是否高于全美实际水平` : ""}。一个人如果同时在两家机构有当前职位，只算在清单中靠前的那一家，所以各行不重叠，十家合计就是各行之和。十家在全球（不限美国）的比例是 ${pct(worldM / worldB)}。`
+            : `Across the US, more than 100,000 people in AI roles show a bachelor's degree, and ${number(lang, usMainland)} of them earned it in mainland China, so the level across all US AI roles is at most ${pctUp(ceiling)}. ${aboveCeiling.length} of the ten labs are above that ceiling${belowCeiling.length ? `; ${join(belowCeiling.map((r) => `${name(r.group)}, at ${pct(share(r))},`))} ${belowCeiling.length === 1 ? "is" : "are"} below it, so the data cannot say whether ${belowCeiling.length === 1 ? "it is" : "they are"} above the actual all-US level` : ""}. Someone with current jobs at two of the labs counts once, at the first in the list, so the rows do not overlap and the ten-lab row is their sum. Worldwide, not only in the US, the ten labs are at ${pct(worldM / worldB)}.`}
+        </p>
+
+        <Figure
+          id="cohorts"
+          number="02"
+          lang={lang}
+          heading={
+            zh
+              ? `当前工作开始于最近 24 个月的人，比例低 ${number(lang, gap * 100, 1)} 个百分点，差距最大的是 ${join(drops.map((c) => name(c.row.group)))}`
+              : `People who started their current job in the last 24 months are ${number(lang, gap * 100, 1)} points lower, with the largest gaps at ${join(drops.map((c) => name(c.row.group)))}`
+          }
+          sub={
+            zh
+              ? "当前工作开始得更早的人（空心）和开始于最近 24 个月的人（实心）中，本科在中国大陆院校的比例。深色是差距超出偶然波动范围的机构"
+              : "Share among people whose current job started earlier (open) and in the last 24 months (filled). Dark rows differ by more than groups this size vary by chance"
+          }
+          alt={cohorts
+            .map((c) =>
+              zh
+                ? `${name(c.row.group)}：更早 ${pct(c.earlier)}，最近 24 个月 ${pct(c.recent)}`
+                : `${name(c.row.group)}: earlier ${pct(c.earlier)}, last 24 months ${pct(c.recent)}`,
+            )
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <div class="rate">
+            <div class="rate-axis" aria-hidden="true">
+              <span />
+              <span class="axis-track">
+                {ticks.map((t) => (
+                  <span class="tick" style={`left: ${x(t)}`}>
+                    {pct(t, 0)}
+                  </span>
+                ))}
+              </span>
+              <span />
+            </div>
+            {[...cohorts, pooled].map((c) => (
+              <div class:list={["rate-row", { focus: c.significant && c.recent < c.earlier, total: c.row.group === "ten-labs" }]}>
+                <span class="rate-name">{name(c.row.group)}</span>
+                <span class="rate-track" aria-hidden="true">
+                  <span
+                    class="link"
+                    style={`left: ${x(Math.min(c.recent, c.earlier))}; width: ${((Math.abs(c.recent - c.earlier) / AXIS) * 100).toFixed(2)}%`}
+                  />
+                  <span class="pt earlier" style={`left: ${x(c.earlier)}`} />
+                  <span class="pt recent" style={`left: ${x(c.recent)}`} />
+                </span>
+                <span class="rate-val">
+                  <strong>
+                    {c.recent >= c.earlier ? "+" : "−"}
+                    {number(lang, Math.abs(c.recent - c.earlier) * 100, 1)}
+                  </strong>
+                  <span>
+                    {pct(c.earlier)} → {pct(c.recent)}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <p class="legend" aria-hidden="true">
+            <span class="lg open">{zh ? "当前工作开始得更早" : "Current job started earlier"}</span>
+            <span class="lg filled">{zh ? "当前工作开始于最近 24 个月" : "Current job started in the last 24 months"}</span>
+          </p>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? `十家合计的差距是 ${number(lang, gap * 100, 1)} 个百分点，其中一部分是因为最近 24 个月开始当前工作的人较多的机构，本身比例较低；按机构分别比较、再按这些人数加权，差距是 ${number(lang, Math.abs(adjusted) * 100, 1)} 个百分点。只有 ${join(drops.map((c) => name(c.row.group)))} 的差距大到不像偶然（把可见档案当作样本做双比例检验，|z| 至少 1.96）；其余机构的 |z| 不超过 ${up1(chanceMaxZ)}。${skipped.length ? `${skipped.map((r) => name(r.group)).join("、")} 的某一组不足 100 人，没有画。` : ""}这里看的是当前这份工作的开始时间，内部转岗也算，所以它描述的是现在的在职结构，不是招聘流程。更早的一组有更长时间流失离开的人：两类人离职快慢如果不同，差距反映的也可能是谁留下，而不只是招了谁。当前工作没有开始时间的档案归在更早的一组。这个比较也没有区分职位类型：职位名称含 scientist 或 researcher 的比例更高（见图 03），而数据看不出最近开始当前工作的人担任这类职位的比例是否一样，影响的方向也可能相反。`
+            : `Across the ten labs the gap is ${number(lang, gap * 100, 1)} points, partly because the labs where the most people started their current job recently have lower shares to begin with; compared lab by lab and weighted by those people, it is ${number(lang, Math.abs(adjusted) * 100, 1)} points. Only ${join(drops.map((c) => name(c.row.group)))} differ by more than chance would explain (a two-proportion test treating the visible profiles as a sample, |z| of at least 1.96); at the other labs |z| is at most ${up1(chanceMaxZ)}. ${skipped.length ? `${skipped.map((r) => name(r.group)).join(", ")} ${skipped.length === 1 ? "has" : "have"} a group under 100 and ${skipped.length === 1 ? "is" : "are"} not drawn. ` : ""}This is the start of the current job, internal moves included, so it describes today's staff by tenure, not a hiring pipeline. The earlier group has had longer to lose people who left, so if people with and without a mainland-China bachelor's leave at different rates, the gap may reflect who stayed as well as who was hired. Profiles with no start date on the current job fall in the earlier group. The comparison does not account for job type either: scientist and researcher titles have higher shares (figure 03), the data does not show whether recent starters hold them as often, and the effect could run in either direction.`}
+        </p>
+
+        <Figure
+          id="research"
+          number="03"
+          lang={lang}
+          heading={
+            zh
+              ? `职位名称含 scientist 或 researcher 的是 ${pct(researchPooled.share)}，同几家机构的其他 AI 职位是 ${pct(researchPooled.other)}`
+              : `Titles with scientist or researcher are at ${pct(researchPooled.share)}, against ${pct(researchPooled.other)} for other AI titles at the same labs`
+          }
+          sub={
+            zh
+              ? "职位名称含 scientist 或 researcher（实心），同一机构的其他 AI 职位（空心）。只画两类都至少 100 人的机构"
+              : "Titles with scientist or researcher (filled), against the same lab's other AI titles (open). Only labs with at least 100 of each are drawn"
+          }
+          alt={research
+            .map((r) =>
+              zh
+                ? `${name(r.row.group)}：scientist 或 researcher ${pct(r.share)}，其他 AI 职位 ${pct(r.other)}`
+                : `${name(r.row.group)}: scientist or researcher ${pct(r.share)}, other AI titles ${pct(r.other)}`,
+            )
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <div class="rate">
+            <div class="rate-axis" aria-hidden="true">
+              <span />
+              <span class="axis-track">
+                {ticks.map((t) => (
+                  <span class="tick" style={`left: ${x(t)}`}>
+                    {pct(t, 0)}
+                  </span>
+                ))}
+              </span>
+              <span />
+            </div>
+            {[...research, { row: { group: "pooled" } as Row, ...researchPooled, total: true }].map((r) => (
+              <div class:list={["rate-row", { total: "total" in r }]}>
+                <span class="rate-name">{name(r.row.group)}</span>
+                <span class="rate-track" aria-hidden="true">
+                  <span
+                    class="link"
+                    style={`left: ${x(Math.min(r.share, r.other))}; width: ${((Math.abs(r.share - r.other) / AXIS) * 100).toFixed(2)}%`}
+                  />
+                  <span class="pt earlier" style={`left: ${x(r.other)}`} />
+                  <span class="pt recent" style={`left: ${x(r.share)}`} />
+                </span>
+                <span class="rate-val">
+                  <strong>{pct(r.share)}</strong>
+                  <span>
+                    {number(lang, r.m)} / {number(lang, r.n)}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+          <p class="legend" aria-hidden="true">
+            <span class="lg open">{zh ? "其他 AI 职位" : "Other AI titles"}</span>
+            <span class="lg filled">{zh ? "scientist 或 researcher" : "Scientist or researcher"}</span>
+          </p>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? `Applied Scientist 也算在内：Amazon 写有本科经历的 ${number(lang, amazon.us_bachelor_count)} 名 AI 员工中有 ${number(lang, int(amazon.us_research_bachelor_count) ?? 0)} 人是这类职位。${join(clearGap)} 的差距远超偶然范围${marginal.length ? `，${join(marginal)} 勉强超过（这里比较了 ${research.length} 家，按多重比较校正后不算）` : ""}；${join(noGap)} 看不出差距。${thinResearch.join("、")} 大多用 member of technical staff 之类的职位名称，这类职位不到 100 人，没有画；有几家的人数太少不能公开，所以这里不给十家合计，汇总行只合计图中这几家。`
+            : `Applied Scientist counts here: at Amazon, ${number(lang, int(amazon.us_research_bachelor_count) ?? 0)} of the ${number(lang, amazon.us_bachelor_count)} AI staff with a bachelor's hold such a title. The gap is far beyond chance at ${join(clearGap)}${marginal.length ? `, marginal at ${join(marginal)} (it passes 1.96 but not a correction for the ${research.length} comparisons)` : ""}, and absent at ${join(noGap)}. ${join(thinResearch)} mostly use titles such as member of technical staff and have fewer than 100 scientist or researcher titles, so they are not drawn. Some of their cells are too small to publish, so there is no ten-lab figure here: the summary row pools the labs drawn.`}
+        </p>
+
+        <Figure
+          id="institutions"
+          number="04"
+          lang={lang}
+          heading={
+            zh
+              ? `十二所大学各行合计 ${number(lang, rowSum)} 人次${ustcFirst ? "，中国科学技术大学排在北京大学之前" : ""}`
+              : `The twelve named universities add up to ${number(lang, rowSum)} entries${ustcFirst ? ", and USTC comes before Peking University" : ""}`
+          }
+          sub={
+            zh
+              ? "十家机构在美国的 AI 员工中，本科在各院校的人数。平台按词匹配院校名称；斜线条是严格计数：排除了名称里还含其他大学用词的记录"
+              : "US-based AI staff at the ten labs, by bachelor's institution. The Platform matches names word by word; hatched bars are strict counts that leave out entries whose names also contain another university's words"
+          }
+          alt={instRows.map((r) => `${instName(r.group, r.label)} ${r.count}`).join(zh ? "，" : ", ")}
+          source={source}
+          queries={queries}
+        >
+          <ol class="inst">
+            {instRows.map((r) => (
+              <li class:list={{ strict: r.strict }}>
+                <span class="inst-name">{instName(r.group, r.label)}</span>
+                <span class="inst-track" aria-hidden="true">
+                  <span class="bar" style={`width: ${(((int(r.count) ?? 0) / instBase) * 100).toFixed(2)}%`} />
+                </span>
+                <span class="inst-val">
+                  {number(lang, int(r.count) ?? 0)} · {pct((int(r.count) ?? 0) / instBase, 0)}
+                </span>
+              </li>
+            ))}
+            <li class="rest">
+              <span class="inst-name">{zh ? "清单上的其他院校，至少" : "Every other listed institution, at least"}</span>
+              <span class="inst-track" aria-hidden="true">
+                <span class="bar" style={`width: ${((elsewhereAtLeast / instBase) * 100).toFixed(2)}%`} />
+              </span>
+              <span class="inst-val">
+                {number(lang, elsewhereAtLeast)} · {pct(elsewhereAtLeast / instBase, 0)}
+              </span>
+            </li>
+          </ol>
+          <p class="legend" aria-hidden="true">
+            <span class="lg strict">{zh ? "严格计数" : "Strict count"}</span>
+          </p>
+        </Figure>
+        <p class="fig-text">
+          {zh
+            ? `平台对院校名称按词匹配：名称的每个词都出现在记录里就算，所以"南京大学"也会匹配南京航空航天大学，"中国科学技术大学"也会匹配电子科技大学。斜线条的几行排除了含这些用词的记录，是严格计数，像"南京大学计算机科学与技术系"这样的写法也会被排除。人数按院校分别计数，一个人如果在两所院校读过本科会在两所都出现，所以十二行合计 ${number(lang, rowSum)} 人次，清单上其他院校的人数至少是 ${number(lang, elsewhereAtLeast)}。条形按占十家总数 ${number(lang, instBase)} 人的比例画。这十二所是提示词里事先列出的大型院校，不是全部院校的排名。`
+            : `The Platform matches institution names word by word: a name counts when each of its words appears in the entry, so Nanjing University also matches Nanjing University of Aeronautics and Astronautics, and the University of Science and Technology of China also matches the University of Electronic Science and Technology of China. The hatched rows leave out entries with those words, which makes them strict counts: an entry such as "Nanjing University, Department of Computer Science and Technology" drops out too. Each institution is counted on its own, and someone with bachelor's entries at two of them appears under both, so the twelve rows add up to ${number(lang, rowSum)} entries and at least ${number(lang, elsewhereAtLeast)} people studied at another listed institution. Every bar is a share of the ${number(lang, instBase)} at the ten labs. The twelve are large universities named in the prompt before any count ran, not a ranking of every institution.`}
+        </p>
+
+        <section class="findings" aria-labelledby="where-title">
+          <h2 id="where-title">{zh ? "他们的档案所在地" : "Where they are based"}</h2>
+          {zh ? (
+            <p>
+              不限机构，在 AI 岗位、本科在中国大陆院校的档案共 {number(lang, cWorld)} 份，其中 {number(lang, cRow("United States"))}{" "}
+              份所在国家是美国，其后是新加坡（{number(lang, cRow("Singapore"))}）、加拿大（{number(lang, cRow("Canada"))}）和英国（
+              {number(lang, cRow("United Kingdom"))}）。这些数字说不出有多少人在中国工作：整个 Platform 上所在国家写中国的 AI 岗位档案只有{" "}
+              {number(lang, chinaListed)} 份，中国本土机构也几乎看不到（{iso}，Tencent 当前职位为 AI 岗位的可见档案为 {tencent} 份）。
+            </p>
+          ) : (
+            <p>
+              Across every employer, {number(lang, cWorld)} profiles in AI roles show a bachelor's degree from a mainland-China
+              institution. {number(lang, cRow("United States"))} of them list the United States, followed by Singapore (
+              {number(lang, cRow("Singapore"))}), Canada ({number(lang, cRow("Canada"))}), and the United Kingdom (
+              {number(lang, cRow("United Kingdom"))}). These numbers cannot say how many work in China: only {number(lang, chinaListed)}{" "}
+              AI-role profiles on the whole Platform list China as their country, and employers based in China are barely visible ({tencent}{" "}
+              visible profiles in AI roles at Tencent on {iso}).
+            </p>
+          )}
+        </section>
+      </div>
+    </>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>人群</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上的档案：当前职位（experience.is_current 为 true）在十家机构之一，职位名称匹配{" "}
+          {population.ai_title_terms.length} 个 AI 词之一，机构、职位和时间条件放在同一个 has_experience 里，描述的是同一份工作。Google
+          DeepMind 包括 "Google DeepMind" 和 "DeepMind" 两种写法；Amazon 包括 AWS。各行不重叠：一个人如果同时在两家机构有当前职位，只算在清单中靠前的那一家。平台按词匹配公司名称，"Google"
+          也会匹配 Google DeepMind，因为 Google DeepMind 排在前面，那里的员工只算在 Google DeepMind。
+        </p>
+        <h3>院校清单</h3>
+        <p>
+          先读了 250 份当前在中国工作的 AI 岗位档案，收集本科院校，逐个按院校本身判断是否位于中国大陆（记录里的院校国家字段常常缺失，也不能用来查询）。清单由{" "}
+          {instList.match.length} 个匹配词和 {instList.exact.length}{" "}
+          个院校名称组成。平台对两者都按词匹配：名称的每个词都出现在记录里就算，所以更长的名称也会被匹配到；{instList.exclude.length}{" "}
+          个排除词去掉其中属于其他地方的院校，比如台湾的国立中山大学含有"中山大学"的全部用词。做了两次独立核对：十家机构共 250 份档案，28 条中国大陆本科记录全部命中；Meta、Amazon、NVIDIA、Microsoft
+          在美国的 200 份档案，63 条中命中 60 条，另误配了一所台湾院校。漏掉的三所院校已补进清单，误配的已排除。不常见院校仍可能漏掉，所以比例可能略微偏低。清单在{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/institutions.json`}>queries/institutions.json</a>。
+        </p>
+        <h3>在美国</h3>
+        <p>按档案本身的 location.country 判断：这一人群的每份档案都写了所在国家，而工作经历里的地点常常缺失。</p>
+        <h3>最近开始的工作与职位类型</h3>
+        <p>
+          "当前工作开始于最近 24 个月"是当前这份工作的开始时间不早于快照前 24 个月。scientist 或 researcher 指职位名称含这两个词之一，Applied Scientist
+          也算在内。差距是否超出偶然用双比例 z 检验，把可见档案当作样本，这是一个近似；图 03 比较了 {research.length} 家，所以 |z| 在 1.96 到 2.69 之间只算勉强超过。
+        </p>
+        <h3>小数字</h3>
+        <p>
+          少于 10 人的数字显示为 "&lt;10"。因为各行不重叠、十家合计是各行之和，职位类型这一列有几家不能公开，所以不公开这一列的十家合计，否则用减法就能算回来。复现脚本在写出文件之前会检查每一个能用减法算出的数字，只要有一个在
+          1 到 9 之间就停下，不写文件。
+        </p>
+        <h3>局限</h3>
+        <p>
+          所有人数都是下限；比例是可见且写了本科经历的档案内部的比例，可能高于也可能低于全部员工中的实际比例。按院校所在地定义人群，不推断国籍。中国本土的档案几乎不可见，所以不能统计有多少人在中国工作。快照当天的截面，不是趋势。
+        </p>
+      </>
+    ) : (
+      <>
+        <h3>Population</h3>
+        <p>
+          Profiles on the Metix AI Platform on {longDate(lang, snapshot)} whose current job (experience.is_current true) is at one
+          of the ten labs with a title matching one of {population.ai_title_terms.length} AI terms. The lab, the title, and the
+          start-date condition sit in one has_experience entry, so they describe the same job. Google DeepMind covers "Google
+          DeepMind" and "DeepMind", and Amazon includes AWS. The rows do not overlap: someone with current jobs at two labs counts
+          once, at the first in the list. The Platform matches company names word by word, so "Google" also matches Google
+          DeepMind; Google DeepMind comes first, so its staff count there only.
+        </p>
+        <h3>The institution list</h3>
+        <p>
+          The agent read 250 profiles of AI staff whose current job is in China, collected their bachelor's institutions, and
+          decided each one's location from the institution itself (the recorded school country is often missing and cannot be
+          queried). The list has {instList.match.length} match words and {instList.exact.length} institution names. The Platform
+          matches both word by word: a name counts when each of its words appears in the entry, so longer names match too, and{" "}
+          {instList.exclude.length} exclude words remove the ones that belong elsewhere, such as National Sun Yat-sen University in
+          Taiwan, which contains every word of Sun Yat-sen University. Two independent checks: 250 profiles at the ten labs, where
+          the list caught all 28 mainland bachelor's entries, and 200 US-based profiles at Meta, Amazon, NVIDIA, and Microsoft,
+          where it caught 60 of 63 and matched one institution in Taiwan. The three it missed are now listed and the Taiwan match
+          is excluded. Less common institutions can still slip through, so the shares are probably slightly low. The list is in{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/institutions.json`}>queries/institutions.json</a>.
+        </p>
+        <h3>US-based</h3>
+        <p>
+          The profile's own location.country: every profile in this population lists one, while the job's location is often
+          missing.
+        </p>
+        <h3>Recent jobs and title types</h3>
+        <p>
+          "Current job started in the last 24 months" means it started no earlier than 24 months before the snapshot. Scientist or
+          researcher means the title contains either word; Applied Scientist counts. Whether a gap is larger than chance uses a
+          two-proportion z test that treats the visible profiles as a sample, which is an approximation. Figure 03 makes{" "}
+          {research.length} comparisons, so a |z| between 1.96 and 2.69 is called marginal.
+        </p>
+        <h3>Small numbers</h3>
+        <p>
+          Counts under 10 show as "&lt;10". Because the rows do not overlap and the ten-lab row is their sum, a column with
+          suppressed cells gets no ten-lab total, or subtraction would give them back; that is why figure 03 has none. Before
+          writing any file, the reproduce script checks every count that can be derived by subtraction and stops if one is between
+          1 and 9.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          Every count is a lower bound on the number of people. The shares are ratios within visible profiles that list a
+          bachelor's, and can sit above or below the share among all US-based AI staff at these labs. The population is defined by
+          where the institution is, never by nationality. Profiles based in China are almost invisible, so nothing here counts how
+          many work there. One day, not a trend.
+        </p>
+      </>
+    ))
+}
+
+<style>
+  .cn-hero {
+    background: #1c1747;
+    color: #fff;
+  }
+
+  .cn-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 48px 72px;
+    align-items: end;
+    padding-block: clamp(48px, 7vw, 96px) clamp(40px, 6vw, 80px);
+  }
+
+  .cn-eyebrow {
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    color: #b5b5ff;
+  }
+
+  .cn-meta {
+    margin-top: 6px;
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.04em;
+    color: rgb(255 255 255 / 0.72);
+  }
+
+  .cn-meta a {
+    color: inherit;
+  }
+
+  /* Small type, but a 44px target on touch screens. */
+  @media (pointer: coarse) {
+    .cn-eyebrow a,
+    .cn-meta a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
+  .cn-eyebrow a {
+    color: inherit;
+  }
+
+  .cn-hero h1 {
+    margin-top: 18px;
+    font-size: clamp(32px, 4.4vw, 58px);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .cn-hero h1:lang(zh) {
+    line-height: 1.22;
+    letter-spacing: -0.01em;
+  }
+
+  .cn-dek {
+    margin-top: 20px;
+    max-width: 62ch;
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .cn-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin-top: 26px;
+  }
+
+  .cn-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px solid rgb(181 181 255 / 0.6);
+    border-radius: 999px;
+    font: 500 13px/1.3 var(--mono);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .cn-chip:hover {
+    background: rgb(181 181 255 / 0.14);
+  }
+
+  .cn-note {
+    font: 12px/1.3 var(--mono);
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .cn-hero :focus-visible {
+    outline-color: #d9d7ff;
+  }
+
+  .cn-num {
+    font: 700 clamp(72px, 10vw, 124px) / 0.9 var(--display);
+    letter-spacing: -0.05em;
+    color: #d9d7ff;
+  }
+
+  .cn-label {
+    margin-top: 14px;
+    max-width: 40ch;
+    color: rgb(255 255 255 / 0.86);
+  }
+
+  /* The ruler: ten labs on one 0 to 50% line. */
+  .ruler {
+    position: relative;
+    height: 96px;
+    margin-top: 40px;
+  }
+
+  .ru-line {
+    position: absolute;
+    top: 46px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgb(255 255 255 / 0.24);
+  }
+
+  .ru-dot {
+    position: absolute;
+    top: 40px;
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    border-radius: 50%;
+    background: #b5b5ff;
+    box-shadow: 0 0 0 2px #1c1747;
+  }
+
+  /* The markers stop just below the line, so they never run through the end labels under it. */
+  .ru-all,
+  .ru-ceiling {
+    position: absolute;
+    top: 24px;
+    height: 32px;
+  }
+
+  .ru-all {
+    border-left: 2px solid #d9d7ff;
+  }
+
+  .ru-ceiling {
+    border-left: 2px dashed rgb(255 255 255 / 0.7);
+  }
+
+  .ru-tag {
+    position: absolute;
+    bottom: 100%;
+    left: -1px;
+    margin-bottom: 4px;
+    font: 12px/1.2 var(--mono);
+    white-space: nowrap;
+    color: #fff;
+  }
+
+  .ru-ceiling .ru-tag {
+    transform: translateX(-100%);
+    padding-right: 6px;
+    color: rgb(255 255 255 / 0.8);
+  }
+
+  .ru-all .ru-tag {
+    padding-left: 6px;
+    color: #d9d7ff;
+  }
+
+  .ru-end {
+    position: absolute;
+    top: 62px;
+    font: 12px/1.2 var(--mono);
+    white-space: nowrap;
+    color: rgb(255 255 255 / 0.86);
+  }
+
+  .ru-end.low {
+    transform: translateX(-50%);
+  }
+
+  .ru-end.high {
+    transform: translateX(-60%);
+  }
+
+  .ru-scale {
+    position: absolute;
+    top: 82px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    font: 12px/1 var(--mono);
+    color: rgb(255 255 255 / 0.6);
+  }
+
+  @media (max-width: 900px) {
+    .cn-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .who {
+    max-width: 900px;
+    padding: 20px 22px;
+    border-left: 4px solid #5b54ef;
+    border-radius: 0 12px 12px 0;
+    background: #f3f2ff;
+  }
+
+  .who h2 {
+    font-size: 18px;
+  }
+
+  .who p {
+    margin-top: 8px;
+    color: var(--ink-2);
+  }
+
+  .brief {
+    max-width: 900px;
+  }
+
+  .brief h2 {
+    font-size: clamp(22px, 2.4vw, 28px);
+  }
+
+  .brief ol {
+    display: grid;
+    gap: 10px;
+    margin: 18px 0 0;
+    padding-left: 1.4em;
+    color: var(--ink-2);
+  }
+
+  .brief li::marker {
+    font-family: var(--mono);
+    color: #3d36c9;
+  }
+
+  .caveat {
+    margin-top: 20px;
+    padding: 16px 18px;
+    border-left: 3px solid #5b54ef;
+    border-radius: 0 10px 10px 0;
+    background: #f3f2ff;
+    font-size: 15px;
+    color: var(--ink-2);
+  }
+
+  .fig-text {
+    max-width: 72ch;
+    margin-top: 14px !important;
+    color: var(--ink-2);
+  }
+
+  /* Rate charts: every one on the same 0 to 50% axis. */
+  .rate {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr) 8.5rem;
+    column-gap: 16px;
+    row-gap: 12px;
+  }
+
+  .rate-axis,
+  .rate-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+  }
+
+  .axis-track {
+    position: relative;
+    height: 16px;
+  }
+
+  .tick {
+    position: absolute;
+    transform: translateX(-50%);
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .tick:first-child {
+    transform: none;
+  }
+
+  .tick:last-child {
+    transform: translateX(-100%);
+  }
+
+  .rate-name {
+    font-size: 15px;
+  }
+
+  .rate-row.total .rate-name,
+  .rate-row.focus .rate-name {
+    font-weight: 600;
+  }
+
+  .rate-row.total {
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+
+  .rate-track {
+    position: relative;
+    height: 24px;
+    background: linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat;
+  }
+
+  .rate-track .bar {
+    position: absolute;
+    inset: 3px auto 3px 0;
+    border-radius: 3px;
+    background: #7e8787;
+  }
+
+  .rate-row.lead .bar {
+    background: #3d36c9;
+  }
+
+  .ref {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    z-index: 1;
+  }
+
+  .ref.all {
+    border-left: 2px solid #3d36c9;
+  }
+
+  .ref.ceiling {
+    border-left: 1.5px dashed #4e4d4b;
+  }
+
+  .link {
+    position: absolute;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    background: #7e8787;
+  }
+
+  .pt {
+    position: absolute;
+    top: 50%;
+    width: 13px;
+    height: 13px;
+    margin: -6.5px 0 0 -6.5px;
+    border-radius: 50%;
+  }
+
+  .pt.earlier {
+    background: #fff;
+    box-shadow: inset 0 0 0 2.5px #7e8787;
+  }
+
+  .pt.recent {
+    background: #7e8787;
+  }
+
+  .rate-row.focus .link,
+  .rate-row.focus .pt.recent,
+  .rate-row.total .link,
+  .rate-row.total .pt.recent {
+    background: #3d36c9;
+  }
+
+  .rate-row.focus .pt.earlier,
+  .rate-row.total .pt.earlier {
+    box-shadow: inset 0 0 0 2.5px #3d36c9;
+  }
+
+  .rate-val {
+    display: grid;
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .rate-val strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .rate-row.focus .rate-val strong,
+  .rate-row.total .rate-val strong {
+    color: #3d36c9;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 16px;
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .lg::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+
+  .lg.solid::before {
+    width: 0;
+    border-left: 2px solid #3d36c9;
+  }
+
+  .lg.strict::before {
+    width: 14px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(135deg, #7e8787 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1.5px #7e8787;
+  }
+
+  .lg.dashed::before {
+    width: 0;
+    border-left: 1.5px dashed #4e4d4b;
+  }
+
+  .lg.open::before {
+    width: 12px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2.5px #7e8787;
+  }
+
+  .lg.filled::before {
+    width: 12px;
+    border-radius: 50%;
+    background: #3d36c9;
+  }
+
+  /* Institutions */
+  .inst {
+    display: grid;
+    grid-template-columns: minmax(8rem, 17rem) minmax(0, 1fr) 7rem;
+    column-gap: 16px;
+    row-gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .inst li {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+  }
+
+  .inst-name {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .inst-track {
+    position: relative;
+    height: 22px;
+    border-radius: 4px;
+    background: var(--surface-muted);
+  }
+
+  .inst-track .bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 4px;
+    background: #7e8787;
+  }
+
+  .inst li:first-child .bar {
+    background: #3d36c9;
+  }
+
+  .inst li.strict .bar {
+    background: repeating-linear-gradient(135deg, #7e8787 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1.5px #7e8787;
+  }
+
+  .inst li.rest {
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+
+  .inst-val {
+    font: 13px/1.3 var(--mono);
+    text-align: right;
+  }
+
+  .findings {
+    max-width: 900px;
+  }
+
+  .findings h2 {
+    font-size: clamp(22px, 2.4vw, 28px);
+  }
+
+  .findings p {
+    margin-top: 12px;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 640px) {
+    .rate {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .rate-name {
+      grid-column: 1 / -1;
+      margin-top: 6px;
+    }
+
+    .rate-axis > span:first-child,
+    .rate-axis > span:last-child {
+      display: none;
+    }
+
+    .inst {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .inst-name {
+      grid-column: 1 / -1;
+      margin-top: 6px;
+    }
+
+    .ru-end.high {
+      transform: translateX(-80%);
+    }
+
+    /* Too narrow for the ceiling tag to sit left of its line: it takes a row of its own above
+       the ten-lab tag, starting at the line. */
+    .ruler {
+      margin-top: 60px;
+    }
+
+    .ru-ceiling .ru-tag {
+      transform: none;
+      padding-right: 0;
+      padding-left: 6px;
+      margin-bottom: 22px;
+    }
+  }
+</style>

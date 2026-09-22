@@ -1,0 +1,61 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/institutions.json",
+  "world_count": 15802,
+  "note": "Where people in AI roles with a mainland-China bachelor's list themselves, by the profile's location.country. Almost no profile lists China: only 32 AI-role profiles do, and people whose current job is recorded in China mostly list another country. The China row therefore does not measure how many live in China, and nothing here measures how many work there.",
+  "rows": [
+    {
+      "group": "United States",
+      "count": 12194
+    },
+    {
+      "group": "China",
+      "count": 18
+    },
+    {
+      "group": "Canada",
+      "count": 577
+    },
+    {
+      "group": "United Kingdom",
+      "count": 399
+    },
+    {
+      "group": "Singapore",
+      "count": 722
+    },
+    {
+      "group": "Germany",
+      "count": 296
+    },
+    {
+      "group": "Australia",
+      "count": 356
+    },
+    {
+      "group": "Switzerland",
+      "count": 81
+    },
+    {
+      "group": "France",
+      "count": 152
+    },
+    {
+      "group": "Japan",
+      "count": 200
+    },
+    {
+      "group": "Hong Kong",
+      "count": 205
+    },
+    {
+      "group": "rest-of-world",
+      "count": 602
+    },
+    {
+      "group": "no-location",
+      "count": 0
+    }
+  ]
+}

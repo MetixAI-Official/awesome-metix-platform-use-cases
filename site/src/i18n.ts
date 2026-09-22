@@ -32,7 +32,8 @@ const escapeHtml = (text: string) =>
  */
 export function titleHtml(text: string, lang: Lang): string {
   const kept = keepNames(text);
-  if (lang !== "zh") return escapeHtml(kept);
+  // A short uppercase compound such as "US-based" never breaks at its hyphen.
+  if (lang !== "zh") return escapeHtml(kept).replace(/\b([A-Z]{2,3}-[a-z]+)\b/g, '<span class="nowrap">$1</span>');
   const units: string[] = [];
   for (const { segment } of new Intl.Segmenter("zh", { granularity: "word" }).segment(kept)) {
     const prev = units[units.length - 1];

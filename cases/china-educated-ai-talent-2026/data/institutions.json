@@ -1,0 +1,81 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/institutions.json",
+  "base": "AI roles at the ten labs, US-based, with a Bachelor entry at the institution",
+  "rows_sum_count": 2854,
+  "rows": [
+    {
+      "group": "tsinghua",
+      "label": "Tsinghua University",
+      "strict": false,
+      "count": 520
+    },
+    {
+      "group": "peking",
+      "label": "Peking University",
+      "strict": false,
+      "count": 332
+    },
+    {
+      "group": "sjtu",
+      "label": "Shanghai Jiao Tong University",
+      "strict": false,
+      "count": 409
+    },
+    {
+      "group": "zju",
+      "label": "Zhejiang University",
+      "strict": true,
+      "count": 345
+    },
+    {
+      "group": "ustc",
+      "label": "University of Science and Technology of China",
+      "strict": true,
+      "count": 385
+    },
+    {
+      "group": "fudan",
+      "label": "Fudan University",
+      "strict": false,
+      "count": 191
+    },
+    {
+      "group": "nju",
+      "label": "Nanjing University",
+      "strict": true,
+      "count": 154
+    },
+    {
+      "group": "hust",
+      "label": "Huazhong University of Science and Technology",
+      "strict": false,
+      "count": 173
+    },
+    {
+      "group": "hit",
+      "label": "Harbin Institute of Technology",
+      "strict": false,
+      "count": 92
+    },
+    {
+      "group": "beihang",
+      "label": "Beihang University",
+      "strict": false,
+      "count": 96
+    },
+    {
+      "group": "xjtu",
+      "label": "Xi'an Jiaotong University",
+      "strict": true,
+      "count": 94
+    },
+    {
+      "group": "uestc",
+      "label": "University of Electronic Science and Technology of China",
+      "strict": false,
+      "count": 63
+    }
+  ]
+}

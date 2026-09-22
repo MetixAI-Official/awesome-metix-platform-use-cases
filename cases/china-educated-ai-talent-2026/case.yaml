@@ -1,14 +1,31 @@
 slug: china-educated-ai-talent-2026
 type: study
 format: report
-status: planned
+status: published
 title:
-  en: China-educated AI talent in industry
-  zh: 中国本科背景的 AI 人才在产业界的分布
+  en: "23.9% of US-based AI staff at ten labs who list a bachelor's earned it in mainland China"
+  zh: 十家 AI 机构在美国、写有本科经历的 AI 员工中，近四分之一本科就读于中国大陆院校
 dek:
-  en: Where AI engineers and researchers with an undergraduate degree from an institution in China work, and who returns. Defined by institution location only.
-  zh: 本科院校位于中国的 AI 工程师和研究员在哪里工作、谁在回流。口径只看院校所在地。
-datasets: [people, companies]
+  en: AI roles at OpenAI, Anthropic, Google DeepMind, xAI, Meta, NVIDIA, Google, Microsoft, Apple, and Amazon, counted by where each person's bachelor's institution is located, on the Metix AI Platform on September 21, 2026.
+  zh: 2026 年 9 月 21 日 Metix AI Platform 上，OpenAI、Anthropic、Google DeepMind、xAI、Meta、NVIDIA、Google、Microsoft、Apple、Amazon 的 AI 岗位，按本科院校所在地统计。
+datasets: [people]
 integration: [rest]
 topics: [ai-talent, education]
-regions: [global]
+regions: [us, global]
+snapshot: 2026-09-21
+published: 2026-09-21
+exploration_credits: 203
+agent_run: { low: 235, high: 265, cap: 300 }
+highlights:
+  - value: "23.9%"
+    label:
+      en: of US-based AI staff at the ten labs with a visible bachelor's earned it in mainland China
+      zh: 十家机构在美国、有可见本科经历的 AI 员工中，本科在中国大陆院校的比例
+  - value: "36.0%"
+    label:
+      en: at Meta, the highest of the ten
+      zh: Meta 的比例，十家中最高
+  - value: "21.7%"
+    label:
+      en: among those whose current job started in the last 24 months
+      zh: 当前工作开始于最近 24 个月的人中的比例

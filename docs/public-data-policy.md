@@ -69,7 +69,9 @@ Any number derived from people (profiles, career moves, education) is published 
 
 A cell from 1 to 9 is published as the string `"<10"`, never as the exact number, never as a share, and never inside a chart that lets a reader recover it (a bar length, a Sankey edge width, a tooltip). A zero may be published.
 
-When a suppressed cell could be recovered by subtracting published cells from a published total, suppress a second cell in the same row or column, or merge the small groups into "Other".
+When a suppressed cell could be recovered by subtracting published cells from a published total, withhold that total or suppress a second cell of 10 or more in the same row or column. Merging the small groups into "Other" does not help while the total is published: the total minus the other cells still gives the merged cell back.
+
+Differences are cells too. A group total minus its parts (people with no Bachelor entry, people whose job started earlier, people outside the US) is a count of people, and so is the overlap between rows that can share a person: the sum of the rows minus their union. Make rows that can overlap disjoint (count each person at the first row in a fixed order), so a total is simply the sum of its rows, and check every difference a reader can form before publishing.
 
 A share or percentage is published only when its denominator is at least 30.
 
@@ -77,7 +79,7 @@ A salary statistic is published only when it rests on at least 10 postings that 
 
 Counts of job postings and of companies are not about people and carry no minimum.
 
-The checker enforces the 1 to 9 rule on every aggregate file whose `unit` is `profiles` (see `docs/framework.md` for the file shape). The recovery rule and the share rule need a human reviewer.
+The checker enforces the 1 to 9 rule on every aggregate file whose `unit` is `profiles` (see `docs/framework.md` for the file shape). It cannot see differences between cells, so the recovery rule and the share rule need a human reviewer, or a check in the case's own script before it writes anything: `cases/china-educated-ai-talent-2026/fetch.py` stops when any difference of published cells is between 1 and 9.
 
 ## Named people and public events
 

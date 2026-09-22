@@ -1,0 +1,262 @@
+{
+  "note": "Who is counted. An AI role is a current job (experience.is_current eq true) whose title matches any of ai_title_terms; the lab and the recent-hire window sit in the same has_experience entry, so they describe that one job. US-based uses the profile's location.country: every profile with a mainland-China bachelor's in an AI role lists one (countries.json has no profile without a location), while the job-level location is often missing. The denominator is people with any Bachelor entry; the numerator is those whose Bachelor entry names an institution in institutions.json.",
+  "ai_title_terms": [
+    "machine learning",
+    "research scientist",
+    "research engineer",
+    "deep learning",
+    "member of technical staff",
+    "applied scientist",
+    "artificial intelligence",
+    "AI engineer",
+    "AI researcher",
+    "LLM",
+    "NLP",
+    "computer vision"
+  ],
+  "research_title_terms": [
+    "scientist",
+    "researcher"
+  ],
+  "recent_hire_window": "now-24m",
+  "us": {
+    "field": "location.country",
+    "eq": "United States"
+  },
+  "labs": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "companies": [
+        "OpenAI"
+      ]
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "companies": [
+        "Anthropic"
+      ]
+    },
+    {
+      "id": "google-deepmind",
+      "name": "Google DeepMind",
+      "companies": [
+        "Google DeepMind",
+        "DeepMind"
+      ]
+    },
+    {
+      "id": "xai",
+      "name": "xAI",
+      "companies": [
+        "xAI"
+      ]
+    },
+    {
+      "id": "meta",
+      "name": "Meta",
+      "companies": [
+        "Meta"
+      ]
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA",
+      "companies": [
+        "NVIDIA"
+      ]
+    },
+    {
+      "id": "google",
+      "name": "Google, other than Google DeepMind",
+      "companies": [
+        "Google"
+      ],
+      "note": "The company name Google also matches people whose current job is at Google DeepMind, because the Platform matches company names word by word. Google DeepMind comes earlier in the order, so its staff count there and not here."
+    },
+    {
+      "id": "microsoft",
+      "name": "Microsoft",
+      "companies": [
+        "Microsoft"
+      ]
+    },
+    {
+      "id": "apple",
+      "name": "Apple",
+      "companies": [
+        "Apple"
+      ]
+    },
+    {
+      "id": "amazon",
+      "name": "Amazon",
+      "companies": [
+        "Amazon",
+        "Amazon Web Services (AWS)",
+        "AWS"
+      ],
+      "note": "Amazon Web Services adds 254 profiles with a Bachelor entry to the 6,098 under Amazon."
+    }
+  ],
+  "institutions": [
+    {
+      "id": "tsinghua",
+      "name": "Tsinghua University",
+      "match": [
+        "Tsinghua"
+      ],
+      "exact": [
+        "清华大学"
+      ]
+    },
+    {
+      "id": "peking",
+      "name": "Peking University",
+      "match": [
+        "Peking University"
+      ],
+      "exact": [
+        "北京大学"
+      ]
+    },
+    {
+      "id": "sjtu",
+      "name": "Shanghai Jiao Tong University",
+      "match": [
+        "Shanghai Jiao Tong"
+      ],
+      "exact": [
+        "Shanghai Jiaotong University",
+        "上海交通大学"
+      ]
+    },
+    {
+      "id": "zju",
+      "name": "Zhejiang University",
+      "exact": [
+        "Zhejiang University",
+        "浙江大学"
+      ],
+      "exclude": [
+        "Sci-Tech",
+        "Normal",
+        "Gongshang",
+        "Finance",
+        "Media"
+      ]
+    },
+    {
+      "id": "ustc",
+      "name": "University of Science and Technology of China",
+      "exact": [
+        "University of Science and Technology of China",
+        "USTC",
+        "中国科学技术大学"
+      ],
+      "exclude": [
+        "Electronic"
+      ]
+    },
+    {
+      "id": "fudan",
+      "name": "Fudan University",
+      "match": [
+        "Fudan"
+      ],
+      "exact": [
+        "复旦大学"
+      ]
+    },
+    {
+      "id": "nju",
+      "name": "Nanjing University",
+      "exact": [
+        "Nanjing University",
+        "南京大学"
+      ],
+      "exclude": [
+        "Aeronautics",
+        "Posts",
+        "Information",
+        "Normal",
+        "Tech",
+        "Medical",
+        "Forestry",
+        "Agricultural",
+        "Audit",
+        "Finance",
+        "Science Technology"
+      ]
+    },
+    {
+      "id": "hust",
+      "name": "Huazhong University of Science and Technology",
+      "match": [
+        "Huazhong Science Technology"
+      ],
+      "exact": [
+        "华中科技大学"
+      ]
+    },
+    {
+      "id": "hit",
+      "name": "Harbin Institute of Technology",
+      "match": [
+        "Harbin Institute Technology"
+      ],
+      "exact": [
+        "哈尔滨工业大学"
+      ]
+    },
+    {
+      "id": "beihang",
+      "name": "Beihang University",
+      "match": [
+        "Beihang"
+      ],
+      "exact": [
+        "Beijing University of Aeronautics and Astronautics",
+        "北京航空航天大学"
+      ]
+    },
+    {
+      "id": "xjtu",
+      "name": "Xi'an Jiaotong University",
+      "exact": [
+        "Xi'an Jiaotong University",
+        "Xian Jiaotong University",
+        "西安交通大学"
+      ],
+      "exclude": [
+        "Liverpool"
+      ]
+    },
+    {
+      "id": "uestc",
+      "name": "University of Electronic Science and Technology of China",
+      "exact": [
+        "University of Electronic Science and Technology of China",
+        "UESTC",
+        "电子科技大学"
+      ]
+    }
+  ],
+  "institutions_note": "One institution per count. The Platform matches names word by word, so Nanjing University also matches Nanjing University of Aeronautics and Astronautics, and University of Science and Technology of China also matches University of Electronic Science and Technology of China. A row with exclude words leaves out entries that contain them, which makes it a strict count: entries such as Nanjing University, Department of Computer Science and Technology drop out too. The twelve are large mainland universities named in the prompt before any count was run; they are not a ranking of every institution, and others outside the twelve are not counted one by one.",
+  "countries": [
+    "United States",
+    "China",
+    "Canada",
+    "United Kingdom",
+    "Singapore",
+    "Germany",
+    "Australia",
+    "Switzerland",
+    "France",
+    "Japan",
+    "Hong Kong"
+  ],
+  "lab_order_note": "Rows do not overlap. A lab's row counts people whose current AI-titled job is at that lab and who hold no current job at a lab listed before it, so someone with current jobs at two labs counts once, at the first. The ten-lab row is the sum of the ten rows.",
+  "countries_note": "Values of the profile's location.country. Hong Kong is its own value on the Platform, listed here as a region."
+}

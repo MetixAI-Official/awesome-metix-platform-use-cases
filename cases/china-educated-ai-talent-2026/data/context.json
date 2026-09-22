@@ -1,0 +1,47 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json",
+  "rows": [
+    {
+      "group": "us-ai-bachelor",
+      "count": "100000+"
+    },
+    {
+      "group": "us-ai-mainland",
+      "count": 12194
+    },
+    {
+      "group": "ten-labs-world-bachelor",
+      "count": 25376
+    },
+    {
+      "group": "ten-labs-world-mainland",
+      "count": 4816
+    },
+    {
+      "group": "china-ai-visible",
+      "count": 32
+    },
+    {
+      "group": "visible-ai-staff-bytedance",
+      "count": 498
+    },
+    {
+      "group": "visible-ai-staff-alibaba",
+      "count": 74
+    },
+    {
+      "group": "visible-ai-staff-tencent",
+      "count": 92
+    },
+    {
+      "group": "visible-ai-staff-baidu",
+      "count": 46
+    },
+    {
+      "group": "visible-ai-staff-deepseek",
+      "count": "<10"
+    }
+  ]
+}

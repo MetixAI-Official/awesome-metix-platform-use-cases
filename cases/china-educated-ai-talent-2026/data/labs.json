@@ -1,0 +1,126 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/institutions.json",
+  "rows": [
+    {
+      "group": "openai",
+      "label": "OpenAI",
+      "us_visible_count": 2053,
+      "us_bachelor_count": 1523,
+      "us_mainland_count": 273,
+      "us_recent_bachelor_count": 1071,
+      "us_recent_mainland_count": 199,
+      "us_research_bachelor_count": 43,
+      "us_research_mainland_count": "<10"
+    },
+    {
+      "group": "anthropic",
+      "label": "Anthropic",
+      "us_visible_count": 888,
+      "us_bachelor_count": 652,
+      "us_mainland_count": 73,
+      "us_recent_bachelor_count": 494,
+      "us_recent_mainland_count": 60,
+      "us_research_bachelor_count": 13,
+      "us_research_mainland_count": 0
+    },
+    {
+      "group": "google-deepmind",
+      "label": "Google DeepMind",
+      "us_visible_count": 961,
+      "us_bachelor_count": 743,
+      "us_mainland_count": 165,
+      "us_recent_bachelor_count": 425,
+      "us_recent_mainland_count": 101,
+      "us_research_bachelor_count": 374,
+      "us_research_mainland_count": 85
+    },
+    {
+      "group": "xai",
+      "label": "xAI",
+      "us_visible_count": 471,
+      "us_bachelor_count": 375,
+      "us_mainland_count": 99,
+      "us_recent_bachelor_count": 347,
+      "us_recent_mainland_count": 89,
+      "us_research_bachelor_count": "<10",
+      "us_research_mainland_count": "<10"
+    },
+    {
+      "group": "meta",
+      "label": "Meta",
+      "us_visible_count": 5671,
+      "us_bachelor_count": 4643,
+      "us_mainland_count": 1672,
+      "us_recent_bachelor_count": 1901,
+      "us_recent_mainland_count": 589,
+      "us_research_bachelor_count": 2346,
+      "us_research_mainland_count": 1084
+    },
+    {
+      "group": "nvidia",
+      "label": "NVIDIA",
+      "us_visible_count": 1577,
+      "us_bachelor_count": 1203,
+      "us_mainland_count": 243,
+      "us_recent_bachelor_count": 507,
+      "us_recent_mainland_count": 95,
+      "us_research_bachelor_count": 382,
+      "us_research_mainland_count": 92
+    },
+    {
+      "group": "google",
+      "label": "Google, other than Google DeepMind",
+      "us_visible_count": 2138,
+      "us_bachelor_count": 1640,
+      "us_mainland_count": 279,
+      "us_recent_bachelor_count": 610,
+      "us_recent_mainland_count": 109,
+      "us_research_bachelor_count": 551,
+      "us_research_mainland_count": 97
+    },
+    {
+      "group": "microsoft",
+      "label": "Microsoft",
+      "us_visible_count": 2630,
+      "us_bachelor_count": 2011,
+      "us_mainland_count": 355,
+      "us_recent_bachelor_count": 1059,
+      "us_recent_mainland_count": 157,
+      "us_research_bachelor_count": 943,
+      "us_research_mainland_count": 233
+    },
+    {
+      "group": "apple",
+      "label": "Apple",
+      "us_visible_count": 2500,
+      "us_bachelor_count": 1995,
+      "us_mainland_count": 371,
+      "us_recent_bachelor_count": 663,
+      "us_recent_mainland_count": 118,
+      "us_research_bachelor_count": 336,
+      "us_research_mainland_count": 67
+    },
+    {
+      "group": "amazon",
+      "label": "Amazon",
+      "us_visible_count": 5397,
+      "us_bachelor_count": 4393,
+      "us_mainland_count": 1052,
+      "us_recent_bachelor_count": 2012,
+      "us_recent_mainland_count": 458,
+      "us_research_bachelor_count": 3229,
+      "us_research_mainland_count": 966
+    },
+    {
+      "group": "ten-labs",
+      "label": "The ten labs together",
+      "us_visible_count": 24286,
+      "us_bachelor_count": 19178,
+      "us_mainland_count": 4582,
+      "us_recent_bachelor_count": 9089,
+      "us_recent_mainland_count": 1975
+    }
+  ]
+}
