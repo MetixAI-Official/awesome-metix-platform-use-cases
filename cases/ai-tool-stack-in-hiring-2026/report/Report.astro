@@ -3,7 +3,7 @@
  * Design
  * Color follows data: postings are jobs blue, profiles violet (see docs/style.md).
  * Hero: deep violet-navy #14112E, white type; demand in sky #A3E4FF, supply in lilac #9A95FF.
- * Body on white: demand in deep jobs blue #145A93, supply in violet #5B54EF, context in grey #7E8787.
+ * Body on white: demand in deep jobs blue #145A93, supply in violet #5B54EF, context in grey #858395.
  * Type: the shell faces; the ratio in Sora 700 at 120 px on desktop.
  * Signature: the two-sided chart. Profiles grow left, postings grow right, from one spine,
  *   so demand and supply for every tool are read on the same scale at a glance.
@@ -1050,7 +1050,7 @@ const industryZh: Record<string, string> = {
     position: absolute;
     top: -6px;
     bottom: -6px;
-    border-left: 1.5px dashed #4e4d4b;
+    border-left: 1.5px dashed #3f3d56;
   }
 
   .dot {
@@ -1060,7 +1060,7 @@ const industryZh: Record<string, string> = {
     height: 14px;
     margin: -7px 0 0 -7px;
     border-radius: 50%;
-    background: #7e8787;
+    background: #858395;
   }
 
   /* Figure 02 has one plain dot per row; figure 03 has a filled (US) and an open dot. The
@@ -1076,11 +1076,11 @@ const industryZh: Record<string, string> = {
   }
 
   .dot-row:not(.focus) .dot.us {
-    background: #7e8787;
+    background: #858395;
   }
 
   .dot-row:not(.focus) .dot.out {
-    box-shadow: inset 0 0 0 2.5px #7e8787;
+    box-shadow: inset 0 0 0 2.5px #858395;
   }
 
   .link {
@@ -1088,7 +1088,7 @@ const industryZh: Record<string, string> = {
     top: 50%;
     height: 2px;
     margin-top: -1px;
-    background: #7e8787;
+    background: #858395;
   }
 
   .dot-row.focus .link {
@@ -1139,7 +1139,7 @@ const industryZh: Record<string, string> = {
 
   .lg.baseline::before {
     border-radius: 2px;
-    background: #7e8787;
+    background: #858395;
   }
 
   /* 05: co-mentions */
@@ -1256,7 +1256,7 @@ const industryZh: Record<string, string> = {
   }
 
   .pay-bar.baseline {
-    background: #7e8787;
+    background: #858395;
     color: var(--ink);
   }
 

@@ -69,7 +69,7 @@ Dashes mean planned: the Planned tag on a case that is not published yet. A disa
 
 Class names in the shell are prefixed by the component they belong to (`start-`, `tb-`, `pg-`, `cb-`), because a case's scoped styles and the shell share one page: a bare `.seg` or `.step` in the shell styles every case that uses the same word.
 
-Report prose has four shapes, all on the rail at a 34em measure in the body grey. A definition (Who is counted) is ruled rows with the term in a label column. Lead findings (In brief) are numbered rows in ink. A figure's reading sits under it as `FigNotes`: "About figure 01" in the heading column, the reading as the first paragraph, method and caveats after it one size smaller. A findings section (Where they are based) is a heading and paragraphs. Long prose is split at its sentence boundaries into what it shows and how it was counted, never reworded to fit.
+Report prose has four shapes, in the body grey at a reading measure. On the rail: a definition (Who is counted) as ruled rows with the term in a label column, lead findings (In brief) as numbered rows in ink, and a findings section (Where they are based) as a heading and paragraphs. Under each figure: its reading as `FigNotes`, aligned with the figure's content edge so it reads as that figure's caption, with the "About figure 01" label above the text and every paragraph at 16 px. Nearness to its figure beats alignment with the page grid for a caption. Long prose is split at its sentence boundaries into what it shows and how it was counted, never reworded to fit.
 
 Dates are UTC dates. A case's snapshot is the day its replay ran in UTC, the same day as `ran_at` in its receipt, and the receipt shows that date without the time.
 
@@ -96,7 +96,7 @@ The field comes from the case's datasets (see Brand and terms). The text and cha
 | blue | `#1E79C2` | white (4.6:1) | ink `#0B0A1F` (4.2:1) | `#C9F6FF` (4.0:1) |
 | teal | `#0DEFC8` | ink (13.2:1) | ink | `#5E5C78` (4.3:1) |
 
-Sky and periwinkle fields use ink text and `#3D3A8C` marks. On white, a chart's focus color follows its dataset: jobs blue `#145A93`, profiles violet `#3D36C9`, companies teal ink `#07545E`. Other marks are grey `#7E8787`.
+Sky and periwinkle fields use ink text and `#3D3A8C` marks. On white, a chart's focus color follows its dataset: jobs blue `#145A93`, profiles violet `#3D36C9`, companies teal ink `#07545E`. Other marks are `#858395`, a grey on the ink's violet hue (3.7:1 on white), so marks and text share one family of neutrals.
 
 ## Per-case design
 
@@ -110,7 +110,8 @@ Charts render at build time from committed aggregate files. They never read raw 
 
 - Label directly; color is never the only key.
 - One series in the focus color, the rest in grey, unless the categories themselves are the point. Never more than four hues.
-- Say what a bar is scaled to. Shares of a total are drawn against the total, so a bar that is half the total fills half the width.
+- Say what a bar is scaled to. A share is drawn on a labelled axis from 0: either the whole total, so a bar that is half the total fills half the width, or, when every share is small, an axis that ends at the first 10% step above the largest share, with its ticks drawn and the range in the subtitle. Never an unlabelled axis that stops short of 100%.
+- The focus color marks exactly what the heading names. A reference (the ten labs together, a ceiling, one to one) is ink or ink-2, never the focus color, so a color keeps one meaning within a figure.
 - Hatching means one thing: a strict count, a mark counted only when a second condition holds (a tool counted only when another tool is named too). Strict counts are lower bounds, but not every lower bound is hatched: a share whose denominator includes unknowns (postings with no city) is drawn solid, and its text says it is a lower bound. Every hatched mark has a key where it appears. Leftover buckets (everywhere else, no city given, rest of the world) are drawn like the other marks and told apart by their label and their place last. A cell that does not apply says so in words ("same tool"). A suppressed cell is an empty outline labelled `<10`.
 - A log scale is allowed for ratios, with the one-to-one line drawn and labelled.
 - Do not draw a result that a definition forces. A tool counted only when named with another tool will always co-occur with another tool, so it does not get a co-mention row.

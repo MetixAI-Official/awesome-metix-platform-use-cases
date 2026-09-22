@@ -1761,7 +1761,7 @@ details.query[open]::details-content {
   border-radius: 14px;
   box-shadow: var(--ring);
   --bl-focus: #145a93;
-  --bl-mark: #7e8787;
+  --bl-mark: #858395;
   --bl-track: var(--surface-muted);
 }
 
@@ -1920,18 +1920,19 @@ details.query[open]::details-content {
   }
 }
 
-/* Figure notes: the reading under a figure, on the rail. All report prose is the body
-   grey; the paragraphs after the first (method and caveats) are one size smaller. */
+/* Figure notes: the reading of a figure, directly under it and aligned with the figure's
+   content edge, so it reads as that figure's caption. The label sits above the text, and
+   every paragraph is the same size. */
 .report-body > .fig-notes {
-  margin-top: 28px;
+  margin-top: 20px;
 }
 
 .fig-notes {
-  display: grid;
-  gap: 8px;
+  padding-inline: clamp(20px, 3vw, 36px);
 }
 
 .fn-label {
+  margin-bottom: 8px;
   font: 500 12px/1.4 var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1945,22 +1946,14 @@ details.query[open]::details-content {
 }
 
 .fn-text {
-  max-width: 34em;
+  max-width: 36em;
+  font-size: 16px;
+  line-height: 1.65;
   color: var(--ink-2);
 }
 
 .fn-text p + p {
-  margin-top: 12px;
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-@media (min-width: 960px) {
-  .fig-notes {
-    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
-    align-items: first baseline;
-    gap: 56px;
-  }
+  margin-top: 10px;
 }
 
 /* The one note style on the site: a muted panel with a label, no side stripe. */

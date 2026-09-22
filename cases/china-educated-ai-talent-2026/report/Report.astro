@@ -5,7 +5,8 @@
  * Hero: deep violet #1C1747, white type, periwinkle #B5B5FF for the ten labs and pale lavender
  *   #D9D7FF for the ten-lab share.
  * Body on white: one 0 to 50% axis for every rate chart, so the figures compare directly;
- *   focus in deep violet #3D36C9, other marks grey #7E8787, the all-US ceiling dashed.
+ *   violet #3D36C9 for the labs a heading names, ink for the ten labs together, other marks
+ *   violet-grey #858395, the all-US ceiling dashed in ink-2.
  * Signature: the ruler. Ten labs on one 0 to 50% line in the hero, from the lowest share to the
  *   highest, with the ten-lab share and the all-US ceiling marked on the same line.
  * Wording: the population is defined by where the bachelor's institution is, and only that.
@@ -167,6 +168,14 @@ const elsewhereAtLeast = Math.max(0, instBase - rowSum);
 const ustc = instRows.find((r) => r.group === "ustc")!;
 const peking = instRows.find((r) => r.group === "peking")!;
 const ustcFirst = (int(ustc.count) ?? 0) > (int(peking.count) ?? 0);
+// Figure 04 uses a labelled axis like figure 01's, ending at the first 10% step above the
+// largest share, so the bars use the width instead of crowding the left eighth.
+const instShares = [...instRows.map((r) => (int(r.count) ?? 0) / instBase), elsewhereAtLeast / instBase];
+const instAxis = Math.ceil(Math.max(...instShares) * 10) / 10;
+const instTicks = Array.from({ length: Math.round(instAxis * 10) + 1 }, (_, i) => i / 10);
+const xi = (v: number) => `${Math.min(100, (v / instAxis) * 100).toFixed(2)}%`;
+// The heading compares USTC with Peking University, so those two rows carry the focus color.
+const instFocus = (g: string) => ustcFirst && (g === "ustc" || g === "peking");
 
 // Where people with a mainland-China bachelor in AI roles list themselves.
 const cWorld = countries.world_count;
@@ -362,8 +371,8 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
               </span>
               <span />
             </div>
-            {byShare.map((r, i) => (
-              <div class:list={["rate-row", { lead: i === 0 }]}>
+            {byShare.map((r) => (
+              <div class:list={["rate-row", { lead: r.group === highest.group || r.group === lowest.group }]}>
                 <span class="rate-name">{name(r.group)}</span>
                 <span class="rate-track" aria-hidden="true">
                   <span class="ref ceiling" style={`left: ${x(ceiling)}`} />
@@ -420,8 +429,8 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
           }
           sub={
             zh
-              ? "当前工作开始得更早的人（空心）和开始于最近 24 个月的人（实心）中，本科在中国大陆院校的比例。深色是差距超出偶然波动范围的机构"
-              : "Share among people whose current job started earlier (open) and in the last 24 months (filled). Dark rows differ by more than groups this size vary by chance"
+              ? "当前工作开始得更早的人（空心）和开始于最近 24 个月的人（实心）中，本科在中国大陆院校的比例。紫色是差距超出偶然波动范围的机构，黑色一行是十家合计"
+              : "Share among people whose current job started earlier (open) and in the last 24 months (filled). Violet rows differ by more than groups this size vary by chance; the ink row is the ten labs together"
           }
           alt={cohorts
             .map((c) =>
@@ -573,33 +582,43 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
           }
           sub={
             zh
-              ? "十家机构在美国的 AI 员工中，本科在各院校的人数。平台按词匹配院校名称；斜线条是严格计数：排除了名称里还含其他大学用词的记录"
-              : "US-based AI staff at the ten labs, by bachelor's institution. The Platform matches names word by word; hatched bars are strict counts that leave out entries whose names also contain another university's words"
+              ? `十家机构在美国的 AI 员工中，本科在各院校的人数和占十家 ${number(lang, instBase)} 人的比例，刻度 0% 到 ${pct(instAxis, 0)}。平台按词匹配院校名称；斜线条是严格计数：排除了名称里还含其他大学用词的记录`
+              : `US-based AI staff at the ten labs by bachelor's institution, as a share of the ${number(lang, instBase)}; axis 0% to ${pct(instAxis, 0)}. The Platform matches names word by word; hatched bars are strict counts that leave out entries whose names also contain another university's words`
           }
           alt={instRows.map((r) => `${instName(r.group, r.label)} ${r.count}`).join(zh ? "，" : ", ")}
           source={source}
           queries={queries}
         >
-          <ol class="inst">
+          <ol class="inst" style={`--inst-step: ${((0.1 / instAxis) * 100).toFixed(4)}%`}>
+            <li class="inst-axis" aria-hidden="true">
+              <span />
+              <span class="axis-track">
+                {instTicks.map((t) => (
+                  <span class="tick" style={`left: ${xi(t)}`}>
+                    {pct(t, 0)}
+                  </span>
+                ))}
+              </span>
+              <span />
+              <span />
+            </li>
             {instRows.map((r) => (
-              <li class:list={{ strict: r.strict }}>
+              <li class:list={{ strict: r.strict, focus: instFocus(r.group) }}>
                 <span class="inst-name">{instName(r.group, r.label)}</span>
                 <span class="inst-track" aria-hidden="true">
-                  <span class="bar" style={`width: ${(((int(r.count) ?? 0) / instBase) * 100).toFixed(2)}%`} />
+                  <span class="bar" style={`width: ${xi((int(r.count) ?? 0) / instBase)}`} />
                 </span>
-                <span class="inst-val">
-                  {number(lang, int(r.count) ?? 0)} · {pct((int(r.count) ?? 0) / instBase, 0)}
-                </span>
+                <span class="inst-pct">{pct((int(r.count) ?? 0) / instBase, 0)}</span>
+                <span class="inst-n">{number(lang, int(r.count) ?? 0)}</span>
               </li>
             ))}
             <li class="rest">
               <span class="inst-name">{zh ? "清单上的其他院校，至少" : "Every other listed institution, at least"}</span>
               <span class="inst-track" aria-hidden="true">
-                <span class="bar" style={`width: ${((elsewhereAtLeast / instBase) * 100).toFixed(2)}%`} />
+                <span class="bar" style={`width: ${xi(elsewhereAtLeast / instBase)}`} />
               </span>
-              <span class="inst-val">
-                {number(lang, elsewhereAtLeast)} · {pct(elsewhereAtLeast / instBase, 0)}
-              </span>
+              <span class="inst-pct">{pct(elsewhereAtLeast / instBase, 0)}</span>
+              <span class="inst-n">{number(lang, elsewhereAtLeast)}</span>
             </li>
           </ol>
           <p class="legend" aria-hidden="true">
@@ -1031,7 +1050,7 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     height: 16px;
     margin-top: -8px;
     border-radius: 0 3px 3px 0;
-    background: #7e8787;
+    background: #858395;
   }
 
   .rate-row.lead .bar {
@@ -1048,14 +1067,14 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
   .ref.all {
     width: 2px;
     margin-left: -1px;
-    background: #3d36c9;
+    background: var(--ink);
   }
 
   /* Dashes drawn as a gradient on an 8px period, so they stay in phase across rows. */
   .ref.ceiling {
     width: 1.5px;
     margin-left: -0.75px;
-    background: repeating-linear-gradient(to bottom, #4e4d4b 0 4px, transparent 4px 8px);
+    background: repeating-linear-gradient(to bottom, #3f3d56 0 4px, transparent 4px 8px);
   }
 
   .ref-labels .axis-track {
@@ -1072,12 +1091,12 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
   .ref-label.ceiling {
     transform: translateX(-100%);
     padding-right: 8px;
-    color: #4e4d4b;
+    color: #3f3d56;
   }
 
   .ref-label.all {
     padding-left: 8px;
-    color: #3d36c9;
+    color: var(--ink);
   }
 
   .legend.ref-legend {
@@ -1089,7 +1108,7 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     top: 50%;
     height: 2px;
     margin-top: -1px;
-    background: #7e8787;
+    background: #858395;
   }
 
   .pt {
@@ -1103,23 +1122,30 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
 
   .pt.earlier {
     background: #fff;
-    box-shadow: inset 0 0 0 2.5px #7e8787;
+    box-shadow: inset 0 0 0 2.5px #858395;
   }
 
   .pt.recent {
-    background: #7e8787;
+    background: #858395;
   }
 
+  /* Violet marks the labs a heading names; ink marks the ten labs together. */
   .rate-row.focus .link,
-  .rate-row.focus .pt.recent,
-  .rate-row.total .link,
-  .rate-row.total .pt.recent {
+  .rate-row.focus .pt.recent {
     background: #3d36c9;
   }
 
-  .rate-row.focus .pt.earlier,
-  .rate-row.total .pt.earlier {
+  .rate-row.focus .pt.earlier {
     box-shadow: inset 0 0 0 2.5px #3d36c9;
+  }
+
+  .rate-row.total .link,
+  .rate-row.total .pt.recent {
+    background: var(--ink);
+  }
+
+  .rate-row.total .pt.earlier {
+    box-shadow: inset 0 0 0 2.5px var(--ink);
   }
 
   .rate-val {
@@ -1141,9 +1167,12 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     color: var(--ink-3);
   }
 
-  .rate-row.focus .rate-val strong,
-  .rate-row.total .rate-val strong {
+  .rate-row.focus .rate-val strong {
     color: #3d36c9;
+  }
+
+  .rate-row.total .rate-val strong {
+    color: var(--ink);
   }
 
   .legend {
@@ -1166,37 +1195,38 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
 
   .lg.solid::before {
     width: 0;
-    border-left: 2px solid #3d36c9;
+    border-left: 2px solid var(--ink);
   }
 
   .lg.strict::before {
-    width: 14px;
+    width: 20px;
     border-radius: 2px;
-    background: repeating-linear-gradient(135deg, #7e8787 0 3px, transparent 3px 6px);
-    box-shadow: inset 0 0 0 1.5px #7e8787;
+    background: repeating-linear-gradient(135deg, #858395 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1.5px #858395;
   }
 
   .lg.dashed::before {
     width: 0;
-    border-left: 1.5px dashed #4e4d4b;
+    border-left: 1.5px dashed #3f3d56;
   }
 
   .lg.open::before {
     width: 12px;
     border-radius: 50%;
-    box-shadow: inset 0 0 0 2.5px #7e8787;
+    box-shadow: inset 0 0 0 2.5px #858395;
   }
 
   .lg.filled::before {
     width: 12px;
     border-radius: 50%;
-    background: #3d36c9;
+    background: #858395;
   }
 
-  /* Institutions */
+  /* Institutions: figure 01's labelled-axis bars, with share and count in two right-aligned
+     columns. The gridlines reach half the row gap past each track, so they run unbroken. */
   .inst {
     display: grid;
-    grid-template-columns: minmax(8rem, 17rem) minmax(0, 1fr) 7rem;
+    grid-template-columns: minmax(8rem, 17rem) minmax(0, 1fr) auto auto;
     column-gap: 16px;
     row-gap: 10px;
     margin: 0;
@@ -1218,35 +1248,65 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
 
   .inst-track {
     position: relative;
-    height: 22px;
-    border-radius: 4px;
-    background: var(--surface-muted);
+    align-self: stretch;
+    min-height: 26px;
+  }
+
+  .inst-track::before {
+    content: "";
+    position: absolute;
+    inset: -5px 0;
+    background: linear-gradient(to right, rgb(11 10 31 / 0.07) 1px, transparent 1px) 0 0 / var(--inst-step, 25%) 100% repeat-x;
+    box-shadow: inset -1px 0 0 rgb(11 10 31 / 0.07);
   }
 
   .inst-track .bar {
     position: absolute;
-    inset: 0 auto 0 0;
-    border-radius: 4px;
-    background: #7e8787;
+    top: 50%;
+    left: 0;
+    height: 16px;
+    margin-top: -8px;
+    border-radius: 0 3px 3px 0;
+    background: #858395;
   }
 
-  .inst li:first-child .bar {
+  .inst li.focus .bar {
     background: #3d36c9;
   }
 
   .inst li.strict .bar {
-    background: repeating-linear-gradient(135deg, #7e8787 0 3px, transparent 3px 6px);
-    box-shadow: inset 0 0 0 1.5px #7e8787;
+    background: repeating-linear-gradient(135deg, #858395 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1.5px #858395;
+  }
+
+  .inst li.strict.focus .bar {
+    background: repeating-linear-gradient(135deg, #3d36c9 0 3px, transparent 3px 6px);
+    box-shadow: inset 0 0 0 1.5px #3d36c9;
   }
 
   .inst li.rest {
-    padding-top: 8px;
+    padding-top: 10px;
     border-top: 1px solid var(--line);
   }
 
-  .inst-val {
-    font: 13px/1.3 var(--mono);
+  .inst-pct,
+  .inst-n {
     text-align: right;
+    white-space: nowrap;
+  }
+
+  .inst-pct {
+    font: 600 14px/1.3 var(--mono);
+    color: var(--ink);
+  }
+
+  .inst li.focus .inst-pct {
+    color: #3d36c9;
+  }
+
+  .inst-n {
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
   }
 
   @media (max-width: 640px) {
@@ -1303,13 +1363,45 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
       display: none;
     }
 
+    /* Phone: the count moves up beside the name, as in figure 01. */
     .inst {
       grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 12px;
+      row-gap: 6px;
     }
 
-    .inst-name {
-      grid-column: 1 / -1;
+    .inst li > .inst-name {
+      grid-column: 1;
+      grid-row: 1;
       margin-top: 6px;
+    }
+
+    .inst li > .inst-n {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: end;
+    }
+
+    .inst li > .inst-track {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .inst li > .inst-pct {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .inst-axis > span:not(.axis-track) {
+      display: none;
+    }
+
+    .inst-axis > .axis-track {
+      grid-column: 1;
+    }
+
+    .inst-track::before {
+      inset: -3px 0;
     }
 
     .ru-end.high {
