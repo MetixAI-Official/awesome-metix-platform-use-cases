@@ -13,7 +13,7 @@ const CJK = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/;
 const CLOSING = /^[，。、：；！？）」』》％…]/;
 const OPENING = /[（「『《]$/;
 /** Chinese words ICU segments wrongly in these titles; add a term when a title needs it. */
-const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名", "留给新人", "客户服务", "注册护士", "暴露度", "五分之一", "软件工程", "职业族", "百分点", "斜线", "实验室", "超级智能"];
+const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名", "留给新人", "客户服务", "注册护士", "暴露度", "五分之一", "软件工程", "职业族", "百分点", "斜线", "实验室", "超级智能", "员工数", "变现", "基础设施", "可穿戴", "九分之一", "其他人"];
 /** A line never starts with these particles; they belong to the word before. */
 const NO_BREAK_BEFORE = /^[的地得了着过吗呢吧里]/;
 /** 被 and 把 bind to the verb that follows. */
@@ -217,7 +217,7 @@ export const ui = {
       reproduceGet: (slug: string) =>
         `data/*.json and data/receipt.json. Run git diff cases/${slug}/data to see what moved: the numbers should match, apart from what changed in the data since the snapshot.`,
       agentLede:
-        "Your agent follows the ten-step prompt: it reads the rules, runs the counts, checks the definitions the prompt asks it to check, and writes the files and the chart. Use an agent that can write files, such as Claude Code or Codex.",
+        "Your agent follows the prompt step by step: it reads the rules, runs the counts, checks the definitions the prompt asks it to check, and writes the files and charts. Use an agent that can write files, such as Claude Code or Codex.",
       stepKey: "Get a key",
       keyBody:
         "New accounts get 100 Credits once, valid for 30 days. Set the key in the shell you start your agent from, or add the line to ~/.zshrc or ~/.bashrc so every new terminal has it:",
@@ -404,7 +404,7 @@ export const ui = {
       reproduceGet: (slug: string) =>
         `data/*.json 和 data/receipt.json。运行 git diff cases/${slug}/data 看哪些数字变了：除去快照之后数据本身的变化，数字应该一致。`,
       agentLede:
-        "你的 agent 按十步提示词执行：先读规则，再计数，按提示词的要求检查定义，最后写出文件和图表。请使用能写文件的 agent，比如 Claude Code 或 Codex。",
+        "你的 agent 按提示词一步步执行：先读规则，再计数，按提示词的要求检查定义，最后写出文件和图表。请使用能写文件的 agent，比如 Claude Code 或 Codex。",
       stepKey: "获取 key",
       keyBody: "新账户一次性赠送 100 Credits，30 天内有效。在启动 agent 的终端里设置，或者把这一行写进 ~/.zshrc 或 ~/.bashrc，新开的终端也能用：",
       createKey: "在 Metix AI Platform 上创建 key",

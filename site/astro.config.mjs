@@ -10,7 +10,7 @@ export default defineConfig({
     locales: ["en", "zh"],
     routing: { prefixDefaultLocale: false },
   },
-  markdown: { syntaxHighlight: false },
+  markdown: { syntaxHighlight: false, smartypants: false },
   vite: {
     resolve: {
       alias: { "@site": fileURLToPath(new URL("./src", import.meta.url)) },

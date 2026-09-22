@@ -89,7 +89,7 @@ A case may refer to a public event involving a person, such as an executive hire
 
 ## Wording
 
-A count of profiles is "visible through the Metix AI Platform", a lower bound, and never a company's headcount. "412 visible profiles in inference roles at the company as of 2026-09-18" is right. "The company has 412 inference engineers" is wrong.
+A count of profiles is "visible through the Metix AI Platform" and never a company's headcount. It is usually a lower bound, since many people have no visible profile, but profiles left out of date count as current; where a case finds more current profiles than a company's reported headcount, it says a count is neither a headcount nor a guaranteed floor. "412 visible profiles in inference roles at the company as of 2026-09-18" is right. "The company has 412 inference engineers" is wrong.
 
 Job counts describe demand and profile counts describe supply. A chart never mixes the two under one label.
 
@@ -142,7 +142,7 @@ The checker catches patterns. A reviewer other than the author checks meaning:
 2. No suppressed cell can be recovered from totals, charts, or neighboring tables.
 3. No chart, sentence, example, or query in `queries/` narrows to one person. The checker does not read query files for this.
 4. Definitions of sensitive populations use institution or employer location only.
-5. Company-level wording is a visible lower bound, and intent claims have a source.
+5. Company-level wording says visible profiles and never a headcount (a lower bound only where nothing can inflate it), and intent claims have a source.
 6. Nothing describes internal systems, customers, or why the study exists.
 7. On the rendered page, in both languages, the product reads Metix AI Platform everywhere, including uppercase labels. The checker reads source text and cannot see a CSS `text-transform`.
 

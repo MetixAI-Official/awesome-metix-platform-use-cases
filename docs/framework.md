@@ -133,6 +133,8 @@ Aggregates are JSON; the checker rejects any other format under `data/`. Row lab
 
 In a `profiles` file, every number must sit under a count key, a share or ratio (`share`, `pct`, `ratio`, or a key ending in one of them), a statistic (`mean`, `median`, `p75`, or a key starting or ending with one), or a numeric dimension (`year`, `month`, `quarter`, `rank`). The checker rejects a number under any other key, because a count stored as `visible` or `total` would otherwise skip the small-cell rule.
 
+A stored share is rounded for reading, so a page never prints one by rounding it again: it divides the count by its base. Rounding twice can land a step off, as 329 of 936 does (35.1496%, stored as 0.3515, which would print 35.2%). Keep every share's count and base in the file so the page can.
+
 ### The receipt
 
 `fetch.py` writes `data/receipt.json` at the end of every run:
