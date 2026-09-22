@@ -1,0 +1,307 @@
+{
+  "note": "What is counted, all within the population in queries/population.json unless a block says otherwise. Every count is sent with size 1, so it costs 1 Credit, or nothing when it finds no one, and reads no record.",
+  "first_joined": {
+    "edges": [
+      "2012-01-01",
+      "2014-01-01",
+      "2016-01-01",
+      "2018-01-01",
+      "2020-01-01",
+      "2022-01-01",
+      "2023-01-01",
+      "2024-01-01",
+      "2025-01-01"
+    ],
+    "after_cut_edges": [
+      "2025-07-01",
+      "2025-08-01",
+      "2025-09-01",
+      "2025-10-01",
+      "2026-01-01",
+      "2026-04-01"
+    ],
+    "note": "A person's first Meta job started before a date exactly when they have an entry at a history name that started before it, so a count at each edge gives how many first joined before it, and the difference between two edges is a band of first-join dates. Bands run from the start of the record through the cut (the dates in edges) and on month by month and quarter by quarter to April 2026 (after_cut_edges). The last band holds April 2026 and anything later, and the fewer than 10 whose Meta entry has no start date. Adjacent bands merge wherever one would hold 1 to 9 people; the cut is never merged away. The second series counts only non-intern entries, so it gives each person's first Meta job that was not an internship; it runs to the cut, and everyone without such a job before the cut is one band."
+  },
+  "moves": {
+    "edges": [
+      "2025-01-01",
+      "2025-04-01",
+      "2025-06-01",
+      "2025-07-01",
+      "2025-08-01",
+      "2025-09-01",
+      "2025-10-01",
+      "2026-01-01",
+      "2026-04-01"
+    ],
+    "note": "For the people who stayed: when their latest current Meta entry started. A count of people with a current Meta entry that started on or after an edge gives how many started their newest current role since then, so a person with two current entries is placed by the newer one. Many people change teams inside Meta without adding an entry, so this shows who recorded a new role, a lower bound on who moved."
+  },
+  "sources": {
+    "ended_from": "2025-01-01",
+    "note": "Where the outside hires (everyone not at Meta when the lab formed) had just been: a job entry that ended in 2025 or later (experience.end_date gte ended_from), which also means it is no longer current. Internships do not count for companies (the intern rule in population.json), so a PhD student's summer at a lab is not where they came from; for academia they do count, because doctoral students' university entries often carry the Intern label. Rows do not overlap: each person counts at the first row in this order whose condition they meet, and the rest are other employers or none. ai_lab marks the five AI labs whose subtotal is published.",
+    "order": [
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "names": [
+          "OpenAI"
+        ],
+        "ai_lab": true
+      },
+      {
+        "id": "google-deepmind",
+        "label": "Google DeepMind",
+        "names": [
+          "DeepMind"
+        ],
+        "ai_lab": true
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "names": [
+          "Anthropic"
+        ],
+        "ai_lab": true
+      },
+      {
+        "id": "xai",
+        "label": "xAI",
+        "names": [
+          "xAI"
+        ],
+        "ai_lab": true
+      },
+      {
+        "id": "thinking-machines",
+        "label": "Thinking Machines Lab",
+        "names": [
+          "Thinking Machines"
+        ],
+        "ai_lab": true
+      },
+      {
+        "id": "apple",
+        "label": "Apple",
+        "names": [
+          "Apple"
+        ]
+      },
+      {
+        "id": "scale-ai",
+        "label": "Scale AI",
+        "names": [
+          "Scale AI"
+        ]
+      },
+      {
+        "id": "google",
+        "label": "Google, other than Google DeepMind",
+        "names": [
+          "Google"
+        ]
+      },
+      {
+        "id": "microsoft",
+        "label": "Microsoft",
+        "names": [
+          "Microsoft"
+        ]
+      },
+      {
+        "id": "amazon",
+        "label": "Amazon",
+        "names": [
+          "Amazon",
+          "AWS"
+        ]
+      },
+      {
+        "id": "nvidia",
+        "label": "NVIDIA",
+        "names": [
+          "NVIDIA"
+        ]
+      },
+      {
+        "id": "academia",
+        "label": "A university or other educational institution",
+        "company_type": "Educational"
+      }
+    ],
+    "context": [
+      {
+        "id": "google",
+        "label": "Google, including Google DeepMind",
+        "names": [
+          "Google",
+          "DeepMind"
+        ]
+      },
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "names": [
+          "OpenAI"
+        ]
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "names": [
+          "Anthropic"
+        ]
+      },
+      {
+        "id": "apple",
+        "label": "Apple",
+        "names": [
+          "Apple"
+        ]
+      },
+      {
+        "id": "microsoft",
+        "label": "Microsoft",
+        "names": [
+          "Microsoft"
+        ]
+      },
+      {
+        "id": "amazon",
+        "label": "Amazon",
+        "names": [
+          "Amazon",
+          "AWS"
+        ]
+      }
+    ],
+    "context_note": "For the whole group: anyone with a past (not current) non-intern job at the employer, at any time. These rows overlap and have no total. Names match word by word, so Google also matches Google DeepMind and Amazon matches Amazon Web Services (AWS). company.type Educational is the employer type the Platform records for universities and schools."
+  },
+  "roles": {
+    "functions": [
+      "Research",
+      "Engineering and Technical",
+      "Product"
+    ],
+    "senior": [
+      "Senior"
+    ],
+    "manager_up": [
+      "Manager",
+      "Head",
+      "Director",
+      "Vice President",
+      "President/Vice President",
+      "C-Level",
+      "Partner",
+      "Founder",
+      "Owner"
+    ],
+    "note": "current_function and current_seniority describe the current job and come from the Platform's fixed sets; either can be missing. Senior covers senior, staff, and principal individual contributors (the audit saw Staff, Senior Staff, and Principal titles labelled Senior); manager_up is Manager and every level above it; the rest of those with a stated level are Specialist or Intern. A doctorate is an education entry with education.degree eq Doctorate, finished or in progress.",
+    "baseline_note": "The baseline is Meta's other research staff: a current Meta entry, current_function eq Research, and no lab term in the headline or current title. It includes people who name FAIR only."
+  },
+  "teams": [
+    {
+      "id": "fair",
+      "label": "FAIR",
+      "terms": [
+        "FAIR"
+      ]
+    },
+    {
+      "id": "tbd-lab",
+      "label": "TBD Lab",
+      "terms": [
+        "TBD"
+      ]
+    },
+    {
+      "id": "infra",
+      "label": "MSL Infra and other infrastructure",
+      "terms": [
+        "infra",
+        "infrastructure"
+      ]
+    },
+    {
+      "id": "par",
+      "label": "Products and Applied Research",
+      "terms": [
+        "PAR",
+        "product applied research"
+      ]
+    }
+  ],
+  "teams_note": "Sub-team names in the headline or current title of people in the population, matched word by word; a person can name more than one. Audited: FAIR, 10 profiles naming it read in whole slices, nearly all naming it as the current team. TBD, all 13 matches read: 10 are in TBD Lab or report to it, and the rest name TBD while recruiting for it, while saying they are not in it, or while saying they have left the lab. Infra, the first 15 of 49 matches for infra or infrastructure (not a whole slice): all 15 work on infrastructure inside the lab, 11 of them naming MSL Infra or Infra at MSL. Products and Applied Research: the words applied research mostly match the job title Applied Research Scientist (most of those read) or an old team name, so the row needs PAR or all of product, applied, and research. fair_only counts current Meta profiles that name FAIR and no lab term; it was not audited outside the population.",
+  "places": {
+    "states": [
+      "California",
+      "New York",
+      "Washington"
+    ],
+    "bay_area": [
+      "Menlo Park",
+      "San Francisco",
+      "Sunnyvale",
+      "Palo Alto",
+      "Mountain View",
+      "Redwood City",
+      "Burlingame",
+      "Fremont",
+      "San Jose",
+      "Santa Clara",
+      "San Mateo",
+      "Foster City",
+      "Oakland",
+      "Berkeley",
+      "Cupertino",
+      "Los Altos",
+      "Belmont",
+      "San Carlos",
+      "Millbrae",
+      "San Bruno",
+      "Newark",
+      "Milpitas",
+      "Los Gatos",
+      "Campbell",
+      "Saratoga",
+      "Daly City",
+      "South San Francisco",
+      "Emeryville",
+      "Alameda",
+      "Hayward",
+      "Dublin",
+      "Pleasanton",
+      "Walnut Creek",
+      "Atherton",
+      "Portola Valley",
+      "Woodside",
+      "Half Moon Bay"
+    ],
+    "countries": [
+      "United Kingdom"
+    ],
+    "note": "The profile's own location, where people list themselves: location.country and location.state, and location.city for the Bay Area, whose cities are listed one by one and compared exactly."
+  },
+  "postings": {
+    "company": "Meta",
+    "title_terms": [
+      "superintelligence",
+      "MSL"
+    ],
+    "description_terms": [
+      "superintelligence labs"
+    ],
+    "research_title": "research",
+    "cities": [
+      "Menlo Park",
+      "San Francisco"
+    ],
+    "states": [
+      "New York"
+    ],
+    "experience_max_months": 36,
+    "posted_from": "2026-09-01",
+    "note": "Open Meta postings (is_open eq true) whose title names superintelligence or MSL, or whose description contains the words superintelligence and labs. All 30 read on 2026-09-22 are Meta postings whose description names Meta Superintelligence Labs. Every one carries the seniority label Not Applicable, so seniority says nothing here, and all were posted in September 2026, so the index shows the openings of the moment rather than a history. Counts of postings carry no minimum."
+  }
+}

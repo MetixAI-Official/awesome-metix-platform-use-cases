@@ -1,0 +1,130 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/measures.json",
+  "total_count": 936,
+  "stayed_count": 722,
+  "outside_count": 214,
+  "lab_research_count": 329,
+  "baseline_research_count": 8955,
+  "note": "function: current_function for the whole group and each cohort; other is any other stated function. level-in-research: current_seniority among people whose current function is Research, in the lab and in the baseline of Meta's other research staff (no lab term in headline or title). doctorate: an education entry with degree Doctorate, finished or in progress.",
+  "rows": [
+    {
+      "table": "function",
+      "group": "research",
+      "count": 329,
+      "share": 0.3515,
+      "stayed_count": 221,
+      "stayed_share": 0.3061,
+      "outside_count": 108,
+      "outside_share": 0.5047
+    },
+    {
+      "table": "function",
+      "group": "engineering-and-technical",
+      "count": 366,
+      "share": 0.391,
+      "stayed_count": 305,
+      "stayed_share": 0.4224,
+      "outside_count": 61,
+      "outside_share": 0.285
+    },
+    {
+      "table": "function",
+      "group": "product",
+      "count": 60,
+      "share": 0.0641,
+      "stayed_count": 49,
+      "stayed_share": 0.0679,
+      "outside_count": 11,
+      "outside_share": 0.0514
+    },
+    {
+      "table": "function",
+      "group": "other",
+      "count": 87,
+      "share": 0.0929,
+      "stayed_count": 69,
+      "stayed_share": 0.0956,
+      "outside_count": 18,
+      "outside_share": 0.0841
+    },
+    {
+      "table": "function",
+      "group": "not-stated",
+      "count": 94,
+      "share": 0.1004,
+      "stayed_count": 78,
+      "stayed_share": 0.108,
+      "outside_count": 16,
+      "outside_share": 0.0748
+    },
+    {
+      "table": "level-in-research",
+      "group": "senior",
+      "lab_count": 52,
+      "lab_share": 0.1581,
+      "baseline_count": 967,
+      "baseline_share": 0.108
+    },
+    {
+      "table": "level-in-research",
+      "group": "manager-up",
+      "lab_count": 22,
+      "lab_share": 0.0669,
+      "baseline_count": 805,
+      "baseline_share": 0.0899
+    },
+    {
+      "table": "level-in-research",
+      "group": "specialist-or-intern",
+      "lab_count": 219,
+      "lab_share": 0.6657,
+      "baseline_count": 6876,
+      "baseline_share": 0.7678
+    },
+    {
+      "table": "level-in-research",
+      "group": "not-stated",
+      "lab_count": 36,
+      "lab_share": 0.1094,
+      "baseline_count": 307,
+      "baseline_share": 0.0343
+    },
+    {
+      "table": "doctorate",
+      "group": "all",
+      "count": 295,
+      "base_count": 936,
+      "share": 0.3152
+    },
+    {
+      "table": "doctorate",
+      "group": "stayed",
+      "count": 214,
+      "base_count": 722,
+      "share": 0.2964
+    },
+    {
+      "table": "doctorate",
+      "group": "outside",
+      "count": 81,
+      "base_count": 214,
+      "share": 0.3785
+    },
+    {
+      "table": "doctorate",
+      "group": "lab-research",
+      "count": 222,
+      "base_count": 329,
+      "share": 0.6748
+    },
+    {
+      "table": "doctorate",
+      "group": "baseline-research",
+      "count": 3670,
+      "base_count": 8955,
+      "share": 0.4098
+    }
+  ]
+}

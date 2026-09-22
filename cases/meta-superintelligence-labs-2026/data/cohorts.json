@@ -1,0 +1,72 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json",
+  "meta_total_count": 936,
+  "meta_outside_count": 214,
+  "meta_outside_share": 0.2286,
+  "meta_outside_labeling_count": "<10",
+  "meta_superintelligence_only_total_count": 790,
+  "microsoft_total_count": 80,
+  "cut": "2025-06-01",
+  "microsoft_cut": "2025-11-01",
+  "note": "The groups of each lab add up to its total. Meta, main definition: stayed (a non-intern job at Meta that began before the cut and ran into May 2025 or later), returned (an earlier non-intern Meta job, but not at Meta then), former interns (only internships there before the cut), and new to the employer. Outside hires are everyone who did not stay. The narrow definition and Microsoft are split as finely as the small-cell rule allows: a difference between a narrow cell and the matching main cell is a group too. earlier-job-at-employer is anyone with an entry there that began before the cut. meta_outside_labeling_count counts outside hires whose title or headline names data labeling, annotation, or red teaming.",
+  "rows": [
+    {
+      "lab": "meta",
+      "definition": "superintelligence-or-msl",
+      "group": "stayed",
+      "count": 722,
+      "share": 0.7714
+    },
+    {
+      "lab": "meta",
+      "definition": "superintelligence-or-msl",
+      "group": "returned",
+      "count": 19,
+      "share": 0.0203
+    },
+    {
+      "lab": "meta",
+      "definition": "superintelligence-or-msl",
+      "group": "former-interns",
+      "count": 25,
+      "share": 0.0267
+    },
+    {
+      "lab": "meta",
+      "definition": "superintelligence-or-msl",
+      "group": "new-to-employer",
+      "count": 170,
+      "share": 0.1816
+    },
+    {
+      "lab": "meta",
+      "definition": "superintelligence-only",
+      "group": "stayed",
+      "count": 617,
+      "share": 0.781
+    },
+    {
+      "lab": "meta",
+      "definition": "superintelligence-only",
+      "group": "outside-hires",
+      "count": 173,
+      "share": 0.219
+    },
+    {
+      "lab": "microsoft",
+      "definition": "superintelligence",
+      "group": "earlier-job-at-employer",
+      "count": 61,
+      "share": 0.7625
+    },
+    {
+      "lab": "microsoft",
+      "definition": "superintelligence",
+      "group": "new-to-employer",
+      "count": 19,
+      "share": 0.2375
+    }
+  ]
+}

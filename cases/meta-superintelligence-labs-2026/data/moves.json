@@ -1,0 +1,114 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/measures.json",
+  "stayed_count": 722,
+  "new_count": 170,
+  "note": "stayed-newest-current-role: people who were at Meta when the lab formed, by the month their newest current Meta entry started; the first band also holds entries with no start date. new-to-meta-first-job: people new to Meta, by the month their first Meta entry started; the last band includes the fewer than 10 with no start date. Many people change teams without a new entry, so a new entry is a lower bound on who moved.",
+  "rows": [
+    {
+      "series": "stayed-newest-current-role",
+      "group": "..2025-01-01",
+      "from": null,
+      "before": "2025-01-01",
+      "count": 476,
+      "share": 0.6593
+    },
+    {
+      "series": "stayed-newest-current-role",
+      "group": "2025-01-01..2025-04-01",
+      "from": "2025-01-01",
+      "before": "2025-04-01",
+      "count": 86,
+      "share": 0.1191
+    },
+    {
+      "series": "stayed-newest-current-role",
+      "group": "2025-04-01..2025-06-01",
+      "from": "2025-04-01",
+      "before": "2025-06-01",
+      "count": 53,
+      "share": 0.0734
+    },
+    {
+      "series": "stayed-newest-current-role",
+      "group": "2025-06-01..2025-08-01",
+      "from": "2025-06-01",
+      "before": "2025-08-01",
+      "count": 28,
+      "share": 0.0388
+    },
+    {
+      "series": "stayed-newest-current-role",
+      "group": "2025-08-01..2025-09-01",
+      "from": "2025-08-01",
+      "before": "2025-09-01",
+      "count": 27,
+      "share": 0.0374
+    },
+    {
+      "series": "stayed-newest-current-role",
+      "group": "2025-09-01..2026-01-01",
+      "from": "2025-09-01",
+      "before": "2026-01-01",
+      "count": 21,
+      "share": 0.0291
+    },
+    {
+      "series": "stayed-newest-current-role",
+      "group": "2026-01-01..",
+      "from": "2026-01-01",
+      "before": null,
+      "count": 31,
+      "share": 0.0429
+    },
+    {
+      "series": "new-to-meta-first-job",
+      "group": "2025-06-01..2025-07-01",
+      "from": "2025-06-01",
+      "before": "2025-07-01",
+      "count": 20,
+      "share": 0.1176
+    },
+    {
+      "series": "new-to-meta-first-job",
+      "group": "2025-07-01..2025-08-01",
+      "from": "2025-07-01",
+      "before": "2025-08-01",
+      "count": 36,
+      "share": 0.2118
+    },
+    {
+      "series": "new-to-meta-first-job",
+      "group": "2025-08-01..2025-09-01",
+      "from": "2025-08-01",
+      "before": "2025-09-01",
+      "count": 28,
+      "share": 0.1647
+    },
+    {
+      "series": "new-to-meta-first-job",
+      "group": "2025-09-01..2025-10-01",
+      "from": "2025-09-01",
+      "before": "2025-10-01",
+      "count": 23,
+      "share": 0.1353
+    },
+    {
+      "series": "new-to-meta-first-job",
+      "group": "2025-10-01..2026-01-01",
+      "from": "2025-10-01",
+      "before": "2026-01-01",
+      "count": 29,
+      "share": 0.1706
+    },
+    {
+      "series": "new-to-meta-first-job",
+      "group": "2026-01-01..",
+      "from": "2026-01-01",
+      "before": null,
+      "count": 34,
+      "share": 0.2
+    }
+  ]
+}

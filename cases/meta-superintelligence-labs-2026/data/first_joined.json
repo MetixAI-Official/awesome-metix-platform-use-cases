@@ -1,0 +1,228 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/measures.json",
+  "meta_total_count": 936,
+  "microsoft_total_count": 80,
+  "cut": "2025-06-01",
+  "microsoft_cut": "2025-11-01",
+  "note": "Bands of the date each person's first job at the employer started, from counts of people with an entry there that started before each date; from is the first day of the band and before the day after it ends, null at the open ends. meta-first-non-intern-job skips internships and runs to the cut; its last band is everyone without a non-intern Meta job before the cut. Bands that would hold 1 to 9 people are merged with a neighbour. The last Meta band includes the fewer than 10 whose Meta entry has no start date. Profiles lag: start dates stop in April 2026.",
+  "rows": [
+    {
+      "series": "meta-any-entry",
+      "group": "..2014-01-01",
+      "from": null,
+      "before": "2014-01-01",
+      "count": 14,
+      "share": 0.015
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2014-01-01..2016-01-01",
+      "from": "2014-01-01",
+      "before": "2016-01-01",
+      "count": 26,
+      "share": 0.0278
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2016-01-01..2018-01-01",
+      "from": "2016-01-01",
+      "before": "2018-01-01",
+      "count": 75,
+      "share": 0.0801
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2018-01-01..2020-01-01",
+      "from": "2018-01-01",
+      "before": "2020-01-01",
+      "count": 128,
+      "share": 0.1368
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2020-01-01..2022-01-01",
+      "from": "2020-01-01",
+      "before": "2022-01-01",
+      "count": 190,
+      "share": 0.203
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2022-01-01..2023-01-01",
+      "from": "2022-01-01",
+      "before": "2023-01-01",
+      "count": 114,
+      "share": 0.1218
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2023-01-01..2024-01-01",
+      "from": "2023-01-01",
+      "before": "2024-01-01",
+      "count": 24,
+      "share": 0.0256
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2024-01-01..2025-01-01",
+      "from": "2024-01-01",
+      "before": "2025-01-01",
+      "count": 118,
+      "share": 0.1261
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2025-01-01..2025-06-01",
+      "from": "2025-01-01",
+      "before": "2025-06-01",
+      "count": 77,
+      "share": 0.0823
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2025-06-01..2025-07-01",
+      "from": "2025-06-01",
+      "before": "2025-07-01",
+      "count": 20,
+      "share": 0.0214
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2025-07-01..2025-08-01",
+      "from": "2025-07-01",
+      "before": "2025-08-01",
+      "count": 36,
+      "share": 0.0385
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2025-08-01..2025-09-01",
+      "from": "2025-08-01",
+      "before": "2025-09-01",
+      "count": 28,
+      "share": 0.0299
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2025-09-01..2025-10-01",
+      "from": "2025-09-01",
+      "before": "2025-10-01",
+      "count": 23,
+      "share": 0.0246
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2025-10-01..2026-01-01",
+      "from": "2025-10-01",
+      "before": "2026-01-01",
+      "count": 29,
+      "share": 0.031
+    },
+    {
+      "series": "meta-any-entry",
+      "group": "2026-01-01..",
+      "from": "2026-01-01",
+      "before": null,
+      "count": 34,
+      "share": 0.0363
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "..2018-01-01",
+      "from": null,
+      "before": "2018-01-01",
+      "count": 99,
+      "share": 0.1058
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "2018-01-01..2020-01-01",
+      "from": "2018-01-01",
+      "before": "2020-01-01",
+      "count": 114,
+      "share": 0.1218
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "2020-01-01..2022-01-01",
+      "from": "2020-01-01",
+      "before": "2022-01-01",
+      "count": 191,
+      "share": 0.2041
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "2022-01-01..2023-01-01",
+      "from": "2022-01-01",
+      "before": "2023-01-01",
+      "count": 114,
+      "share": 0.1218
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "2023-01-01..2024-01-01",
+      "from": "2023-01-01",
+      "before": "2024-01-01",
+      "count": 25,
+      "share": 0.0267
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "2024-01-01..2025-01-01",
+      "from": "2024-01-01",
+      "before": "2025-01-01",
+      "count": 116,
+      "share": 0.1239
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "2025-01-01..2025-06-01",
+      "from": "2025-01-01",
+      "before": "2025-06-01",
+      "count": 82,
+      "share": 0.0876
+    },
+    {
+      "series": "meta-first-non-intern-job",
+      "group": "2025-06-01..",
+      "from": "2025-06-01",
+      "before": null,
+      "count": 195,
+      "share": 0.2083
+    },
+    {
+      "series": "microsoft-any-entry",
+      "group": "..2020-01-01",
+      "from": null,
+      "before": "2020-01-01",
+      "count": 21,
+      "share": 0.2625
+    },
+    {
+      "series": "microsoft-any-entry",
+      "group": "2020-01-01..2025-01-01",
+      "from": "2020-01-01",
+      "before": "2025-01-01",
+      "count": 19,
+      "share": 0.2375
+    },
+    {
+      "series": "microsoft-any-entry",
+      "group": "2025-01-01..2025-11-01",
+      "from": "2025-01-01",
+      "before": "2025-11-01",
+      "count": 21,
+      "share": 0.2625
+    },
+    {
+      "series": "microsoft-any-entry",
+      "group": "2025-11-01..",
+      "from": "2025-11-01",
+      "before": null,
+      "count": 19,
+      "share": 0.2375
+    }
+  ]
+}

@@ -10,6 +10,7 @@ Reports are long reads with many figures. Cards are one question, one number, on
 
 | Use case | Format | Data | Credits to rerun |
 | --- | --- | --- | --- |
+| [77% of people who name Meta's superintelligence lab were already at Meta when it formed](cases/meta-superintelligence-labs-2026/) | Report | People, jobs | 105 |
 | [Software and AI postings have the narrowest entry door of twelve US occupation families](cases/entry-level-postings-by-occupation-2026/) | Report | Jobs | 126 |
 | [23.9% of US-based AI staff at ten labs who list a bachelor's earned it in mainland China](cases/china-educated-ai-talent-2026/) | Report | People | 104 |
 | [Job postings ask for Claude Code five times as often as profiles list it](cases/ai-tool-stack-in-hiring-2026/) | Report | Jobs, people | 92 |

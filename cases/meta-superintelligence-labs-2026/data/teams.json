@@ -1,0 +1,39 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/measures.json",
+  "total_count": 936,
+  "note": "People who name a group of the lab in their headline or current title; a person can name more than one, so rows overlap and have no total. Most name no group. fair-only is outside the population.",
+  "rows": [
+    {
+      "group": "fair",
+      "label": "FAIR",
+      "count": 63,
+      "share": 0.0673
+    },
+    {
+      "group": "tbd-lab",
+      "label": "TBD Lab",
+      "count": 13,
+      "share": 0.0139
+    },
+    {
+      "group": "infra",
+      "label": "MSL Infra and other infrastructure",
+      "count": 49,
+      "share": 0.0524
+    },
+    {
+      "group": "par",
+      "label": "Products and Applied Research",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "group": "fair-only",
+      "label": "Current Meta profiles naming FAIR and no lab term (outside the population)",
+      "count": 238,
+      "share": null
+    }
+  ]
+}

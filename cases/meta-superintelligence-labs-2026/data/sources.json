@@ -1,0 +1,159 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/measures.json",
+  "outside_count": 214,
+  "ai_labs_count": 31,
+  "ai_labs_share": 0.1449,
+  "total_count": 936,
+  "ended_from": "2025-01-01",
+  "note": "came-from: the outside hires by a job that ended in 2025 or later, at the first employer in the listed order that matches, so the rows add up to outside_count; internships do not count for companies and do count for universities. ai_labs_count is the five AI labs together. ever-worked-at: the whole group by any past non-intern job at the employer; those rows overlap.",
+  "rows": [
+    {
+      "set": "came-from",
+      "group": "openai",
+      "label": "OpenAI",
+      "ai_lab": true,
+      "count": "<10",
+      "share": null
+    },
+    {
+      "set": "came-from",
+      "group": "google-deepmind",
+      "label": "Google DeepMind",
+      "ai_lab": true,
+      "count": 18,
+      "share": 0.0841
+    },
+    {
+      "set": "came-from",
+      "group": "anthropic",
+      "label": "Anthropic",
+      "ai_lab": true,
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "set": "came-from",
+      "group": "xai",
+      "label": "xAI",
+      "ai_lab": true,
+      "count": "<10",
+      "share": null
+    },
+    {
+      "set": "came-from",
+      "group": "thinking-machines",
+      "label": "Thinking Machines Lab",
+      "ai_lab": true,
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "set": "came-from",
+      "group": "apple",
+      "label": "Apple",
+      "ai_lab": false,
+      "count": "<10",
+      "share": null
+    },
+    {
+      "set": "came-from",
+      "group": "scale-ai",
+      "label": "Scale AI",
+      "ai_lab": false,
+      "count": 16,
+      "share": 0.0748
+    },
+    {
+      "set": "came-from",
+      "group": "google",
+      "label": "Google, other than Google DeepMind",
+      "ai_lab": false,
+      "count": 16,
+      "share": 0.0748
+    },
+    {
+      "set": "came-from",
+      "group": "microsoft",
+      "label": "Microsoft",
+      "ai_lab": false,
+      "count": "<10",
+      "share": null
+    },
+    {
+      "set": "came-from",
+      "group": "amazon",
+      "label": "Amazon",
+      "ai_lab": false,
+      "count": 10,
+      "share": 0.0467
+    },
+    {
+      "set": "came-from",
+      "group": "nvidia",
+      "label": "NVIDIA",
+      "ai_lab": false,
+      "count": "<10",
+      "share": null
+    },
+    {
+      "set": "came-from",
+      "group": "academia",
+      "label": "A university or other educational institution",
+      "ai_lab": false,
+      "count": 22,
+      "share": 0.1028
+    },
+    {
+      "set": "came-from",
+      "group": "other",
+      "label": "Other employers, or none that ended in 2025 or later",
+      "ai_lab": false,
+      "count": 101,
+      "share": 0.472
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "google",
+      "label": "Google, including Google DeepMind",
+      "count": 133,
+      "share": 0.1421
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "openai",
+      "label": "OpenAI",
+      "count": 12,
+      "share": 0.0128
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "anthropic",
+      "label": "Anthropic",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "apple",
+      "label": "Apple",
+      "count": 36,
+      "share": 0.0385
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "microsoft",
+      "label": "Microsoft",
+      "count": 92,
+      "share": 0.0983
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "amazon",
+      "label": "Amazon",
+      "count": 110,
+      "share": 0.1175
+    }
+  ]
+}

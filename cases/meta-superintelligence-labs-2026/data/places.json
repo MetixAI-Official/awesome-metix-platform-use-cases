@@ -1,0 +1,46 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/measures.json",
+  "total_count": 936,
+  "us_count": 881,
+  "us_share": 0.9412,
+  "note": "Where people list themselves (location on the profile). The rows add up to total_count.",
+  "rows": [
+    {
+      "group": "bay-area",
+      "count": 453,
+      "share": 0.484
+    },
+    {
+      "group": "california-other",
+      "count": 27,
+      "share": 0.0288
+    },
+    {
+      "group": "new-york",
+      "count": 118,
+      "share": 0.1261
+    },
+    {
+      "group": "washington",
+      "count": 84,
+      "share": 0.0897
+    },
+    {
+      "group": "us-other",
+      "count": 199,
+      "share": 0.2126
+    },
+    {
+      "group": "united-kingdom",
+      "count": 19,
+      "share": 0.0203
+    },
+    {
+      "group": "elsewhere-or-none",
+      "count": 36,
+      "share": 0.0385
+    }
+  ]
+}

@@ -1,0 +1,2049 @@
+---
+/*
+ * Design
+ * Color follows cohort. Violet #3D36C9 marks people who were at Meta when the lab formed, the
+ *   group the title names; pale violet #8E88E6 people who had worked at Meta before but not
+ *   then; ink #0B0A1F people new to Meta; grey #858395 context. A profiles report, so it stays in
+ *   the violet family, and it opens on white, unlike the two dark violet reports.
+ * Signature: the 936. One strip of 936 hairlines, one per person, in three blocks, with the
+ *   lab's founding at the point where the first block ends. Two rows on wide screens, three below
+ *   1200px, four on tablets, eight on phones, so a mark never drops much under 1.5px.
+ * Body: figure 01 draws first joins as a rate per year, so bands of different lengths compare,
+ *   in two panels split at the founding: by year before it, by month after it.
+ * Wording: the population is people who chose to name the lab, a lower bound and not the lab.
+ *   Neutral verbs for moves (join, leave, return, hire). No one is named.
+ */
+import BarList from "@site/components/charts/BarList.astro";
+import Chapter from "@site/components/Chapter.astro";
+import Contents from "@site/components/Contents.astro";
+import FigNotes from "@site/components/charts/FigNotes.astro";
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, href, isoDate, longDate, number, titleHtml, type Lang } from "@site/i18n";
+import cohortsData from "../data/cohorts.json";
+import firstData from "../data/first_joined.json";
+import movesData from "../data/moves.json";
+import placesData from "../data/places.json";
+import postingsData from "../data/postings.json";
+import receipt from "../data/receipt.json";
+import rolesData from "../data/roles.json";
+import sourcesData from "../data/sources.json";
+import teamsData from "../data/teams.json";
+import measuresQuery from "../queries/measures.json";
+import populationQuery from "../queries/population.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: {
+    slug: string;
+    title: Record<Lang, string>;
+    dek: Record<Lang, string>;
+    snapshot?: Date;
+    exploration_credits?: number;
+  };
+}
+
+const { lang, section, entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(cohortsData.snapshot);
+const iso = isoDate(snapshot);
+const pct = (x: number, d = 1) => `${number(lang, x * 100, d)}%`;
+const n = (x: number) => number(lang, x);
+const source = zh ? `来源：Metix AI Platform 个人档案数据，${iso}。` : `Source: Metix AI Platform, profiles, ${iso}.`;
+const sourceJobs = zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`;
+const queries = [
+  { file: "population.json", endpoint: "POST /v1/people/query", spec: populationQuery },
+  { file: "measures.json", endpoint: "POST /v1/people/query · POST /v1/jobs/query", spec: measuresQuery },
+];
+const MEMO = "https://www.cnbc.com/2025/06/30/mark-zuckerberg-creating-meta-superintelligence-labs-read-the-memo.html";
+const SCALE = "https://axios.com/2025/06/13/meta-scale-ai-deal";
+const MSFT = "https://www.cnbc.com/2025/11/06/microsoft-forms-superintelligence-team-under-ai-head-mustafa-suleyman-.html";
+
+// A published count of people can be "<10"; every number a sentence uses must be a real count.
+const num = (v: number | string, what: string): number => {
+  if (typeof v !== "number") throw new Error(`Meta report: ${what} is suppressed (${v}); rewrite the text that uses it`);
+  return v;
+};
+const row = <T extends { group: string }>(rows: T[], group: string, what: string): T => {
+  const r = rows.find((x) => x.group === group);
+  if (!r) throw new Error(`Meta report: no ${what} row ${group}`);
+  return r;
+};
+
+// ---------- cohorts
+const cohort = (lab: string, definition: string, group: string) => {
+  const r = cohortsData.rows.find((x) => x.lab === lab && x.definition === definition && x.group === group);
+  if (!r) throw new Error(`Meta report: no cohort ${lab} ${definition} ${group}`);
+  return num(r.count, `${lab} ${group}`);
+};
+const total = cohortsData.meta_total_count;
+const stayed = cohort("meta", "superintelligence-or-msl", "stayed");
+const returned = cohort("meta", "superintelligence-or-msl", "returned");
+const interns = cohort("meta", "superintelligence-or-msl", "former-interns");
+const fresh = cohort("meta", "superintelligence-or-msl", "new-to-employer");
+const hadBeen = returned + interns;
+const outside = cohortsData.meta_outside_count;
+if (stayed + hadBeen + fresh !== total || hadBeen + fresh !== outside) throw new Error("Meta report: cohorts do not add up");
+// The title and the hero say most were already at Meta.
+if (stayed / total < 0.5) throw new Error("Meta report: those who stayed are no longer a majority; rewrite the title");
+const narrowTotal = cohortsData.meta_superintelligence_only_total_count;
+const narrowStayed = cohort("meta", "superintelligence-only", "stayed");
+const msTotal = cohortsData.microsoft_total_count;
+const msBefore = cohort("microsoft", "superintelligence", "earlier-job-at-employer");
+
+// ---------- first joins (figure 01): a rate per year so bands of different lengths compare
+const DAY = 864e5;
+const YEAR = 365.25 * DAY;
+const T0 = Date.parse("2014-01-01");
+const CUT = Date.parse(firstData.cut);
+const EDGE = Date.parse("2026-05-01"); // profiles stop in April 2026 (see Limits)
+type Band = { from: string | null; before: string | null; count: number; a: number; b: number; rate: number };
+const bands: Band[] = firstData.rows
+  .filter((r) => r.series === "meta-any-entry")
+  .map((r) => {
+    const count = num(r.count, `first-join band ${r.group}`);
+    const a = r.from ? Date.parse(r.from) : Number.NEGATIVE_INFINITY;
+    const b = r.before ? Date.parse(r.before) : EDGE;
+    return { from: r.from, before: r.before, count, a, b, rate: Number.isFinite(a) ? count / ((b - a) / YEAR) : 0 };
+  });
+const openBand = bands.find((b) => !Number.isFinite(b.a));
+if (!openBand || openBand.b !== T0) throw new Error("Meta report: the first band no longer ends in 2014; move T0");
+const beforeBands = bands.filter((b) => Number.isFinite(b.a) && b.b <= CUT);
+const afterBands = bands.filter((b) => b.a >= CUT);
+const everBefore = openBand.count + beforeBands.reduce((s, b) => s + b.count, 0);
+if (everBefore + afterBands.reduce((s, b) => s + b.count, 0) !== total) throw new Error("Meta report: first-join bands do not add up");
+const maxRate = Math.max(...bands.map((b) => b.rate));
+const yMax = Math.ceil(maxRate / 100) * 100;
+const yTicks = Array.from({ length: yMax / 100 + 1 }, (_, i) => i * 100);
+const h = (rate: number) => `${(rate / yMax) * 100}%`;
+const xBefore = (t: number) => `${((t - T0) / (CUT - T0)) * 100}%`;
+const xAfter = (t: number) => `${((t - CUT) / (EDGE - CUT)) * 100}%`;
+const wBefore = (b: Band) => `calc(${((b.b - b.a) / (CUT - T0)) * 100}% - 2px)`;
+const wAfter = (b: Band) => `calc(${((b.b - b.a) / (EDGE - CUT)) * 100}% - 2px)`;
+const beforeTicks = [2014, 2016, 2018, 2020, 2022, 2024].map((y) => ({ t: Date.parse(`${y}-01-01`), label: String(y), yr: "", mid: false }));
+// The after panel is narrow: a tick's year hides first, then the middle tick (container queries on .mx-sky-panel.after).
+const afterTicks = [
+  { t: CUT, label: zh ? "6 月" : "Jun", yr: zh ? "2025 年 " : " 2025", mid: false },
+  { t: Date.parse("2025-10-01"), label: zh ? "10 月" : "Oct", yr: "", mid: true },
+  { t: Date.parse("2026-01-01"), label: zh ? "1 月" : "Jan", yr: zh ? "2026 年 " : " 2026", mid: false },
+];
+// Where half the group had first joined, from the cumulative counts.
+let cum = openBand.count;
+const medianBand = beforeBands.find((b) => (cum += b.count) >= total / 2);
+if (!medianBand) throw new Error("Meta report: half the group first joined after the lab formed; rewrite figure 01");
+const medianYear = new Date(medianBand.a).getUTCFullYear();
+// 2024 as one calendar year, the last full year before the lab, for the monthly comparison in figure 01's note.
+const y2024 = bands.find((b) => b.from === "2024-01-01" && b.before === "2025-01-01");
+if (!y2024) throw new Error("Meta report: 2024 is no longer one band; rewrite figure 01's note");
+
+// ---------- moves (figure 03) and the newcomers' months
+const moves = movesData.rows.filter((r) => r.series === "stayed-newest-current-role");
+const movesBefore = moves.filter((r) => !r.from || Date.parse(r.from) < CUT);
+const movesAfter = moves.filter((r) => r.from && Date.parse(r.from) >= CUT);
+const movedAfter = movesAfter.reduce((s, r) => s + num(r.count, r.group), 0);
+const movedBySummerEnd = movesAfter.filter((r) => r.before && Date.parse(r.before) <= Date.parse("2025-09-01")).reduce((s, r) => s + num(r.count, r.group), 0);
+const newcomers = movesData.rows.filter((r) => r.series === "new-to-meta-first-job");
+const summer = newcomers.filter((r) => r.before && Date.parse(r.before) <= Date.parse("2025-10-01")).reduce((s, r) => s + num(r.count, r.group), 0);
+const summerMonths = 4; // June to September 2025, the window of summer
+const monthName = (d: string, withYear: boolean) => {
+  const t = new Date(d);
+  const m = t.getUTCMonth();
+  return zh ? `${withYear ? `${t.getUTCFullYear()} 年 ` : ""}${m + 1} 月` : `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m]}${withYear ? ` ${t.getUTCFullYear()}` : ""}`;
+};
+// A period from its first month to the month before `before`; the year is written once when both ends share it.
+const spanLabel = (from: string, before: string | null) => {
+  if (!before) return zh ? `${monthName(from, true)}起` : `Since ${monthName(from, true)}`;
+  const end = new Date(Date.parse(before) - DAY).toISOString().slice(0, 10);
+  if (from.slice(0, 7) === end.slice(0, 7)) return monthName(from, true);
+  const sameYear = from.slice(0, 4) === end.slice(0, 4);
+  return zh ? `${monthName(from, true)}到 ${monthName(end, !sameYear)}` : `${monthName(from, !sameYear)} to ${monthName(end, true)}`;
+};
+const moveLabel = (r: { from: string | null; before: string | null }) =>
+  r.from ? spanLabel(r.from, r.before) : zh ? "2025 年以前，或没有日期" : "Before 2025, or no date";
+
+// ---------- where outside hires came from (figure 04)
+const cameFrom = sourcesData.rows.filter((r) => r.set === "came-from");
+const ever = sourcesData.rows.filter((r) => r.set === "ever-worked-at");
+const aiLabs = sourcesData.ai_labs_count;
+const deepmind = num(row(cameFrom, "google-deepmind", "source").count, "Google DeepMind");
+const uni = num(row(cameFrom, "academia", "source").count, "universities");
+const scale = num(row(cameFrom, "scale-ai", "source").count, "Scale AI");
+const cfScale = 0.5; // the came-from bars are shares of the outside hires on a 0 to 50% axis
+const sourceLabel: Record<string, Record<Lang, string>> = {
+  openai: { en: "OpenAI", zh: "OpenAI" },
+  "google-deepmind": { en: "Google DeepMind", zh: "Google DeepMind" },
+  anthropic: { en: "Anthropic", zh: "Anthropic" },
+  xai: { en: "xAI", zh: "xAI" },
+  "thinking-machines": { en: "Thinking Machines Lab", zh: "Thinking Machines Lab" },
+  apple: { en: "Apple", zh: "Apple" },
+  "scale-ai": { en: "Scale AI", zh: "Scale AI" },
+  google: { en: "Google, other than Google DeepMind", zh: "Google（Google DeepMind 以外）" },
+  microsoft: { en: "Microsoft", zh: "Microsoft" },
+  amazon: { en: "Amazon", zh: "Amazon" },
+  nvidia: { en: "NVIDIA", zh: "NVIDIA" },
+  academia: { en: "A university or other educational institution", zh: "大学或其他教育机构" },
+  other: { en: "Another employer, or none that ended in 2025 or later", zh: "其他雇主，或没有 2025 年或以后结束的工作" },
+};
+type Src = (typeof cameFrom)[number];
+const srcRow = (r: Src, focus: boolean) => {
+  const suppressed = typeof r.count !== "number";
+  const c = typeof r.count === "number" ? r.count : 9;
+  return {
+    label: sourceLabel[r.group][lang],
+    display: suppressed ? "<10" : typeof r.count === "number" && r.count > 0 ? `${n(r.count)} · ${pct(r.count / outside)}` : "0",
+    width: c / outside / cfScale,
+    kind: suppressed ? ("suppressed" as const) : r.group === "other" ? ("residual" as const) : focus && c > 0 ? ("focus" as const) : ("other" as const),
+  };
+};
+const byCount = (a: Src, b: Src) => (typeof b.count === "number" ? b.count : 0.5) - (typeof a.count === "number" ? a.count : 0.5);
+const labRows = cameFrom.filter((r) => r.ai_lab).sort(byCount).map((r) => srcRow(r, true));
+const elseRows = [
+  ...cameFrom.filter((r) => !r.ai_lab && r.group !== "other").sort(byCount),
+  row(cameFrom, "other", "source"),
+].map((r) => srcRow(r, false));
+const otherShare = num(row(cameFrom, "other", "source").count, "other") / outside;
+const everOf = (g: string) => num(row(ever, g, "ever-worked-at").count, `ever ${g}`);
+
+// ---------- roles (figures 05 and 06)
+const fnRows = rolesData.rows.filter((r) => r.table === "function");
+const fnName: Record<string, Record<Lang, string>> = {
+  research: { en: "Research", zh: "研究" },
+  "engineering-and-technical": { en: "Engineering and technical", zh: "工程与技术" },
+  product: { en: "Product", zh: "产品" },
+  other: { en: "Another function", zh: "其他职能" },
+  "not-stated": { en: "None stated", zh: "未写明" },
+};
+const fn = (g: string) => row(fnRows, g, "function");
+const research = fn("research");
+const engineering = fn("engineering-and-technical");
+const phdRows = rolesData.rows.filter((r) => r.table === "doctorate");
+const phd = (g: string) => row(phdRows, g, "doctorate");
+const levelRows = rolesData.rows.filter((r) => r.table === "level-in-research");
+const level = (g: string) => row(levelRows, g, "level");
+const prMax = 0.6;
+const prX = (s: number) => `${(s / prMax) * 100}%`;
+type Pair = { name: string; stayed: number; outside: number; divider?: boolean };
+const pairs: Pair[] = [
+  ...fnRows.map((r) => ({ name: fnName[r.group][lang], stayed: num(r.stayed_share, r.group), outside: num(r.outside_share, r.group) })),
+  { name: zh ? "写有博士学历" : "Lists a doctorate", stayed: phd("stayed").share, outside: phd("outside").share, divider: true },
+];
+const labPhd = phd("lab-research");
+const basePhd = phd("baseline-research");
+
+// ---------- teams, places, postings (figures 07 to 09)
+function teamsAtMostOf(rows: typeof teamsData.rows) {
+  return rows.filter((r) => r.group !== "fair-only").reduce((s, r) => s + (typeof r.count === "number" ? r.count : 9), 0);
+}
+const teamRows = teamsData.rows
+  .filter((r) => r.group !== "fair-only")
+  .sort((a, b) => (typeof b.count === "number" ? b.count : 0.5) - (typeof a.count === "number" ? a.count : 0.5));
+// "at least" is a lower bound, so it rounds down.
+const noneAtLeast = `${number(lang, Math.floor((1 - teamsAtMostOf(teamsData.rows) / teamsData.total_count) * 100))}%`;
+const fairOnly = num(row(teamsData.rows, "fair-only", "team").count, "FAIR only");
+const fair = row(teamRows, "fair", "team");
+const teamsAtMost = teamsAtMostOf(teamsData.rows);
+if (teamsAtMost / total >= 1 / 6) throw new Error("Meta report: a sixth or more may name a group; rewrite figure 07");
+const teamName: Record<string, Record<Lang, string>> = {
+  fair: { en: "FAIR", zh: "FAIR" },
+  infra: { en: "MSL Infra and other infrastructure", zh: "MSL Infra 及其他基础设施" },
+  "tbd-lab": { en: "TBD Lab", zh: "TBD Lab" },
+  par: { en: "Products and Applied Research", zh: "Products and Applied Research" },
+};
+const place = (g: string) => row(placesData.rows, g, "place");
+const placeName: Record<string, Record<Lang, string>> = {
+  "bay-area": { en: "San Francisco Bay Area", zh: "旧金山湾区" },
+  "new-york": { en: "New York State", zh: "纽约州" },
+  washington: { en: "Washington State", zh: "华盛顿州" },
+  "california-other": { en: "Elsewhere in California", zh: "加州其他地区" },
+  "us-other": { en: "Elsewhere in the US, or no state", zh: "美国其他地区，或未写州" },
+  "united-kingdom": { en: "United Kingdom", zh: "英国" },
+  "elsewhere-or-none": { en: "Elsewhere, or no country", zh: "其他国家，或未写国家" },
+};
+// US places by size, the US remainder, then abroad.
+const placeOrder = ["bay-area", "new-york", "washington", "california-other", "us-other", "united-kingdom", "elsewhere-or-none"];
+const placeRows = placeOrder.map((g) => place(g));
+if (placeRows.length !== placesData.rows.length) throw new Error("Meta report: a place row is missing from placeOrder");
+const placeShare = (g: string) => num(place(g).count, g) / total;
+const posting = (g: string) => num(row(postingsData.rows, g, "posting").count, `posting ${g}`);
+const openAll = posting("all");
+const menlo = posting("menlo-park");
+const postingPlaces = [
+  { g: "menlo-park", en: "Menlo Park", zh: "Menlo Park" },
+  { g: "san-francisco", en: "San Francisco", zh: "旧金山" },
+  { g: "new-york", en: "New York", zh: "纽约" },
+  { g: "other-locations", en: "Elsewhere", zh: "其他地点" },
+];
+// Ticks for a bar scale that stops short of 100%: its start, middle, and end.
+const axis = (max: number) => [0, max / 2, max].map((v) => ({ at: v / max, label: pct(v, 0) }));
+
+// ---------- the signature strip: one mark per person in three blocks, column-major, so each
+// block is one run from left to right at every row count and the founding line sits where the
+// first block ends. Each row of a block is one dashed line whose pattern repeats once per
+// column, so every mark is drawn the same width instead of snapping to one or two pixels.
+const blocks = [
+  { cls: "st", from: 0, to: stayed },
+  { cls: "hb", from: stayed, to: stayed + hadBeen },
+  { cls: "nw", from: stayed + hadBeen, to: total },
+];
+const stripLayouts = [
+  { rows: 2, h: 30, gap: 6 },
+  { rows: 3, h: 24, gap: 6 },
+  { rows: 4, h: 22, gap: 6 },
+  { rows: 8, h: 12, gap: 4 },
+].map(({ rows, h, gap }) => {
+  // Mark i sits in column floor(i / rows), row i % rows; colAt is the first column in row r whose mark index reaches k.
+  const colAt = (k: number, r: number) => Math.max(0, Math.ceil((k - r) / rows));
+  const lines = blocks.flatMap((b) =>
+    Array.from({ length: rows }, (_, r) => ({ cls: b.cls, y: r * (h + gap) + h / 2, x1: colAt(b.from, r), x2: colAt(b.to, r) })).filter(
+      (l) => l.x2 > l.x1,
+    ),
+  );
+  return { rows, h, cols: Math.ceil(total / rows), height: rows * h + (rows - 1) * gap, lines };
+});
+const cutAt = stayed / total;
+
+const parts = [
+  {
+    id: "part-already",
+    figures: ["01", "02", "03"],
+    title: zh ? "已在 Meta 的人" : "Already at Meta",
+    note: zh
+      ? "写明实验室的人最早何时加入 Meta，这个比例在两种口径下和在 Microsoft 是否一样，以及从 2025 年 6 月起谁记录了新职位。"
+      : "When the people who name the lab first joined Meta, whether the share holds under two definitions and at Microsoft, and who recorded a new role from June 2025, the month it formed.",
+  },
+  {
+    id: "part-outside",
+    figures: ["04", "05"],
+    title: zh ? "从外部加入的人" : "From outside",
+    note: zh
+      ? `${n(outside)} 名外部加入者刚离开的雇主，以及他们的职能和已在 Meta 的人有什么不同。`
+      : `Where the ${n(outside)} outside hires had just worked, and how their roles differ from those already at Meta.`,
+  },
+  {
+    id: "part-lab",
+    figures: ["06", "07", "08", "09"],
+    title: zh ? "实验室现在的样子" : "The lab now",
+    note: zh
+      ? "研究人员的博士学历、大家写明的团队、所在地，以及快照当天仍在招聘的岗位。"
+      : "Doctorates among its researchers, the groups people name, where they are, and the postings open on the day of the snapshot.",
+  },
+];
+---
+
+{section === "card" && null}
+
+{
+  section === "body" && (
+    <>
+      <header class="mx-hero">
+        <div class="wrap">
+          <div class="mx-top">
+            <div class="mx-text">
+              <nav class="mx-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
+                <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
+                <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
+              </nav>
+              <p class="mx-meta">
+                {zh ? "报告" : "Report"} ·{" "}
+                <a href={`${href(lang)}?data=people#index`}>{zh ? "个人档案" : "Profiles"}</a> ·{" "}
+                <span class="nowrap">{iso}</span>
+              </p>
+              <h1 set:html={titleHtml(entry.title[lang], lang)} />
+              <p class="mx-dek" set:html={titleHtml(entry.dek[lang], lang)} />
+              <div class="mx-actions">
+                <a class="mx-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
+                <a class="mx-chip" href="#run-reproduce">
+                  {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+                </a>
+                <span class="mx-note">{zh ? "复现只计数，不读取任何个人档案" : "Reproducing reads no profiles: every number is a count"}</span>
+              </div>
+            </div>
+            <div class="mx-side">
+              <dl class="mx-pair">
+                <div class="stay">
+                  <dt>{n(stayed)}</dt>
+                  <dd
+                    set:html={titleHtml(
+                      zh
+                        ? `${n(total)} 人中，2025 年 6 月实验室成立时已在 Meta 工作的人数（${pct(stayed / total)}）`
+                        : `of the ${n(total)} were at Meta when the lab formed in June 2025 (${pct(stayed / total)})`,
+                      lang,
+                    )}
+                  />
+                </div>
+                <div class="new">
+                  <dt>{n(aiLabs)}</dt>
+                  <dd
+                    set:html={titleHtml(
+                      zh
+                        ? `从外部加入的 ${n(outside)} 人中，刚离开五家 AI 实验室之一的人数（${pct(aiLabs / outside)}）`
+                        : `of the ${n(outside)} who joined from outside had just left one of five AI labs (${pct(aiLabs / outside)})`,
+                      lang,
+                    )}
+                  />
+                </div>
+              </dl>
+              <p class="mx-pair-note">
+                {zh ? (
+                  <>
+                    Meta 在 2025 年 6 月 30 日
+                    <a href={MEMO}>宣布成立该实验室</a>
+                    时，把现有的 AI 团队（包括 FAIR）并入其中，所以实验室里本来就会有很多老员工。个人档案显示的是有多少，以及谁是新加入的。
+                  </>
+                ) : (
+                  <>
+                    Meta put its existing AI teams, FAIR among them, into the lab when it <a href={MEMO}>announced it</a> on June 30,
+                    2025, so many long-time staff were always going to be in it. The profiles show how many, and who came in.
+                  </>
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div class="mx-strip-head">
+            <p class="mx-strip-title" id="strip-title" set:html={titleHtml(zh ? `写明实验室的 ${n(total)} 人，按实验室成立时所处的位置` : `The ${n(total)} who name the lab, by where they stood when it formed`, lang)} />
+            <p class="mx-strip-key" aria-hidden="true">
+              <span class="sk st">{zh ? `${n(stayed)} 人成立时已在 Meta` : `${n(stayed)} at Meta when it formed`}</span>
+              <span class="sk hb">{zh ? `${n(hadBeen)} 人以前在 Meta，当时不在` : `${n(hadBeen)} had worked at Meta, not then`}</span>
+              <span class="sk nw">{zh ? `${n(fresh)} 人是 Meta 新人` : `${n(fresh)} new to Meta`}</span>
+            </p>
+          </div>
+          <div
+            class="mx-strip"
+            role="img"
+            aria-labelledby="strip-title"
+            aria-describedby="strip-desc"
+            style={`--cut: ${cutAt * 100}%`}
+          >
+            <span class="mx-strip-found">{zh ? "实验室成立，2025 年 6 月" : "Lab formed, June 2025"}</span>
+            {stripLayouts.map((l) => (
+              <svg
+                class={`mx-strip-svg r${l.rows}`}
+                viewBox={`0 0 ${l.cols} ${l.height}`}
+                preserveAspectRatio="none"
+                style={`height: ${l.height}px`}
+                aria-hidden="true"
+                focusable="false"
+              >
+                {l.lines.map((m) => (
+                  <line class={m.cls} x1={m.x1} x2={m.x2} y1={m.y} y2={m.y} stroke-width={l.h} stroke-dasharray="0.62 0.38" />
+                ))}
+              </svg>
+            ))}
+          </div>
+          <p class="visually-hidden" id="strip-desc">
+            {zh
+              ? `${n(stayed)} 人在实验室成立时已在 Meta，${n(hadBeen)} 人以前在 Meta 但当时不在，${n(fresh)} 人是 Meta 新人。`
+              : `${n(stayed)} were at Meta when the lab formed, ${n(hadBeen)} had worked at Meta before but not then, and ${n(fresh)} were new to Meta.`}
+          </p>
+        </div>
+      </header>
+
+      <div class="wrap report-body">
+        <section class="text-block rail-block" aria-labelledby="who-title">
+          <div class="rail">
+            <h2 id="who-title">{zh ? "统计的是谁" : "Who is counted"}</h2>
+          </div>
+          <div class="rail-main">
+            <dl class="criteria">
+              {(zh
+                ? [
+                    ["写明实验室", `个人资料标题或当前职位写有 superintelligence 或 MSL：${n(total)} 个档案，其中 ${n(narrowTotal)} 个写的是 superintelligence。`],
+                    ["雇主", "当前有一段在 Meta 的工作。Metix AI Platform 把 Facebook 和 Meta 视为同一个雇主；以前的 Meta 工作也包括 Instagram、WhatsApp 和 Oculus。"],
+                    ["成立时已在 Meta", "有一段不是实习的 Meta 工作，开始于 2025 年 6 月以前，并且到 2025 年 5 月或更晚仍在进行。"],
+                    ["外部加入", "其余的人：Meta 新人，离开后又回到 Meta 的人，以及只在 Meta 实习过的人。"],
+                    ["日期", "工作开始日期截至 2026 年 4 月。个人档案更新有滞后，最后几个月的人数偏少。只写年份的日期按 1 月算。"],
+                    ["计数的含义", "这是自己写明实验室的人的可见档案，是下限，不是实验室的人数。不点任何人的名字。"],
+                  ]
+                : [
+                    ["Named the lab", `The headline or current title says superintelligence or MSL: ${n(total)} profiles, ${n(narrowTotal)} of which write superintelligence.`],
+                    ["Employer", "A current job at Meta. The Metix AI Platform treats Facebook and Meta as one employer; an earlier Meta job also includes Instagram, WhatsApp, and Oculus."],
+                    ["At Meta when it formed", "A Meta job, not an internship, that began before June 2025 and was still running in May 2025 or later."],
+                    ["Outside hires", "Everyone else: people new to Meta, people who worked at Meta and came back, and people who had only interned there."],
+                    ["Dates", "Job start dates run to April 2026. Profiles lag, so the last months are undercounted. A date given only as a year reads as January."],
+                    ["What a count is", "These are visible profiles of people who chose to name the lab: a lower bound, not the lab's headcount. No one is named."],
+                  ]
+              ).map(([term, text]) => (
+                <div>
+                  <dt>{term}</dt>
+                  <dd set:html={titleHtml(text, lang)} />
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <section class="text-block rail-block" aria-labelledby="brief-title">
+          <div class="rail">
+            <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
+          </div>
+          <div class="rail-main">
+            <ol class="brief-list">
+              {(zh
+                ? [
+                    `写明实验室的 ${n(total)} 人中，${n(stayed)} 人（${pct(stayed / total)}）在实验室成立时已在 Meta。只算写 superintelligence 的 ${n(narrowTotal)} 人，这个比例是 ${pct(narrowStayed / narrowTotal)}。`,
+                    `${n(fresh)} 名 Meta 新人从 2025 年 6 月（实验室成立的那个月）起集中加入：其中 ${n(summer)} 人在 6 月到 9 月加入。`,
+                    `${n(outside)} 名外部加入者中，${n(aiLabs)} 人（${pct(aiLabs / outside)}）刚离开五家 AI 实验室之一，其中 ${n(deepmind)} 人来自 Google DeepMind；${n(uni)} 人来自大学，${n(scale)} 人来自 Scale AI。`,
+                    `外部加入者更偏研究：${pct(research.outside_share)} 做研究，已在 Meta 的人是 ${pct(research.stayed_share)}。实验室研究人员中 ${pct(labPhd.share)} 写有博士学历，Meta 其他研究人员是 ${pct(basePhd.share)}。`,
+                  ]
+                : [
+                    `${n(stayed)} of the ${n(total)} who name the lab (${pct(stayed / total)}) were at Meta when it formed. Among the ${n(narrowTotal)} who write superintelligence, the share is ${pct(narrowStayed / narrowTotal)}.`,
+                    `The ${n(fresh)} who were new to Meta arrived in a burst from June 2025, the month the lab formed: ${n(summer)} of them from June to September.`,
+                    `${n(aiLabs)} of the ${n(outside)} outside hires (${pct(aiLabs / outside)}) had just left one of five AI labs, ${n(deepmind)} of them Google DeepMind; ${n(uni)} came from a university and ${n(scale)} from Scale AI.`,
+                    `Outside hires lean toward research: ${pct(research.outside_share)} of them work in research, against ${pct(research.stayed_share)} of those already at Meta. ${pct(labPhd.share)} of the lab's research staff list a doctorate, against ${pct(basePhd.share)} of Meta's other research staff.`,
+                  ]
+              ).map((text) => (
+                <li>
+                  <span set:html={zh ? titleHtml(text, "zh") : text} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <Contents lang={lang} parts={parts} />
+
+        <Chapter lang={lang} part={1} {...parts[0]} />
+
+        <Figure
+          id="joined"
+          level={3}
+          number="01"
+          lang={lang}
+          heading={
+            zh
+              ? `典型成员在 ${medianYear} 年首次加入 Meta；新人在 2025 年夏天集中加入`
+              : `The typical member first joined Meta in ${medianYear}; newcomers arrived in a burst in the summer of 2025`
+          }
+          sub={
+            zh
+              ? "写明实验室的人首次加入 Meta 的时间。高度是每年首次加入的人数，所以长短不同的时段可以比较；条上的数字是人数"
+              : "When the people who name the lab first joined Meta. Height is first joins per year, so periods of different lengths compare; the number on each bar is people"
+          }
+          alt={bands
+            .map((b) => {
+              const when = !b.from
+                ? zh
+                  ? "2014 年以前"
+                  : "Before 2014"
+                : b.before
+                  ? spanLabel(b.from, b.before)
+                  : `${spanLabel(b.from, null)}${zh ? "，或没有开始日期" : ", or no start date"}`;
+              const rate = b.from ? (zh ? `，每年 ${n(Math.round(b.rate))} 人` : `, ${n(Math.round(b.rate))} a year`) : "";
+              return `${when}${zh ? "：" : ": "}${n(b.count)}${zh ? " 人" : ""}${rate}`;
+            })
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-st">{zh ? "2025 年 6 月以前首次加入" : "First joined before June 2025"}</span>
+            <span class="lg lg-nw">{zh ? "2025 年 6 月起首次加入" : "First joined from June 2025"}</span>
+          </p>
+          <div class="mx-sky" aria-hidden="true">
+            {[
+              { key: "before", tag: zh ? "2025 年 6 月以前，按年" : "Before June 2025, by year", bars: beforeBands, x: xBefore, w: wBefore, ticks: beforeTicks },
+              { key: "after", tag: zh ? "2025 年 6 月起，按月" : "From June 2025, by month", bars: afterBands, x: xAfter, w: wAfter, ticks: afterTicks },
+            ].map((p) => (
+              <div class:list={["mx-sky-panel", p.key]}>
+                <p class="mx-sky-tag">{p.tag}</p>
+                <div class="mx-sky-y">
+                  {yTicks.map((t) => (
+                    <span style={`bottom: ${(t / yMax) * 100}%`}>{n(t)}</span>
+                  ))}
+                </div>
+                <div class="mx-sky-area">
+                  {yTicks.slice(1).map((t) => (
+                    <span class="grid" style={`bottom: ${(t / yMax) * 100}%`} />
+                  ))}
+                  {p.bars.map((b) => (
+                    <span class="bar" style={`left: ${p.x(b.a)}; width: ${p.w(b)}; height: ${h(b.rate)}`}>
+                      <em>{n(b.count)}</em>
+                    </span>
+                  ))}
+                </div>
+                <div class="mx-sky-x">
+                  {p.ticks.map((t) => (
+                    <span class:list={{ mid: t.mid }} style={`left: ${p.x(t.t)}`}>
+                      {zh && t.yr && <span class="yr">{t.yr}</span>}
+                      {t.label}
+                      {!zh && t.yr && <span class="yr">{t.yr}</span>}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p
+            class="mx-sky-foot"
+            aria-hidden="true"
+            set:html={titleHtml(
+              zh
+                ? `纵轴：每年首次加入的人数。另有 ${n(openBand.count)} 人在 2014 年以前首次加入，未画出。`
+                : `Vertical axis: first joins per year. Another ${n(openBand.count)} first joined before 2014 and are not drawn.`,
+              lang,
+            )}
+          />
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `{{hl|${n(everBefore)} 人}}在 2025 年 6 月以前首次加入 Meta，占写明实验室的人的 ${pct(everBefore / total)}；一半的人在 ${medianYear} 年底以前首次加入。2025 年 6 月到 9 月，平均每月 ${n(Math.round(summer / summerMonths))} 人首次加入，2024 年是每月 ${n(Math.round(y2024.count / 12))} 人。`,
+                  ]
+                : [
+                    `{{hl|${n(everBefore)} people}} first joined Meta before June 2025, ${pct(everBefore / total)} of those who name the lab; half had first joined by the end of ${medianYear}. From June to September 2025, first joins averaged ${n(Math.round(summer / summerMonths))} a month, against ${n(Math.round(y2024.count / 12))} a month in 2024.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    `首次加入是一个人最早那段 Meta 工作的开始日期，包括实习，所以成立前的部分也包括离开后又回来的人和只实习过的人（合计 ${n(hadBeen)} 人）。最后一段截至 2026 年 4 月，其中有不到 10 人没有开始日期；个人档案有滞后，这一段很可能偏少。早年只算到现在仍在 Meta、并写明实验室的人，所以和最近几个月相比会偏少。只写年份的开始日期按 1 月算，所以只写了 2025 年的新人会算在 2025 年 6 月以前。`,
+                  ]
+                : [
+                    `A first join is the start of a person's earliest Meta entry, internships included, so the part before the lab also holds those who left and came back or only interned (${n(hadBeen)} together). The last period runs to April 2026 and holds fewer than 10 with no start date; profiles lag, so it is probably undercounted. Earlier years count only people who are still at Meta and name the lab now, so they run low next to the recent months. A start date given only as a year reads as January, so a newcomer who wrote only 2025 counts before June 2025.`,
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="cohorts"
+          level={3}
+          number="02"
+          lang={lang}
+          heading={
+            zh
+              ? `${pct(stayed / total)} 的人在实验室成立时已在 Meta；只算写 superintelligence 的人是 ${pct(narrowStayed / narrowTotal)}`
+              : `${pct(stayed / total)} were at Meta when the lab formed, and ${pct(narrowStayed / narrowTotal)} of those who write superintelligence`
+          }
+          sub={zh ? "每一行是 100%，按实验室成立时所处的位置拆分" : "Each row is 100%, split by where people stood when the lab formed"}
+          alt={
+            zh
+              ? `写 superintelligence 或 MSL：${n(stayed)} 人成立时在 Meta，${n(hadBeen)} 人以前在，${n(fresh)} 人是新人；只写 superintelligence：${n(narrowStayed)} / ${n(narrowTotal)}；团队成立前在本公司工作过：Meta ${pct(everBefore / total)}，Microsoft ${pct(msBefore / msTotal)}`
+              : `Superintelligence or MSL: ${n(stayed)} at Meta when it formed, ${n(hadBeen)} had worked there before, ${n(fresh)} new; superintelligence only: ${n(narrowStayed)} of ${n(narrowTotal)}; worked at the company before its team formed: Meta ${pct(everBefore / total)}, Microsoft ${pct(msBefore / msTotal)}`
+          }
+          source={source}
+          queries={queries}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-st">{zh ? "成立时已在 Meta" : "At Meta when it formed"}</span>
+            <span class="lg lg-hb">{zh ? "以前在 Meta，当时不在" : "Had worked at Meta, not then"}</span>
+            <span class="lg lg-nw">{zh ? "Meta 新人" : "New to Meta"}</span>
+          </p>
+          <div class="mx-ck" aria-hidden="true">
+            <div class="mx-ck-row">
+              <p class="mx-ck-name">
+                {zh ? "写 superintelligence 或 MSL" : "Write superintelligence or MSL"} <span>{n(total)}</span>
+              </p>
+              <div class="mx-ck-cell">
+                <div class="mx-ck-bar">
+                  <span class="st" style={`flex: ${stayed} 1 0px`} />
+                  <span class="hb" style={`flex: ${hadBeen} 1 0px`} />
+                  <span class="nw" style={`flex: ${fresh} 1 0px`} />
+                </div>
+                <p class="mx-ck-vals">
+                  <b class="st">{pct(stayed / total)}</b>
+                  <b class="nw">{pct(fresh / total)}</b>
+                </p>
+              </div>
+            </div>
+            <div class="mx-ck-row">
+              <p class="mx-ck-name">
+                {zh ? "只写 superintelligence" : "Write superintelligence only"} <span>{n(narrowTotal)}</span>
+              </p>
+              <div class="mx-ck-cell">
+                <div class="mx-ck-bar">
+                  <span class="st" style={`flex: ${narrowStayed} 1 0px`} />
+                  <span class="rest" style={`flex: ${narrowTotal - narrowStayed} 1 0px`} />
+                </div>
+                <p class="mx-ck-vals">
+                  <b class="st">{pct(narrowStayed / narrowTotal)}</b>
+                  <b>{zh ? `其余 ${pct(1 - narrowStayed / narrowTotal)}` : `The rest ${pct(1 - narrowStayed / narrowTotal)}`}</b>
+                </p>
+              </div>
+            </div>
+            <p class="mx-ck-sub">
+              {zh ? "同一口径比较两家：团队成立前在本公司工作过（含实习）" : "One measure for both labs: had worked at the company before its team formed, internships included"}
+            </p>
+            {[
+              { name: zh ? "Meta，2025 年 6 月以前" : "Meta, before June 2025", k: everBefore, of: total },
+              { name: zh ? "Microsoft，2025 年 11 月以前" : "Microsoft, before November 2025", k: msBefore, of: msTotal },
+            ].map((r) => (
+              <div class="mx-ck-row thin">
+                <p class="mx-ck-name">
+                  {r.name} <span>{n(r.of)}</span>
+                </p>
+                <div class="mx-ck-track">
+                  <span style={`width: ${(r.k / r.of) * 100}%`} />
+                </div>
+                <b class="mx-ck-v">{pct(r.k / r.of)}</b>
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `两种口径下，{{hl|成立时已在 Meta}} 的比例只差 ${number(lang, Math.abs(narrowStayed / narrowTotal - stayed / total) * 100, 1)} 个百分点。Microsoft 在 2025 年 11 月宣布组建超级智能团队；用同一口径，它的 ${n(msTotal)} 人中 ${pct(msBefore / msTotal)} 以前在 Microsoft 工作过，Meta 是 ${pct(everBefore / total)}。`,
+                  ]
+                : [
+                    `Under the two definitions, the share {{hl|at Meta when it formed}} differs by ${number(lang, Math.abs(narrowStayed / narrowTotal - stayed / total) * 100, 1)} points. Microsoft announced its own superintelligence team in November 2025; on the same measure, ${pct(msBefore / msTotal)} of its ${n(msTotal)} had worked at Microsoft before, against ${pct(everBefore / total)} at Meta.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    `以前在 Meta、当时不在的 ${n(hadBeen)} 人中，${n(returned)} 人离开后又回来，${n(interns)} 人只实习过。Microsoft 的 ${n(msTotal)} 人是当前在 Microsoft、标题或职位写有 superintelligence 的档案；抽读时发现其中有招聘人员，而且公司名不包括 LinkedIn、GitHub 等子公司。只写年份的日期按 1 月算，所以只写了 2025 年结束的工作算作在 2025 年 5 月以前结束，可能把人算进离开后又回来的 ${n(returned)} 人。个人档案截至 2026 年 4 月，这对 Microsoft 团队成立以来那几个月的影响比对 Meta 大，所以它的比例可能偏高。`,
+                  ]
+                : [
+                    `Of the ${n(hadBeen)} who had worked at Meta but not then, ${n(returned)} left and came back and ${n(interns)} had only interned. Microsoft's ${n(msTotal)} are profiles with a current Microsoft job whose headline or title says superintelligence; reads found recruiters among them, and the company names leave out subsidiaries such as LinkedIn and GitHub. A date given only as a year reads as January, so an entry that ended in 2025 without a month counts as ending before May 2025, which can move someone into the ${n(returned)} who returned. Profiles stop in April 2026, which hides more of Microsoft's months since its team formed than of Meta's, so its share is likely biased upward.`,
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="moves"
+          level={3}
+          number="03"
+          lang={lang}
+          heading={
+            zh
+              ? `实验室成立时已在 Meta 的人中，${pct(movedAfter / stayed)} 从 2025 年 6 月起记录了新的 Meta 职位`
+              : `${pct(movedAfter / stayed)} of those at Meta when the lab formed recorded a new Meta role from June 2025 on`
+          }
+          sub={
+            zh
+              ? `成立时已在 Meta 的 ${n(stayed)} 人，按当前最新一段 Meta 工作的开始时间。条形是占 ${n(stayed)} 人的比例，刻度 0 到 70%`
+              : `The ${n(stayed)} at Meta when it formed, by when their newest current Meta role began. Bars are shares of the ${n(stayed)} on a 0 to 70% scale`
+          }
+          alt={moves.map((r) => `${moveLabel(r)} ${n(num(r.count, r.group))}`).join(zh ? "，" : ", ")}
+          source={source}
+          queries={queries}
+        >
+          <div class="mx-lists mx-violet">
+            <div>
+              <h4 class="mx-list-head">{zh ? "2025 年 6 月以前" : "Before June 2025"}</h4>
+              <BarList
+                label={zh ? "2025 年 6 月以前开始的最新职位" : "Newest role began before June 2025"}
+                ticks={axis(0.7)}
+                rows={movesBefore.map((r) => ({
+                  label: moveLabel(r),
+                  display: `${n(num(r.count, r.group))} · ${pct(num(r.count, r.group) / stayed)}`,
+                  width: num(r.count, r.group) / stayed / 0.7,
+                  kind: "other" as const,
+                }))}
+              />
+            </div>
+            <div>
+              <h4 class="mx-list-head">
+                {zh ? `2025 年 6 月起：${n(movedAfter)} 人，${pct(movedAfter / stayed)}` : `From June 2025: ${n(movedAfter)}, ${pct(movedAfter / stayed)}`}
+              </h4>
+              <BarList
+                label={zh ? "2025 年 6 月起开始的最新职位" : "Newest role began from June 2025"}
+                ticks={axis(0.7)}
+                rows={movesAfter.map((r) => ({
+                  label: moveLabel(r),
+                  display: `${n(num(r.count, r.group))} · ${pct(num(r.count, r.group) / stayed)}`,
+                  width: num(r.count, r.group) / stayed / 0.7,
+                  kind: "focus" as const,
+                }))}
+              />
+            </div>
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`已在 Meta 的人中，{{hl|2025 年 6 月起}}记录新职位的 ${n(movedAfter)} 人里，${n(movedBySummerEnd)} 人在 2025 年 8 月底以前。大多数已在 Meta 的人（${pct(num(movesBefore[0].count, "first") / stayed)}）的最新职位开始于 2025 年以前，或没有日期。`]
+                : [`Of the ${n(movedAfter)} already at Meta who recorded a new role {{hl|from June 2025}}, ${n(movedBySummerEnd)} did so by the end of August 2025. Most of those already at Meta (${pct(num(movesBefore[0].count, "first") / stayed)}) hold a newest role that began before 2025, or give no date.`]
+            }
+            method={
+              zh
+                ? ["日期是一个人当前最新一段 Meta 工作的开始日期。很多人在 Meta 内部换团队时不会新加一段经历，所以这是换岗人数的下限。第一行也包括没有开始日期的工作。"]
+                : ["The date is when a person's newest current Meta entry began. Many people change teams inside Meta without adding an entry, so this is a lower bound on who moved. The first row also holds entries with no start date."]
+            }
+          />
+        </Figure>
+
+        <Chapter lang={lang} part={2} {...parts[1]} />
+
+        <Figure
+          id="came-from"
+          level={3}
+          number="04"
+          lang={lang}
+          heading={
+            zh
+              ? `${n(outside)} 名外部加入者中，${n(aiLabs)} 人刚离开五家 AI 实验室之一，其中 ${n(deepmind)} 人来自 Google DeepMind`
+              : `${n(aiLabs)} of the ${n(outside)} outside hires had just left one of five AI labs, ${n(deepmind)} of them Google DeepMind`
+          }
+          sub={
+            zh
+              ? `外部加入者在 2025 年或以后结束的上一份工作。每人只算一次。条形是占 ${n(outside)} 人的比例，刻度 0 到 50%`
+              : `The job each outside hire had just left, one that ended in 2025 or later. Each person counts once. Bars are shares of the ${n(outside)} on a 0 to 50% scale`
+          }
+          alt={cameFrom
+            .map((r) => `${sourceLabel[r.group][lang]} ${typeof r.count === "number" ? n(r.count) : "<10"}`)
+            .join(zh ? "，" : ", ")}
+          source={source}
+          queries={queries}
+        >
+          <div class="mx-lists mx-ink">
+            <div>
+              <h4 class="mx-list-head">
+                {zh ? `五家 AI 实验室：${n(aiLabs)} 人，${pct(aiLabs / outside)}` : `Five AI labs: ${n(aiLabs)}, ${pct(aiLabs / outside)}`}
+              </h4>
+              <div class="mx-lablist">
+                <BarList label={zh ? "来自 AI 实验室" : "From an AI lab"} rows={labRows} ticks={axis(cfScale)} />
+              </div>
+            </div>
+            <div>
+              <h4 class="mx-list-head">{zh ? "其他地方" : "Elsewhere"}</h4>
+              <BarList label={zh ? "来自其他地方" : "From elsewhere"} rows={elseRows} ticks={axis(cfScale)} />
+            </div>
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `在整个群体里，在大型科技公司工作过的人很多：${n(everOf("google"))} 人（${pct(everOf("google") / total)}）曾在 Google 工作（包括 Google DeepMind），${n(everOf("amazon"))} 人在 Amazon，${n(everOf("microsoft"))} 人在 Microsoft。在 OpenAI 工作过的只有 ${n(everOf("openai"))} 人，Anthropic ${everOf("anthropic") === 0 ? "没有" : `${n(everOf("anthropic"))} 人`}。据 Axios 报道，Meta 在 2025 年 6 月大笔入股 Scale AI。`,
+                  ]
+                : [
+                    `Across the whole group, earlier jobs at the large technology companies are common: ${n(everOf("google"))} (${pct(everOf("google") / total)}) once worked at Google, Google DeepMind included, ${n(everOf("amazon"))} at Amazon, and ${n(everOf("microsoft"))} at Microsoft. Earlier jobs at OpenAI (${n(everOf("openai"))}) and Anthropic (${everOf("anthropic") === 0 ? "none" : n(everOf("anthropic"))}) are rare. Axios reported that Meta took a large stake in Scale AI in June 2025.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    "一段工作必须不是实习、并在 2025 年或以后结束才算。每人按固定顺序只算在第一个匹配的雇主：OpenAI、Google DeepMind、Anthropic、xAI、Thinking Machines Lab、Apple、Scale AI、Google、Microsoft、Amazon、NVIDIA，最后是大学；大学的实习也算，因为博士生的经历常标为实习。1 到 9 人显示为 <10，画成可能的最大值处的空框。",
+                  ]
+                : [
+                    "A job counts when it was not an internship and ended in 2025 or later. Each person counts once, at the first match in the order OpenAI, Google DeepMind, Anthropic, xAI, Thinking Machines Lab, Apple, Scale AI, Google, Microsoft, Amazon, NVIDIA, then universities, where internships count because doctoral students' entries often carry the Intern label. Counts from 1 to 9 show as <10, drawn as an outline at the largest value they could hide.",
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="roles"
+          level={3}
+          number="05"
+          lang={lang}
+          heading={
+            zh
+              ? `外部加入者中 ${pct(research.outside_share)} 做研究，已在 Meta 的人是 ${pct(research.stayed_share)}`
+              : `${pct(research.outside_share)} of outside hires work in research, against ${pct(research.stayed_share)} of those already at Meta`
+          }
+          sub={
+            zh
+              ? `当前职能，以及写有博士学历的比例，按两组比较。刻度 0 到 ${pct(prMax, 0)}`
+              : `Current function, and the share that lists a doctorate, for the two groups. Axis 0 to ${pct(prMax, 0)}`
+          }
+          alt={pairs
+            .map((p) => `${p.name}${zh ? "：已在 Meta " : ": already at Meta "}${pct(p.stayed)}${zh ? "，外部 " : ", outside "}${pct(p.outside)}`)
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-st">{zh ? `成立时已在 Meta（${n(stayed)}）` : `At Meta when it formed (${n(stayed)})`}</span>
+            <span class="lg lg-nw">{zh ? `外部加入（${n(outside)}）` : `Outside hires (${n(outside)})`}</span>
+          </p>
+          <div class="mx-pr" aria-hidden="true">
+            <div class="mx-pr-axis">
+              <span class="mx-pr-ticks">
+                {axis(prMax).map((t) => (
+                  <span style={`left: ${t.at * 100}%`}>{t.label}</span>
+                ))}
+              </span>
+            </div>
+            {pairs.map((p) => (
+              <div class:list={["mx-pr-row", { divider: p.divider, focus: p.name === fnName.research[lang] }]}>
+                <span class="mx-pr-name">{p.name}</span>
+                <span class="mx-pr-track">
+                  <span class="b st" style={`width: ${prX(p.stayed)}`} />
+                </span>
+                <span class="mx-pr-v st">{pct(p.stayed)}</span>
+                <span class="mx-pr-track">
+                  <span class="b nw" style={`width: ${prX(p.outside)}`} />
+                </span>
+                <span class="mx-pr-v nw">{pct(p.outside)}</span>
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`{{hl|已在 Meta 的人}}中最大的职能是工程与技术（${pct(engineering.stayed_share)}），外部加入者中是研究。外部加入者写有博士学历的比例是 ${pct(phd("outside").share)}，已在 Meta 的人是 ${pct(phd("stayed").share)}。`]
+                : [`Engineering is the largest function among {{hl|those already at Meta}} (${pct(engineering.stayed_share)}); research is the largest among outside hires. ${pct(phd("outside").share)} of outside hires list a doctorate, against ${pct(phd("stayed").share)} of those already at Meta.`]
+            }
+            method={
+              zh
+                ? [`职能是 Metix AI Platform 对当前工作的固定分类。其他职能指写明的其余职能；${n(num(fn("not-stated").count, "not stated"))} 人没有写明。`]
+                : [`Function is the Metix AI Platform's fixed value for the current job. Another function is any other stated function; ${n(num(fn("not-stated").count, "not stated"))} state none.`]
+            }
+          />
+        </Figure>
+
+        <Chapter lang={lang} part={3} {...parts[2]} />
+
+        <Figure
+          id="doctorates"
+          level={3}
+          number="06"
+          lang={lang}
+          heading={
+            zh
+              ? `实验室研究人员中 ${pct(labPhd.share)} 写有博士学历，Meta 其他研究人员是 ${pct(basePhd.share)}`
+              : `${pct(labPhd.share)} of the lab's research staff list a doctorate, against ${pct(basePhd.share)} of Meta's other research staff`
+          }
+          sub={zh ? "当前职能为研究的人。刻度 0 到 70%" : "People whose current function is Research. Scale 0 to 70%"}
+          alt={
+            zh
+              ? `实验室研究人员 ${pct(labPhd.share)}（${n(labPhd.base_count)} 人）；Meta 其他研究人员 ${pct(basePhd.share)}（${n(basePhd.base_count)} 人）`
+              : `The lab's research staff ${pct(labPhd.share)} of ${n(labPhd.base_count)}; Meta's other research staff ${pct(basePhd.share)} of ${n(basePhd.base_count)}`
+          }
+          source={source}
+          queries={queries}
+        >
+          <div class="mx-violet">
+            <BarList
+              label={zh ? "写有博士学历的比例" : "Share listing a doctorate"}
+              ticks={axis(0.7)}
+              rows={[
+                {
+                  label: zh ? "实验室的研究人员" : "The lab's research staff",
+                  note: zh ? `${n(labPhd.base_count)} 人` : `${n(labPhd.base_count)} people`,
+                  display: `${n(labPhd.count)} · ${pct(labPhd.share)}`,
+                  width: labPhd.share / 0.7,
+                  kind: "focus",
+                },
+                {
+                  label: zh ? "Meta 其他研究人员" : "Meta's other research staff",
+                  note: zh ? `${n(basePhd.base_count)} 人` : `${n(basePhd.base_count)} people`,
+                  display: `${n(basePhd.count)} · ${pct(basePhd.share)}`,
+                  width: basePhd.share / 0.7,
+                  kind: "other",
+                },
+              ]}
+            />
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`{{hl|实验室的研究人员}}也更常标为 Senior（${pct(level("senior").lab_share)}，其他研究人员是 ${pct(level("senior").baseline_share)}）；经理及以上的差别在偶然误差范围内（${pct(level("manager-up").lab_share)} 对 ${pct(level("manager-up").baseline_share)}）。`]
+                : [`{{hl|The lab's research staff}} are also more often labelled Senior (${pct(level("senior").lab_share)} against ${pct(level("senior").baseline_share)}); at manager level or above the gap is within chance (${pct(level("manager-up").lab_share)} against ${pct(level("manager-up").baseline_share)}).`]
+            }
+            method={
+              zh
+                ? [`对照组是当前在 Meta、职能为研究、标题和职位都没有写实验室的人：${n(basePhd.base_count)} 个档案，包括只写 FAIR 的人，而 FAIR 已并入实验室。Senior 包括 senior、staff 和 principal 级别。`]
+                : [`The baseline is current Meta staff whose function is Research and whose headline and title name neither lab term: ${n(basePhd.base_count)} profiles, including people who name only FAIR, which Meta put inside the lab. Senior covers senior, staff, and principal titles.`]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="teams"
+          level={3}
+          number="07"
+          lang={lang}
+          heading={
+            zh
+              ? `不到六分之一的人写明实验室四个团队中的任何一个；写得最多的是 FAIR，占 ${pct(num(fair.count, "FAIR") / total)}`
+              : `Fewer than one in six name any of four groups inside the lab; FAIR is named most, by ${pct(num(fair.count, "FAIR") / total)}`
+          }
+          sub={
+            zh
+              ? `标题或职位里写明的团队。一个人可以写多个团队。条形是占 ${n(total)} 人的比例，刻度 0 到 10%`
+              : `Groups named in the headline or current title; a person can name more than one. Bars are shares of the ${n(total)} on a 0 to 10% scale`
+          }
+          alt={teamRows.map((r) => `${teamName[r.group][lang]} ${typeof r.count === "number" ? n(r.count) : "<10"}`).join(zh ? "，" : ", ")}
+          source={source}
+          queries={queries}
+        >
+          <div class="mx-violet">
+            <BarList
+              label={zh ? "写明的团队" : "Groups named"}
+              ticks={axis(0.1)}
+              rows={teamRows.map((r) => ({
+                label: teamName[r.group][lang],
+                display: typeof r.count === "number" ? `${n(r.count)} · ${pct(r.count / total)}` : "<10",
+                width: (typeof r.count === "number" ? r.count : 9) / total / 0.1,
+                kind: typeof r.count !== "number" ? ("suppressed" as const) : r.group === "fair" ? ("focus" as const) : ("other" as const),
+              }))}
+            />
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`最多 ${n(teamsAtMost)} 人写明了其中一个团队，所以至少 ${noneAtLeast} 的人一个都没写。另有 ${n(fairOnly)} 个当前 Meta 档案写了 FAIR 但没写实验室，这些人不在本次统计里。`]
+                : [`At most ${n(teamsAtMost)} name any of these, so at least ${noneAtLeast} name none. Another ${n(fairOnly)} current Meta profiles name FAIR without naming the lab; people in its groups who do not write its name fall outside this count.`]
+            }
+            method={
+              zh
+                ? ["检索了四个团队：FAIR、TBD Lab、基础设施和 Products and Applied Research。FAIR 和 TBD 也是普通单词，所以匹配结果逐条读过：13 个 TBD 匹配里有 10 个在 TBD Lab。applied research 大多匹配的是 Applied Research Scientist 这个职位，所以 Products and Applied Research 只数写 PAR 或写全这几个词的人。"]
+                : ["Four groups were searched: FAIR, TBD Lab, infrastructure, and Products and Applied Research. FAIR and TBD are ordinary words, so the matches were read: 10 of the 13 TBD matches are in TBD Lab. Applied research mostly matches the job title Applied Research Scientist, so Products and Applied Research counts only PAR or all three words."]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="places"
+          level={3}
+          number="08"
+          lang={lang}
+          heading={
+            zh
+              ? `${pct(placeShare("bay-area"))} 的人写的所在地是旧金山湾区，${pct(placesData.us_count / total)} 是美国`
+              : `${pct(placeShare("bay-area"))} list the Bay Area, and ${pct(placesData.us_count / total)} the United States`
+          }
+          sub={
+            zh
+              ? `个人档案上写的所在地。条形是占 ${n(total)} 人的比例，刻度 0 到 50%`
+              : `Where people list themselves. Bars are shares of the ${n(total)} on a 0 to 50% scale`
+          }
+          alt={placeRows.map((r) => `${placeName[r.group][lang]} ${n(num(r.count, r.group))}`).join(zh ? "，" : ", ")}
+          source={source}
+          queries={queries}
+        >
+          <div class="mx-violet">
+            <BarList
+              label={zh ? "所在地" : "Location"}
+              ticks={axis(0.5)}
+              rows={placeRows.map((r) => ({
+                label: placeName[r.group][lang],
+                display: `${n(num(r.count, r.group))} · ${pct(placeShare(r.group))}`,
+                width: placeShare(r.group) / 0.5,
+                kind: r.group === "bay-area" ? ("focus" as const) : r.group === "us-other" || r.group === "elsewhere-or-none" ? ("residual" as const) : ("other" as const),
+              }))}
+            />
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`{{hl|湾区}}之后是纽约州（${pct(placeShare("new-york"))}）和华盛顿州（${pct(placeShare("washington"))}）；${n(num(place("united-kingdom").count, "UK"))} 人写的是英国。`]
+                : [`After the {{hl|Bay Area}} come New York State (${pct(placeShare("new-york"))}) and Washington State (${pct(placeShare("washington"))}); ${n(num(place("united-kingdom").count, "UK"))} list the United Kingdom.`]
+            }
+            method={
+              zh
+                ? ["所在地是个人档案上写的地点。美国其他地区包括没写州的档案。"]
+                : ["Location is where the person lists themselves. Elsewhere in the US includes profiles that give no state."]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="postings"
+          level={3}
+          number="09"
+          lang={lang}
+          heading={
+            zh
+              ? `${n(openAll)} 个在招的 Meta 岗位写明实验室，其中 ${n(menlo)} 个在 Menlo Park`
+              : `${n(openAll)} open Meta postings name the lab, ${n(menlo)} of them in Menlo Park`
+          }
+          sub={zh ? `快照当天在招的岗位，按地点。条形是占 ${n(openAll)} 个的比例` : `Postings open on the day of the snapshot, by location. Bars are shares of the ${n(openAll)}`}
+          alt={postingPlaces.map((r) => `${zh ? r.zh : r.en} ${n(posting(r.g))}`).join(zh ? "，" : ", ")}
+          source={sourceJobs}
+          queries={queries}
+        >
+          <div class="mx-jobs">
+            <BarList
+              label={zh ? "岗位地点" : "Posting location"}
+              ticks={axis(1)}
+              rows={postingPlaces.map((r) => ({
+                label: zh ? r.zh : r.en,
+                display: `${n(posting(r.g))} · ${pct(posting(r.g) / openAll)}`,
+                width: posting(r.g) / openAll,
+                kind: r.g === "menlo-park" ? ("focus" as const) : r.g === "other-locations" ? ("residual" as const) : ("other" as const),
+              }))}
+            />
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`它们占 Meta ${n(postingsData.meta_open_count)} 个在招岗位的 ${pct(postingsData.share_of_meta_open)}；${n(posting("research-titles"))} 个的职位名称里有 research。`]
+                : [`They are ${pct(postingsData.share_of_meta_open)} of Meta's ${n(postingsData.meta_open_count)} open postings; ${n(posting("research-titles"))} have research in the title.`]
+            }
+            method={
+              zh
+                ? [`只是一天的岗位。${n(openAll)} 个岗位都发布于 2026 年 9 月，资历标签都是 Not Applicable，所以这两项在这里说明不了什么。写明经验要求的 ${n(posting("experience-stated"))} 个岗位中，${n(posting("experience-36-months-or-less"))} 个要求 36 个月以内。`]
+                : [`One day of postings. All ${n(openAll)} were posted in September 2026 and all carry the seniority label Not Applicable, so neither says anything here. ${n(posting("experience-36-months-or-less"))} of the ${n(posting("experience-stated"))} that state an experience requirement ask for 36 months or less.`]
+            }
+          />
+        </Figure>
+      </div>
+    </>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>人群</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上的个人档案：有一段当前在 Meta 的工作，并且个人资料标题或当前职位写有 superintelligence 或
+          MSL（逐词匹配，不分大小写）。共 {n(total)} 人，其中 {n(narrowTotal)} 人写的是 superintelligence。定义在{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/population.json`}>queries/population.json</a> 和{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/measures.json`}>queries/measures.json</a>。
+        </p>
+        <h3>四组人</h3>
+        <p>
+          分界是 2025 年 6 月 1 日；Meta 在当月底宣布成立实验室。成立时已在 Meta：有一段不是实习的 Meta 工作，开始于分界以前，并且当前仍在或在 2025 年 5
+          月或以后结束。离开后回来：分界以前有过不是实习的 Meta 工作，但都没有持续到 2025 年 5 月。只实习过：分界以前在 Meta 只有实习。Meta
+          新人：分界以前没有任何 Meta 经历，包括不到 10 个没有开始日期的人。后三组合称外部加入者。以前的 Meta 工作包括 Meta、Facebook、Instagram、WhatsApp 和
+          Oculus；实习是资历为 Intern 或职位名称含 intern 的经历。
+        </p>
+        <h3>刚离开的雇主</h3>
+        <p>
+          外部加入者在 2025 年或以后结束的一段工作，按固定顺序只算第一个匹配的雇主。公司的实习不算，所以博士生在某个实验室的暑期实习不算他来自哪里；大学的实习算，因为博士生的经历常标为实习。
+        </p>
+        <h3>日期</h3>
+        <p>
+          首次加入是一个人最早那段 Meta 经历的开始日期，由"在某个日期以前有 Meta 经历"的累计人数相减得到，所以不需要读取任何人。人数少于 10
+          的时段与相邻时段合并。个人档案有滞后：平台上所有 Meta 经历中，2026 年开始的有 3,988 段，其中 3 月和 4 月 1,104 段，5 月及以后不到 10 段，所以日期截至 2026 年 4 月，最后几个月偏少。只写年份的日期按 1 月算。
+        </p>
+        <h3>抽读</h3>
+        <p>
+          定义是这份研究的关键，所以按完整切片读了 63 个档案，而不是搜索结果的最前面几条：62 个写的是自己在实验室工作，其余的是为实验室招聘的人。抽读改了三处定义：写 MSL
+          的人也算（读了 14 个，13 个指的是实验室）；以前的 Meta 工作加上 Instagram、WhatsApp 和 Oculus；少数数据标注或红队测试的岗位单独统计。读过的档案都不会公开。
+        </p>
+        <h3>局限</h3>
+        <p>
+          这是自己写明实验室的人，不是实验室本身：只写 FAIR 或什么都不写的人不在里面；如果新人比老员工更爱写，或者更少写，这个比例会随之变化。人数是可见档案，是下限，不是员工总数。少数档案已经过时。只写年份的日期按 1 月算，所以只写了 2025 年的新人会算作实验室成立时已在 Meta，已在 Meta 的人也可能被算作离开后又回来。刚离开的雇主依赖结束日期，有 {pct(otherShare)} 的外部加入者在列出的雇主和大学都没有 2025 年或以后结束的工作。Microsoft 组人数少，包括招聘人员，个人档案的滞后对它的影响也比对 Meta 大。岗位只是一天的数据。不点任何人的名字，也不涉及薪资。
+        </p>
+        <h3>来源</h3>
+        <p>
+          <a href={MEMO}>Meta 宣布成立实验室</a>（CNBC，2025 年 6 月 30 日）；<a href={SCALE}>Meta 投资 Scale AI</a>（Axios，2025 年 6 月 13
+          日）；<a href={MSFT}>Microsoft 组建超级智能团队</a>（CNBC，2025 年 11 月 6 日）。
+        </p>
+      </>
+    ) : (
+      <>
+        <h3>Population</h3>
+        <p>
+          Profiles on the Metix AI Platform on {longDate(lang, snapshot)} with a current job at Meta whose headline or current title
+          says superintelligence or MSL, matched word by word and ignoring case: {n(total)} people, {n(narrowTotal)} of whom write
+          superintelligence. Definitions:{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/population.json`}>queries/population.json</a> and{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/measures.json`}>queries/measures.json</a>.
+        </p>
+        <h3>Four groups</h3>
+        <p>
+          The cut is June 1, 2025; Meta announced the lab at the end of that month. At Meta when it formed: a Meta job, not an
+          internship, that began before the cut and was current or ended in May 2025 or later. Returned: a Meta job, not an internship, before the cut,
+          none of which lasted into May 2025. Former interns: only internships at Meta before the cut. New to Meta: no Meta entry
+          before the cut, including fewer than 10 whose Meta entry has no start date. The last three are the outside hires. An
+          earlier Meta job is an entry at Meta, Facebook, Instagram, WhatsApp, or Oculus; an internship is an entry whose seniority is
+          Intern or whose title says intern.
+        </p>
+        <h3>Where outside hires came from</h3>
+        <p>
+          A job entry that ended in 2025 or later, at the first match in a fixed order. Internships do not count for companies, so a
+          doctoral student's summer at a lab is not where they came from; they do count for universities, because doctoral students'
+          entries often carry the Intern label.
+        </p>
+        <h3>Dates</h3>
+        <p>
+          A first join is the start of a person's earliest Meta entry, taken from the counts of people with a Meta entry before each
+          date, so no one is read. A period that would hold 1 to 9 people merges with its neighbour. Profiles lag: across all Meta
+          entries on the Platform, 3,988 start in 2026, 1,104 of them in March and April and fewer than 10 in May or later, so dates stop in April
+          2026 and the last months are undercounted. A date given only as a year reads as January.
+        </p>
+        <h3>Audits</h3>
+        <p>
+          The definition carries the study, so 63 profiles were read in whole slices, never the top of a search: 62 describe working in
+          the lab and the rest recruit for it. The reads changed the definition three ways: MSL counts too (13 of 14 read use it for
+          the lab), Instagram, WhatsApp, and Oculus join Meta as earlier employers, and the few data labeling and red teaming roles are
+          counted apart. No record read is published.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          This is people who chose to name the lab, not the lab: people in its groups who write only FAIR or nothing are missing, and
+          if newcomers name it more readily than long-time staff, or less, the share moves with them. Counts are visible profiles, a
+          lower bound and never a headcount. A few profiles are out of date. A date given only as a year reads as January, so a
+          newcomer who wrote only 2025 counts among those at Meta when the lab formed, and someone who stayed can count among those
+          who returned. Where outside hires came from rests on end dates, and {pct(otherShare)} of them have no job at the listed
+          employers or a university that ended in 2025 or later. The Microsoft group is small and includes recruiters, and profile lag
+          hides more of its months than of Meta's. Postings are one day. No one is named, and nothing here describes pay.
+        </p>
+        <h3>Sources</h3>
+        <p>
+          <a href={MEMO}>Meta's announcement of the lab</a> (CNBC, June 30, 2025); <a href={SCALE}>Meta's investment in Scale AI</a>{" "}
+          (Axios, June 13, 2025); <a href={MSFT}>Microsoft's superintelligence team</a> (CNBC, November 6, 2025).
+        </p>
+      </>
+    ))
+}
+
+<style>
+  /* ---------- palette: color follows cohort ---------- */
+  .mx-hero,
+  .report-body {
+    --st: #3d36c9;
+    --hb: #7770de;
+    --nw: #0b0a1f;
+    --ctx: #858395;
+  }
+
+  /* ---------- hero: white, the title and the pair on the halfway line, then the 936 ---------- */
+  .mx-hero {
+    background: #fff;
+    color: var(--ink);
+    padding-block: clamp(36px, 6vw, 72px) clamp(40px, 5vw, 64px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mx-top {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    align-items: end;
+  }
+
+  .mx-eyebrow,
+  .mx-meta {
+    font: 500 12px/1.5 var(--mono);
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+  }
+
+  .mx-eyebrow {
+    text-transform: uppercase;
+  }
+
+  .mx-eyebrow a,
+  .mx-meta a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .mx-hero h1 {
+    margin-top: 18px;
+    font: 700 clamp(34px, 4.2vw, 56px) / 1.04 var(--display);
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .mx-hero h1:lang(zh),
+  .mx-strip-title:lang(zh) {
+    letter-spacing: 0;
+    line-height: 1.22;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .mx-dek {
+    margin-top: 18px;
+    max-width: 58ch;
+    font-size: clamp(16px, 1.4vw, 18px);
+    color: var(--ink-2);
+  }
+
+  .mx-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin-top: 24px;
+  }
+
+  .mx-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--ink);
+    font: 500 13px/1 var(--mono);
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color 160ms var(--ease);
+  }
+
+  .mx-chip:hover {
+    background: #f1f0fa;
+  }
+
+  .mx-note {
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  /* The pair starts level with the title, beside it rather than under the empty corner. */
+  .mx-side {
+    align-self: start;
+    padding-top: 58px;
+  }
+
+  /* One numeral column for both rows, so the two descriptions start on the same line. */
+  .mx-pair {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 20px;
+    margin: 0;
+  }
+
+  .mx-pair div {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    padding-block: 14px;
+    border-bottom: 1px solid rgb(11 10 31 / 0.14);
+  }
+
+  .mx-pair div:first-child {
+    border-top: 1px solid var(--ink);
+  }
+
+  .mx-pair dt {
+    font: 700 clamp(48px, 6vw, 84px) / 0.95 var(--display);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mx-pair .stay dt {
+    color: var(--st);
+  }
+
+  .mx-pair dd {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .mx-pair-note {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .mx-pair-note a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  /* ---------- the signature: 936 hairlines, one per person, in three blocks ---------- */
+  .mx-strip-head {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    align-items: last baseline;
+    margin-top: clamp(40px, 5vw, 64px);
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .mx-strip-title {
+    font: 600 clamp(17px, 1.6vw, 20px) / 1.3 var(--display);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .mx-strip-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .sk::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: -1px;
+  }
+
+  .sk.st::before {
+    background: var(--st);
+  }
+
+  .sk.hb::before {
+    background: var(--hb);
+  }
+
+  .sk.nw::before {
+    background: var(--nw);
+  }
+
+  /* One SVG per row count. Its width stretches and its height stays in pixels, so a mark is as
+     tall as its row and the dash pattern alone sets its width. */
+  .mx-strip {
+    position: relative;
+    margin-top: 16px;
+    padding-top: 26px;
+  }
+
+  .mx-strip-svg {
+    display: none;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .mx-strip-svg.r2 {
+    display: block;
+  }
+
+  .mx-strip-svg .st {
+    stroke: var(--st);
+  }
+
+  .mx-strip-svg .hb {
+    stroke: var(--hb);
+  }
+
+  .mx-strip-svg .nw {
+    stroke: var(--nw);
+  }
+
+  .mx-strip::after {
+    content: "";
+    position: absolute;
+    left: var(--cut);
+    top: 18px;
+    bottom: -8px;
+    border-left: 2px solid var(--ink);
+    transform: translateX(-1px);
+  }
+
+  .mx-strip-found {
+    position: absolute;
+    top: 0;
+    right: calc(100% - var(--cut));
+    padding-right: 8px;
+    font: 500 12px/1.4 var(--mono);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  /* ---------- shared chart marks ---------- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .lg::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: -1px;
+  }
+
+  .lg-st::before {
+    background: var(--st);
+  }
+
+  .lg-hb::before {
+    background: var(--hb);
+  }
+
+  .lg-nw::before {
+    background: var(--nw);
+  }
+
+  .mx-violet {
+    --bl-focus: #3d36c9;
+  }
+
+  .mx-ink {
+    --bl-focus: #0b0a1f;
+  }
+
+  .mx-lists {
+    display: grid;
+    gap: 24px;
+  }
+
+  .mx-list-head {
+    margin-bottom: 10px;
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .mx-list-head:lang(zh) {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  /* ---------- 01: first joins as a rate, split at the founding ---------- */
+  /* The panels share the parent's rows, so a tag that wraps in the narrow panel moves both plot
+     areas together and the baseline stays one line across the founding. */
+  .mx-sky {
+    display: grid;
+    grid-template-columns: 7fr 3fr;
+    grid-template-rows: auto 220px auto;
+    margin-top: 8px;
+  }
+
+  .mx-sky-panel {
+    --yg: 2.75rem;
+    display: grid;
+    grid-row: 1 / span 3;
+    grid-template-columns: var(--yg) minmax(0, 1fr);
+    grid-template-rows: subgrid;
+  }
+
+  .mx-sky-panel.after {
+    --yg: 0px;
+  }
+
+  .mx-sky-tag {
+    grid-column: 2;
+    align-self: end;
+    padding-bottom: 12px;
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .mx-sky-tag:lang(zh) {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .mx-sky-panel.after .mx-sky-tag {
+    padding-left: 12px;
+    color: var(--ink);
+  }
+
+  .mx-sky-y {
+    grid-column: 1;
+    grid-row: 2;
+    position: relative;
+  }
+
+  .mx-sky-panel.after .mx-sky-y {
+    visibility: hidden;
+  }
+
+  .mx-sky-y span {
+    position: absolute;
+    right: 10px;
+    transform: translateY(50%);
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .mx-sky-area {
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .mx-sky-panel.after .mx-sky-area {
+    border-left: 2px solid var(--ink);
+  }
+
+  .mx-sky-area .grid {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-top: 1px solid rgb(11 10 31 / 0.08);
+  }
+
+  .mx-sky-area .bar {
+    position: absolute;
+    bottom: 0;
+    margin-left: 1px;
+    border-radius: 2px 2px 0 0;
+    background: var(--st);
+  }
+
+  .mx-sky-panel.after .bar {
+    background: var(--nw);
+  }
+
+  .mx-sky-area .bar em {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translate(-50%, -4px);
+    font: 500 12px/1 var(--mono);
+    font-style: normal;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  /* The last bar of a panel ends at its edge, so its count aligns right instead of spilling over. */
+  .mx-sky-area .bar:last-child em {
+    left: auto;
+    right: 0;
+    transform: translateY(-4px);
+  }
+
+  /* The tick row is the container, not the panel: containment on the panel would switch off its subgrid. */
+  .mx-sky-x {
+    grid-column: 2;
+    grid-row: 3;
+    position: relative;
+    height: 24px;
+  }
+
+  .mx-sky-panel.after .mx-sky-x {
+    container: sky-after / inline-size;
+  }
+
+  .mx-sky-x > span {
+    position: absolute;
+    top: 8px;
+    transform: translateX(-50%);
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .mx-sky-panel.after .mx-sky-x > span:first-child {
+    transform: none;
+    padding-left: 12px;
+  }
+
+  /* A narrow after panel drops the years from its ticks first (Chinese sooner, its dates are
+     longer), then the middle tick. */
+  @container sky-after (max-width: 280px) {
+    .mx-sky-x .yr {
+      display: none;
+    }
+  }
+
+  @container sky-after (max-width: 320px) {
+    .mx-sky-x .yr:lang(zh) {
+      display: none;
+    }
+  }
+
+  @container sky-after (max-width: 200px) {
+    .mx-sky-x .mid {
+      display: none;
+    }
+  }
+
+  .mx-sky-foot {
+    margin-top: 10px;
+    font: 12px/1.5 var(--mono);
+    color: var(--ink-3);
+  }
+
+  /* ---------- 02: 100% bars by cohort ---------- */
+  .mx-ck {
+    display: grid;
+    gap: 14px;
+  }
+
+  .mx-ck-row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 17rem) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: center;
+  }
+
+  .mx-ck-row.thin {
+    grid-template-columns: minmax(10rem, 17rem) minmax(0, 1fr) 4.5rem;
+  }
+
+  .mx-ck-name {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .mx-ck-name span {
+    margin-left: 6px;
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+  }
+
+  /* Segments grow from a zero basis, so each is exactly its share of the bar. The values sit
+     under the bar at its two ends, where no segment is too narrow to hold one. */
+  .mx-ck-row:not(.thin) {
+    align-items: start;
+  }
+
+  .mx-ck-row:not(.thin) .mx-ck-name {
+    padding-top: 7px;
+  }
+
+  .mx-ck-cell {
+    min-width: 0;
+  }
+
+  .mx-ck-bar {
+    display: flex;
+    gap: 2px;
+    height: 34px;
+  }
+
+  .mx-ck-bar span {
+    min-width: 0;
+  }
+
+  .mx-ck-bar span:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .mx-ck-bar span:last-child {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .mx-ck-bar .st {
+    background: var(--st);
+  }
+
+  .mx-ck-bar .hb {
+    background: var(--hb);
+  }
+
+  .mx-ck-bar .nw {
+    background: var(--nw);
+  }
+
+  .mx-ck-bar .rest {
+    background: var(--surface-muted);
+  }
+
+  .mx-ck-vals {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 6px;
+    color: var(--ink-2);
+  }
+
+  .mx-ck-vals b,
+  .mx-ck-v {
+    font: 600 13px/1 var(--mono);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mx-ck-vals .st {
+    color: var(--st);
+  }
+
+  .mx-ck-vals .nw {
+    color: var(--nw);
+  }
+
+  .mx-ck-v {
+    text-align: right;
+  }
+
+  .mx-ck-sub {
+    margin-top: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    font: 500 12px/1.4 var(--mono);
+    letter-spacing: 0.04em;
+    color: var(--ink-3);
+  }
+
+  .mx-ck-track {
+    height: 14px;
+    border-radius: 3px;
+    background: var(--surface-muted);
+  }
+
+  .mx-ck-track span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--ctx);
+  }
+
+  /* ---------- 05: two cohorts, one axis ---------- */
+  .mx-pr {
+    display: grid;
+    gap: 14px;
+  }
+
+  .mx-pr-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr) 4rem;
+    grid-template-rows: auto auto;
+    column-gap: 16px;
+    row-gap: 4px;
+    align-items: center;
+  }
+
+  .mx-pr-row.divider {
+    margin-top: 4px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .mx-pr-name {
+    grid-row: 1 / 3;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .mx-pr-row.focus .mx-pr-name {
+    font-weight: 600;
+  }
+
+  .mx-pr-track {
+    position: relative;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--surface-muted);
+  }
+
+  .mx-pr-track .b {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 3px;
+  }
+
+  .mx-pr-track .st {
+    background: var(--st);
+  }
+
+  .mx-pr-track .nw {
+    background: var(--nw);
+  }
+
+  .mx-pr-v {
+    font: 500 13px/1 var(--mono);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mx-pr-v.st {
+    color: var(--st);
+  }
+
+  .mx-pr-axis {
+    display: grid;
+    grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr) 4rem;
+    column-gap: 16px;
+  }
+
+  .mx-pr-ticks {
+    grid-column: 2;
+    position: relative;
+    height: 14px;
+  }
+
+  .mx-pr-ticks span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .mx-pr-ticks span:first-child {
+    transform: none;
+  }
+
+  .mx-pr-ticks span:last-child {
+    transform: translateX(-100%);
+  }
+
+  /* Chinese copy outside the titles breaks only between words; titleHtml marks the places. */
+  .mx-dek:lang(zh),
+  .mx-pair dd:lang(zh),
+  .criteria dd:lang(zh),
+  .mx-sky-foot:lang(zh) {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  /* Two lists that share a scale get the same value column, so their tracks are the same length. */
+  .mx-lists :global(.bl) {
+    grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr) 7.5rem;
+  }
+
+  @container (max-width: 560px) {
+    .mx-lists :global(.bl) {
+      grid-template-columns: minmax(0, 1fr) 7.5rem;
+    }
+  }
+
+  /* The <10 outlines among the AI labs are part of the 31, so they take the focus colour. */
+  .mx-lablist :global(.bl-row.suppressed .bl-fill) {
+    box-shadow: inset 0 0 0 1.5px var(--bl-focus);
+  }
+
+  /* Figure 09 is postings, so its focus is the jobs blue. */
+  .mx-jobs {
+    --bl-focus: #145a93;
+  }
+
+  @media (pointer: coarse) {
+    .mx-eyebrow a,
+    .mx-meta a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+
+    .mx-chip {
+      min-height: 44px;
+    }
+  }
+
+  @media (max-width: 1199px) {
+    .mx-strip-svg.r2 {
+      display: none;
+    }
+
+    .mx-strip-svg.r3 {
+      display: block;
+    }
+  }
+
+  /* ---------- tablets ---------- */
+  @media (max-width: 959px) {
+    .mx-top,
+    .mx-strip-head {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 28px;
+    }
+
+    .mx-strip-head {
+      row-gap: 8px;
+    }
+
+    .mx-side {
+      padding-top: 0;
+    }
+
+    .mx-strip-svg.r3 {
+      display: none;
+    }
+
+    .mx-strip-svg.r4 {
+      display: block;
+    }
+  }
+
+  /* ---------- phones ---------- */
+  @media (max-width: 719px) {
+    .mx-ck-row,
+    .mx-ck-row.thin {
+      grid-template-columns: minmax(0, 1fr) auto;
+      row-gap: 6px;
+    }
+
+    .mx-ck-name {
+      grid-column: 1 / -1;
+    }
+
+    .mx-ck-row:not(.thin) .mx-ck-cell {
+      grid-column: 1 / -1;
+    }
+
+    .mx-ck-row:not(.thin) .mx-ck-name {
+      padding-top: 0;
+    }
+
+    .mx-pr-axis {
+      grid-template-columns: minmax(0, 1fr) 3.5rem;
+    }
+
+    .mx-pr-ticks {
+      grid-column: 1;
+    }
+
+    .mx-pr-row {
+      grid-template-columns: minmax(0, 1fr) 3.5rem;
+      grid-template-rows: auto;
+    }
+
+    .mx-pr-name {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+  }
+
+  @media (max-width: 599px) {
+    .mx-strip-svg.r4 {
+      display: none;
+    }
+
+    .mx-strip-svg.r8 {
+      display: block;
+    }
+
+    .mx-sky {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+      row-gap: 28px;
+    }
+
+    .mx-sky-panel {
+      grid-row: auto;
+      grid-template-rows: auto 180px auto;
+    }
+
+    .mx-sky-panel.after {
+      --yg: 2.75rem;
+    }
+
+    .mx-sky-panel.after .mx-sky-y {
+      visibility: visible;
+    }
+
+    .mx-sky-panel.after .mx-sky-area {
+      border-left: 0;
+    }
+
+    .mx-sky-panel.after .mx-sky-tag {
+      padding-left: 0;
+    }
+
+    .mx-sky-panel.after .mx-sky-x > span:first-child {
+      padding-left: 0;
+    }
+  }
+
+  /* On the narrowest phones a numeral leaves too little room beside it: the words go under it. */
+  @media (max-width: 439px) {
+    .mx-pair {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mx-pair div {
+      row-gap: 6px;
+    }
+  }
+</style>

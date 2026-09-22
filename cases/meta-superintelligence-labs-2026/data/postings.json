@@ -1,0 +1,60 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/measures.json",
+  "meta_open_count": 2104,
+  "share_of_meta_open": 0.0143,
+  "note": "Open Meta postings that name the lab in the title or description. Location rows use the posting's city or state and add up to all. The experience share is of postings that state one.",
+  "rows": [
+    {
+      "group": "all",
+      "count": 30,
+      "share": 1.0
+    },
+    {
+      "group": "research-titles",
+      "count": 14,
+      "share": 0.4667
+    },
+    {
+      "group": "menlo-park",
+      "count": 23,
+      "share": 0.7667
+    },
+    {
+      "group": "san-francisco",
+      "count": 3,
+      "share": 0.1
+    },
+    {
+      "group": "new-york",
+      "count": 2,
+      "share": 0.0667
+    },
+    {
+      "group": "other-locations",
+      "count": 2,
+      "share": 0.0667
+    },
+    {
+      "group": "experience-stated",
+      "count": 26,
+      "share": 0.8667
+    },
+    {
+      "group": "experience-36-months-or-less",
+      "count": 7,
+      "share": null
+    },
+    {
+      "group": "seniority-not-applicable",
+      "count": 30,
+      "share": 1.0
+    },
+    {
+      "group": "posted-since-2026-09-01",
+      "count": 30,
+      "share": 1.0
+    }
+  ]
+}

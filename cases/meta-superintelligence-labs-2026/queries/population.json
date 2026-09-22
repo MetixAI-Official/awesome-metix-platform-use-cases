@@ -1,0 +1,62 @@
+{
+  "note": "Who is counted. A person counts when one job entry is at Meta and current (experience.company.name match current_employer and experience.is_current eq true, in one has_experience entry) and the profile's headline or current_title names the lab with one of lab_terms. The Platform matches text word by word, in any order, and ignores case, so MSL also matches msl and superintelligence also matches SuperIntelligence. Counts are profiles visible through the Metix AI Platform, a lower bound on the lab and never its headcount.",
+  "current_employer": "Meta",
+  "current_employer_note": "match Meta on the current entry. The name also matches entries written as Facebook: a current entry named Facebook counts, and a Facebook condition returned all 790 profiles of the narrow definition, so the two names are one employer on the Platform and a Facebook condition is no separate test. company.name eq Meta returned the same 790 profiles as match Meta, and every one of the 63 profiles read in the audit has a current entry at Meta itself.",
+  "lab_terms": [
+    "superintelligence",
+    "MSL"
+  ],
+  "lab_fields": [
+    "headline",
+    "current_title"
+  ],
+  "lab_terms_note": "superintelligence alone (the narrow definition) gives 790 profiles. MSL, the lab's short name, adds 146 current Meta profiles that never write superintelligence; 13 of 14 read in a whole slice use it for the lab, and the rest recruit for it. FAIR, one of the lab's groups since 2025, is not a lab term: people who name only FAIR do not name the lab, and teams.json counts them as context (fair_only).",
+  "narrow_terms": [
+    "superintelligence"
+  ],
+  "history_names": [
+    "Meta",
+    "Facebook",
+    "Instagram",
+    "WhatsApp",
+    "Oculus"
+  ],
+  "history_names_note": "Names that count as an earlier job at Meta, matched word by word in one has_experience entry. The name Meta does not match an entry listed under Instagram; adding the other names moves fewer than 10 people.",
+  "cut": "2025-06-01",
+  "cut_note": "Meta announced Meta Superintelligence Labs at the end of June 2025. A person with a job entry at a history name that started before the cut had a Meta job before the lab. experience.start_date is a month (YYYY-MM) or a year; the Platform compares it as its first day, so a year alone reads as January. A newcomer whose Meta entry says only 2025 therefore counts as at Meta before the cut, which raises the share at Meta when the lab formed, and an earlier entry whose end date says only 2025 counts as ending before May 2025, which can move someone who was at Meta into returned.",
+  "stay_end": "2025-05-01",
+  "cohorts_note": "Four groups that do not overlap and add up to the whole. Stayed: a non-intern Meta entry that started before the cut and is current or ended in May 2025 or later, so the person was at Meta when the lab formed. Returned: a non-intern Meta entry before the cut, but none that lasted into May 2025, so they had left and came back. Former interns: the only Meta entries before the cut are internships. New to Meta: no Meta entry that started before the cut, including fewer than 10 whose current Meta entry has no start date. Returned, former interns, and new to Meta together are the outside hires, everyone who was not at Meta when the lab formed.",
+  "intern_rule": "An entry is an internship when experience.seniority eq Intern or experience.title matches intern. Both are tested inside the same has_experience entry as the employer and the date.",
+  "labeling_terms": [
+    "labeling",
+    "labelling",
+    "annotation",
+    "annotator",
+    "red teamer",
+    "red teaming"
+  ],
+  "labeling_note": "Titles and headlines that name data labeling, annotation, or red teaming. The audit found such roles among recent hires (fewer than 10 in the slice read); vendors often staff them, but the profile lists Meta.",
+  "freshness_note": "Profiles are a periodically refreshed snapshot. Across all Meta job entries on the Platform, 3,988 start in 2026, 1,104 of them in March and April and fewer than 10 in May or later, so start dates stop in April 2026 and the most recent months are probably undercounted. April 2026 is the last month shown, and people who joined since are missing.",
+  "audit": "63 profiles read in whole slices, never from the top of a search, because Search ranks by match quality. The slices covered people with no Meta-named entry before the cut, people with a Meta entry before the cut, people who write MSL but not superintelligence, and the profiles whose Meta entry has no start date (fewer than 10). 62 of 63 describe themselves as working in the lab, and the rest recruit for it. All 63 have a current Meta entry, almost all of them named Meta. All 31 read with a Meta entry before the cut had a real Meta job there, not only an internship. Among people without a Meta-named entry before the cut, an earlier Meta job turned up listed under Instagram, which is why Instagram is a history name, and fewer than 10 of them hold data labeling or red teaming roles. Separate reads of sub-team matches found fewer than 10 profiles that say they have left the lab while the Meta entry is still current, so a few members are out of date. Records read for the audit are kept private.",
+  "comparison": {
+    "id": "microsoft",
+    "label": "Microsoft",
+    "current_employer": "Microsoft",
+    "lab_terms": [
+      "superintelligence"
+    ],
+    "history_names": [
+      "Microsoft"
+    ],
+    "cut": "2025-11-01",
+    "stay_end": "2025-10-01",
+    "edges": [
+      "2012-01-01",
+      "2016-01-01",
+      "2020-01-01",
+      "2023-01-01",
+      "2025-01-01"
+    ],
+    "note": "Current Microsoft staff whose headline or current_title names superintelligence. Microsoft AI announced its superintelligence team in November 2025, so the cut for this group is 2025-11-01. Microsoft also matches Microsoft AI and Microsoft Research; subsidiaries with their own names (LinkedIn, GitHub) are not history names. A whole slice of 15 all named the Microsoft AI superintelligence team; fewer than 10 of them are recruiters or sourcers for it."
+  }
+}
