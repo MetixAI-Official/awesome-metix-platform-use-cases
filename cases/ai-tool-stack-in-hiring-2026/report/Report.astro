@@ -9,6 +9,7 @@
  *   so demand and supply for every tool are read on the same scale at a glance.
  */
 import BarList from "@site/components/charts/BarList.astro";
+import FigNotes from "@site/components/charts/FigNotes.astro";
 import Figure from "@site/components/charts/Figure.astro";
 import { REPO, href, isoDate, longDate, number, titleHtml, type Lang } from "@site/i18n";
 import coMentions from "../data/co-mentions.json";
@@ -207,7 +208,7 @@ const industryZh: Record<string, string> = {
       </header>
 
       <div class="wrap report-body">
-        <section class="intro rail-block" aria-labelledby="brief-title">
+        <section class="text-block rail-block" aria-labelledby="brief-title">
           <div class="rail">
             <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
           </div>
@@ -300,11 +301,13 @@ const industryZh: Record<string, string> = {
             ))}
           </ol>
         </Figure>
-        <p class="fig-text">
-          {zh
+        <FigNotes
+          lang={lang}
+          figure="01"
+          paras={[zh
             ? `岗位和档案的数量级相近，所以放在同一刻度上。LangChain 是唯一一个档案数远超岗位数的大工具，Claude Code 则是岗位数远超档案数。`
-            : `Postings and profiles run to similar sizes, so they share one scale. LangChain is the one large tool with far more profiles than postings; Claude Code is the one with far more postings than profiles.`}
-        </p>
+            : `Postings and profiles run to similar sizes, so they share one scale. LangChain is the one large tool with far more profiles than postings; Claude Code is the one with far more postings than profiles.`]}
+        />
 
         <Figure
           id="gap"
@@ -348,11 +351,13 @@ const industryZh: Record<string, string> = {
             ))}
           </div>
         </Figure>
-        <p class="fig-text">
-          {zh
+        <FigNotes
+          lang={lang}
+          figure="02"
+          paras={[zh
             ? `比值大于 1 表示岗位多于列出技能的档案。LlamaIndex、AutoGen、CrewAI 也在 1.7 倍以上；DSPy 和 LangChain 在 0.5 倍左右，档案比岗位多一倍。`
-            : `Above 1, postings outnumber the profiles that list the skill. LlamaIndex, AutoGen, and CrewAI are also above 1.7; DSPy and LangChain sit near 0.5, with twice as many profiles as postings.`}
-        </p>
+            : `Above 1, postings outnumber the profiles that list the skill. LlamaIndex, AutoGen, and CrewAI are also above 1.7; DSPy and LangChain sit near 0.5, with twice as many profiles as postings.`]}
+        />
 
         <Figure
           id="us-and-rest"
@@ -413,11 +418,13 @@ const industryZh: Record<string, string> = {
             <span class="lg out">{zh ? "美国以外" : "Outside the US"}</span>
           </p>
         </Figure>
-        <p class="fig-text">
-          {zh
+        <FigNotes
+          lang={lang}
+          figure="03"
+          paras={[zh
             ? `列出 Claude Code 的档案有 ${pct(cc.sUs / cc.s)} 在美国，提到它的岗位只有 ${pct(cc.dUs / cc.d)} 在美国。美国以外的雇主在大量点名这个工具，而公开把它写进技能栏的人主要在美国。`
-            : `${pct(cc.sUs / cc.s)} of the profiles that list Claude Code are in the US, but only ${pct(cc.dUs / cc.d)} of the postings that name it. Employers outside the US ask for it at scale, while the people who publish it as a skill are mostly American.`}
-        </p>
+            : `${pct(cc.sUs / cc.s)} of the profiles that list Claude Code are in the US, but only ${pct(cc.dUs / cc.d)} of the postings that name it. Employers outside the US ask for it at scale, while the people who publish it as a skill are mostly American.`]}
+        />
 
         <Figure
           id="assistants"
@@ -439,11 +446,13 @@ const industryZh: Record<string, string> = {
         >
           <BarList rows={assistantRows} label={zh ? "各编程助手的岗位数" : "Postings by assistant"} />
         </Figure>
-        <p class="fig-text">
-          {zh
+        <FigNotes
+          lang={lang}
+          figure="04"
+          paras={[zh
             ? "Cursor、Codex 和 Windsurf 也是普通词，只在同一段描述里还提到另一个 AI 编程工具时才计入，所以是下限，也不参与上面的供需比较。"
-            : "Cursor, Codex, and Windsurf are also ordinary words, so they count only when the description names another AI coding tool as well. That makes them lower bounds, and keeps them out of the demand and supply comparison above."}
-        </p>
+            : "Cursor, Codex, and Windsurf are also ordinary words, so they count only when the description names another AI coding tool as well. That makes them lower bounds, and keeps them out of the demand and supply comparison above."]}
+        />
         <Figure
           id="together"
           number="05"
@@ -495,11 +504,13 @@ const industryZh: Record<string, string> = {
             </tbody>
           </table>
         </Figure>
-        <p class="fig-text">
-          {zh
+        <FigNotes
+          lang={lang}
+          figure="05"
+          paras={[zh
             ? "只画 Claude Code 和 GitHub Copilot 两列，因为另外三个工具的定义本身就要求同时提到别的工具，它们的列会被这个定义抬高。点名 Copilot 的岗位多半也点名 Claude Code，点名 Claude Code 的岗位却很少再提 Copilot。"
-            : "Only two columns are drawn, because the other three tools are defined as named alongside another tool, which would inflate their columns by construction. Postings that name Copilot usually name Claude Code too; postings that name Claude Code seldom add Copilot."}
-        </p>
+            : "Only two columns are drawn, because the other three tools are defined as named alongside another tool, which would inflate their columns by construction. Postings that name Copilot usually name Claude Code too; postings that name Claude Code seldom add Copilot."]}
+        />
 
         <Figure
           id="countries"
@@ -615,11 +626,13 @@ const industryZh: Record<string, string> = {
             <span class="lg baseline">{zh ? "软件工程师标题" : "Software engineer title"}</span>
           </p>
         </Figure>
-        <p class="fig-text">
-          {zh
+        <FigNotes
+          lang={lang}
+          figure="08"
+          paras={[zh
             ? "两组的分布几乎重合。两组有重叠（很多软件工程师岗位也会点名工具），前一组还包括非工程岗位，所以这不是严格的对照，但足以说明点名工具不是高薪岗位的标志。"
-            : "The two distributions nearly match. The groups overlap (many software engineer postings name a tool) and the first includes roles outside engineering, so this is not a controlled comparison, but it is enough to say that naming a tool does not mark a better-paid job."}
-        </p>
+            : "The two distributions nearly match. The groups overlap (many software engineer postings name a tool) and the first includes roles outside engineering, so this is not a controlled comparison, but it is enough to say that naming a tool does not mark a better-paid job."]}
+        />
       </div>
     </>
   )
@@ -886,12 +899,6 @@ const industryZh: Record<string, string> = {
 
   .ks-dot.above .ks-val {
     top: -20px;
-  }
-
-  .fig-text {
-    max-width: 72ch;
-    margin-top: 14px !important;
-    color: var(--ink-2);
   }
 
   /* 01: the two-sided chart */

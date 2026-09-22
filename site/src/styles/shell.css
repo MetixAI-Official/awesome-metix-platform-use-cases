@@ -1817,33 +1817,33 @@ details.query[open]::details-content {
   }
 }
 
-/* Report intros hang on the same rail as the closing blocks: the heading in the left
+/* Report text sections hang on the same rail as the closing blocks: the heading in the left
    column, the text at a reading measure in the right. */
-.report-body > .intro + .intro {
+.report-body > .text-block:not(:first-child) {
   padding-top: clamp(28px, 4vw, 44px);
   border-top: 1px solid var(--line);
 }
 
-.intro h2 {
+.text-block h2 {
   font-size: clamp(22px, 2.4vw, 28px);
 }
 
 @media (min-width: 960px) {
-  .intro > .rail,
-  .intro > .rail-main {
+  .text-block > .rail,
+  .text-block > .rail-main {
     align-self: first baseline;
   }
 }
 
 /* One measure for everything in an intro's content column, set once at the body size:
    ch in each child would resolve against its own font and give ragged right edges. */
-.intro > .rail-main {
+.text-block > .rail-main {
   max-width: calc(68ch + 3rem);
 }
 
 /* Prose alone takes a reading measure (about 75 characters); the list and the note keep
    the column so their rules reach the figures' edge. */
-.intro-text {
+.block-prose {
   max-width: 34em;
   color: var(--ink-2);
 }
@@ -1881,6 +1881,86 @@ details.query[open]::details-content {
   content: counter(brief, decimal-leading-zero);
   font: 500 13px/1 var(--mono);
   color: var(--ink-3);
+}
+
+/* Definitions as ruled rows, in the brief list's rhythm: the term in a label column on
+   its definition's first baseline. */
+.criteria {
+  margin: 0;
+}
+
+.criteria > div {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 4px 20px;
+  align-items: baseline;
+  padding-block: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.criteria > div:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.criteria dt {
+  font: 600 14px/1.4 var(--sans);
+  color: var(--ink);
+}
+
+.criteria dd {
+  max-width: 34em;
+  margin: 0;
+  color: var(--ink-2);
+}
+
+@media (max-width: 599px) {
+  .criteria > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Figure notes: the reading under a figure, on the rail. All report prose is the body
+   grey; the paragraphs after the first (method and caveats) are one size smaller. */
+.report-body > .fig-notes {
+  margin-top: 28px;
+}
+
+.fig-notes {
+  display: grid;
+  gap: 8px;
+}
+
+.fn-label {
+  font: 500 12px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.fn-label:lang(zh) {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.fn-text {
+  max-width: 34em;
+  color: var(--ink-2);
+}
+
+.fn-text p + p {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+@media (min-width: 960px) {
+  .fig-notes {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    align-items: first baseline;
+    gap: 56px;
+  }
 }
 
 /* The one note style on the site: a muted panel with a label, no side stripe. */

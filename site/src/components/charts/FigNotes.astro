@@ -1,0 +1,24 @@
+---
+/*
+ * The reading of a figure, under it, on the rail: a label naming the figure in the
+ * heading column, the text at a reading measure in the content column. The first
+ * paragraph is what the figure shows; any after it carry method and caveats, one size
+ * smaller.
+ */
+import type { Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  figure: string;
+  paras: string[];
+}
+
+const { lang, figure, paras } = Astro.props;
+---
+
+<div class="fig-notes">
+  <p class="fn-label">{lang === "zh" ? `关于图 ${figure}` : `About figure ${figure}`}</p>
+  <div class="fn-text">
+    {paras.map((p) => <p>{p}</p>)}
+  </div>
+</div>
