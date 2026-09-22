@@ -7,7 +7,7 @@ title:
   zh: 写明薪资的美国推理岗位里，一半起薪在 15 万到 20 万美元之间
 dek:
   en: US postings with inference or model serving in the title that state an annual salary in USD, by posted minimum, on the Metix AI Platform on September 21, 2026.
-  zh: 2026 年 9 月 21 日 Metix AI Platform 上标题含 inference 或 model serving、写明美元年薪的美国岗位，按起薪分档。
+  zh: 2026 年 9 月 21 日，Metix AI Platform 上职位名称含 inference 或 model serving、写明美元年薪的美国岗位，按起薪分档。
 datasets: [jobs]
 integration: [rest]
 topics: [inference, pay]

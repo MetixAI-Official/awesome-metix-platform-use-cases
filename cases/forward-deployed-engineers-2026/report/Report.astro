@@ -107,7 +107,7 @@ const nextThree = leaders.map((r) => `${name(r.group)} ${pct(r.share, 0)}`).join
         sub={
           zh
             ? `标题含 forward deployed 的在招岗位，按国家统计，条形按占全球 ${number(lang, world)} 个的比例画`
-            : `Open postings with forward deployed in the title, by country, drawn as a share of all ${number(lang, world)} worldwide`
+            : `Open postings with "forward deployed" in the title, by country, drawn as a share of all ${number(lang, world)} worldwide`
         }
         alt={rows.map((r) => `${name(r.group)} ${r.count}`).join(zh ? "，" : ", ")}
         source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
@@ -135,7 +135,7 @@ const nextThree = leaders.map((r) => `${name(r.group)} ${pct(r.share, 0)}`).join
         ) : (
           <>
             <p>
-              Worldwide, {number(lang, world)} open postings have forward deployed in the title, and {number(lang, us.count)} of them,{" "}
+              Worldwide, {number(lang, world)} open postings have "forward deployed" in the title, and {number(lang, us.count)} of them,{" "}
               {pct(us.share)}, are in the US. India is second with {second.count}, then the United Kingdom and Germany.
             </p>
             <p>
@@ -158,7 +158,7 @@ const nextThree = leaders.map((r) => `${name(r.group)} ${pct(r.share, 0)}`).join
   section === "method" &&
     (zh ? (
       <>
-        <h3>人群</h3>
+        <h3>统计范围</h3>
         <p>{longDate(lang, snapshot)} Metix AI Platform 上标题含 "forward deployed" 的在招岗位。这个词组很少有别的意思，不需要排除词。</p>
         <h3>选国家</h3>
         <p>

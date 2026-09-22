@@ -9,7 +9,7 @@ Answer one question with the Metix AI Platform: in which countries are companies
 
 2. Population. Open postings whose title matches "forward deployed". The phrase rarely means anything else; read 25 titles to confirm.
 
-3. Count the whole first. One worldwide count, size 1.
+3. Count the whole population first. One worldwide count, size 1.
 
 4. Find the countries. Read the country of about 500 postings to learn which countries appear. Search results come in their own order, not a random one, so this read only chooses the countries: never publish a share computed from it.
 
@@ -21,7 +21,7 @@ Answer one question with the Metix AI Platform: in which countries are companies
 
 8. Outputs. Write data/countries.json with "unit": "jobs", the snapshot date, the worldwide count, and each country's count and share. Report the balance from GET /auth/key/status before and after as the cost.
 
-9. Chart. One bar per country scaled to the worldwide total, the US highlighted, the rest of the world hatched and last. Title it with the finding.
+9. Chart. One bar per country scaled to the worldwide total, the US highlighted, the rest of the world plain and last. Title it with the finding.
 
 10. Limits. Titles only; the same work under another title (solutions engineer, for example) is not counted. One day, not a trend.
 ```

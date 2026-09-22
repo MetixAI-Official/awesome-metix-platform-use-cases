@@ -1,8 +1,8 @@
 ---
 /*
  * Design
- * Field: teal #0DEFC8 with ink text; the inference bar in ink, the other stages in #5E5C78.
- * Detail chart on white: teal ink #07545E for inference, grey for the other stages.
+ * Field: the jobs family (blue or sky), set by fieldColor(); the inference bar in the field's focus color.
+ * Detail chart on white: deep jobs blue #145A93 for inference, grey for the other stages.
  * Signature: the ratio as the number, 8.2×, because the finding is the gap, not the count.
  */
 import BarList from "@site/components/charts/BarList.astro";
@@ -48,7 +48,7 @@ const rows = order.map((r) => ({
   display: zh ? `${number(lang, r.count)} · 美国 ${pct(r.us_count / r.count)}` : `${number(lang, r.count)} · ${pct(r.us_count / r.count)} US`,
   width: r.us_count / max,
   ghost: r.count / max,
-  kind: r.group === mostUs.group ? ("focus" as const) : ("other" as const),
+  kind: r.group === "inference" ? ("focus" as const) : ("other" as const),
 }));
 ---
 
@@ -87,8 +87,8 @@ const rows = order.map((r) => ({
         lang={lang}
         heading={
           zh
-            ? `推理岗位多过其他所有阶段，${labels[mostUs.group].zh}最集中在美国`
-            : `Inference outnumbers every other stage. ${labels[mostUs.group].en} is the most concentrated in the US.`
+            ? `推理岗位多过其他所有阶段，是预训练的 ${number(lang, ratio, 1)} 倍`
+            : `Inference outnumbers every other stage, ${number(lang, ratio, 1)} times pre-training`
         }
         sub={
           zh
@@ -159,7 +159,7 @@ const rows = order.map((r) => ({
   section === "method" &&
     (zh ? (
       <>
-        <h3>人群</h3>
+        <h3>统计范围</h3>
         <p>
           {longDate(lang, snapshot)} Metix AI Platform 上的在招岗位。每个阶段是一组标题关键词：预训练（pretraining、pre-training）、后训练（post-training、posttraining）、微调（fine-tuning、finetuning）、推理（inference、model
           serving、llm serving）。每一组还要求标题里有一个机器学习相关的词（research、engineer、scientist、llm、model、ai、ml、technical），并排除 sales、customer、teacher、trainer、doctoral、pharmacy、licensing、licensed、causal、statistical。

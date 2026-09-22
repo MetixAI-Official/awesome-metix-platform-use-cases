@@ -66,6 +66,11 @@ h3 {
   letter-spacing: 0;
 }
 
+/* "Casebook" is Latin in both editions; it keeps the English tracking on Chinese pages. */
+:lang(zh) .mast-title {
+  letter-spacing: -0.06em;
+}
+
 p {
   margin: 0;
   text-wrap: pretty;
@@ -125,11 +130,34 @@ a {
 
 /* ---------- header ---------- */
 
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 20;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 500;
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+main:focus {
+  outline: none;
+}
+
+/* Opaque: body text scrolling under a translucent bar reads as noise behind the controls. */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgb(238 240 244 / 0.94);
+  background: var(--ground);
   border-bottom: 1px solid var(--line);
 }
 
@@ -645,7 +673,7 @@ a {
   --f-ink: #0b0a1f;
   --f-ink-2: rgb(11 10 31 / 0.78);
   --f-focus: #0b0a1f;
-  --f-mark: #3d3a8c;
+  --f-mark: #145a93;
   --f-track: rgb(11 10 31 / 0.1);
 }
 
@@ -1559,13 +1587,14 @@ details.query[open]::details-content {
   color: var(--ink);
 }
 
+/* Syntax colors stay out of the dataset hues (blue, violet, teal). */
 .code .str {
-  color: #07545e;
+  color: #8a4b08;
 }
 
 .code .num,
 .code .lit {
-  color: var(--accent-ink);
+  color: var(--ink-3);
 }
 
 .code .punct {
@@ -1638,7 +1667,7 @@ details.query[open]::details-content {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
-  --bl-focus: #07545e;
+  --bl-focus: #145a93;
   --bl-mark: #7e8787;
   --bl-track: var(--surface-muted);
 }
@@ -1650,8 +1679,9 @@ details.query[open]::details-content {
   margin-bottom: 12px;
 }
 
+/* One step below the section heads (28px), so the evidence and the closing blocks read as different levels. */
 .fig h2 {
-  font-size: clamp(21px, 2.3vw, 27px);
+  font-size: clamp(20px, 2vw, 24px);
   max-width: 40ch;
 }
 
@@ -1933,9 +1963,9 @@ details.query[open]::details-content {
 .cost-flag {
   padding: 4px 10px;
   border-radius: 999px;
-  background: #d9f7ef;
+  background: #e3f5e8;
   font: 500 12px/1.3 var(--sans);
-  color: #07545e;
+  color: #1f6f3a;
 }
 
 .cost-flag.over {
@@ -1975,7 +2005,9 @@ details.query[open]::details-content {
   display: flex;
   align-items: center;
   gap: 12px;
+  font-family: var(--display);
   font-size: 18px;
+  font-weight: 600;
 }
 
 .rs-n {
@@ -2135,6 +2167,12 @@ details.query[open]::details-content {
 
 .as-tabs button:hover {
   color: var(--ink);
+}
+
+/* The tab row scrolls, which clips an outside ring; draw it inside the tab. */
+.as-tabs button:focus-visible {
+  outline-offset: -3px;
+  border-radius: 6px;
 }
 
 .as-tabs button[aria-selected="true"] {
@@ -2316,7 +2354,7 @@ details.query[open]::details-content {
   width: 100%;
   min-height: 44px;
   padding: 0 16px;
-  border: 1px solid var(--line);
+  border: 1px solid #84829a;
   border-radius: 999px;
   background: var(--surface);
   font: 15px/1 var(--sans);
@@ -2360,9 +2398,9 @@ details.query[open]::details-content {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 14px;
-  border: 1px solid var(--line);
+  border: 1px solid #84829a;
   border-radius: 999px;
   background: var(--surface);
   font-size: 14px;
@@ -2389,7 +2427,7 @@ details.query[open]::details-content {
 }
 
 .ic-sort select {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -2601,5 +2639,314 @@ details.query[open]::details-content {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+  }
+}
+
+/* ---------- v3 review: run block, start strip, index, targets ---------- */
+
+/* Setup is the same on every case: open for a first visit, folded once an agent is chosen. */
+.setup-once {
+  margin-top: 28px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.setup-once > summary {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 14px 44px 14px 18px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.setup-once > summary::-webkit-details-marker {
+  display: none;
+}
+
+.setup-once > summary::after {
+  content: "";
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -6px;
+  border-right: 2px solid var(--ink-2);
+  border-bottom: 2px solid var(--ink-2);
+  transform: rotate(45deg);
+  transition: transform 160ms var(--ease);
+}
+
+.setup-once[open] > summary::after {
+  margin-top: -2px;
+  transform: rotate(-135deg);
+}
+
+.so-title {
+  font: 600 16px/1.3 var(--display);
+}
+
+.so-note {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.setup-once > .run-steps {
+  margin: 0;
+  padding: 4px 18px 20px;
+}
+
+.run-prompt {
+  display: block;
+  margin-top: 32px;
+}
+
+.run-prompt .rs-body {
+  margin-top: 10px;
+  max-width: 70ch;
+  color: var(--ink-2);
+}
+
+.prompt-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+}
+
+.adapt-table {
+  margin-top: 16px;
+}
+
+/* Step 4 of the start strip: the cheapest case, opened at its prompt. */
+.start-case {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 120ms var(--ease), transform 160ms var(--ease);
+}
+
+.start-case:hover {
+  border-color: var(--ink-3);
+  transform: translateY(-2px);
+}
+
+.sc-meta {
+  font: 500 12px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.sc-title {
+  font: 600 17px/1.3 var(--display);
+  text-wrap: balance;
+}
+
+.sc-cost {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.sc-cost strong {
+  color: var(--ink);
+}
+
+.sc-cta {
+  font-weight: 500;
+  color: var(--accent-ink);
+}
+
+.start-case + .text-link {
+  display: inline-block;
+  margin-top: 12px;
+}
+
+/* Facet counts, and a value with no cases shown but not offered. */
+.ic-n {
+  font: 500 12px/1 var(--mono);
+  color: var(--ink-3);
+}
+
+.ic-group input:checked + span .ic-n {
+  color: rgb(255 255 255 / 0.7);
+}
+
+.ic-group input:disabled + span {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ci-cost .fits::after {
+  content: " \2713";
+  color: #1f6f3a;
+}
+
+/* The forward-deployed card names the next countries for the catalog; its own page has the chart. */
+.card-hero .card-body .strip-next {
+  display: none;
+}
+
+/* Featured cards share rows, so titles, big numbers, and stubs line up across the shelf. */
+@supports (grid-template-rows: subgrid) {
+  .featured-cards > li,
+  .featured-cards .card-link,
+  .featured-cards .card {
+    display: grid;
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+
+  .featured-cards .card .cf-body {
+    justify-content: flex-start;
+  }
+
+  .featured-cards .card .cf-body > * {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .featured-cards .card :is(.mini-bars, .mini-cols, .strip) {
+    margin-top: auto;
+  }
+}
+
+/* Dense Han glyphs at 12px are harder to read than Latin at the same size. */
+html:lang(zh) :is(.cost-flag, .pq-label, .hero-chip, .chart-legend, .legend, .strip-legend, .mb-key, .receipt-grid dt, .ic-n, .sc-meta) {
+  font-size: 13px;
+}
+
+/* The agent tabs wrap onto two rows on a phone instead of hiding the last one. */
+@media (max-width: 440px) {
+  .as-tabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
+  .as-tabs button {
+    flex: 1 1 auto;
+  }
+}
+
+/* Touch targets: 44px on phones, whatever the visual size. */
+@media (max-width: 640px) {
+  .btn,
+  .btn-small {
+    min-height: 44px;
+  }
+
+  .lang-switch a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+  }
+
+  .site-header .pill,
+  .as-docs,
+  .links-line a,
+  details.query > summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+/* Step 4 runs under the first three as a band: the pitch on the left, the cheapest case beside it. */
+.start-steps > .start-run {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.7fr);
+  gap: 14px 32px;
+  align-items: start;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.start-run .start-case {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 24px;
+  margin-top: 0;
+  padding: 18px 22px;
+}
+
+.start-run .sc-meta,
+.start-run .sc-title {
+  grid-column: 1;
+}
+
+.start-run .sc-cost {
+  grid-column: 1;
+}
+
+.start-run .sc-cta {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+  justify-self: end;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  white-space: nowrap;
+}
+
+.start-run .sr-browse {
+  grid-column: 2;
+  justify-self: start;
+  margin-top: 0;
+}
+
+@media (max-width: 1080px) {
+  .start-steps > .start-run {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .start-run .sr-browse {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .start-run .start-case {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .start-run .sc-cta {
+    grid-column: 1;
+    grid-row: auto;
+    justify-self: start;
+  }
+}
+
+/* On a phone the Copy button sits above the command, so a command that scrolls is never read
+   as cut off by the button beside it. */
+@media (max-width: 640px) {
+  .code-copy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .code-copy > .btn {
+    grid-row: 1;
+    justify-self: end;
+    margin: 6px 6px 0 0;
+  }
+
+  .code-copy pre.code {
+    padding: 4px 16px 14px;
+    border-radius: 0 0 10px 10px;
   }
 }

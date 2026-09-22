@@ -7,7 +7,7 @@ title:
   zh: 美国近一半推理岗位集中在旧金山湾区
 dek:
   en: Open postings with inference or model serving in the title, grouped by US metro, as listed on the Metix AI Platform on September 21, 2026.
-  zh: 2026 年 9 月 21 日 Metix AI Platform 上标题含 inference 或 model serving 的美国在招岗位，按都市区统计。
+  zh: 2026 年 9 月 21 日，Metix AI Platform 上职位名称含 inference 或 model serving 的美国在招岗位，按都市区统计。
 datasets: [jobs]
 integration: [rest]
 topics: [inference, ai-hiring]
@@ -20,11 +20,11 @@ highlights:
   - value: "49.9%"
     label:
       en: of distinct US postings are in the Bay Area
-      zh: 的美国去重岗位在旧金山湾区
+      zh: 的美国岗位（合并重复发布后）在旧金山湾区
   - value: "353"
     label:
       en: distinct US postings
-      zh: 个美国去重岗位
+      zh: 个美国岗位（合并重复发布后）
   - value: "120"
     label:
       en: companies posting them

@@ -38,7 +38,7 @@ export const prompts = {
   zh: bySlug(import.meta.glob<PromptModule>("../../cases/*/PROMPT.zh.md", { eager: true })),
 };
 
-/** Catalog order for cards: wide cards lead their rows so the three-column grid stays full. */
+/** Order among cases published the same day: wide cards lead their rows so the three-column grid stays full. */
 export const CARD_ORDER = [
   "ai-coding-tools-in-postings-2026",
   "inference-roles-us-metros-2026",
@@ -47,9 +47,21 @@ export const CARD_ORDER = [
   "us-inference-pay-2026",
 ];
 
-export function byCardOrder(a: { data: { slug: string } }, b: { data: { slug: string } }): number {
+type Orderable = { data: { slug: string; format: string; published?: Date } };
+
+/**
+ * The one catalog order: newest first, then reports before cards, then CARD_ORDER. The
+ * index's default sort, previous and next, and card numbers all follow it, so "Card 03"
+ * is the third card wherever it appears.
+ */
+export function byCatalog(a: Orderable, b: Orderable): number {
   const rank = (slug: string) => (CARD_ORDER.includes(slug) ? CARD_ORDER.indexOf(slug) : CARD_ORDER.length);
-  return rank(a.data.slug) - rank(b.data.slug) || a.data.slug.localeCompare(b.data.slug);
+  return (
+    (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0) ||
+    Number(a.data.format === "card") - Number(b.data.format === "card") ||
+    rank(a.data.slug) - rank(b.data.slug) ||
+    a.data.slug.localeCompare(b.data.slug)
+  );
 }
 
 /**
@@ -69,3 +81,17 @@ export function fieldColor(datasets: readonly string[], position = 0): string {
 
 /** Dataset marks on light ground: the darker shade of each family, for 3:1 contrast. */
 export const DATASET_INK: Record<string, string> = { jobs: "#1e79c2", people: "#5b54ef", companies: "#07545e" };
+
+/** Search terms for each topic, in both languages, so "salary" or 薪资 finds the pay card. */
+export const TOPIC_TERMS: Record<string, string> = {
+  inference: "inference serving 推理",
+  "ai-hiring": "ai hiring jobs postings 招聘 岗位",
+  "forward-deployed": "forward deployed fde 前线部署",
+  pay: "pay salary compensation wage 薪资 工资 薪酬 起薪",
+  "ai-talent": "ai talent staff 人才 员工",
+  education: "education degree university bachelor 教育 学历 本科 大学 院校",
+  "model-lifecycle": "pre-training post-training lifecycle 预训练 后训练",
+  "ai-tools": "ai tools coding assistant copilot 工具 编程助手",
+  skills: "skills 技能",
+  "coding-agents": "coding agents 编程",
+};

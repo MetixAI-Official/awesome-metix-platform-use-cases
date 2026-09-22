@@ -1,8 +1,8 @@
 ---
 /*
  * Design
- * Field: violet #5B54EF with white text; Claude Code in teal #0DEFC8, the others in #D9D7FF.
- * Detail chart on white: teal ink #07545E for the leader; grey for the rest.
+ * Field: the jobs family (blue or sky), set by fieldColor(); Claude Code in the field's focus color.
+ * Detail chart on white: deep jobs blue #145A93 for the leader; grey for the rest.
  * Signature: strict counts drawn solid or hatched, with an outline behind showing the
  *   looser plain-word count, so the reader sees how much the definition moves each tool.
  */
@@ -46,8 +46,8 @@ const barRows = rows.map((r) => ({
   note:
     r.word_count !== undefined
       ? zh
-        ? `下限：需同时提到另一个工具；只看这个词 ${number(lang, r.word_count)}`
-        : `lower bound: another tool named too; the word alone ${number(lang, r.word_count)}`
+        ? `严格计数：需同时提到另一个工具；只看这个词 ${number(lang, r.word_count)}`
+        : `strict count: another tool named too; the word alone ${number(lang, r.word_count)}`
       : undefined,
   display: number(lang, r.count),
   width: r.count / max,
@@ -79,7 +79,7 @@ const lowestUs = byUs[byUs.length - 1];
         ))}
       </ul>
       <p class="mb-key">
-        {zh ? "斜线条是下限：只在同时提到另一个 AI 编程工具时才计入" : "Hatched bars are lower bounds, counted only when another AI coding tool is named too"}
+        {zh ? "斜线条是严格计数：只在同时提到另一个 AI 编程工具时才计入。条形按最长的一条缩放" : "Hatched bars are strict counts, made only when another AI coding tool is named too. Bars are scaled to the largest"}
       </p>
     </div>
   )
@@ -98,8 +98,8 @@ const lowestUs = byUs[byUs.length - 1];
         }
         sub={
           zh
-            ? "职位描述里提到各工具的全球在招岗位数。斜线条是下限，背后的轮廓是只看这个词时的数量"
-            : "Open postings worldwide whose description names each tool. Hatched bars are lower bounds; the outline behind shows the count for the word alone"
+            ? "职位描述里提到各工具的全球在招岗位数，条形按最长的一条缩放。斜线条是严格计数（因此是下限），背后的轮廓是只看这个词时的数量"
+            : "Open postings worldwide whose description names each tool, with bars scaled to the largest. Hatched bars are strict counts, so lower bounds; the outline behind shows the count for the word alone"
         }
         alt={rows.map((r) => `${names[r.group]} ${r.count}`).join(", ")}
         source={zh ? `来源：Metix AI Platform 岗位数据，${isoDate(snapshot)}。` : `Source: Metix AI Platform, jobs, ${isoDate(snapshot)}.`}
@@ -158,7 +158,7 @@ const lowestUs = byUs[byUs.length - 1];
   section === "method" &&
     (zh ? (
       <>
-        <h3>人群</h3>
+        <h3>统计范围</h3>
         <p>
           {longDate(lang, snapshot)} Metix AI Platform 上职位描述提到某个 AI 编程工具的在招岗位。Claude Code 和 GitHub Copilot
           按名称匹配。Cursor、Codex、Windsurf 需要同一段描述里还提到另一个 AI 编程工具。

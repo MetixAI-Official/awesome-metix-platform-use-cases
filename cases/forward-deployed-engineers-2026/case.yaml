@@ -6,8 +6,8 @@ title:
   en: Nearly two in three forward-deployed engineering openings are in the US
   zh: 近三分之二的前线部署工程师岗位在美国
 dek:
-  en: Open postings with forward deployed in the title, by country, on the Metix AI Platform on September 21, 2026.
-  zh: 2026 年 9 月 21 日 Metix AI Platform 上标题含 forward deployed 的在招岗位，按国家统计。
+  en: 'Open postings with "forward deployed" in the title, by country, on the Metix AI Platform on September 21, 2026.'
+  zh: 2026 年 9 月 21 日，Metix AI Platform 上职位名称含 forward deployed 的在招岗位，按国家统计。
 datasets: [jobs]
 integration: [rest]
 topics: [forward-deployed, ai-hiring]

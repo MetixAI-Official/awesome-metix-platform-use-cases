@@ -1,16 +1,16 @@
 ---
 /*
  * The home page, in the order a first visit needs it: what the Platform is and what a
- * case is, how to get one running (key, connect, check), a few featured cases, then the
- * whole index with search, filters, and sort. The index is a list, not a wall of tiles,
- * so it stays usable at sixty cases; without JavaScript it is simply the full list.
+ * case is, how to get one running (key, connect, check, run), a few featured cases, then
+ * the whole index with search, filters, and sort. The index is a list, not a wall of
+ * tiles, so it stays usable at sixty cases; without JavaScript it is simply the full list.
  */
 import { getCollection } from "astro:content";
 import AgentSetup from "@site/components/AgentSetup.astro";
 import CardFrame from "@site/components/CardFrame.astro";
 import Base from "@site/layouts/Base.astro";
-import { DATASET_INK, byCardOrder, fieldColor, receipts, reports } from "@site/cases";
-import { FREE_CREDITS, REPO, href, isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
+import { DATASET_INK, TOPIC_TERMS, byCatalog, fieldColor, receipts, reports } from "@site/cases";
+import { FREE_CREDITS, REPO, dollars, href, isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
@@ -19,15 +19,12 @@ interface Props {
 const { lang } = Astro.props;
 const t = ui[lang];
 const all = await getCollection("cases");
-const byNewest = (a: (typeof all)[number], b: (typeof all)[number]) =>
-  (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0) || a.data.slug.localeCompare(b.data.slug);
-const published = all.filter((c) => c.data.status === "published").sort(byNewest);
+const published = all.filter((c) => c.data.status === "published").sort(byCatalog);
 const reportCases = published.filter((c) => c.data.format === "report");
-const cards = published.filter((c) => c.data.format === "card").sort(byCardOrder);
+const cards = published.filter((c) => c.data.format === "card");
 const planned = all.filter((c) => c.data.status === "planned");
 const featuredReport = reportCases[0];
 const featuredCards = cards.slice(0, 3);
-const cheapest = Math.min(...published.map((c) => c.data.agent_run?.low ?? Infinity));
 const cardPosition = (slug: string) => cards.findIndex((c) => c.data.slug === slug);
 const range = (lo: number, hi: number) => (lo === hi ? `${lo}` : lang === "zh" ? `${lo} 到 ${hi}` : `${lo} to ${hi}`);
 const rows = published.map(({ data }) => ({
@@ -36,6 +33,21 @@ const rows = published.map(({ data }) => ({
   low: data.agent_run?.low ?? 0,
   high: data.agent_run?.high ?? 0,
 }));
+
+// The start strip's promise, counted from the cases so it cannot drift from the case pages.
+const reproduceFits = rows.filter((r) => r.replay <= FREE_CREDITS).length;
+const agentFits = rows.filter((r) => r.high <= FREE_CREDITS).length;
+const cheapestRow = [...rows].sort((a, b) => a.low - b.low || a.replay - b.replay)[0];
+const cheapest = cheapestRow.low;
+
+// Everything a reader may type: both titles, both summaries, topics and their synonyms.
+const normalize = (text: string) => text.toLowerCase().replace(/[-_/]+/g, " ").replace(/\s+/g, " ");
+const haystack = (data: (typeof rows)[number]["data"]) =>
+  normalize(
+    [data.title.en, data.title.zh, data.dek.en, data.dek.zh, ...data.topics, ...data.topics.map((tp) => TOPIC_TERMS[tp] ?? "")].join(" "),
+  );
+const formatCount = (f: string) => rows.filter((r) => !f || r.data.format === f).length;
+const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d as "jobs")).length;
 ---
 
 <Base lang={lang} path="">
@@ -62,19 +74,19 @@ const rows = published.map(({ data }) => ({
     <div class="wrap">
       <div class="shelf-head">
         <h2 id="start-title">{t.start.title}</h2>
-        <p>{t.start.lede}</p>
+        <p>{t.start.lede(published.length, reproduceFits, agentFits)}</p>
       </div>
       <ol class="start-steps">
         <li data-copy-root>
           <h3><span class="rs-n">1</span>{t.run.stepKey}</h3>
+          <a class="text-link" href="https://platform.metix.ai/api-keys">{t.run.createKey}{"\u00a0"}→</a>
           <p>{t.run.keyBody}</p>
           <div class="code-copy">
-            <pre class="code">export METIX_KEY=metix_xxxxxxxx</pre>
+            <pre class="code prompt-line">export METIX_KEY=metix_xxxxxxxx</pre>
             <button class="btn btn-small" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
               {t.copy}
             </button>
           </div>
-          <a class="text-link" href="https://platform.metix.ai/api-keys">{t.run.createKey} →</a>
         </li>
         <li>
           <h3><span class="rs-n">2</span>{t.run.stepConnect}</h3>
@@ -89,10 +101,25 @@ const rows = published.map(({ data }) => ({
               {t.copy}
             </button>
           </div>
-          <p class="start-pick">
-            {t.start.pickBody} {t.start.cheapest(cheapest)}
-          </p>
-          <a class="text-link" href="#index">{t.home.ctaBrowse} →</a>
+        </li>
+        <li class="start-run">
+          <div>
+            <h3><span class="rs-n">4</span>{t.start.stepRun}</h3>
+            <p>{t.start.runBody}</p>
+          </div>
+          <a class="start-case" href={href(lang, `cases/${cheapestRow.data.slug}/#prompt`)}>
+            <span class="sc-meta">
+              {t.formats[cheapestRow.data.format]} · {cheapestRow.data.datasets.map((d) => t.datasets[d]).join(" · ")}
+            </span>
+            <span class="sc-title" set:html={titleHtml(cheapestRow.data.title[lang], lang)} />
+            <span class="sc-cost">
+              <strong>{t.cost.credits(cheapestRow.low, cheapestRow.high)}</strong>
+              <span>{dollars(lang, cheapestRow.high)}</span>
+              {cheapestRow.high <= FREE_CREDITS && <span class="cost-flag">{t.cost.free}</span>}
+            </span>
+            <span class="sc-cta">{t.start.openPrompt} →</span>
+          </a>
+          <a class="text-link sr-browse" href="#index">{t.home.ctaBrowse} →</a>
         </li>
       </ol>
     </div>
@@ -171,19 +198,34 @@ const rows = published.map(({ data }) => ({
       </label>
       <fieldset class="ic-group">
         <legend>{t.home.format}</legend>
-        <label><input type="radio" name="format" value="" checked /><span>{t.home.formatAll}</span></label>
-        <label><input type="radio" name="format" value="report" /><span>{t.reportsLabel}</span></label>
-        <label><input type="radio" name="format" value="card" /><span>{t.cardsLabel}</span></label>
+        {
+          (
+            [
+              ["", t.home.formatAll],
+              ["report", t.reportsLabel],
+              ["card", t.cardsLabel],
+            ] as const
+          ).map(([value, label]) => (
+            <label>
+              <input type="radio" name="format" value={value} checked={value === ""} />
+              <span>
+                {label}
+                <b class="ic-n">{formatCount(value)}</b>
+              </span>
+            </label>
+          ))
+        }
       </fieldset>
       <fieldset class="ic-group">
         <legend>{t.home.data}</legend>
         {
           (["jobs", "people", "companies"] as const).map((d) => (
             <label>
-              <input type="checkbox" name="data" value={d} />
+              <input type="checkbox" name="data" value={d} disabled={dataCount(d) === 0} />
               <span>
                 <i class="dot" style={`--dot: ${DATASET_INK[d]}`} aria-hidden="true" />
                 {t.datasets[d]}
+                <b class="ic-n">{dataCount(d)}</b>
               </span>
             </label>
           ))
@@ -208,7 +250,7 @@ const rows = published.map(({ data }) => ({
           <li
             data-format={data.format}
             data-datasets={data.datasets.join(" ")}
-            data-title={`${data.title.en} ${data.title.zh}`.toLowerCase()}
+            data-search={haystack(data)}
             data-order={i}
             data-replay={replay}
             data-agent={low}
@@ -221,12 +263,14 @@ const rows = published.map(({ data }) => ({
               </span>
               <span class="ci-title" set:html={titleHtml(data.title[lang], lang)} />
               <span class="ci-meta">
-                {t.formats[data.format]} · {data.datasets.map((d) => t.datasets[d]).join(" · ")}
+                {t.formats[data.format]}
+                {data.format === "card" && ` ${String(cardPosition(data.slug) + 1).padStart(2, "0")}`} ·{" "}
+                {data.datasets.map((d) => t.datasets[d]).join(" · ")}
                 {data.snapshot && <span class="nowrap"> · {isoDate(data.snapshot)}</span>}
               </span>
               <span class="ci-cost">
                 <span class="nowrap">{t.home.reproduceShort(number(lang, replay))}</span>
-                <span class="nowrap">{t.home.agentShort(range(low, high))}</span>
+                <span class:list={["nowrap", { fits: high <= FREE_CREDITS }]}>{t.home.agentShort(range(low, high))}</span>
               </span>
             </a>
           </li>
@@ -279,36 +323,42 @@ const rows = published.map(({ data }) => ({
     const items = [...list.children];
     const count = document.querySelector("[data-index-count]");
     const empty = document.querySelector("[data-index-empty]");
+    const normalize = (text) => text.toLowerCase().replace(/[-_/]+/g, " ").replace(/\s+/g, " ").trim();
     const params = new URLSearchParams(location.search);
     form.q.value = params.get("q") || "";
-    const format = params.get("format") || "";
-    for (const radio of form.querySelectorAll('input[name="format"]')) radio.checked = radio.value === format;
+    // An unknown value falls back to All, so one chip is always shown as chosen.
+    const radios = [...form.querySelectorAll('input[name="format"]')];
+    const format = radios.some((r) => r.value === params.get("format")) ? params.get("format") : "";
+    for (const radio of radios) radio.checked = radio.value === format;
     const data = (params.get("data") || "").split(",").filter(Boolean);
-    for (const box of form.querySelectorAll('input[name="data"]')) box.checked = data.includes(box.value);
+    for (const box of form.querySelectorAll('input[name="data"]')) box.checked = !box.disabled && data.includes(box.value);
     if (["newest", "reproduce", "agent"].includes(params.get("sort"))) form.sort.value = params.get("sort");
 
     const apply = () => {
-      const q = form.q.value.trim().toLowerCase();
+      const words = normalize(form.q.value).split(" ").filter(Boolean);
       const fmt = form.querySelector('input[name="format"]:checked')?.value || "";
       const sets = [...form.querySelectorAll('input[name="data"]:checked')].map((box) => box.value);
       const sort = form.sort.value;
       let shown = 0;
       for (const item of items) {
         const match =
-          (!q || item.dataset.title.includes(q)) &&
+          words.every((word) => item.dataset.search.includes(word)) &&
           (!fmt || item.dataset.format === fmt) &&
           (!sets.length || sets.some((set) => item.dataset.datasets.split(" ").includes(set)));
         item.hidden = !match;
         if (match) shown += 1;
       }
+      // Move rows only when the order changes. Re-appending a row between mousedown and
+      // mouseup (the search field's blur fires change) makes the browser drop the click.
       const key = { newest: "order", reproduce: "replay", agent: "agent" }[sort] || "order";
-      items
-        .sort((a, b) => Number(a.dataset[key]) - Number(b.dataset[key]) || Number(a.dataset.order) - Number(b.dataset.order))
-        .forEach((item) => list.appendChild(item));
+      const sorted = [...items].sort(
+        (a, b) => Number(a.dataset[key]) - Number(b.dataset[key]) || Number(a.dataset.order) - Number(b.dataset.order),
+      );
+      if (sorted.some((item, i) => list.children[i] !== item)) sorted.forEach((item) => list.appendChild(item));
       count.textContent = shown === 1 ? count.dataset.one : count.dataset.many.replace(/\d+/, String(shown));
       empty.hidden = shown > 0;
       const next = new URLSearchParams();
-      if (q) next.set("q", q);
+      if (form.q.value.trim()) next.set("q", form.q.value.trim());
       if (fmt) next.set("format", fmt);
       if (sets.length) next.set("data", sets.join(","));
       if (sort !== "newest") next.set("sort", sort);
@@ -316,7 +366,10 @@ const rows = published.map(({ data }) => ({
       history.replaceState(null, "", `${location.pathname}${query ? `?${query}` : ""}${location.hash}`);
     };
     form.addEventListener("input", apply);
-    form.addEventListener("change", apply);
+    // The search field already applied on input; its change event only fires on blur.
+    form.addEventListener("change", (event) => {
+      if (event.target !== form.q) apply();
+    });
     document.querySelector("[data-index-clear]")?.addEventListener("click", () => {
       form.reset();
       apply();

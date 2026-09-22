@@ -1,8 +1,9 @@
 ---
 /*
  * Design
- * Hero: deep violet-navy #14112E, white type; demand in teal #0DEFC8, supply in lilac #9A95FF.
- * Body on white: demand in teal ink #07545E, supply in violet #5B54EF, context in grey #7E8787.
+ * Color follows data: postings are jobs blue, profiles violet (see docs/style.md).
+ * Hero: deep violet-navy #14112E, white type; demand in sky #A3E4FF, supply in lilac #9A95FF.
+ * Body on white: demand in deep jobs blue #145A93, supply in violet #5B54EF, context in grey #7E8787.
  * Type: the shell faces; the ratio in Sora 700 at 120 px on desktop.
  * Signature: the two-sided chart. Profiles grow left, postings grow right, from one spine,
  *   so demand and supply for every tool are read on the same scale at a glance.
@@ -37,7 +38,7 @@ const { lang, section, entry } = Astro.props;
 const zh = lang === "zh";
 const snapshot = entry.snapshot ?? new Date(demand.snapshot);
 const iso = isoDate(snapshot);
-const source = zh ? `来源：Metix AI Platform 岗位与人才数据，${iso}。` : `Source: Metix AI Platform, jobs and profiles, ${iso}.`;
+const source = zh ? `来源：Metix AI Platform 岗位与个人档案数据，${iso}。` : `Source: Metix AI Platform, jobs and profiles, ${iso}.`;
 const toolQuery = [{ file: "tools.json", endpoint: "POST /v1/jobs/query · POST /v1/people/query", spec: tools }];
 const dimQuery = [
   { file: "tools.json", endpoint: "POST /v1/jobs/query", spec: tools },
@@ -103,7 +104,7 @@ const anyAssistant = countries.world_count;
 const strict = new Set(tools.tools.filter((t) => !t.unambiguous).map((t) => t.id));
 const assistantRows = assistants.map((r) => ({
   label: names[r.group],
-  note: strict.has(r.group) ? (zh ? "下限：需同时提到另一个工具" : "lower bound: another tool named too") : undefined,
+  note: strict.has(r.group) ? (zh ? "严格计数：需同时提到另一个工具" : "strict count: another tool named too") : undefined,
   display: `${number(lang, r.count)} · ${pct(r.count / anyAssistant)}`,
   width: r.count / anyAssistant,
   kind: r.group === "claude-code" ? ("focus" as const) : strict.has(r.group) ? ("lower" as const) : ("other" as const),
@@ -155,18 +156,20 @@ const industryZh: Record<string, string> = {
       <header class="report-hero">
         <div class="wrap hero-grid">
           <div>
-            <p class="hero-eyebrow">
+            <nav class="hero-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
               <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
-              <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a> ·{" "}
-              <a href={`${href(lang)}?data=jobs#index`}>{zh ? "岗位" : "Jobs"}</a> ·{" "}
-              <a href={`${href(lang)}?data=people#index`}>{zh ? "人才" : "People"}</a> · <span class="nowrap">{iso}</span>
+              <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
+            </nav>
+            <p class="hero-meta">
+              {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=jobs#index`}>{zh ? "岗位" : "Jobs"}</a> ·{" "}
+              <a href={`${href(lang)}?data=people#index`}>{zh ? "个人档案" : "Profiles"}</a> · <span class="nowrap">{iso}</span>
             </p>
             <h1 set:html={titleHtml(entry.title[lang], lang)} />
             <p class="hero-dek">{entry.dek[lang]}</p>
             <div class="hero-actions">
               <a class="hero-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
               <a class="hero-chip" href="#run-reproduce">
-                {zh ? `重跑需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+                {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
               </a>
               <span class="hero-note">{zh ? "复现只计数，不读取任何记录" : "Reproducing reads no records: every number is a count"}</span>
             </div>
@@ -185,12 +188,20 @@ const industryZh: Record<string, string> = {
               <span class="ks-line" />
               <span class="ks-parity" style={`left: ${pos(1)}%`} />
               {[lowest, ratios.find((p) => p.id === "github-copilot")!, leader].map((p, i) => (
-                <span class={i === 1 ? "ks-dot above" : "ks-dot"} style={`left: ${pos(p.r)}%`}>
+                <span
+                  class:list={["ks-dot", { above: i === 1 }, p.r > 1.1 ? "lean-jobs" : p.r < 0.9 ? "lean-people" : "lean-even"]}
+                  style={`left: ${pos(p.r)}%`}
+                >
                   <span class="ks-name">{names[p.id]}</span>
                   <span class="ks-val">{times(p.r)}</span>
                 </span>
               ))}
             </div>
+            <p class="ks-caption">
+              {zh
+                ? "每个档案对应的岗位数，对数刻度。竖线是一比一，蓝点偏向岗位，淡紫点偏向档案。"
+                : "Postings per profile, log scale. The tick is one to one; blue leans to postings, lilac to profiles."}
+            </p>
           </div>
         </div>
       </header>
@@ -354,7 +365,13 @@ const industryZh: Record<string, string> = {
               ? "每个档案对应的岗位数，美国（实心）和美国以外（空心）分开算，对数刻度"
               : "Postings per profile in the US (filled) and outside it (open), on a log scale"
           }
-          alt={split.map((p) => `${names[p.id]}: US ${number(lang, p.us, 2)}, outside ${number(lang, p.out, 2)}`).join("; ")}
+          alt={split
+            .map((p) =>
+              zh
+                ? `${names[p.id]}：美国 ${number(lang, p.us, 2)}，美国以外 ${number(lang, p.out, 2)}`
+                : `${names[p.id]}: US ${number(lang, p.us, 2)}, outside ${number(lang, p.out, 2)}`,
+            )
+            .join(zh ? "；" : "; ")}
           source={source}
           queries={toolQuery}
         >
@@ -495,7 +512,7 @@ const industryZh: Record<string, string> = {
               ? `至少提到一个 AI 编程助手的 ${number(lang, anyAssistant)} 个在招岗位，按国家统计，条形按占全部的比例画`
               : `The ${number(lang, anyAssistant)} open postings that name at least one AI coding assistant, by country, drawn as a share of all of them`
           }
-          alt={countries.rows.map((r) => `${r.group} ${r.count}`).join(", ")}
+          alt={countries.rows.map((r) => `${zh ? (countryZh[r.group] ?? r.group) : r.group} ${r.count}`).join(zh ? "，" : ", ")}
           source={zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`}
           queries={dimQuery}
         >
@@ -526,7 +543,7 @@ const industryZh: Record<string, string> = {
               ? "至少提到一个 AI 编程助手的岗位里，行业包含所列行业的比例。这是挑选出的行业，不是排名；一个岗位可以属于多个行业，所以比例会重叠"
               : "Share of postings naming at least one AI coding assistant whose industries include each one listed. These are selected industries, not a ranking, and a posting can list several, so shares overlap"
           }
-          alt={industries.rows.map((r) => `${r.group} ${r.count}`).join(", ")}
+          alt={industries.rows.map((r) => `${zh ? (industryZh[r.group] ?? r.group) : r.group} ${r.count}`).join(zh ? "，" : ", ")}
           source={zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`}
           queries={dimQuery}
         >
@@ -690,11 +707,29 @@ const industryZh: Record<string, string> = {
     font: 500 12px/1.3 var(--mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #0defc8;
+    color: #a3e4ff;
   }
 
-  .hero-eyebrow a {
+  .hero-eyebrow a,
+  .hero-meta a {
     color: inherit;
+  }
+
+  .hero-meta {
+    margin-top: 6px;
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.04em;
+    color: rgb(255 255 255 / 0.72);
+  }
+
+  /* The links keep their small type but get a 44px target on touch screens. */
+  @media (pointer: coarse) {
+    .hero-eyebrow a,
+    .hero-meta a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
   }
 
   .report-hero h1 {
@@ -730,10 +765,10 @@ const industryZh: Record<string, string> = {
     align-items: center;
     min-height: 36px;
     padding: 0 14px;
-    border: 1px solid rgb(13 239 200 / 0.5);
+    border: 1px solid rgb(163 228 255 / 0.5);
     border-radius: 999px;
     font: 500 12px/1.3 var(--mono);
-    color: #0defc8;
+    color: #a3e4ff;
     text-decoration: none;
     transition: background-color 120ms var(--ease);
   }
@@ -752,13 +787,13 @@ const industryZh: Record<string, string> = {
   }
 
   .report-hero :focus-visible {
-    outline-color: #0defc8;
+    outline-color: #a3e4ff;
   }
 
   .key-num {
     font: 700 clamp(72px, 10vw, 128px) / 0.9 var(--display);
     letter-spacing: -0.05em;
-    color: #0defc8;
+    color: #a3e4ff;
   }
 
   .key-num span {
@@ -801,11 +836,25 @@ const industryZh: Record<string, string> = {
     height: 14px;
     margin-left: -7px;
     border-radius: 50%;
+  }
+
+  .ks-dot.lean-people {
     background: #9a95ff;
   }
 
-  .ks-dot:last-child {
-    background: #0defc8;
+  .ks-dot.lean-jobs {
+    background: #a3e4ff;
+  }
+
+  .ks-dot.lean-even {
+    background: #d8d7e6;
+  }
+
+  .ks-caption {
+    margin-top: 40px;
+    max-width: 44ch;
+    font: 12px/1.5 var(--mono);
+    color: rgb(255 255 255 / 0.72);
   }
 
   .ks-name,
@@ -854,7 +903,7 @@ const industryZh: Record<string, string> = {
 
   .brief li::marker {
     font-family: var(--mono);
-    color: #07545e;
+    color: #145a93;
   }
 
   .caveat {
@@ -894,7 +943,7 @@ const industryZh: Record<string, string> = {
   }
 
   .bf-h.demand {
-    color: #07545e;
+    color: #145a93;
   }
 
   .butterfly {
@@ -960,7 +1009,7 @@ const industryZh: Record<string, string> = {
   }
 
   .demand .bf-bar {
-    background: #07545e;
+    background: #145a93;
   }
 
   .bf-val {
@@ -1035,14 +1084,16 @@ const industryZh: Record<string, string> = {
     background: #7e8787;
   }
 
-  .dot-row.focus .dot,
+  /* Figure 02 has one plain dot per row; figure 03 has a filled (US) and an open dot. The
+     focus row colors its plain and filled dots, and its open dot stays open, as the legend says. */
+  .dot-row.focus .dot:not(.out),
   .dot.us {
-    background: #07545e;
+    background: #145a93;
   }
 
   .dot.out {
     background: #fff;
-    box-shadow: inset 0 0 0 2.5px #07545e;
+    box-shadow: inset 0 0 0 2.5px #145a93;
   }
 
   .dot-row:not(.focus) .dot.us {
@@ -1062,7 +1113,7 @@ const industryZh: Record<string, string> = {
   }
 
   .dot-row.focus .link {
-    background: #07545e;
+    background: #145a93;
   }
 
   .dot-val {
@@ -1071,7 +1122,7 @@ const industryZh: Record<string, string> = {
   }
 
   .dot-row.focus .dot-val {
-    color: #07545e;
+    color: #145a93;
     font-weight: 600;
   }
 
@@ -1095,16 +1146,16 @@ const industryZh: Record<string, string> = {
   }
 
   .lg.us::before {
-    background: #07545e;
+    background: #145a93;
   }
 
   .lg.out::before {
-    box-shadow: inset 0 0 0 2.5px #07545e;
+    box-shadow: inset 0 0 0 2.5px #145a93;
   }
 
   .lg.assistant::before {
     border-radius: 2px;
-    background: #07545e;
+    background: #145a93;
   }
 
   .lg.baseline::before {
@@ -1154,7 +1205,7 @@ const industryZh: Record<string, string> = {
     text-align: center;
     font: 600 15px/1 var(--mono);
     border-radius: 6px;
-    background: color-mix(in srgb, #07545e calc(var(--v) * 100%), #f4f5f8);
+    background: color-mix(in srgb, #145a93 calc(var(--v) * 100%), #f4f5f8);
     color: var(--ink);
   }
 
@@ -1222,7 +1273,7 @@ const industryZh: Record<string, string> = {
   }
 
   .pay-bar.assistant {
-    background: #07545e;
+    background: #145a93;
   }
 
   .pay-bar.baseline {

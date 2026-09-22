@@ -2,7 +2,7 @@
 /*
  * Design
  * Field: navy #100D35 (card and hero); sky #A3E4FF focus; #8C8AA8 other metros.
- * Detail chart on white: teal ink #07545E focus bar; grey #7E8787 other metros;
+ * Detail chart on white: deep jobs blue #145A93 focus bar; grey #7E8787 other metros;
  *   elsewhere and no city in the same grey, labelled and placed last.
  * Signature: bars scaled to the share of all distinct postings, not to the longest bar,
  *   with a dashed marker at 50%. The Bay Area bar stops just short of it.
@@ -81,13 +81,13 @@ const miniRows = [
     share: (distinct - bay.count - ny.count - sea.count) / distinct,
   },
 ];
-const miniLabel = (g: string) => (g === "rest" ? (zh ? "其余" : "Everywhere else") : labels[g][lang]);
+const miniLabel = (g: string) => (g === "rest" ? (zh ? "美国其他城市和未注明城市" : "Other US metros and no city") : labels[g][lang]);
 
 const figureHeading = zh
   ? `一个都市区就占了近一半，接下来两个再占 ${pct(nextTwo, 0)}`
   : `One metro holds nearly half. The next two hold another ${pct(nextTwo, 0)}.`;
 const figureSub = zh
-  ? `标题含 inference 或 model serving 的美国去重岗位，按都市区统计，占全部 ${number(lang, distinct)} 个的比例`
+  ? `职位名称含 inference 或 model serving 的美国岗位（合并重复发布后），按都市区统计，占全部 ${number(lang, distinct)} 个的比例`
   : `Distinct US postings with inference or model serving in the title, by metro, as a share of all ${number(lang, distinct)}`;
 const altText = zh
   ? `条形图：旧金山湾区 ${bay.count} 个（${pct(bay.share)}），纽约 ${ny.count} 个（${pct(ny.share)}），西雅图 ${sea.count} 个（${pct(sea.share)}），其余都市区各不到 ${pct(largestSmall, 0)}。`
@@ -103,7 +103,7 @@ const altText = zh
       </p>
       <p class="big-label">
         {zh
-          ? `美国 ${number(lang, distinct)} 个去重推理岗位中，有 ${bay.count} 个在旧金山湾区。`
+          ? `美国 ${number(lang, distinct)} 个推理岗位（合并重复发布后）中，有 ${bay.count} 个在旧金山湾区。`
           : `${bay.count} of ${number(lang, distinct)} distinct US inference postings are in the San Francisco Bay Area.`}
       </p>
       <ul class="mini-bars half" aria-label={zh ? "按都市区的占比" : "Share by metro"}>
@@ -117,7 +117,7 @@ const altText = zh
           </li>
         ))}
       </ul>
-      <p class="mb-key">{zh ? "条形按占全部去重岗位的比例画，虚线是一半" : "Bars are shares of all distinct postings; the dashed line is half"}</p>
+      <p class="mb-key">{zh ? "条形按占全部岗位（合并重复发布后）的比例画，虚线是一半" : "Bars are shares of all distinct postings; the dashed line is half"}</p>
     </div>
   )
 }
@@ -233,7 +233,7 @@ const altText = zh
   section === "method" &&
     (zh ? (
       <>
-        <h3>人群</h3>
+        <h3>统计范围</h3>
         <p>
           {longDate(lang, snapshot)} Metix AI Platform 上的在招岗位，标题匹配 "inference"、"model serving" 或 "llm
           serving"，并排除匹配 "causal" 或 "statistical" 的标题。被排除的是因果推断之类的统计岗位，不是模型部署。
@@ -388,7 +388,7 @@ const altText = zh
   }
 
   .focus .fill {
-    background: #07545e;
+    background: #145a93;
   }
 
   .residual .label {
@@ -403,7 +403,7 @@ const altText = zh
   }
 
   .focus .value {
-    color: #07545e;
+    color: #145a93;
     font-weight: 600;
   }
 

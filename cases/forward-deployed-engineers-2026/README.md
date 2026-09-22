@@ -1,6 +1,6 @@
 # Nearly two in three forward-deployed engineering openings are in the US
 
-Open postings with forward deployed in the title, by country, on the Metix AI Platform on September 21, 2026.
+Open postings with "forward deployed" in the title, by country, on the Metix AI Platform on September 21, 2026.
 
 ## Finding
 

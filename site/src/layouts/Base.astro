@@ -34,6 +34,7 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
     <script is:inline>document.documentElement.classList.replace("no-js", "js");</script>
   </head>
   <body>
+    <a class="skip-link" href="#main">{t.skipLink}</a>
     <header class="site-header">
       <div class="wrap bar">
         <a class="brand" href={href(lang)} aria-label={`Metix AI Platform ${t.casebook}`}>
@@ -53,7 +54,7 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
       </div>
     </header>
 
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
 
@@ -111,14 +112,23 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
 
       // Run it: the paths are links to their panels; with JavaScript one panel shows at a
       // time. A hash naming a panel, or anything inside one (#prompt, #step-3), opens it.
+      // A panel is hidden when the browser looks for the hash, so scroll once it shows.
       const runRoots = [...document.querySelectorAll("[data-run]")];
+      const hashTarget = () => location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      const scrollToHash = () => {
+        const target = hashTarget();
+        if (target && target.closest("[data-run], [data-steps]")) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+      };
+      // Below the rail breakpoint the paths sit above the panels, so a choice would swap
+      // content out of sight; bring the panel's heading up.
+      const stacked = window.matchMedia("(max-width: 959px)");
       const showRunPath = (root, key) => {
         for (const panel of root.querySelectorAll("[data-panel]")) panel.hidden = panel.dataset.panel !== key;
         for (const link of root.querySelectorAll("[data-path]")) link.setAttribute("aria-current", String(link.dataset.path === key));
       };
       const runFromHash = () => {
         for (const root of runRoots) {
-          const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+          const target = hashTarget();
           const panel = target && root.contains(target) && target.closest("[data-panel]");
           showRunPath(root, panel ? panel.dataset.panel : root.querySelector("[data-path]").dataset.path);
         }
@@ -129,43 +139,48 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
             event.preventDefault();
             showRunPath(root, link.dataset.path);
             history.replaceState(null, "", `#run-${link.dataset.path}`);
+            if (stacked.matches) document.getElementById(`run-${link.dataset.path}`)?.scrollIntoView({ block: "start" });
           });
         }
       }
       runFromHash();
 
-      // Agent tabs: arrow keys move between them, and the choice carries across pages.
+      // Agent tabs: arrow keys, Home and End move between them, and the choice carries
+      // across pages however it was made.
       let savedAgent = null;
       try {
         savedAgent = localStorage.getItem("metix-agent");
       } catch {}
       for (const box of document.querySelectorAll("[data-agent-setup]")) {
         const tabs = [...box.querySelectorAll('[role="tab"]')];
-        const select = (key, focus) => {
+        const select = (key, byUser) => {
           for (const tab of tabs) {
             const on = tab.dataset.agent === key;
             tab.setAttribute("aria-selected", String(on));
             tab.tabIndex = on ? 0 : -1;
-            if (on && focus) tab.focus();
+            if (on && byUser) tab.scrollIntoView({ block: "nearest", inline: "nearest" });
           }
           for (const panel of box.querySelectorAll("[data-agent-panel]")) panel.hidden = panel.dataset.agentPanel !== key;
+          if (!byUser) return;
+          try {
+            localStorage.setItem("metix-agent", key);
+          } catch {}
         };
         tabs.forEach((tab, i) => {
-          tab.addEventListener("click", () => {
-            select(tab.dataset.agent);
-            try {
-              localStorage.setItem("metix-agent", tab.dataset.agent);
-            } catch {}
-          });
+          tab.addEventListener("click", () => select(tab.dataset.agent, true));
           tab.addEventListener("keydown", (event) => {
-            const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
-            if (!step) return;
+            const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[event.key];
+            if (to === undefined) return;
             event.preventDefault();
-            select(tabs[(i + step + tabs.length) % tabs.length].dataset.agent, true);
+            const next = tabs[(to + tabs.length) % tabs.length];
+            select(next.dataset.agent, true);
+            next.focus();
           });
         });
         select(tabs.some((tab) => tab.dataset.agent === savedAgent) ? savedAgent : tabs[0].dataset.agent);
       }
+      // A reader who has chosen an agent before has done the setup; fold it away for them.
+      if (savedAgent) for (const fold of document.querySelectorAll("[data-setup-once]")) fold.open = false;
 
       // Expand all / Collapse all: the label follows the folds, including ones opened by hand.
       for (const button of document.querySelectorAll("[data-fold-toggle]")) {
@@ -187,14 +202,18 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
 
       // A link to a folded step (#step-3) opens it.
       const openTarget = () => {
-        const target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        const target = hashTarget();
         const fold = target && target.id.startsWith("step-") && target.querySelector("details");
         if (fold) fold.open = true;
+        const setup = target && target.closest("[data-setup-once]");
+        if (setup) setup.open = true;
       };
       openTarget();
+      scrollToHash();
       window.addEventListener("hashchange", () => {
         runFromHash();
         openTarget();
+        scrollToHash();
       });
     </script>
   </body>

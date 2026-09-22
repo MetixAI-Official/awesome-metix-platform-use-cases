@@ -7,7 +7,7 @@
 
 1. 先读规则再查询。调用 GET /contract（免费），读薪资规则：对 salary.annual_min 做比较时，同一个 all 节点里必须用 eq 固定 salary.currency；金额是在同一币种内换算成年薪，不做跨币种换算。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 10 Credits 之前先停下来问我。
 
-2. 人群。美国在招岗位，标题匹配 "inference"、"model serving"、"llm serving" 中任意一个，排除匹配 "causal" 或 "statistical" 的标题，并且 salary.currency eq "USD"、salary.annual_min 存在。
+2. 统计范围。美国在招岗位，标题匹配 "inference"、"model serving"、"llm serving" 中任意一个，排除匹配 "causal" 或 "statistical" 的标题，并且 salary.currency eq "USD"、salary.annual_min 存在。
 
 3. 分母也要算。去掉薪资条件，用同样的标题条件算一次美国总数，让读者知道有多大比例的岗位写了薪资。
 

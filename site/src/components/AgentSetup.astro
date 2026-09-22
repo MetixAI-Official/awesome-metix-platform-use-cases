@@ -22,7 +22,9 @@ const agents = [
     key: "claude",
     label: t.setup.claude,
     note: t.setup.claudeNote,
-    command: `claude mcp add --scope user --transport http metix \\\n  ${ENDPOINT}/mcp \\\n  --header "Authorization: Bearer $METIX_KEY"`,
+    // The header is expanded when the command runs; without a key it would register an
+    // empty Bearer, so the command refuses to run instead.
+    command: `: "\${METIX_KEY:?run step 1 first}" &&\nclaude mcp add --scope user --transport http metix \\\n  ${ENDPOINT}/mcp \\\n  --header "Authorization: Bearer $METIX_KEY"`,
   },
   {
     key: "codex",
@@ -40,7 +42,7 @@ const agents = [
     key: "other",
     label: t.setup.other,
     note: t.setup.otherNote,
-    command: `${ENDPOINT}/mcp\nAuthorization: Bearer <your key>`,
+    command: `${ENDPOINT}/mcp\nAuthorization: Bearer <your key>\nAccept: application/json, text/event-stream`,
   },
 ];
 ---
@@ -74,7 +76,11 @@ const agents = [
             {t.copy}
           </button>
         </div>
-        {a.key !== "skills" && (
+        {a.key === "skills" ? (
+          <a class="as-docs" href="https://platform.metix.ai/docs/skills#install">
+            {t.setup.skillsDocs} →
+          </a>
+        ) : (
           <a class="as-docs" href="https://platform.metix.ai/docs/mcp">
             {t.setup.docs} →
           </a>

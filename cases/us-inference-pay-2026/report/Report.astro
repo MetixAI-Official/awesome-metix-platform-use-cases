@@ -144,7 +144,7 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
   section === "method" &&
     (zh ? (
       <>
-        <h3>人群</h3>
+        <h3>统计范围</h3>
         <p>
           {longDate(lang, snapshot)} Metix AI Platform 上的美国在招岗位，标题匹配 "inference"、"model serving" 或 "llm
           serving"，排除 "causal" 和 "statistical"，并且写明了美元年薪（salary.currency 为 USD，salary.annual_min 存在）。和旧金山湾区那张卡片用的是同一组标题条件。
@@ -229,7 +229,7 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
   }
 
   .col.focus .col-bar {
-    background: #07545e;
+    background: #145a93;
   }
 
   .col.focus .col-value {

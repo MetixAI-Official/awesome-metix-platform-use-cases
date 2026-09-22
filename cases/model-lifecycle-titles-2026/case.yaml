@@ -4,7 +4,7 @@ format: card
 status: published
 title:
   en: Job titles name inference eight times as often as pre-training
-  zh: 招聘标题里，推理出现的次数是预训练的八倍
+  zh: 职位名称里，推理出现的次数是预训练的八倍
 dek:
   en: Open postings whose title names a stage of the model lifecycle, worldwide and in the US, on the Metix AI Platform on September 21, 2026.
   zh: 2026 年 9 月 21 日 Metix AI Platform 上，标题写明模型生命周期某个阶段的在招岗位，全球与美国。

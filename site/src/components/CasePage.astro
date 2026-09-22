@@ -4,7 +4,7 @@ import Base from "@site/layouts/Base.astro";
 import FoldSections from "@site/components/FoldSections.astro";
 import RunBlock from "@site/components/RunBlock.astro";
 import Receipt from "@site/components/Receipt.astro";
-import { byCardOrder, fieldColor, prompts, receipts, reports } from "@site/cases";
+import { byCatalog, fieldColor, prompts, receipts, reports } from "@site/cases";
 import { href, isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
 
 interface Props {
@@ -19,16 +19,11 @@ const Report = reports[data.slug];
 const prompt = prompts[lang][data.slug];
 const receipt = receipts[data.slug];
 
-// A card's number in the catalog, so the page and the grid agree.
-const cards = (await getCollection("cases", (c) => c.data.status === "published" && c.data.format === "card")).sort(
-  byCardOrder,
-);
+// One catalog order for previous and next, the index, and card numbers, so "Card 03" is
+// the third card everywhere and Next goes where the index goes.
+const ordered = (await getCollection("cases", (c) => c.data.status === "published")).sort(byCatalog);
+const cards = ordered.filter((c) => c.data.format === "card");
 const cardIndex = cards.findIndex((c) => c.data.slug === data.slug) + 1;
-
-// Previous and next follow the index's default order, newest first.
-const ordered = (await getCollection("cases", (c) => c.data.status === "published")).sort(
-  (a, b) => (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0) || a.data.slug.localeCompare(b.data.slug),
-);
 const at = ordered.findIndex((c) => c.data.slug === data.slug);
 const prev = at > 0 ? ordered[at - 1].data : undefined;
 const next = at >= 0 && at < ordered.length - 1 ? ordered[at + 1].data : undefined;
@@ -41,7 +36,7 @@ const indexHref = (query: string) => `${href(lang)}?${query}#index`;
       <header class={`card-hero field-${fieldColor(data.datasets, cardIndex - 1)}`}>
         <div class="wrap card-hero-grid">
           <div>
-            <nav class="crumbs" aria-label="Breadcrumb">
+            <nav class="crumbs" aria-label={t.crumbs}>
               <a href={href(lang)}>{t.casebook}</a>
               <span aria-hidden="true">/</span>
               <a href={indexHref("format=card")}>{t.cardsLabel}</a>

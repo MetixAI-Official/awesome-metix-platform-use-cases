@@ -43,6 +43,14 @@ def load_key() -> str:
         sys.exit(
             "METIX_KEY is not set. Create a key at https://platform.metix.ai/api-keys."
         )
+    # The site's setup step shows a placeholder of x's; sending it would fail with a 401
+    # that does not say why.
+    prefix, _, rest = key.partition("_")
+    if prefix == "metix" and rest and set(rest) <= {"x"}:
+        sys.exit(
+            "METIX_KEY still holds the placeholder. Replace it with your own key from"
+            " https://platform.metix.ai/api-keys."
+        )
     return key
 
 

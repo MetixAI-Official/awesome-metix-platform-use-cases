@@ -7,7 +7,7 @@
 
 1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.job 里的字段。阅读 https://mira-api.metix.ai/docs/credits.md 了解价格：搜索按 ceil(返回的 ID 数 / 25) 计费，详情按 ceil(找到的记录数 / 5) 计费，没有结果的搜索不收费。
 
-2. 人群定义。在招岗位，标题匹配 "inference"、"model serving"、"llm serving" 中任意一个，并排除标题匹配 "causal" 或 "statistical" 的岗位（这些是统计岗位，不是模型部署）。关键词放在一个 any 节点里，排除词放在一个 not 节点里。
+2. 统计范围。在招岗位，标题匹配 "inference"、"model serving"、"llm serving" 中任意一个，并排除标题匹配 "causal" 或 "statistical" 的岗位（这些是统计岗位，不是模型部署）。关键词放在一个 any 节点里，排除词放在一个 not 节点里。
 
 3. 先计数。用 size 1 分别记录全球总数和 location.country eq "United States" 的总数，每次计数花 1 Credit。
 

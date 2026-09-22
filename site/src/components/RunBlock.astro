@@ -1,9 +1,10 @@
 ---
 /*
  * Run it: the three things a reader comes here to do, each with its true cost before
- * they start. Reproduce the published numbers with the replay script (the receipt's
- * cost), run the whole method in their own agent (the prompt's counts plus the reads it
- * asks for, with the ceiling the prompt stops at), or adapt the prompt to their question.
+ * they start. Run the whole method in their own agent (the prompt's counts plus the reads
+ * it asks for, with the ceiling the prompt stops at), reproduce the published numbers
+ * with the reproduce script (the receipt's cost), or adapt the prompt to their question.
+ * The hints under each path come from this case's own data, never from one shared line.
  *
  * Paths are links to their panels, so the section works without JavaScript (all panels
  * shown) and #run-reproduce, #run-agent, #run-adapt deep-link. The prompt Copy takes the
@@ -11,7 +12,7 @@
  */
 import type { PromptModule, Receipt } from "@site/cases";
 import AgentSetup from "@site/components/AgentSetup.astro";
-import { FREE_CREDITS, dollars, ui, type Lang } from "@site/i18n";
+import { FREE_CREDITS, REPO, dollars, ui, type Lang } from "@site/i18n";
 import { parsePrompt } from "@site/prompt";
 
 interface Props {
@@ -26,20 +27,39 @@ const { lang, slug, prompt, receipt, agentRun } = Astro.props;
 const t = ui[lang];
 const parsed = await parsePrompt(prompt, slug, lang, agentRun.cap);
 const replay = receipt.credits;
-const money = (lo: number, hi = lo) => (lo === hi ? dollars(lang, lo) : `${dollars(lang, lo)} ${lang === "zh" ? "到" : "to"} ${dollars(lang, hi)}`);
-const fits = (n: number) => (n <= FREE_CREDITS ? t.cost.free : t.cost.notFree);
+const money = (lo: number, hi = lo) =>
+  lo === hi ? dollars(lang, lo) : lang === "zh" ? `${dollars(lang, lo).replace(" 美元", "")} 到 ${dollars(lang, hi)}` : `${dollars(lang, lo)} to ${dollars(lang, hi)}`;
+// Three states, so a range that only straddles 100 does not read as a firm "more than".
+const flag = (lo: number, hi: number) =>
+  hi <= FREE_CREDITS ? { text: t.cost.free, over: false } : lo <= FREE_CREDITS ? { text: t.cost.maybe, over: true } : { text: t.cost.notFree, over: true };
+const agentFlag = flag(agentRun.low, agentRun.high);
+const replayFlag = flag(replay, replay);
+const sameAsReplay = agentRun.low === replay && agentRun.high === replay;
+// The key is a precondition, not part of the block: pasting must never overwrite a real key.
 const reproduceCommand = [
   "git clone https://github.com/MetixAI-Official/awesome-metix-platform-use-cases",
   "cd awesome-metix-platform-use-cases",
-  "export METIX_KEY=metix_xxxxxxxx",
-  `python3 cases/${slug}/fetch.py`,
+  `: "\${METIX_KEY:?set METIX_KEY first}" && python3 cases/${slug}/fetch.py`,
 ].join("\n");
 const copy = { "data-done": t.copied, "data-fail": t.copyFailed, "aria-live": "polite" };
 const paths = [
-  { key: "agent", label: t.run.agent, hint: t.run.agentHint, cost: `${t.cost.credits(agentRun.low, agentRun.high)} · ${money(agentRun.low, agentRun.high)}` },
-  { key: "reproduce", label: t.run.reproduce, hint: t.run.reproduceHint, cost: `${t.cost.credits(replay)} · ${money(replay)}` },
+  { key: "agent", label: t.run.agent, hint: t.run.agentHint(sameAsReplay), cost: `${t.cost.credits(agentRun.low, agentRun.high)} · ${money(agentRun.low, agentRun.high)}` },
+  { key: "reproduce", label: t.run.reproduce, hint: t.run.reproduceHint(receipt.records), cost: `${t.cost.credits(replay)} · ${money(replay)}` },
   { key: "adapt", label: t.run.adapt, hint: t.run.adaptHint, cost: "" },
 ];
+const promptFile = `${REPO}/blob/main/cases/${slug}/PROMPT${lang === "zh" ? ".zh" : ""}.md`;
+// "Step 2", "Steps 2 and 3", "第 2 步" in the Adapt table link to that step of the prompt.
+const linkSteps = (html: string) =>
+  lang === "zh"
+    ? html.replace(/第 ?(\d+) ?步/g, (m, n) => `<a href="#step-${n}">${m}</a>`)
+    : html.replace(/\bSteps? (\d+)(?: and (\d+))?/g, (m, a, b) =>
+        b ? `Steps <a href="#step-${a}">${a}</a> and <a href="#step-${b}">${b}</a>` : `<a href="#step-${a}">${m}</a>`,
+      );
+// The prompt's own "Adapt it" / "怎么改成你自己的问题" section is this panel's table; its
+// heading would only repeat the panel's, so the table shows without it.
+const isAdapt = (html: string) => /^(Adapt it|怎么改成你自己的问题)$/.test(html.replace(/<[^>]+>/g, "").trim());
+const adaptTable = parsed.sections.find((s) => isAdapt(s.title));
+const adaptSections = parsed.sections.filter((s) => !isAdapt(s.title));
 ---
 
 <section class="block rail-block run" id="run" aria-labelledby="run-title" data-run data-copy-root>
@@ -67,78 +87,85 @@ const paths = [
         <p class="cost-line">
           <strong>{t.cost.credits(agentRun.low, agentRun.high)}</strong>
           <span>{money(agentRun.low, agentRun.high)}</span>
-          <span class:list={["cost-flag", { over: agentRun.high > FREE_CREDITS }]}>{fits(agentRun.high)}</span>
+          <span class:list={["cost-flag", { over: agentFlag.over }]}>{agentFlag.text}</span>
         </p>
         <p class="rp-cap">{t.cost.capNote(agentRun.cap)}</p>
       </header>
       <p class="rp-lede">{t.run.agentLede}</p>
 
-      <ol class="run-steps">
-        <li>
-          <h4><span class="rs-n">1</span>{t.run.stepKey}</h4>
-          <p>
-            {t.run.keyBody}{" "}
-            <a href="https://platform.metix.ai/api-keys">{t.run.createKey} →</a>
-          </p>
-          <div class="code-copy" data-copy-root>
-            <pre class="code">export METIX_KEY=metix_xxxxxxxx</pre>
-            <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
-          </div>
-        </li>
-        <li>
-          <h4><span class="rs-n">2</span>{t.run.stepConnect}</h4>
-          <AgentSetup lang={lang} id={`${slug}-setup`} />
-        </li>
-        <li>
-          <h4><span class="rs-n">3</span>{t.run.stepCheck}</h4>
-          <p>{t.run.checkBody}</p>
-          <div class="code-copy" data-copy-root>
-            <pre class="code prompt-line">{t.run.checkPrompt}</pre>
-            <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
-          </div>
-        </li>
-        <li id="prompt">
-          <div class="rs-head">
-            <h4><span class="rs-n">4</span>{t.run.stepPrompt}</h4>
-            <div class="rs-actions">
-              <button class="btn btn-primary" type="button" data-copy=".prompt-raw" {...copy}>{t.copyPrompt}</button>
-              <button
-                class="btn"
-                type="button"
-                data-fold-toggle
-                aria-controls={`${slug}-steps`}
-                aria-expanded="false"
-                data-expand={t.expandAll}
-                data-collapse={t.collapseAll}
-              >
-                {t.expandAll}
-              </button>
+      <details class="setup-once" data-setup-once open>
+        <summary>
+          <span class="so-title">{t.run.setupOnce}</span>
+          <span class="so-note">{t.run.setupOnceNote}</span>
+        </summary>
+        <ol class="run-steps">
+          <li>
+            <h4><span class="rs-n">1</span>{t.run.stepKey}</h4>
+            <p><a href="https://platform.metix.ai/api-keys">{t.run.createKey}{"\u00a0"}→</a></p>
+            <p>{t.run.keyBody}</p>
+            <div class="code-copy" data-copy-root>
+              <pre class="code prompt-line">export METIX_KEY=metix_xxxxxxxx</pre>
+              <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
             </div>
-          </div>
-          <div class="prompt-question">
-            <p class="pq-label">{t.questionLabel}</p>
-            <p class="pq-text">{parsed.question}</p>
-          </div>
-          <ol class="steps" id={`${slug}-steps`} aria-label={t.stepsLabel(parsed.steps.length)}>
-            {
-              parsed.steps.map((step) => (
-                <li id={`step-${step.n}`}>
-                  <details class="step">
-                    <summary>
-                      <span class="step-n">{String(step.n).padStart(2, "0")}</span>
-                      <span class="step-title">{step.title}</span>
-                    </summary>
-                    <p class="step-body">{step.body}</p>
-                  </details>
-                </li>
-              ))
-            }
-          </ol>
-          <div class="prompt-foot">
+          </li>
+          <li>
+            <h4><span class="rs-n">2</span>{t.run.stepConnect}</h4>
+            <AgentSetup lang={lang} id={`${slug}-setup`} />
+          </li>
+          <li>
+            <h4><span class="rs-n">3</span>{t.run.stepCheck}</h4>
+            <p>{t.run.checkBody}</p>
+            <div class="code-copy" data-copy-root>
+              <pre class="code prompt-line">{t.run.checkPrompt}</pre>
+              <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
+            </div>
+          </li>
+        </ol>
+      </details>
+
+      <div class="run-steps run-prompt" id="prompt">
+        <div class="rs-head">
+          <h4><span class="rs-n">4</span>{t.run.stepPrompt}</h4>
+          <div class="rs-actions">
             <button class="btn btn-primary" type="button" data-copy=".prompt-raw" {...copy}>{t.copyPrompt}</button>
+            <button
+              class="btn"
+              type="button"
+              data-fold-toggle
+              aria-controls={`${slug}-steps`}
+              aria-expanded="false"
+              data-expand={t.expandAll}
+              data-collapse={t.collapseAll}
+            >
+              {t.expandAll}
+            </button>
           </div>
-        </li>
-      </ol>
+        </div>
+        <p class="rs-body">{t.run.stepPromptBody}</p>
+        <div class="prompt-question">
+          <p class="pq-label">{t.questionLabel}</p>
+          <p class="pq-text">{parsed.question}</p>
+        </div>
+        <ol class="steps" id={`${slug}-steps`} aria-label={t.stepsLabel(parsed.steps.length)} data-steps>
+          {
+            parsed.steps.map((step) => (
+              <li id={`step-${step.n}`}>
+                <details class="step">
+                  <summary>
+                    <span class="step-n">{String(step.n).padStart(2, "0")}</span>
+                    <span class="step-title">{step.title}</span>
+                  </summary>
+                  <p class="step-body">{step.body}</p>
+                </details>
+              </li>
+            ))
+          }
+        </ol>
+        <div class="prompt-foot">
+          <button class="btn btn-primary" type="button" data-copy=".prompt-raw" {...copy}>{t.copyPrompt}</button>
+          <a class="text-link" href={promptFile}>{t.run.viewSource} →</a>
+        </div>
+      </div>
       <div class="run-get">
         <p class="rg-label">{t.run.getLabel}</p>
         <p>{t.run.agentGet}</p>
@@ -152,33 +179,39 @@ const paths = [
         <p class="cost-line">
           <strong>{t.cost.credits(replay)}</strong>
           <span>{money(replay)}</span>
-          <span class:list={["cost-flag", { over: replay > FREE_CREDITS }]}>{fits(replay)}</span>
+          <span class:list={["cost-flag", { over: replayFlag.over }]}>{replayFlag.text}</span>
         </p>
       </header>
-      <p class="rp-lede">{t.run.reproduceLede}</p>
+      <p class="rp-lede">{t.run.reproduceLede(receipt.records)}</p>
       <div class="code-copy" data-copy-root>
         <pre class="code">{reproduceCommand}</pre>
         <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
       </div>
       <div class="run-get">
         <p class="rg-label">{t.run.getLabel}</p>
-        <p>{t.run.reproduceGet}</p>
+        <p>{t.run.reproduceGet(slug)}</p>
       </div>
     </section>
 
     <section class="run-panel" id="run-adapt" data-panel="adapt" aria-labelledby="run-adapt-title">
       <header class="rp-head">
         <h3 id="run-adapt-title">{t.run.adapt}</h3>
+        <p class="rp-cap">{t.run.adaptCost}</p>
       </header>
       <p class="rp-lede">{t.run.adaptLede}</p>
+      {adaptTable && <div class="prose adapt-table" set:html={linkSteps(adaptTable.body)} />}
       {
-        parsed.sections.map((section) => (
+        adaptSections.map((section) => (
           <div class="adapt-section">
             <h4 set:html={section.title} />
-            <div class="prose" set:html={section.body} />
+            <div class="prose" set:html={linkSteps(section.body)} />
           </div>
         ))
       }
+      <div class="prompt-foot">
+        <button class="btn btn-primary" type="button" data-copy=".prompt-raw" {...copy}>{t.copyPrompt}</button>
+        <a class="text-link" href={promptFile}>{t.run.viewSource} →</a>
+      </div>
     </section>
 
     <pre class="prompt-raw" hidden>{parsed.raw}</pre>
