@@ -5,14 +5,18 @@
  * kind: focus (the series the finding is about), other, residual (a leftover bucket,
  * drawn like other and told apart by its label and its place last), lower (a strict
  * count that is a lower bound: the only thing hatching means on this site).
+ * suppressed: a count of people from 1 to 9, published as "<10"; drawn as an empty
+ * outline at the largest value it could hide, so the length never reads as a measurement.
  * ghost: an outline behind the bar, for a larger total the bar is part of
  * (a looser count of the same thing, or the worldwide count behind a US fill).
+ * ticks: an axis row over the tracks, for a scale that stops short of 100%, so the end of a
+ * track never reads as the whole. at is a fraction of the track.
  */
 export interface BarRow {
   label: string;
   display: string;
   width: number;
-  kind?: "focus" | "other" | "residual" | "lower";
+  kind?: "focus" | "other" | "residual" | "lower" | "suppressed";
   ghost?: number;
   note?: string;
 }
@@ -20,14 +24,26 @@ export interface BarRow {
 interface Props {
   rows: BarRow[];
   label: string;
+  ticks?: { at: number; label: string }[];
 }
 
-const { rows, label } = Astro.props;
+const { rows, label, ticks } = Astro.props;
 const pct = (w: number) => `${Math.max(0, Math.min(1, w)) * 100}%`;
 ---
 
 <div class="bl-box">
 <ol class="bl" aria-label={label}>
+  {
+    ticks && (
+      <li class="bl-axis" aria-hidden="true">
+        <span class="bl-ticks">
+          {ticks.map((t) => (
+            <span style={`left: ${t.at * 100}%`}>{t.label}</span>
+          ))}
+        </span>
+      </li>
+    )
+  }
   {
     rows.map((r) => (
       <li class={`bl-row ${r.kind ?? "other"}`}>

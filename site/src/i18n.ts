@@ -13,7 +13,7 @@ const CJK = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/;
 const CLOSING = /^[，。、：；！？）」』》％…]/;
 const OPENING = /[（「『《]$/;
 /** Chinese words ICU segments wrongly in these titles; add a term when a title needs it. */
-const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名", "留给新人", "客户服务", "注册护士", "暴露度", "五分之一", "软件工程", "职业族", "百分点", "斜线"];
+const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名", "留给新人", "客户服务", "注册护士", "暴露度", "五分之一", "软件工程", "职业族", "百分点", "斜线", "实验室", "超级智能"];
 /** A line never starts with these particles; they belong to the word before. */
 const NO_BREAK_BEFORE = /^[的地得了着过吗呢吧里]/;
 /** 被 and 把 bind to the verb that follows. */
@@ -297,7 +297,7 @@ export const ui = {
     recordsLabel: "Records read",
     creditsLabel: "Credits",
     exploration: (n: number) =>
-      `Making this case cost about ${n} Credits more: the agent's audits, trial queries, and runs it replaced before the reproduce script existed. You do not pay that again.`,
+      `Making this case cost about ${n} Credits more: the agent's audits, trial queries, and earlier runs that the published replay replaced. You do not pay that again.`,
     rerun: "Reproduce it",
     caseFolder: "Case folder on GitHub",
     pricing: "Credits and pricing",
@@ -478,7 +478,7 @@ export const ui = {
     recordsLabel: "读取记录",
     creditsLabel: "Credits",
     exploration: (n: number) =>
-      `做这个案例另外花了大约 ${n} Credits：复现脚本写出来之前 agent 做的抽检、试探性查询和被替换掉的运行。你不需要再花这部分。`,
+      `做这个案例另外花了大约 ${n} Credits：agent 做的抽检、试探性查询，以及被公开复现取代的早先运行。你不需要再花这部分。`,
     rerun: "复现",
     caseFolder: "GitHub 上的案例目录",
     pricing: "Credits 与价格",

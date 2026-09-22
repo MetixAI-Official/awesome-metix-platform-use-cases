@@ -2394,6 +2394,15 @@ details.query[open]::details-content {
   opacity: 0.7;
 }
 
+.bl-row.suppressed .bl-fill {
+  background: none;
+  box-shadow: inset 0 0 0 1.5px var(--bl-mark);
+}
+
+.bl-row.suppressed .bl-value {
+  color: var(--ink-3);
+}
+
 .bl-value {
   font: 13px/1.3 var(--mono);
   white-space: nowrap;
@@ -2408,6 +2417,42 @@ details.query[open]::details-content {
    get the stacked form: label on its own line, then the track and the value. */
 .bl-box {
   container-type: inline-size;
+}
+
+/* The axis row: 0 at the track's start, the scale's end at its end, the middle centred. */
+.bl-axis {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+}
+
+.bl-ticks {
+  grid-column: 2;
+  position: relative;
+  height: 14px;
+}
+
+.bl-ticks span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font: 12px/1 var(--mono);
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.bl-ticks span:first-child {
+  transform: none;
+}
+
+.bl-ticks span:last-child {
+  transform: translateX(-100%);
+}
+
+@container (max-width: 560px) {
+  .bl-ticks {
+    grid-column: 1;
+  }
 }
 
 @container (max-width: 560px) {
@@ -2458,7 +2503,7 @@ details.query[open]::details-content {
 
 /* Chinese display titles break at spaces and punctuation first, anywhere only when
    a phrase cannot fit; CJK lines need more leading than Latin display type. */
-:is(.cf-title, .report-band h3, .pl-title, .card-hero h1, .report-hero h1, .ed-hero h1, .ed-wall-title, .fig-title, .figure h2, .ci-title, .pg-title):lang(zh) {
+:is(.cf-title, .report-band h3, .pl-title, .card-hero h1, .report-hero h1, .ed-hero h1, .ed-wall-title, .fig-title, .figure h2, .ci-title, .pg-title, .chapter .ch-note):lang(zh) {
   word-break: keep-all;
   overflow-wrap: anywhere;
   line-height: 1.25;

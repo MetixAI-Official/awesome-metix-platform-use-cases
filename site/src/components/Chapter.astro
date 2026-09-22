@@ -5,7 +5,7 @@
  * beside it. The title comes first in the DOM so heading navigation lands on it; CSS puts the
  * numeral row above. Figures inside a chapter pass level={3}.
  */
-import { chapterFigures, type Lang } from "@site/i18n";
+import { chapterFigures, titleHtml, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
@@ -26,5 +26,5 @@ const { lang, id, part, title, note, figures } = Astro.props;
     <span class="visually-hidden">{lang === "zh" ? `第 ${part} 部分，` : `Part ${part}, `}</span>
     <span>{chapterFigures(lang, figures)}</span>
   </p>
-  <p class="ch-note">{note}</p>
+  <p class="ch-note" set:html={titleHtml(note, lang)} />
 </header>

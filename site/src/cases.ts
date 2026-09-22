@@ -50,16 +50,20 @@ export const CARD_ORDER = [
 type Orderable = { data: { slug: string; format: string; published?: Date } };
 
 /**
- * The one catalog order: newest first, then reports before cards, then CARD_ORDER. The
+ * The one catalog order: newest first, then reports before cards, then CARD_ORDER, then among
+ * reports published the same day the one reproduced most recently. The
  * index's default sort, previous and next, and card numbers all follow it, so "Card 03"
  * is the third card wherever it appears.
  */
+const ranAt = (slug: string) => Date.parse(receipts[slug]?.ran_at ?? "") || 0;
+
 export function byCatalog(a: Orderable, b: Orderable): number {
   const rank = (slug: string) => (CARD_ORDER.includes(slug) ? CARD_ORDER.indexOf(slug) : CARD_ORDER.length);
   return (
     (b.data.published?.getTime() ?? 0) - (a.data.published?.getTime() ?? 0) ||
     Number(a.data.format === "card") - Number(b.data.format === "card") ||
     rank(a.data.slug) - rank(b.data.slug) ||
+    ranAt(b.data.slug) - ranAt(a.data.slug) ||
     a.data.slug.localeCompare(b.data.slug)
   );
 }
