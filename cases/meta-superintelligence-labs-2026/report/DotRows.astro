@@ -1,0 +1,429 @@
+---
+/*
+ * Dot rows for stage 2: one row per category, one dot per group on a shared axis from 0, with a
+ * light link between the dots so the gap reads as a length. Groups keep one color across the
+ * page: lab violet, the rest of Meta's AI staff gray, Meta's AI postings blue. The header is the
+ * legend: each value column is headed by its group with a swatch, and values stay in ink.
+ * A value that is not a number prints as given and draws no dot: "·" is withheld, "" is a group
+ * the row does not apply to. A capped small group ("<1%") draws an open ring at upTo, the largest
+ * share it could hide.
+ * The lab's dot paints last, so it is never the one hidden. Where two dots would overlap, each
+ * moves 4px off the line (lab up, the other down); the move is computed in container units, so
+ * it happens only when they overlap at the width the reader sees.
+ * bar adds a second panel on its own scale (postings in figure 14), for a measure whose level
+ * does not compare with the dots.
+ * Narrow: the values move onto the name row and the track takes its own full-width row, so the
+ * dots keep the width a phone has. With three value columns in a very narrow box, the name takes
+ * a row of its own too.
+ */
+import type { Lang } from "@site/i18n";
+import { number } from "@site/i18n";
+
+export type Series = "lab" | "rest" | "post";
+export interface Dot {
+  s: Series;
+  v: number | string | null;
+  /** For a capped value such as "<1%": the largest share it could hide, drawn as an open ring. */
+  upTo?: number;
+}
+export interface Row {
+  name: string;
+  dots: Dot[];
+  bar?: number | string | null;
+  divider?: boolean;
+  head?: string;
+}
+
+interface Props {
+  lang: Lang;
+  series: { s: Series; label: string }[];
+  rows: Row[];
+  max: number;
+  bar?: { label: string; max: number };
+}
+
+const { lang, series, rows, max, bar } = Astro.props;
+const pct = (x: number, d = 1) => `${number(lang, x * 100, d)}%`;
+const at = (v: number) => Math.min(v, max) / max;
+const x = (v: number) => `${at(v) * 100}%`;
+// A tick keeps a decimal only when it has one (12.5%, not a rounded 13%).
+const tickLabel = (v: number) => pct(v, Number.isInteger(Math.round(v * 1e6) / 1e4) ? 0 : 1);
+const ticks = (m: number) => [0, m / 2, m].map((v) => ({ at: (v / m) * 100, label: tickLabel(v) }));
+const show = (v: number | string | null) => (typeof v === "number" ? pct(v) : v === null ? "·" : v);
+const values = series.length + (bar ? 1 : 0);
+const PAINT: Record<Series, number> = { rest: 0, post: 1, lab: 2 };
+
+// Dots to draw in a row: numbers and rings, painted lab last, each with its distance (as a
+// fraction of the axis) to the nearest other dot and the side it moves to if they overlap.
+const marks = (r: Row) => {
+  const pts = r.dots
+    .map((d) => ({ s: d.s, pos: typeof d.v === "number" ? at(d.v) : typeof d.upTo === "number" ? at(d.upTo) : null, ring: typeof d.v !== "number" }))
+    .filter((d): d is { s: Series; pos: number; ring: boolean } => d.pos !== null);
+  return pts
+    .map((d) => {
+      const others = pts.filter((o) => o !== d);
+      const near = others.reduce<{ gap: number; s: Series | null }>((best, o) => (Math.abs(o.pos - d.pos) < best.gap ? { gap: Math.abs(o.pos - d.pos), s: o.s } : best), { gap: 1, s: null });
+      const dir = d.s === "lab" ? -1 : d.s === "rest" ? 1 : near.s === "lab" ? 1 : -1;
+      return { ...d, gap: near.gap, dir };
+    })
+    .sort((a, b) => PAINT[a.s] - PAINT[b.s]);
+};
+---
+
+<div class="dr-box">
+  <div
+    class:list={["dr", { "has-bar": !!bar, v3: values >= 3 }]}
+    style={`--series: ${series.length}; --values: ${values}`}
+    aria-hidden="true"
+  >
+    <div class="dr-head">
+      <span class="dr-name" />
+      <span class="dr-ticks">
+        {ticks(max).map((t) => <span style={`left: ${t.at}%`}>{t.label}</span>)}
+      </span>
+      {
+        series.map((s) => (
+          <span class={`dr-h ${s.s}`}>
+            <i />
+            {s.label}
+          </span>
+        ))
+      }
+      {
+        bar && (
+          <>
+            <span class="dr-ticks bar">
+              {ticks(bar.max).map((t) => (
+                <span style={`left: ${t.at}%`}>{t.label}</span>
+              ))}
+            </span>
+            <span class="dr-h post bar">
+              <i />
+              {bar.label}
+            </span>
+          </>
+        )
+      }
+    </div>
+    {
+      rows.map((r) => {
+        const nums = r.dots.map((d) => d.v).filter((v): v is number => typeof v === "number");
+        const lo = nums.length > 1 ? Math.min(...nums) : null;
+        const hi = nums.length > 1 ? Math.max(...nums) : null;
+        return (
+          <>
+            {r.head && <p class="dr-group">{r.head}</p>}
+            <div class:list={["dr-row", { divider: r.divider }]}>
+              <span class="dr-name">{r.name}</span>
+              <span class="dr-track">
+                {lo !== null && hi !== null && <span class="dr-link" style={`left: ${x(lo)}; width: calc(${x(hi)} - ${x(lo)})`} />}
+                {marks(r).map((m) => (
+                  <span class:list={["dr-dot", m.s, { ring: m.ring }]} style={`left: ${m.pos * 100}%; --gap: ${m.gap.toFixed(4)}; --dir: ${m.dir}`} />
+                ))}
+              </span>
+              {r.dots.map((d) => (
+                <span class="dr-v">{show(d.v)}</span>
+              ))}
+              {bar && (
+                <>
+                  <span class="dr-bar">
+                    {typeof r.bar === "number" && <span style={`width: ${(Math.min(r.bar, bar.max) / bar.max) * 100}%`} />}
+                  </span>
+                  <span class="dr-v">{show(r.bar ?? null)}</span>
+                </>
+              )}
+            </div>
+          </>
+        );
+      })
+    }
+  </div>
+</div>
+
+<style>
+  /* The box is the container, so the grid inside it can change with the space it gets. */
+  .dr-box {
+    container-type: inline-size;
+  }
+
+  .dr {
+    --lab: #3d36c9;
+    --rest: #858395;
+    --post: #1e79c2;
+    --vcol: 5rem;
+    display: grid;
+    grid-template-columns: minmax(9rem, 16rem) minmax(0, 1fr) repeat(var(--series), var(--vcol));
+    column-gap: 16px;
+    row-gap: 12px;
+  }
+
+  .dr.has-bar {
+    grid-template-columns:
+      minmax(9rem, 15rem) minmax(0, 1fr) repeat(var(--series), var(--vcol))
+      minmax(0, 0.7fr) var(--vcol);
+  }
+
+  .dr-head,
+  .dr-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+  }
+
+  .dr-head {
+    align-items: end;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .dr-ticks {
+    position: relative;
+    height: 14px;
+  }
+
+  .dr-ticks span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .dr-ticks span:first-child {
+    transform: none;
+  }
+
+  .dr-ticks span:last-child {
+    transform: translateX(-100%);
+  }
+
+  .dr-h {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 5px;
+    white-space: nowrap;
+    font: 500 12px/1.25 var(--mono);
+    color: var(--ink-2);
+    text-align: right;
+  }
+
+  .dr-h i {
+    flex: none;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    transform: translateY(-1px);
+  }
+
+  .dr-h.lab i {
+    background: var(--lab);
+  }
+
+  .dr-h.rest i {
+    background: var(--rest);
+  }
+
+  .dr-h.post i {
+    background: var(--post);
+  }
+
+  /* The postings bar panel is keyed by a square, since its marks are bars. */
+  .dr-h.bar i {
+    border-radius: 2px;
+  }
+
+  .dr-group {
+    grid-column: 1 / -1;
+    margin-top: 6px;
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .dr-group:lang(zh) {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .dr-row.divider {
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .dr-name {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .dr-track {
+    container-type: inline-size;
+    position: relative;
+    height: 18px;
+    background: linear-gradient(var(--line), var(--line)) 0 50% / 100% 1px no-repeat;
+  }
+
+  .dr-link {
+    position: absolute;
+    top: 50%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgb(11 10 31 / 0.14);
+    transform: translateY(-50%);
+  }
+
+  /* Two dots closer than 14px apart move off the line in opposite directions, by up to 4px. */
+  .dr-dot {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--surface, #fff);
+    transform: translate(-50%, calc(-50% + var(--dir, 0) * clamp(0px, (14px - var(--gap, 1) * 100cqw) / 2, 4px)));
+  }
+
+  .dr-dot.lab {
+    background: var(--lab);
+  }
+
+  .dr-dot.rest {
+    background: var(--rest);
+  }
+
+  .dr-dot.post {
+    background: var(--post);
+  }
+
+  .dr-dot.ring {
+    border: 2px solid var(--lab);
+    background: var(--surface, #fff);
+  }
+
+  .dr-dot.ring.rest {
+    border-color: var(--rest);
+  }
+
+  .dr-v {
+    font: 500 13px/1 var(--mono);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  .dr-bar {
+    position: relative;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--surface-muted);
+  }
+
+  .dr-bar span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 3px;
+    background: var(--post);
+  }
+
+  /* Narrow: the name and its values share a row and the track runs full width beneath them, so
+     the dots keep the width of the box. The second panel keeps its value column and drops its
+     bar, which would need an axis of its own. A chart with a bar panel goes narrow sooner. */
+  @container (max-width: 860px) {
+    .dr.has-bar {
+      --vcol: 3.25rem;
+      grid-template-columns: minmax(0, 1fr) repeat(var(--values), var(--vcol));
+      column-gap: 8px;
+      row-gap: 14px;
+    }
+
+    .dr.has-bar .dr-ticks.bar,
+    .dr.has-bar .dr-bar {
+      display: none;
+    }
+
+    .dr.has-bar :is(.dr-head, .dr-row) {
+      row-gap: 8px;
+    }
+
+    .dr.has-bar :is(.dr-head, .dr-row) > .dr-name {
+      grid-row: 1;
+      grid-column: 1;
+    }
+
+    .dr.has-bar :is(.dr-head > .dr-h, .dr-row > .dr-v) {
+      grid-row: 1;
+    }
+
+    .dr.has-bar :is(.dr-head > .dr-ticks, .dr-row > .dr-track) {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
+
+    .dr.has-bar .dr-row {
+      align-items: baseline;
+    }
+  }
+
+  @container (max-width: 760px) {
+    .dr {
+      --vcol: 3.25rem;
+      grid-template-columns: minmax(0, 1fr) repeat(var(--values), var(--vcol));
+      column-gap: 8px;
+      row-gap: 14px;
+    }
+
+    .dr :is(.dr-head, .dr-row) {
+      row-gap: 8px;
+    }
+
+    .dr :is(.dr-head, .dr-row) > .dr-name {
+      grid-row: 1;
+      grid-column: 1;
+    }
+
+    .dr :is(.dr-head > .dr-h, .dr-row > .dr-v) {
+      grid-row: 1;
+    }
+
+    .dr :is(.dr-head > .dr-ticks:not(.bar), .dr-row > .dr-track) {
+      grid-row: 2;
+      grid-column: 1 / -1;
+    }
+
+    .dr .dr-row {
+      align-items: baseline;
+    }
+
+    .dr-row.divider {
+      padding-top: 14px;
+    }
+  }
+
+  /* Very narrow with three value columns: the name takes its own row above its values. */
+  @container (max-width: 280px) {
+    .dr.v3 .dr-row > .dr-name {
+      grid-column: 1 / -1;
+    }
+
+    .dr.v3 .dr-row > .dr-v {
+      grid-row: 2;
+    }
+
+    /* The values stay under their headers: an empty cell holds the name column on their row, so
+       auto-placement starts them in the first value column. */
+    .dr.v3 .dr-row::before {
+      content: "";
+      grid-row: 2;
+      grid-column: 1;
+    }
+
+    .dr.v3 .dr-row > .dr-track {
+      grid-row: 3;
+    }
+  }
+</style>

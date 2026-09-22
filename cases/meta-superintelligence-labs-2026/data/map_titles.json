@@ -1,0 +1,90 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "lab_count": 936,
+  "rest_count": 7321,
+  "note": "Current titles that contain all the words of the label, in any order; rows overlap. The ten candidates with the most P2 profiles.",
+  "rows": [
+    {
+      "group": "machine-learning-engineer",
+      "label": "machine learning engineer",
+      "lab_count": 36,
+      "lab_share": 0.0385,
+      "rest_count": 1772,
+      "rest_share": 0.242
+    },
+    {
+      "group": "software-engineer",
+      "label": "software engineer",
+      "lab_count": 228,
+      "lab_share": 0.2436,
+      "rest_count": 1499,
+      "rest_share": 0.2048
+    },
+    {
+      "group": "research-scientist",
+      "label": "research scientist",
+      "lab_count": 237,
+      "lab_share": 0.2532,
+      "rest_count": 763,
+      "rest_share": 0.1042
+    },
+    {
+      "group": "engineering-manager",
+      "label": "engineering manager",
+      "lab_count": 40,
+      "lab_share": 0.0427,
+      "rest_count": 315,
+      "rest_share": 0.043
+    },
+    {
+      "group": "director",
+      "label": "director",
+      "lab_count": 52,
+      "lab_share": 0.0556,
+      "rest_count": 169,
+      "rest_share": 0.0231
+    },
+    {
+      "group": "product-manager",
+      "label": "product manager",
+      "lab_count": 37,
+      "lab_share": 0.0395,
+      "rest_count": 175,
+      "rest_share": 0.0239
+    },
+    {
+      "group": "research-engineer",
+      "label": "research engineer",
+      "lab_count": 52,
+      "lab_share": 0.0556,
+      "rest_count": 153,
+      "rest_share": 0.0209
+    },
+    {
+      "group": "data-scientist",
+      "label": "data scientist",
+      "lab_count": 24,
+      "lab_share": 0.0256,
+      "rest_count": 173,
+      "rest_share": 0.0236
+    },
+    {
+      "group": "program-manager",
+      "label": "program manager",
+      "lab_count": "<10",
+      "lab_share": null,
+      "rest_count": 168,
+      "rest_share": 0.0229
+    },
+    {
+      "group": "data-engineer",
+      "label": "data engineer",
+      "lab_count": 14,
+      "lab_share": 0.015,
+      "rest_count": 82,
+      "rest_share": 0.0112
+    }
+  ]
+}

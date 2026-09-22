@@ -1,0 +1,186 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "start_from": "2025-06-01",
+  "ended_from": "2025-05-01",
+  "note": "out: a current non-intern job at the employer that started on or after start_from, a non-intern Meta job that ended on or after ended_from, and no current Meta job. in: a current non-intern Meta job that started on or after start_from and a non-intern job at the employer that ended on or after ended_from, and no current job there. all: any employer outside Meta. ai_titled_count: the P2 AI terms in the headline or current title, counted where the row holds 10 or more. Profiles lag: dates stop in April 2026. Rows can overlap.",
+  "rows": [
+    {
+      "direction": "out",
+      "group": "all",
+      "label": "Any employer outside Meta",
+      "count": 8054,
+      "ai_titled_count": 735,
+      "ai_titled_share": 0.0913
+    },
+    {
+      "direction": "in",
+      "group": "all",
+      "label": "Any employer outside Meta",
+      "count": 7787,
+      "ai_titled_count": 1392,
+      "ai_titled_share": 0.1788
+    },
+    {
+      "direction": "out",
+      "group": "openai",
+      "label": "OpenAI",
+      "count": 191,
+      "ai_titled_count": "<10",
+      "ai_titled_share": null
+    },
+    {
+      "direction": "in",
+      "group": "openai",
+      "label": "OpenAI",
+      "count": 37,
+      "ai_titled_count": 21,
+      "ai_titled_share": 0.5676
+    },
+    {
+      "direction": "out",
+      "group": "google-deepmind",
+      "label": "Google DeepMind",
+      "count": 58,
+      "ai_titled_count": 11,
+      "ai_titled_share": 0.1897
+    },
+    {
+      "direction": "in",
+      "group": "google-deepmind",
+      "label": "Google DeepMind",
+      "count": 41,
+      "ai_titled_count": 27,
+      "ai_titled_share": 0.6585
+    },
+    {
+      "direction": "out",
+      "group": "anthropic",
+      "label": "Anthropic",
+      "count": 81,
+      "ai_titled_count": "<10",
+      "ai_titled_share": null
+    },
+    {
+      "direction": "in",
+      "group": "anthropic",
+      "label": "Anthropic",
+      "count": "<10",
+      "ai_titled_count": null,
+      "ai_titled_share": null
+    },
+    {
+      "direction": "out",
+      "group": "xai",
+      "label": "xAI",
+      "count": 33,
+      "ai_titled_count": "<10",
+      "ai_titled_share": null
+    },
+    {
+      "direction": "in",
+      "group": "xai",
+      "label": "xAI",
+      "count": 11,
+      "ai_titled_count": "<10",
+      "ai_titled_share": null
+    },
+    {
+      "direction": "out",
+      "group": "thinking-machines",
+      "label": "Thinking Machines Lab",
+      "count": 16,
+      "ai_titled_count": 0,
+      "ai_titled_share": null
+    },
+    {
+      "direction": "in",
+      "group": "thinking-machines",
+      "label": "Thinking Machines Lab",
+      "count": "<10",
+      "ai_titled_count": null,
+      "ai_titled_share": null
+    },
+    {
+      "direction": "out",
+      "group": "microsoft",
+      "label": "Microsoft",
+      "count": 154,
+      "ai_titled_count": 27,
+      "ai_titled_share": 0.1753
+    },
+    {
+      "direction": "in",
+      "group": "microsoft",
+      "label": "Microsoft",
+      "count": 343,
+      "ai_titled_count": 51,
+      "ai_titled_share": 0.1487
+    },
+    {
+      "direction": "out",
+      "group": "apple",
+      "label": "Apple",
+      "count": 134,
+      "ai_titled_count": 30,
+      "ai_titled_share": 0.2239
+    },
+    {
+      "direction": "in",
+      "group": "apple",
+      "label": "Apple",
+      "count": 158,
+      "ai_titled_count": 40,
+      "ai_titled_share": 0.2532
+    },
+    {
+      "direction": "out",
+      "group": "amazon",
+      "label": "Amazon",
+      "count": 153,
+      "ai_titled_count": 19,
+      "ai_titled_share": 0.1242
+    },
+    {
+      "direction": "in",
+      "group": "amazon",
+      "label": "Amazon",
+      "count": 691,
+      "ai_titled_count": 117,
+      "ai_titled_share": 0.1693
+    },
+    {
+      "direction": "out",
+      "group": "nvidia",
+      "label": "NVIDIA",
+      "count": 82,
+      "ai_titled_count": 29,
+      "ai_titled_share": 0.3537
+    },
+    {
+      "direction": "in",
+      "group": "nvidia",
+      "label": "NVIDIA",
+      "count": 20,
+      "ai_titled_count": "<10",
+      "ai_titled_share": null
+    },
+    {
+      "direction": "out",
+      "group": "google",
+      "label": "Google, other than Google DeepMind",
+      "count": 308,
+      "ai_titled_count": 38,
+      "ai_titled_share": 0.1234
+    },
+    {
+      "direction": "in",
+      "group": "google",
+      "label": "Google, other than Google DeepMind",
+      "count": 317,
+      "ai_titled_count": 65,
+      "ai_titled_share": 0.205
+    }
+  ]
+}

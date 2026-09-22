@@ -1,0 +1,107 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "all_count": 218,
+  "note": "Meta postings posted in the last 180 days with an AI title (queries/mapping.json), open on the day. family: exclusive, first match in order. direction: title or description names it; rows overlap. A role posted in several cities counts once per city.",
+  "rows": [
+    {
+      "set": "family",
+      "group": "research-scientist",
+      "label": "Research scientist",
+      "count": 38,
+      "share": 0.1743
+    },
+    {
+      "set": "family",
+      "group": "research-engineer",
+      "label": "Research engineer",
+      "count": 14,
+      "share": 0.0642
+    },
+    {
+      "set": "family",
+      "group": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "count": 107,
+      "share": 0.4908
+    },
+    {
+      "set": "family",
+      "group": "data",
+      "label": "Data",
+      "count": 9,
+      "share": 0.0413
+    },
+    {
+      "set": "family",
+      "group": "product-program",
+      "label": "Product, program, and design",
+      "count": 14,
+      "share": 0.0642
+    },
+    {
+      "set": "family",
+      "group": "other",
+      "label": "Other titles",
+      "count": 36,
+      "share": 0.1651
+    },
+    {
+      "set": "direction",
+      "group": "foundation-models",
+      "label": "Foundation models and LLMs",
+      "count": 78,
+      "share": 0.3578
+    },
+    {
+      "set": "direction",
+      "group": "post-training",
+      "label": "Post-training and alignment",
+      "count": 32,
+      "share": 0.1468
+    },
+    {
+      "set": "direction",
+      "group": "multimodal-perception",
+      "label": "Multimodal and perception",
+      "count": 27,
+      "share": 0.1239
+    },
+    {
+      "set": "direction",
+      "group": "ai-infrastructure",
+      "label": "AI infrastructure",
+      "count": 76,
+      "share": 0.3486
+    },
+    {
+      "set": "direction",
+      "group": "agents",
+      "label": "Agents",
+      "count": 38,
+      "share": 0.1743
+    },
+    {
+      "set": "direction",
+      "group": "ranking-recommendations",
+      "label": "Ranking and recommendations",
+      "count": 101,
+      "share": 0.4633
+    },
+    {
+      "set": "direction",
+      "group": "ar-vr-devices",
+      "label": "AR, VR, and devices",
+      "count": 14,
+      "share": 0.0642
+    },
+    {
+      "set": "direction",
+      "group": "safety-evaluation",
+      "label": "Safety and evaluation",
+      "count": 9,
+      "share": 0.0413
+    }
+  ]
+}

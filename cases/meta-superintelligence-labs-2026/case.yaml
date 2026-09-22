@@ -6,16 +6,16 @@ title:
   en: 77% of people who name Meta's superintelligence lab were already at Meta when it formed
   zh: 写明 Meta 超级智能实验室的人中，77% 在实验室成立时已在 Meta 工作
 dek:
-  en: Current Meta staff whose profile headline or title names Meta Superintelligence Labs, by when they joined Meta, where the newcomers had just worked, and what they do, on the Metix AI Platform on September 22, 2026.
-  zh: 2026 年 9 月 22 日 Metix AI Platform 上，个人资料标题或当前职位写明 Meta Superintelligence Labs 的 Meta 在职人员，按加入 Meta 的时间、新人刚离开的雇主和所做的工作统计。
+  en: Who names Meta Superintelligence Labs on their profile and when they joined Meta, then a map of the lab among Meta's 8,257 visible AI staff by unit, role, source, moves, and posted pay, on the Metix AI Platform on September 22, 2026.
+  zh: 2026 年 9 月 22 日 Metix AI Platform 上，个人资料写明 Meta 超级智能实验室的人何时加入 Meta；再把实验室放进 Meta 8,257 名可见 AI 员工的地图：单元、岗位、来源、人员流动和岗位写明的底薪。
 datasets: [people, jobs]
 integration: [rest]
 topics: [ai-talent, ai-hiring, ai-labs]
 regions: [US, global]
 snapshot: 2026-09-22
 published: 2026-09-22
-exploration_credits: 206
-agent_run: { low: 160, high: 200, cap: 250 }
+exploration_credits: 1629
+agent_run: { low: 500, high: 600, cap: 650 }
 highlights:
   - value: "77.1%"
     label:
@@ -25,7 +25,7 @@ highlights:
     label:
       en: of the 214 who joined from outside had just left Google DeepMind, OpenAI, Anthropic, xAI, or Thinking Machines Lab
       zh: 从外部加入的 214 人中，刚离开 Google DeepMind、OpenAI、Anthropic、xAI 或 Thinking Machines Lab 的比例
-  - value: "67.5%"
+  - value: "191"
     label:
-      en: of the lab's research staff list a doctorate, against 41.0% of Meta's other research staff
-      zh: 实验室研究人员中写有博士学历的比例，Meta 其他研究人员为 41.0%
+      en: people in any role left Meta for OpenAI since June 2025, while 37 joined Meta from it
+      zh: 2025 年 6 月以来离开 Meta 去 OpenAI 的人数（所有岗位），从 OpenAI 加入 Meta 的是 37 人

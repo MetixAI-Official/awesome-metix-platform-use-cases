@@ -1,0 +1,45 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "lab_count": 936,
+  "rest_count": 7321,
+  "note": "current_seniority in five groups: specialist-or-intern (Intern and Specialist), senior, manager, head-and-above (Head, Director, Vice President, President/Vice President, C-Level, Partner, Founder, Owner), and none stated. Intern and the levels above Director are merged into their neighbours because the lab holds fewer than 10 of each. A visible hierarchy, not a reporting line.",
+  "rows": [
+    {
+      "group": "specialist-or-intern",
+      "lab_count": 362,
+      "lab_share": 0.3868,
+      "rest_count": 3658,
+      "rest_share": 0.4997
+    },
+    {
+      "group": "senior",
+      "lab_count": 154,
+      "lab_share": 0.1645,
+      "rest_count": 986,
+      "rest_share": 0.1347
+    },
+    {
+      "group": "manager",
+      "lab_count": 115,
+      "lab_share": 0.1229,
+      "rest_count": 760,
+      "rest_share": 0.1038
+    },
+    {
+      "group": "head-and-above",
+      "lab_count": 50,
+      "lab_share": 0.0534,
+      "rest_count": 245,
+      "rest_share": 0.0335
+    },
+    {
+      "group": "none",
+      "lab_count": 255,
+      "lab_share": 0.2724,
+      "rest_count": 1672,
+      "rest_share": 0.2284
+    }
+  ]
+}

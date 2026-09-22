@@ -1,0 +1,60 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "lab_count": 936,
+  "rest_count": 7321,
+  "lab_other_and_none_merged": true,
+  "note": "Exclusive, in order: research (current_function Research), data (a data title, not research), engineering (Engineering and Technical), product (Product, Design, Project Management), other stated, none stated. rest is P2 without the lab. When lab_other_and_none_merged is true, the lab's other and none are one row, other-or-none, because stage 1 published the lab's functions and a separate row would let a reader work out fewer than 10 people.",
+  "rows": [
+    {
+      "group": "research",
+      "lab_count": 329,
+      "lab_share": 0.3515,
+      "rest_count": 1305,
+      "rest_share": 0.1783
+    },
+    {
+      "group": "data",
+      "lab_count": 30,
+      "lab_share": 0.0321,
+      "rest_count": 464,
+      "rest_share": 0.0634
+    },
+    {
+      "group": "engineering",
+      "lab_count": 349,
+      "lab_share": 0.3729,
+      "rest_count": 4248,
+      "rest_share": 0.5802
+    },
+    {
+      "group": "product",
+      "lab_count": 99,
+      "lab_share": 0.1058,
+      "rest_count": 583,
+      "rest_share": 0.0796
+    },
+    {
+      "group": "other",
+      "lab_count": null,
+      "lab_share": null,
+      "rest_count": 189,
+      "rest_share": 0.0258
+    },
+    {
+      "group": "none",
+      "lab_count": null,
+      "lab_share": null,
+      "rest_count": 532,
+      "rest_share": 0.0727
+    },
+    {
+      "group": "other-or-none",
+      "lab_count": 129,
+      "lab_share": 0.1378,
+      "rest_count": 721,
+      "rest_share": 0.0985
+    }
+  ]
+}

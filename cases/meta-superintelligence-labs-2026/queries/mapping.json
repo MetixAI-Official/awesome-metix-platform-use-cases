@@ -1,0 +1,719 @@
+{
+  "note": "Stage 2, the map: where Meta's visible AI staff sit, and where the lab sits among them. Every count is sent with size 1, so it costs 1 Credit, or nothing when it finds no one, and reads no record. Text fields match word by word, in any order, ignoring case; a list sent with in matches when any one of its entries matches that way, which gives the same counts as one match leaf per entry (15,229 both ways for the draft term list) and keeps queries under the Platform's limit of 64 conditions. Counts are of profiles and postings visible through the Metix AI Platform, never headcounts; stale profiles count as current, so a count is not a guaranteed floor either.",
+  "population": {
+    "id": "p2",
+    "label": "Meta's visible AI staff",
+    "note": "A current Meta entry (the stage-1 entry: experience.company.name match Meta and experience.is_current eq true), an AI term in the headline or current title, and three filters that apply to everyone except the lab. The lab's 936 people (queries/population.json) are all in P2 by construction, so the lab node is exactly the stage-1 population and no stage-2 count of the lab differs from a stage-1 count by a small group. Everyone else also needs a current Meta entry whose employer size is 10,001+, a current_function outside non_technical_functions, and a current title with none of non_technical_title_words.",
+    "ai_terms": [
+      "machine learning",
+      "ML",
+      "deep learning",
+      "computer vision",
+      "NLP",
+      "natural language processing",
+      "LLM",
+      "LLMs",
+      "large language models",
+      "reinforcement learning",
+      "generative AI",
+      "GenAI",
+      "artificial intelligence",
+      "superintelligence",
+      "MSL",
+      "FAIR"
+    ],
+    "ai_terms_fields": [
+      "headline",
+      "current_title"
+    ],
+    "title_only_terms": [
+      "AI"
+    ],
+    "employer_size": "10,001+",
+    "non_technical_functions": [
+      "Human Resources",
+      "Sales",
+      "Marketing",
+      "Administrative",
+      "Finance & Accounting",
+      "Legal",
+      "Customer Service",
+      "Real Estate"
+    ],
+    "non_technical_title_words": [
+      "marketing",
+      "sales",
+      "recruiter",
+      "recruiting",
+      "sourcer",
+      "sourcing",
+      "talent",
+      "administrative",
+      "assistant",
+      "counsel",
+      "attorney",
+      "paralegal",
+      "accountant",
+      "communications",
+      "partnerships"
+    ],
+    "lab_note": "26 of the 936 list a non-technical function (recruiting and administration, mostly) and 12 more a non-technical title word. They stay in P2 as members of the lab, so the lab row carries them (about 4% of it) while the rest of P2 does not; the function table shows them among other functions.",
+    "decisions": [
+      "The draft term list (machine learning, AI, artificial intelligence, research scientist, research engineer, applied scientist, deep learning, LLM, computer vision, NLP, superintelligence, MSL, FAIR, generative AI, GenAI) gave 15,229 current Meta profiles and 14,297 after the function filter.",
+      "AI alone counts only in the current title. 4,003 draft profiles entered only through AI in the headline, where it is mostly a buzzword (AI-driven testing, cloud and AI platforms); in the first slice read, about half of them held AI roles.",
+      "Research scientist, research engineer, and applied scientist are not AI terms. Matching is word by word, so research engineer also matched titles such as a software engineer in Reality Labs Research, and plain research titles at Meta also cover people research, survey science, software testing, photonics, materials, and physical modeling. With these titles admitted, reads in California and Washington found 75 to 82% in AI roles; without them, 92%. 2,180 profiles entered only through such a title and are left out; research scientists who name an AI term, FAIR, or the lab stay in.",
+      "The employer must be the 10,001+ company. Outside the US the name Meta also matches small companies: 6 of 25 profiles in one slice outside the US worked at other firms whose names contain Meta, none of them sized 10,001+. The rule drops 845 draft profiles, most of them Meta work recorded under variant names or through staffing agencies, and a few that are not Meta at all.",
+      "ML, LLMs, large language models, natural language processing, and reinforcement learning were added; together they bring 547 profiles the draft missed.",
+      "Title words exclude marketing, sales, recruiting, and other non-technical roles whose current_function is missing or not in the excluded set (administrative, marketing, and sales roles in the reads)."
+    ],
+    "audit": "365 profiles read in whole slices, each a narrow filter read in full (one state or country and a range of total_experience_months), never the top of a search. The first slice (49 profiles of the draft) and three candidate slices (53) set the rules above. 150 profiles in eight whole slices fall in the final P2: 138 (92.0%) hold AI roles by their title, headline, and current job description. The last slice, 39 profiles read after the definition was fixed, gave 35 (89.7%) when two borderline creative and advisory roles count as misses. The misses are stale profiles that still list a current Meta job, generic engineers whose headline lists AI words, and a few operations roles. Contract data workers (prompt engineers, annotators, knowledge experts) who list Meta count as AI roles; they appear under data titles. No lab member with a non-technical function falls in the slices read. Records read for the audit are kept private.",
+    "size_note": "The name Meta on a current entry gives 66,757 profiles in the US and more than 100,000 elsewhere, because outside the US it also matches other companies. With the employer size 10,001+ in the same entry the count is exact on both sides. A company's reported headcount is the comparison; visible profiles also include contractors and profiles not yet updated after someone left."
+  },
+  "units": {
+    "note": "Each person counts at the first unit in this order whose terms appear in the headline or current title, so the rows do not overlap and add up to P2. The lab comes first, so every lab member is in the lab row whatever else they name. Units are what people write, not Meta's org chart.",
+    "order": [
+      {
+        "id": "lab",
+        "label": "Meta Superintelligence Labs",
+        "terms": [
+          "superintelligence",
+          "MSL"
+        ]
+      },
+      {
+        "id": "fair",
+        "label": "FAIR, outside the lab",
+        "terms": [
+          "FAIR"
+        ]
+      },
+      {
+        "id": "reality-labs",
+        "label": "Reality Labs, AR, VR, and wearables",
+        "terms": [
+          "Reality Labs",
+          "AR",
+          "VR",
+          "XR",
+          "augmented reality",
+          "virtual reality",
+          "mixed reality",
+          "wearables",
+          "smart glasses",
+          "Oculus"
+        ]
+      },
+      {
+        "id": "infrastructure",
+        "label": "AI infrastructure",
+        "terms": [
+          "infra",
+          "infrastructure"
+        ]
+      },
+      {
+        "id": "ads",
+        "label": "Ads and monetization",
+        "terms": [
+          "ads",
+          "monetization",
+          "advertising"
+        ]
+      },
+      {
+        "id": "ranking",
+        "label": "Ranking and recommendations",
+        "terms": [
+          "ranking",
+          "recommendation",
+          "recommendations",
+          "recommender",
+          "recsys"
+        ]
+      },
+      {
+        "id": "integrity",
+        "label": "Integrity",
+        "terms": [
+          "integrity"
+        ]
+      },
+      {
+        "id": "apps",
+        "label": "Instagram, WhatsApp, Messenger, Threads",
+        "terms": [
+          "Instagram",
+          "WhatsApp",
+          "Messenger",
+          "Threads"
+        ]
+      },
+      {
+        "id": "genai",
+        "label": "GenAI, the former org name",
+        "terms": [
+          "GenAI"
+        ]
+      }
+    ],
+    "none": {
+      "id": "none",
+      "label": "Names none of these"
+    },
+    "attributes": {
+      "research": "current_function eq Research",
+      "engineering": "current_function eq Engineering and Technical",
+      "manager_up": "current_seniority in Manager, Head, Director, Vice President, President/Vice President, C-Level, Partner, Founder, Owner (the stage-1 set in queries/measures.json)",
+      "doctorate": "an education entry with degree Doctorate",
+      "us": "location.country eq United States",
+      "china_educated": "a Bachelor entry at an institution on the mainland-China list (china_educated below)",
+      "bachelor": "any Bachelor entry, the base of the China-educated share"
+    },
+    "audit": [
+      "GenAI: a whole slice of 24 profiles outside the lab: 16 name Meta's former GenAI org, and 8 use the word for the topic, 5 of them inside ads, integrity, Instagram, or AR and VR work. GenAI therefore comes after the product areas, so that topic uses that name an area count there.",
+      "Generative AI without GenAI: a whole slice of 23: 5 read as the org, all of them job titles, and 18 as the topic. The phrase is not a unit term.",
+      "AR, VR, and wearables without Reality Labs: a whole slice of 16: 12 describe work on Reality Labs products (Quest, smart glasses, wearables), 4 do not (ads, sales, creator, and stale profiles). Reality Labs itself is the org name.",
+      "Infra or infrastructure outside the lab: a whole slice of 28: 26 work on AI infrastructure, 6 of them ads ML infrastructure, which counts here because infrastructure comes before ads; 2 work on network or general infrastructure.",
+      "FAIR outside the lab: all 7 who name it in the eight P2 slices are FAIR research staff. 215 of the 238 current Meta profiles that name FAIR and no lab term (stage 1) are in P2.",
+      "Ads, ranking, integrity, and app names were not read in slices of their own; in the P2 slices they name the current team's product area (ads ranking, Reels ranking, integrity, Instagram)."
+    ]
+  },
+  "functions": {
+    "note": "Five functions and none, exclusive, in this order: research (current_function Research), data (a data title and not Research), engineering (Engineering and Technical, no data title), product (Product, Design, or Project Management, no data title), other stated, none stated. The lab and the rest of P2 each add up to their total.",
+    "data_title_words": [
+      "data",
+      "annotation",
+      "annotations",
+      "annotator",
+      "labeling",
+      "labelling",
+      "labeler",
+      "prompt",
+      "knowledge expert",
+      "rater",
+      "evaluator"
+    ],
+    "product_functions": [
+      "Product",
+      "Design",
+      "Project Management"
+    ],
+    "audit": "Data titles in the reads: data engineers and data scientists, annotators and data labeling analysts, prompt engineers, knowledge experts, and AI data quality reviewers, many of them contract workers. Several annotators carry the Research function, which is why research comes first and keeps them: the data row is a lower bound on data work.",
+    "lab_rule": "The lab's functions are also published in stage 1 (data/roles.json). When a difference between a stage-1 cell and a stage-2 cell would be 1 to 9 people, the lab row merges other and none into one cell; if a difference is still 1 to 9, the run stops without writing."
+  },
+  "levels": {
+    "note": "current_seniority is counted in the groups below (Vice President and above is manager_up minus Manager, Head, and Director) and published in five: specialist-or-intern, senior, manager, head-and-above (Head, Director, and every level above), and none stated. The lab holds fewer than 10 interns and fewer than 10 above Director, and with the lab's manager_up published a reader could work out both, so Intern joins Specialist (as in stage 1) and the levels from Head up form one group. A visible hierarchy, not a reporting line.",
+    "groups": [
+      {
+        "id": "intern",
+        "values": [
+          "Intern"
+        ]
+      },
+      {
+        "id": "specialist",
+        "values": [
+          "Specialist"
+        ]
+      },
+      {
+        "id": "senior",
+        "values": [
+          "Senior"
+        ]
+      },
+      {
+        "id": "manager",
+        "values": [
+          "Manager"
+        ]
+      },
+      {
+        "id": "head-director",
+        "values": [
+          "Head",
+          "Director"
+        ]
+      },
+      {
+        "id": "vp-up",
+        "values": [
+          "Vice President",
+          "President/Vice President",
+          "C-Level",
+          "Partner",
+          "Founder",
+          "Owner"
+        ]
+      }
+    ],
+    "individual_contributor": [
+      "Intern",
+      "Specialist",
+      "Senior"
+    ],
+    "published": [
+      "specialist-or-intern",
+      "senior",
+      "manager",
+      "head-and-above",
+      "none"
+    ]
+  },
+  "titles": {
+    "note": "Current titles that contain all the words of a candidate, in any order, so rows overlap: Software Engineer, Machine Learning counts under both software engineer and machine learning engineer. Candidates are the titles that recur in the audit reads; the ten with the most P2 profiles are published.",
+    "candidates": [
+      "machine learning engineer",
+      "software engineer",
+      "research scientist",
+      "research engineer",
+      "engineering manager",
+      "product manager",
+      "program manager",
+      "data scientist",
+      "data engineer",
+      "prompt engineer",
+      "production engineer",
+      "director"
+    ],
+    "publish": 10
+  },
+  "directions": {
+    "note": "Multi-label. Stock: P2 profiles whose headline or current title contains a phrase, or whose skills contain a single word, of the direction. Flow: Meta AI postings (postings below) whose title contains a phrase or whose description contains a single word. Long fields (skills lists, descriptions) take single distinctive words only, because a phrase matches its words anywhere in the text.",
+    "list": [
+      {
+        "id": "foundation-models",
+        "label": "Foundation models and LLMs",
+        "phrase": [
+          "LLM",
+          "LLMs",
+          "large language model",
+          "large language models",
+          "foundation model",
+          "foundation models",
+          "language model",
+          "language models",
+          "pre-training",
+          "pretraining",
+          "Llama"
+        ],
+        "word": [
+          "LLM",
+          "LLMs",
+          "pretraining",
+          "Llama"
+        ]
+      },
+      {
+        "id": "post-training",
+        "label": "Post-training and alignment",
+        "phrase": [
+          "post-training",
+          "post training",
+          "RLHF",
+          "reinforcement learning",
+          "fine-tuning",
+          "alignment"
+        ],
+        "word": [
+          "RLHF",
+          "RLVR",
+          "reinforcement"
+        ]
+      },
+      {
+        "id": "multimodal-perception",
+        "label": "Multimodal and perception",
+        "phrase": [
+          "computer vision",
+          "vision",
+          "multimodal",
+          "speech",
+          "video",
+          "image",
+          "perception",
+          "3D",
+          "VLM"
+        ],
+        "word": [
+          "multimodal",
+          "VLM",
+          "VLMs",
+          "speech"
+        ]
+      },
+      {
+        "id": "ai-infrastructure",
+        "label": "AI infrastructure",
+        "phrase": [
+          "infra",
+          "infrastructure",
+          "GPU",
+          "GPUs",
+          "CUDA",
+          "inference",
+          "compiler",
+          "compilers",
+          "accelerator",
+          "accelerators",
+          "kernels",
+          "distributed training",
+          "systems ML",
+          "SystemML",
+          "HPC",
+          "MTIA",
+          "PyTorch"
+        ],
+        "word": [
+          "GPU",
+          "GPUs",
+          "CUDA",
+          "compiler",
+          "compilers",
+          "accelerator",
+          "accelerators",
+          "kernels",
+          "MTIA",
+          "HPC"
+        ]
+      },
+      {
+        "id": "agents",
+        "label": "Agents",
+        "phrase": [
+          "agent",
+          "agents",
+          "agentic"
+        ],
+        "word": [
+          "agentic",
+          "agents"
+        ]
+      },
+      {
+        "id": "ranking-recommendations",
+        "label": "Ranking and recommendations",
+        "phrase": [
+          "ranking",
+          "recommendation",
+          "recommendations",
+          "recommender",
+          "recsys"
+        ],
+        "word": [
+          "ranking",
+          "recommendation",
+          "recommender",
+          "recsys"
+        ]
+      },
+      {
+        "id": "ar-vr-devices",
+        "label": "AR, VR, and devices",
+        "phrase": [
+          "AR",
+          "VR",
+          "XR",
+          "augmented reality",
+          "virtual reality",
+          "mixed reality",
+          "wearables",
+          "smart glasses",
+          "Reality Labs",
+          "Oculus"
+        ],
+        "word": [
+          "wearables",
+          "XR",
+          "glasses"
+        ]
+      },
+      {
+        "id": "safety-evaluation",
+        "label": "Safety and evaluation",
+        "phrase": [
+          "safety",
+          "evaluation",
+          "evals",
+          "red teaming",
+          "responsible AI"
+        ],
+        "word": [
+          "evals",
+          "teaming"
+        ]
+      }
+    ],
+    "audit": "91 postings read in two whole slices (every Meta AI-titled posting of the last 180 days in New York, 30, and in Menlo Park, 61). Every description carries Meta's standard paragraph on augmented and virtual reality, and 59 of 91 mention responsible AI, so those phrases would match nearly every posting. Alignment appears mostly as stakeholder alignment, post-training also matches post-silicon in accelerator postings that mention training, inference also means causal inference, and computer vision matches any description with Computer Science and vision. Hence single distinctive words for descriptions; with them the matches read as the direction, except agents, which one security posting uses for its own tooling. In skills, safety mostly meant workplace safety and perception included brand perception, so neither is a skill word."
+  },
+  "sources": {
+    "employers_note": "Anyone with a past (not current) non-intern job at the employer, at any time, for the lab and the rest of P2; rows overlap. The first six are the stage-1 ever-worked-at rows, with the same definitions, so the lab's counts equal data/sources.json.",
+    "employers": [
+      {
+        "id": "google",
+        "label": "Google, including Google DeepMind",
+        "names": [
+          "Google",
+          "DeepMind"
+        ]
+      },
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "names": [
+          "OpenAI"
+        ]
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "names": [
+          "Anthropic"
+        ]
+      },
+      {
+        "id": "apple",
+        "label": "Apple",
+        "names": [
+          "Apple"
+        ]
+      },
+      {
+        "id": "microsoft",
+        "label": "Microsoft",
+        "names": [
+          "Microsoft"
+        ]
+      },
+      {
+        "id": "amazon",
+        "label": "Amazon",
+        "names": [
+          "Amazon",
+          "AWS"
+        ]
+      },
+      {
+        "id": "nvidia",
+        "label": "NVIDIA",
+        "names": [
+          "NVIDIA"
+        ]
+      },
+      {
+        "id": "bytedance",
+        "label": "ByteDance or TikTok",
+        "names": [
+          "ByteDance",
+          "TikTok"
+        ]
+      }
+    ],
+    "schools_note": "Any education entry at the school, any degree; rows overlap.",
+    "schools": [
+      {
+        "id": "stanford",
+        "label": "Stanford University",
+        "names": [
+          "Stanford"
+        ]
+      },
+      {
+        "id": "carnegie-mellon",
+        "label": "Carnegie Mellon University",
+        "names": [
+          "Carnegie Mellon"
+        ]
+      },
+      {
+        "id": "berkeley",
+        "label": "University of California, Berkeley",
+        "names": [
+          "Berkeley"
+        ]
+      },
+      {
+        "id": "mit",
+        "label": "Massachusetts Institute of Technology",
+        "names": [
+          "Massachusetts Institute of Technology"
+        ]
+      },
+      {
+        "id": "uiuc",
+        "label": "University of Illinois Urbana-Champaign",
+        "names": [
+          "Urbana"
+        ]
+      },
+      {
+        "id": "iit",
+        "label": "Indian Institutes of Technology",
+        "names": [
+          "Indian Institute of Technology"
+        ]
+      }
+    ]
+  },
+  "china_educated": {
+    "institutions_file": "cases/china-educated-ai-talent-2026/queries/institutions.json",
+    "note": "China-educated means a Bachelor entry that names an institution on the China-educated study's mainland list (its match and exact names, none of its exclude words), read from that file. The query sends the match and exact names in one in leaf and the exclude words in another; on P2 it gives the same 1,227 profiles as the study's own form with one match leaf per name. The share is of people with any Bachelor entry.",
+    "level_gate_count": 20,
+    "level_note": "By level (individual contributors, that is Intern, Specialist, and Senior, against manager and above) only where all four cells of a group (China-educated and Bachelor-listed, at each level) hold 20 or more."
+  },
+  "flows": {
+    "note": "Moves since 2025-06-01, with symmetric windows, non-intern entries only. Meta is the same employer as in P2: the name Meta with employer size 10,001+, since outside the US the name alone also matches other companies; Facebook, Instagram, WhatsApp, and Oculus entries count by name. Out to X: a current entry at X that started on or after 2025-06-01, a Meta entry that ended on or after 2025-05-01, and no current entry under the name Meta at any size, so a current Meta job whose entry lacks a size never counts as a move away. In from X: a current Meta entry that started on or after 2025-06-01, an entry at X that ended on or after 2025-05-01, and no current entry at X. All movers: the same with any employer outside the Meta names. The AI-titled subset adds the P2 AI terms in the headline or current title, and is counted only where the row holds 10 or more. Rows by employer can overlap.",
+    "start_from": "2025-06-01",
+    "ended_from": "2025-05-01",
+    "peers": [
+      {
+        "id": "openai",
+        "label": "OpenAI",
+        "names": [
+          "OpenAI"
+        ]
+      },
+      {
+        "id": "google-deepmind",
+        "label": "Google DeepMind",
+        "names": [
+          "DeepMind"
+        ]
+      },
+      {
+        "id": "anthropic",
+        "label": "Anthropic",
+        "names": [
+          "Anthropic"
+        ]
+      },
+      {
+        "id": "xai",
+        "label": "xAI",
+        "names": [
+          "xAI"
+        ]
+      },
+      {
+        "id": "thinking-machines",
+        "label": "Thinking Machines Lab",
+        "names": [
+          "Thinking Machines"
+        ]
+      },
+      {
+        "id": "microsoft",
+        "label": "Microsoft",
+        "names": [
+          "Microsoft"
+        ]
+      },
+      {
+        "id": "apple",
+        "label": "Apple",
+        "names": [
+          "Apple"
+        ]
+      },
+      {
+        "id": "amazon",
+        "label": "Amazon",
+        "names": [
+          "Amazon",
+          "AWS"
+        ]
+      },
+      {
+        "id": "nvidia",
+        "label": "NVIDIA",
+        "names": [
+          "NVIDIA"
+        ]
+      },
+      {
+        "id": "google",
+        "label": "Google, other than Google DeepMind",
+        "names": [
+          "Google"
+        ],
+        "exclude": [
+          "DeepMind"
+        ]
+      }
+    ],
+    "limits": "Profiles lag: start dates stop in April 2026, so a move needs a new entry by then to count, and the most recent months are undercounted. Meta cut more than 600 roles in its AI organization in October 2025 (SiliconANGLE, 2025-10-22, https://siliconangle.com/2025/10/22/meta-lays-off-600-ai-workers-looks-streamline-superintelligence-labs/); people who left then count as out-movers only once their next job appears. An entry whose date gives only a year reads as January of that year."
+  },
+  "postings": {
+    "note": "Meta postings (company.name match Meta; the jobs index has no employer size, so a few postings at other companies named Meta may be included) posted in the last 180 days (posted_date gte now-180d) whose title contains a P2 AI term or AI, and none of the non-technical title words. The index holds open postings only, and every one read was posted within three weeks of the snapshot, so this is the demand open on the day. A role posted in several cities counts once per city. Counts of postings carry no minimum.",
+    "posted_from": "now-180d",
+    "families": [
+      {
+        "id": "research-scientist",
+        "label": "Research scientist",
+        "title": [
+          "research scientist"
+        ]
+      },
+      {
+        "id": "research-engineer",
+        "label": "Research engineer",
+        "title": [
+          "research engineer"
+        ]
+      },
+      {
+        "id": "ml-software-engineer",
+        "label": "Machine learning or software engineer",
+        "title": [
+          "software engineer",
+          "machine learning engineer",
+          "ML engineer",
+          "AI engineer"
+        ]
+      },
+      {
+        "id": "data",
+        "label": "Data",
+        "title": [
+          "data",
+          "annotation",
+          "annotator",
+          "labeling",
+          "prompt",
+          "evaluator"
+        ]
+      },
+      {
+        "id": "product-program",
+        "label": "Product, program, and design",
+        "title": [
+          "product manager",
+          "product management",
+          "program manager",
+          "designer"
+        ]
+      }
+    ],
+    "families_note": "Exclusive, first match in this order; the rest are other (hardware, production, security, network, and leadership titles).",
+    "audit": "91 read (see directions): 73 pass the title rule. Plain research scientist postings include demography and survey science, server demand forecasting, and infrastructure reliability, and AI in a title also names marketing and business development roles; the rule drops those. The 73 left are AI roles, a few of them borderline (security for AI, analytics for AI ranking, AI hardware bring-up). 90 of 91 state a range in USD."
+  },
+  "pay": {
+    "note": "US postings (location.country eq United States) in USD that state both salary.annual_min and salary.annual_max, by family. A family is published only with 15 or more such postings. Counts at thresholds describe the posted base range; bonus, equity, and benefits are not in these figures, and no statistic describes what anyone is paid.",
+    "gate_count": 15,
+    "annual_min_thresholds": [
+      150000,
+      180000,
+      215000,
+      265000
+    ],
+    "annual_max_thresholds": [
+      215000,
+      250000,
+      295000,
+      340000
+    ],
+    "thresholds_note": "Meta's posted ranges fall on a few fixed bands (for example 122,000 to 181,000, 154,000 to 217,000, 184,000 to 257,000, 219,000 to 301,000, and 271,000 to 347,000 in the reads), so these thresholds separate the bands."
+  },
+  "hiring_difficulty": "Out of scope. A measure of how hard roles are to fill needs a comparison across employers or markets; one company's open postings and profiles do not give one.",
+  "privacy": "Every count of people from 1 to 9 is published as <10, and a share needs a base of 30. fetch.py lists every sum a reader can form: units add up to P2, table rows to their totals, and every nested pair (a unit and its US staff, a stage-2 lab cell and the stage-1 cell that holds it, a flow row and its AI-titled part) is a sum with the difference as a hidden group. It then solves those sums together by exact elimination, so a count is treated as known if any combination of published counts determines it, and withholds a count (null) until no hidden cell and no group of 1 to 9 people is determined and no sum leaves hidden parts that add up to 1 to 9. The residual row (units that name none of the terms) gives way first; a withheld count that the sums determine anyway is published. The China-educated split by level needs 20 in every cell. fetch.py writes nothing if any check fails."
+}

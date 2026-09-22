@@ -1,0 +1,74 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "lab_count": 936,
+  "rest_count": 7321,
+  "note": "Stock: profiles whose headline or current title names the direction, or whose skills list one of its words; a person can count in several.",
+  "rows": [
+    {
+      "group": "foundation-models",
+      "label": "Foundation models and LLMs",
+      "lab_count": 269,
+      "lab_share": 0.2874,
+      "rest_count": 1355,
+      "rest_share": 0.1851
+    },
+    {
+      "group": "post-training",
+      "label": "Post-training and alignment",
+      "lab_count": 82,
+      "lab_share": 0.0876,
+      "rest_count": 466,
+      "rest_share": 0.0637
+    },
+    {
+      "group": "multimodal-perception",
+      "label": "Multimodal and perception",
+      "lab_count": 149,
+      "lab_share": 0.1592,
+      "rest_count": 938,
+      "rest_share": 0.1281
+    },
+    {
+      "group": "ai-infrastructure",
+      "label": "AI infrastructure",
+      "lab_count": 123,
+      "lab_share": 0.1314,
+      "rest_count": 1135,
+      "rest_share": 0.155
+    },
+    {
+      "group": "agents",
+      "label": "Agents",
+      "lab_count": 53,
+      "lab_share": 0.0566,
+      "rest_count": 368,
+      "rest_share": 0.0503
+    },
+    {
+      "group": "ranking-recommendations",
+      "label": "Ranking and recommendations",
+      "lab_count": 77,
+      "lab_share": 0.0823,
+      "rest_count": 1307,
+      "rest_share": 0.1785
+    },
+    {
+      "group": "ar-vr-devices",
+      "label": "AR, VR, and devices",
+      "lab_count": 25,
+      "lab_share": 0.0267,
+      "rest_count": 532,
+      "rest_share": 0.0727
+    },
+    {
+      "group": "safety-evaluation",
+      "label": "Safety and evaluation",
+      "lab_count": 39,
+      "lab_share": 0.0417,
+      "rest_count": 261,
+      "rest_share": 0.0357
+    }
+  ]
+}

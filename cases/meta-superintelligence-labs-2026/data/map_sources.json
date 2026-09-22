@@ -1,0 +1,169 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "lab_count": 936,
+  "rest_count": 7321,
+  "note": "ever-worked-at: a past non-intern job at the employer, any time; the lab's first six rows equal data/sources.json. school: any education entry there. china-educated: a Bachelor entry at a mainland-China institution (the China-educated study's list), of those with a Bachelor entry; by level only where all four cells of a group hold 20 or more. Rows overlap.",
+  "rows": [
+    {
+      "set": "ever-worked-at",
+      "group": "google",
+      "label": "Google, including Google DeepMind",
+      "lab_count": 133,
+      "lab_share": 0.1421,
+      "rest_count": 604,
+      "rest_share": 0.0825
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "openai",
+      "label": "OpenAI",
+      "lab_count": 12,
+      "lab_share": 0.0128,
+      "rest_count": 19,
+      "rest_share": 0.0026
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "anthropic",
+      "label": "Anthropic",
+      "lab_count": 0,
+      "lab_share": 0.0,
+      "rest_count": "<10",
+      "rest_share": null
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "apple",
+      "label": "Apple",
+      "lab_count": 36,
+      "lab_share": 0.0385,
+      "rest_count": 222,
+      "rest_share": 0.0303
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "microsoft",
+      "label": "Microsoft",
+      "lab_count": 92,
+      "lab_share": 0.0983,
+      "rest_count": 561,
+      "rest_share": 0.0766
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "amazon",
+      "label": "Amazon",
+      "lab_count": 110,
+      "lab_share": 0.1175,
+      "rest_count": 745,
+      "rest_share": 0.1018
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "nvidia",
+      "label": "NVIDIA",
+      "lab_count": 10,
+      "lab_share": 0.0107,
+      "rest_count": 50,
+      "rest_share": 0.0068
+    },
+    {
+      "set": "ever-worked-at",
+      "group": "bytedance",
+      "label": "ByteDance or TikTok",
+      "lab_count": 16,
+      "lab_share": 0.0171,
+      "rest_count": 168,
+      "rest_share": 0.0229
+    },
+    {
+      "set": "school",
+      "group": "stanford",
+      "label": "Stanford University",
+      "lab_count": 48,
+      "lab_share": 0.0513,
+      "rest_count": 283,
+      "rest_share": 0.0387
+    },
+    {
+      "set": "school",
+      "group": "carnegie-mellon",
+      "label": "Carnegie Mellon University",
+      "lab_count": 51,
+      "lab_share": 0.0545,
+      "rest_count": 277,
+      "rest_share": 0.0378
+    },
+    {
+      "set": "school",
+      "group": "berkeley",
+      "label": "University of California, Berkeley",
+      "lab_count": 53,
+      "lab_share": 0.0566,
+      "rest_count": 284,
+      "rest_share": 0.0388
+    },
+    {
+      "set": "school",
+      "group": "mit",
+      "label": "Massachusetts Institute of Technology",
+      "lab_count": 22,
+      "lab_share": 0.0235,
+      "rest_count": 92,
+      "rest_share": 0.0126
+    },
+    {
+      "set": "school",
+      "group": "uiuc",
+      "label": "University of Illinois Urbana-Champaign",
+      "lab_count": 31,
+      "lab_share": 0.0331,
+      "rest_count": 177,
+      "rest_share": 0.0242
+    },
+    {
+      "set": "school",
+      "group": "iit",
+      "label": "Indian Institutes of Technology",
+      "lab_count": 42,
+      "lab_share": 0.0449,
+      "rest_count": 288,
+      "rest_share": 0.0393
+    },
+    {
+      "set": "china-educated",
+      "group": "all-levels",
+      "label": "Bachelor's at a mainland-China institution, of those with a Bachelor entry",
+      "lab_count": 144,
+      "lab_base_count": 727,
+      "lab_share": 0.1981,
+      "rest_count": 1083,
+      "rest_base_count": 5514,
+      "rest_share": 0.1964
+    },
+    {
+      "set": "china-educated-by-level",
+      "group": "ic",
+      "label": "Individual contributors (Intern, Specialist, Senior)",
+      "lab_count": null,
+      "lab_base_count": null,
+      "lab_share": null,
+      "rest_count": 765,
+      "rest_base_count": 3509,
+      "rest_share": 0.218
+    },
+    {
+      "set": "china-educated-by-level",
+      "group": "manager-up",
+      "label": "Manager and above",
+      "lab_count": null,
+      "lab_base_count": null,
+      "lab_share": null,
+      "rest_count": 117,
+      "rest_base_count": 752,
+      "rest_share": 0.1556
+    }
+  ]
+}

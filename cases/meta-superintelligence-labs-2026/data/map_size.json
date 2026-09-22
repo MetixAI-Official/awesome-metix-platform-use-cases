@@ -1,0 +1,38 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "note": "meta-current-us: current Meta entries (the name Meta, which outside the US also matches other companies, so no global count is given). meta-10001: current Meta entries whose employer size is 10,001+, in the US and elsewhere or with no country. p2: Meta's visible AI staff (queries/mapping.json). Visible profiles include contractors and people who left without updating their profile; compare them with the company's reported headcount only as a coverage ratio.",
+  "rows": [
+    {
+      "group": "meta-current-us",
+      "count": 66757,
+      "share": null
+    },
+    {
+      "group": "meta-10001-us",
+      "count": 60588,
+      "share": null
+    },
+    {
+      "group": "meta-10001-elsewhere-or-none",
+      "count": 68382,
+      "share": null
+    },
+    {
+      "group": "p2",
+      "count": 8257,
+      "share": null
+    },
+    {
+      "group": "p2-us",
+      "count": 6888,
+      "share": 0.8342
+    },
+    {
+      "group": "lab",
+      "count": 936,
+      "share": 0.1134
+    }
+  ]
+}

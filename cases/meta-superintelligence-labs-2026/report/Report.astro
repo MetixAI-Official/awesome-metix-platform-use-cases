@@ -10,7 +10,7 @@
  *   1200px, four on tablets, eight on phones, so a mark never drops much under 1.5px.
  * Body: figure 01 draws first joins as a rate per year, so bands of different lengths compare,
  *   in two panels split at the founding: by year before it, by month after it.
- * Wording: the population is people who chose to name the lab, a lower bound and not the lab.
+ * Wording: the population is people who chose to name the lab, counted as profiles, not staff.
  *   Neutral verbs for moves (join, leave, return, hire). No one is named.
  */
 import BarList from "@site/components/charts/BarList.astro";
@@ -28,8 +28,49 @@ import receipt from "../data/receipt.json";
 import rolesData from "../data/roles.json";
 import sourcesData from "../data/sources.json";
 import teamsData from "../data/teams.json";
+import mapDirectionsRaw from "../data/map_directions.json";
+import mapFlows from "../data/map_flows.json";
+import mapFunctionsRaw from "../data/map_functions.json";
+import mapLevelsRaw from "../data/map_levels.json";
+import mapPay from "../data/map_pay.json";
+import mapPostings from "../data/map_postings.json";
+import mapSize from "../data/map_size.json";
+import mapSourcesRaw from "../data/map_sources.json";
+import mapTitlesRaw from "../data/map_titles.json";
+import mapUnitsRaw from "../data/map_units.json";
+import mappingQuery from "../queries/mapping.json";
 import measuresQuery from "../queries/measures.json";
 import populationQuery from "../queries/population.json";
+import DotRows, { type Row as DotRow } from "./DotRows.astro";
+
+// Stage-2 shares are stored rounded to four places, and rounding one again for display can land
+// a step off (329 of 936 is 35.1496%, stored as 0.3515, which would print 35.2%). Every share that
+// has its count is recomputed from the count and its base before anything is drawn.
+type Rec = Record<string, unknown>;
+const reshare = <T extends Rec>(rows: T[], baseOf: (r: T, prefix: string) => unknown): T[] =>
+  rows.map((r) => {
+    const out: Rec = { ...r };
+    for (const k of Object.keys(r)) {
+      if (!k.endsWith("_share")) continue;
+      const p = k.slice(0, -"_share".length);
+      const c = r[`${p}_count`];
+      const b = baseOf(r, p);
+      if (typeof c === "number" && typeof b === "number" && b > 0) out[k] = c / b;
+    }
+    return out as T;
+  });
+// Files that compare the lab with the rest: the groups are the bases unless a row names its own.
+const labRest = <F extends { lab_count: number; rest_count: number; rows: Rec[] }>(f: F): F => ({
+  ...f,
+  rows: reshare(f.rows, (r, p) => (p === "lab" ? (r.lab_base_count ?? f.lab_count) : p === "rest" ? (r.rest_base_count ?? f.rest_count) : undefined)),
+});
+const mapDirections = labRest(mapDirectionsRaw);
+const mapFunctions = labRest(mapFunctionsRaw);
+const mapLevels = labRest(mapLevelsRaw);
+const mapSources = labRest(mapSourcesRaw);
+const mapTitles = labRest(mapTitlesRaw);
+// Units: shares within the unit, except China-educated, which is of those listing a bachelor's.
+const mapUnits = { ...mapUnitsRaw, rows: reshare(mapUnitsRaw.rows, (r, p) => (p === "china_educated" ? r.bachelor_count : r.count)) };
 
 interface Props {
   lang: Lang;
@@ -329,6 +370,324 @@ const parts = [
       : "Doctorates among its researchers, the groups people name, where they are, and the postings open on the day of the snapshot.",
   },
 ];
+
+// ================= stage 2: the map =================
+// Color keeps one meaning per group: lab violet, the rest of Meta's AI staff gray, Meta's AI
+// postings blue, and a warm tone only for people who left Meta.
+// Each figure shows only the parts of mapping.json it rests on.
+const PEOPLE = "POST /v1/people/query";
+const JOBS = "POST /v1/jobs/query";
+const q2 = (endpoint: string, ...parts: (keyof typeof mappingQuery)[]) => [
+  { file: `mapping.json (${parts.join(", ")})`, endpoint, spec: Object.fromEntries(parts.map((k) => [k, mappingQuery[k]])) },
+];
+const sourceBoth = zh ? `来源：Metix AI Platform 个人档案与岗位数据，${iso}。` : `Source: Metix AI Platform, profiles and jobs, ${iso}.`;
+const SEC = "https://www.sec.gov/Archives/edgar/data/1326801/000162828026050596/meta-06302026xexhibit991.htm";
+const SPLIT = "https://builtin.com/artificial-intelligence/meta-superintelligence-reorg";
+const CUTS = "https://siliconangle.com/2025/10/22/meta-lays-off-600-ai-workers-looks-streamline-superintelligence-labs/";
+// Meta's reported headcount on 2026-06-30 (SEC exhibit 99.1, released 2026-07-29): public, not a Platform count.
+const HEADCOUNT = 75472;
+
+type Cell = number | string | null | undefined;
+const isNum = (v: Cell): v is number => typeof v === "number";
+const sizeOf = (g: string) => num(row(mapSize.rows, g, "size").count, `size ${g}`);
+const p2 = sizeOf("p2");
+const visibleMeta = sizeOf("meta-10001-us") + sizeOf("meta-10001-elsewhere-or-none");
+const coverage = visibleMeta / HEADCOUNT;
+if (coverage < 1.2) throw new Error("Meta report: visible profiles no longer clearly exceed the headcount; rewrite figure 11");
+
+// ---------- the map (figure 10)
+type UnitRow = (typeof mapUnits.rows)[number];
+const unitRows = mapUnits.rows.filter((r) => r.group !== "p2");
+const p2row = row(mapUnits.rows, "p2", "unit");
+const unit = (g: string) => row(unitRows, g, "unit");
+if (unit("lab").count !== total) throw new Error("Meta report: the map's lab row is no longer the stage-1 group");
+if (unitRows.reduce((s, r) => s + num(r.count, r.group), 0) !== p2) throw new Error("Meta report: the units do not add up to P2");
+const noneShare = num(unit("none").count, "none") / p2;
+const named = unitRows.filter((r) => r.group !== "none").sort((a, b) => num(b.count, b.group) - num(a.count, a.group));
+if (named[0].group !== "lab") throw new Error("Meta report: the lab is no longer the largest named unit; rewrite figure 10");
+if (Math.round(p2 / total) !== 9) throw new Error("Meta report: the lab is no longer one in nine; rewrite the stage heading");
+const unitName: Record<string, Record<Lang, string>> = {
+  lab: { en: "Meta Superintelligence Labs", zh: "Meta 超级智能实验室" },
+  fair: { en: "FAIR, outside the lab", zh: "FAIR（没写实验室）" },
+  "reality-labs": { en: "Reality Labs, AR, VR, and wearables", zh: "Reality Labs、AR、VR 与可穿戴设备" },
+  infrastructure: { en: "AI infrastructure", zh: "AI 基础设施" },
+  ads: { en: "Ads and monetization", zh: "广告与变现" },
+  ranking: { en: "Ranking and recommendations", zh: "排序与推荐" },
+  integrity: { en: "Integrity", zh: "内容安全（Integrity）" },
+  apps: { en: "Instagram, WhatsApp, Messenger, Threads", zh: "Instagram、WhatsApp、Messenger、Threads" },
+  genai: { en: "GenAI, the former org", zh: "GenAI（原组织名）" },
+  none: { en: "Names none of these", zh: "以上都没写" },
+};
+type Stat = "research_share" | "engineering_share" | "manager_up_share" | "doctorate_share" | "china_educated_share" | "us_share";
+const statCols: { field: Stat; en: string; zh: string }[] = [
+  { field: "research_share", en: "Research", zh: "研究" },
+  { field: "engineering_share", en: "Engineering", zh: "工程" },
+  { field: "manager_up_share", en: "Manager+", zh: "经理及以上" },
+  { field: "doctorate_share", en: "Doctorate", zh: "博士" },
+  { field: "china_educated_share", en: "China-educated", zh: "大陆本科" },
+  { field: "us_share", en: "US", zh: "美国" },
+];
+const stat = (r: UnitRow, k: Stat): Cell => (r as unknown as Record<string, Cell>)[k];
+// Each column is shaded within itself, against the highest value among the named units.
+const colMax = Object.fromEntries(statCols.map((c) => [c.field, Math.max(...named.map((r) => (isNum(stat(r, c.field)) ? (stat(r, c.field) as number) : 0)))]));
+const shade = (k: Stat, v: Cell) => (isNum(v) ? `--a: ${((v / colMax[k]) * 0.2).toFixed(3)}` : "");
+const MAP_MAX = 0.7; // the map's bars: shares of P2 on a 0 to 70% scale
+type MapRow = { key: string; name: string; count: Cell; share: number | null; r: UnitRow | null; level: 0 | 1 | 2; lab?: boolean; last?: boolean; bound?: boolean; first?: boolean };
+const labGroups = ["fair", "infra", "tbd-lab", "par"].map((g) => row(teamsData.rows, g, "team"));
+// The groups overlap, so at most their sum (a "<10" at 9) names one; the rest name none of them.
+const labNamesNone = total - labGroups.reduce((sum, t) => sum + (isNum(t.count) ? t.count : 9), 0);
+const mapRows: MapRow[] = [
+  { key: "p2", name: zh ? "Meta · 可见的 AI 员工" : "Meta · visible AI staff", count: p2, share: 1, r: p2row, level: 0 },
+  ...named.flatMap((r): MapRow[] => [
+    { key: r.group, name: unitName[r.group][lang], count: r.count, share: num(r.count, r.group) / p2, r, level: 1, lab: r.group === "lab" },
+    ...(r.group === "lab"
+      ? [
+          ...labGroups.map((t, i): MapRow => ({ key: `lab-${t.group}`, name: teamName[t.group][lang], count: t.count, share: isNum(t.count) ? t.count / p2 : null, r: null, level: 2, first: i === 0 })),
+          { key: "lab-none", name: zh ? "四个团队都没写" : "Names none of the four", count: `≥ ${n(labNamesNone)}`, share: labNamesNone / p2, r: null, level: 2, last: true, bound: true },
+        ]
+      : []),
+  ]),
+  { key: "none", name: unitName.none[lang], count: unit("none").count, share: noneShare, r: unit("none"), level: 1, last: true },
+];
+
+// ---------- functions and levels, titles (figures 12 and 13)
+// A count of "<10" in a column of shares prints the share it stays under and draws an open ring
+// at the largest share it could hide.
+const capped = (s: "lab" | "rest", count: Cell, share: Cell): DotRow["dots"][number] => {
+  if (isNum(count)) return { s, v: share as number };
+  if (count !== "<10") return { s, v: count ?? null };
+  const upTo = 9 / (s === "lab" ? total : p2 - total);
+  return { s, v: `<${number(lang, Math.ceil(upTo * 100), 0)}%`, upTo };
+};
+const postAll = mapPostings.all_count;
+const postRow = (set: string, g: string) => row(mapPostings.rows.filter((r) => r.set === set), g, `posting ${set}`);
+const fam = (g: string) => num(postRow("family", g).count, `family ${g}`);
+const fnOf = (g: string) => row(mapFunctions.rows, g, "function");
+const mapFnRows: DotRow[] = [
+  { g: "research", en: "Research", zh: "研究", post: (fam("research-scientist") + fam("research-engineer")) / postAll },
+  { g: "engineering", en: "Engineering", zh: "工程", post: fam("ml-software-engineer") / postAll },
+  { g: "product", en: "Product, design, and program", zh: "产品、设计与项目", post: fam("product-program") / postAll },
+  { g: "data", en: "Data", zh: "数据", post: fam("data") / postAll },
+  { g: "other-or-none", en: "Other, or none stated", zh: "其他或未写明", post: fam("other") / postAll },
+].map((f) => ({ name: zh ? f.zh : f.en, dots: [{ s: "lab", v: fnOf(f.g).lab_share }, { s: "rest", v: fnOf(f.g).rest_share }, { s: "post", v: f.post }] }));
+const labR = num(fnOf("research").lab_share, "lab research");
+const restR = num(fnOf("research").rest_share, "rest research");
+if (labR <= restR * 1.5) throw new Error("Meta report: the lab's research share is no longer well above the rest's; rewrite figure 12 and the brief");
+const lvOf = (g: string) => row(mapLevels.rows, g, "level");
+const lvName: Record<string, Record<Lang, string>> = {
+  "specialist-or-intern": { en: "Specialist or intern", zh: "专员或实习" },
+  senior: { en: "Senior", zh: "资深" },
+  manager: { en: "Manager", zh: "经理" },
+  "head-and-above": { en: "Head, director, and above", zh: "负责人、总监及以上" },
+  none: { en: "None stated", zh: "未写明" },
+};
+const lvRows: DotRow[] = mapLevels.rows.map((r) => ({ name: lvName[r.group][lang], dots: [{ s: "lab", v: r.lab_share }, { s: "rest", v: r.rest_share }] }));
+const mgrUp = (k: "lab_share" | "rest_share") => num(lvOf("manager")[k], "manager") + num(lvOf("head-and-above")[k], "head");
+// Figure 12 holds both: functions for the two staff groups and postings, then levels, which
+// postings do not have.
+const roleRows: DotRow[] = [
+  ...mapFnRows.map((r, i) => ({ ...r, head: i === 0 ? (zh ? "职能" : "Function") : undefined })),
+  ...lvRows.map((r, i) => ({ ...r, dots: [...r.dots, { s: "post" as const, v: "" }], head: i === 0 ? (zh ? "层级（岗位没有层级）" : "Level (postings have none)") : undefined })),
+];
+const tiName: Record<string, string> = {
+  "machine-learning-engineer": "机器学习工程师",
+  "software-engineer": "软件工程师",
+  "research-scientist": "研究科学家",
+  "engineering-manager": "工程经理",
+  director: "总监",
+  "product-manager": "产品经理",
+  "research-engineer": "研究工程师",
+  "data-scientist": "数据科学家",
+  "program-manager": "项目经理",
+  "data-engineer": "数据工程师",
+};
+const tiRows: DotRow[] = [...mapTitles.rows]
+  .sort((a, b) => num(b.rest_count, b.group) + (isNum(b.lab_count) ? b.lab_count : 0) - (num(a.rest_count, a.group) + (isNum(a.lab_count) ? a.lab_count : 0)))
+  .map((r) => ({ name: zh ? tiName[r.group] : r.label.charAt(0).toUpperCase() + r.label.slice(1), dots: [capped("lab", r.lab_count, r.lab_share), capped("rest", r.rest_count, r.rest_share)] }));
+const tiOf = (g: string) => row(mapTitles.rows, g, "title");
+
+// ---------- directions, stock against postings (figure 14)
+const drName: Record<string, Record<Lang, string>> = {
+  "foundation-models": { en: "Foundation models and LLMs", zh: "基础模型与大语言模型" },
+  "post-training": { en: "Post-training and alignment", zh: "后训练与对齐" },
+  "multimodal-perception": { en: "Multimodal and perception", zh: "多模态与感知" },
+  "ai-infrastructure": { en: "AI infrastructure", zh: "AI 基础设施" },
+  agents: { en: "Agents", zh: "Agent" },
+  "ranking-recommendations": { en: "Ranking and recommendations", zh: "排序与推荐" },
+  "ar-vr-devices": { en: "AR, VR, and devices", zh: "AR、VR 与设备" },
+  "safety-evaluation": { en: "Safety and evaluation", zh: "安全与评测" },
+};
+const drPost = (g: string) => num(postRow("direction", g).count, `direction ${g}`) / postAll;
+const drRows: DotRow[] = [...mapDirections.rows]
+  .sort((a, b) => drPost(b.group) - drPost(a.group))
+  .map((r) => ({ name: drName[r.group][lang], dots: [{ s: "lab", v: r.lab_share }, { s: "rest", v: r.rest_share }], bar: drPost(r.group) }));
+const topPosted = [...mapDirections.rows].sort((a, b) => drPost(b.group) - drPost(a.group)).slice(0, 3).map((r) => r.group).join(",");
+if (topPosted !== "ranking-recommendations,foundation-models,ai-infrastructure") throw new Error(`Meta report: postings now lead with ${topPosted}; rewrite figure 14`);
+const drOf = (g: string) => row(mapDirections.rows, g, "direction");
+
+// ---------- sources (figure 15)
+const srcSet = (set: string) => mapSources.rows.filter((r) => r.set === set);
+const srcName: Record<string, string> = {
+  google: "Google（含 Google DeepMind）",
+  openai: "OpenAI",
+  apple: "Apple",
+  microsoft: "Microsoft",
+  amazon: "Amazon",
+  nvidia: "NVIDIA",
+  bytedance: "字节跳动或 TikTok",
+  stanford: "斯坦福大学",
+  "carnegie-mellon": "卡内基梅隆大学",
+  berkeley: "加州大学伯克利分校",
+  mit: "麻省理工学院",
+  uiuc: "伊利诺伊大学厄巴纳-香槟分校",
+  iit: "印度理工学院",
+};
+const mapSrcRow = (r: (typeof mapSources.rows)[number]): DotRow => ({ name: zh ? srcName[r.group] : r.label, dots: [capped("lab", r.lab_count, r.lab_share), capped("rest", r.rest_count, r.rest_share)] });
+const byLab = (a: (typeof mapSources.rows)[number], b: (typeof mapSources.rows)[number]) => (isNum(b.lab_share) ? b.lab_share : 0) - (isNum(a.lab_share) ? a.lab_share : 0);
+const cnAll = row(srcSet("china-educated"), "all-levels", "China-educated");
+const cnIc = row(srcSet("china-educated-by-level"), "ic", "China-educated IC");
+const cnMgr = row(srcSet("china-educated-by-level"), "manager-up", "China-educated manager");
+const srcRows: DotRow[] = [
+  ...srcSet("ever-worked-at").filter((r) => r.group !== "anthropic").sort(byLab).map((r, i) => ({ ...mapSrcRow(r), head: i === 0 ? (zh ? "以前工作过的公司" : "Earlier employers") : undefined })),
+  ...srcSet("school").sort(byLab).map((r, i) => ({ ...mapSrcRow(r), head: i === 0 ? (zh ? "就读过的学校" : "Schools") : undefined })),
+  { name: zh ? "中国大陆本科（占写有本科者）" : "Mainland-China bachelor's, of those listing one", dots: [{ s: "lab", v: cnAll.lab_share }, { s: "rest", v: cnAll.rest_share }], head: zh ? "中国教育背景" : "China-educated" },
+  { name: zh ? "其中：个人贡献者" : "Of them: individual contributors", dots: [{ s: "lab", v: null }, { s: "rest", v: cnIc.rest_share }] },
+  { name: zh ? "其中：经理及以上" : "Of them: manager and above", dots: [{ s: "lab", v: null }, { s: "rest", v: cnMgr.rest_share }] },
+];
+const srcOf = (set: string, g: string) => row(srcSet(set), g, `${set} ${g}`);
+
+// ---------- flows with ten employers since June 2025 (figure 16)
+const flow = (dir: "out" | "in", g: string) => row(mapFlows.rows.filter((r) => r.direction === dir), g, `flow ${dir}`).count;
+const flowName: Record<string, Record<Lang, string>> = {
+  openai: { en: "OpenAI", zh: "OpenAI" },
+  anthropic: { en: "Anthropic", zh: "Anthropic" },
+  "google-deepmind": { en: "Google DeepMind", zh: "Google DeepMind" },
+  xai: { en: "xAI", zh: "xAI" },
+  "thinking-machines": { en: "Thinking Machines Lab", zh: "Thinking Machines Lab" },
+  amazon: { en: "Amazon", zh: "Amazon" },
+  microsoft: { en: "Microsoft", zh: "Microsoft" },
+  google: { en: "Google, other than DeepMind", zh: "Google（DeepMind 以外）" },
+  apple: { en: "Apple", zh: "Apple" },
+  nvidia: { en: "NVIDIA", zh: "NVIDIA" },
+};
+const upper = (v: Cell) => (isNum(v) ? v : 9); // a "<10" cell is at most 9
+const lower = (v: Cell) => (isNum(v) ? v : 1);
+const netText = (o: Cell, i: Cell) => {
+  if (isNum(o) && isNum(i)) {
+    const d = o - i;
+    if (d === 0) return zh ? "持平" : "even";
+    return d > 0 ? (zh ? `净流出 ${n(d)}` : `${n(d)} more left`) : zh ? `净流入 ${n(-d)}` : `${n(-d)} more joined`;
+  }
+  // One side is "<10": give the bound the published counts support.
+  const least = isNum(o) ? o - upper(i) : upper(o) - lower(i);
+  return least > 0 ? (zh ? `净流出至少 ${n(least)}` : `at least ${n(least)} more left`) : isNum(i) ? (zh ? `净流入至少 ${n(i - upper(o))}` : `at least ${n(i - upper(o))} more joined`) : "";
+};
+const flowGroups = [
+  { title: zh ? "AI 实验室" : "AI labs", keys: ["openai", "anthropic", "google-deepmind", "xai", "thinking-machines"] },
+  { title: zh ? "大型科技公司" : "Large technology companies", keys: ["amazon", "microsoft", "google", "apple", "nvidia"] },
+].map((gp) => ({ ...gp, rows: gp.keys.map((k) => ({ k, name: flowName[k][lang], out: flow("out", k), in: flow("in", k), net: netText(flow("out", k), flow("in", k)) })) }));
+const flowMax = Math.max(...mapFlows.rows.filter((r) => r.group !== "all").map((r) => upper(r.count)));
+// The largest bar leaves room for its count, whatever the width of the side.
+const flowW = (v: Cell) => `calc((100% - 48px) * ${(upper(v) / flowMax).toFixed(4)})`;
+const labsOut = flowGroups[0].keys.reduce((s, k) => s + num(flow("out", k), `out ${k}`), 0);
+const labsInAtMost = flowGroups[0].keys.reduce((s, k) => s + upper(flow("in", k)), 0);
+if (labsOut <= labsInAtMost) throw new Error("Meta report: Meta no longer loses more to the AI labs than it hires from them; rewrite the stage heading");
+// Among the large technology companies, who sent more people to Meta than they took, and who took more.
+const bigRows = flowGroups[1].rows;
+const moreIn = bigRows.filter((r) => isNum(r.in) && isNum(r.out) && r.in > r.out * 1.1);
+const moreOut = bigRows.filter((r) => isNum(r.in) && isNum(r.out) && r.out > r.in * 1.1);
+const evenRows = bigRows.filter((r) => !moreIn.includes(r) && !moreOut.includes(r));
+if (!["amazon", "microsoft"].every((k) => moreIn.some((r) => r.k === k))) throw new Error("Meta report: Amazon or Microsoft no longer sends Meta more people than it takes; rewrite figure 16");
+const shortName: Record<string, Record<Lang, string>> = { google: { en: "Google outside DeepMind", zh: "Google（DeepMind 以外）" } };
+const listOf = (rows: typeof bigRows) => {
+  const names = rows.map((r) => shortName[r.k]?.[lang] ?? r.name);
+  if (!zh) return new Intl.ListFormat("en", { type: "conjunction" }).format(names);
+  return names.length > 1 ? `${names.slice(0, -1).join("、")} 和 ${names[names.length - 1]}` : names[0];
+};
+const exceptions = moreOut.length
+  ? zh
+    ? `${listOf(moreOut)} 是例外：${moreOut.map((r) => `离开去 ${r.name} 的有 ${n(r.out as number)} 人，从那里加入的是 ${n(r.in as number)} 人`).join("；")}。`
+    : `${listOf(moreOut)} ${moreOut.length === 1 ? "is the exception" : "are the exceptions"}: ${moreOut.map((r) => `${n(r.out as number)} left for ${r.name} and ${n(r.in as number)} joined from it`).join("; ")}. `
+  : "";
+const evenText = evenRows.length
+  ? zh
+    ? `${listOf(evenRows)}：两个方向相当（${evenRows.map((r) => `${evenRows.length > 1 ? `${r.name} ` : ""}加入 ${n(r.in as number)} 人、离开 ${n(r.out as number)} 人`).join("；")}）。`
+    : `${listOf(evenRows)} ${evenRows.length === 1 ? "is" : "are"} about even (${evenRows.map((r) => `${evenRows.length > 1 ? `${r.name}: ` : ""}${n(r.in as number)} in and ${n(r.out as number)} out`).join("; ")}). `
+  : "";
+const allOut = num(flow("out", "all"), "all out");
+const allIn = num(flow("in", "all"), "all in");
+
+// ---------- base pay stated in postings (figure 17)
+const payRows = (f: string, b: string | null) => mapPay.rows.filter((r) => r.family === f && r.bound === b);
+const payTotal = (f: string) => num(payRows(f, null)[0].count, `pay ${f}`);
+const payAt = (f: string, b: string) => payRows(f, b).sort((x, y) => (x.at_least ?? 0) - (y.at_least ?? 0)).map((r) => ({ at: r.at_least ?? 0, c: num(r.count, `pay ${f}`) }));
+// The band holding the middle posting: the last threshold at least half the postings reach, and the next one.
+const midBand = (f: string, b: string) => {
+  const t = payAt(f, b);
+  const i = t.findIndex((x) => x.c / payTotal(f) < 0.5);
+  if (i <= 0) throw new Error(`Meta report: the middle ${b} band of ${f} moved; rewrite figure 17`);
+  return [t[i - 1].at, t[i].at];
+};
+const money = (v: number) => (zh ? `${number(lang, v / 10000, 1).replace(/\.0$/, "")} 万美元` : `$${n(v)}`);
+const moneyK = (v: number) => (zh ? `${number(lang, v / 10000, 1).replace(/\.0$/, "")} 万` : `$${n(v / 1000)}k`);
+const payFamilies = ["all", "research-scientist", "ml-software-engineer"].filter((f) => payRows(f, null)[0]?.published);
+const payName: Record<string, Record<Lang, string>> = {
+  all: { en: "All AI postings", zh: "全部 AI 岗位" },
+  "research-scientist": { en: "Research scientist", zh: "研究科学家" },
+  "ml-software-engineer": { en: "Machine learning or software engineer", zh: "机器学习或软件工程师" },
+};
+// Bands of the top of the posted range, from the annual_max thresholds.
+const payBands = payFamilies.map((f) => {
+  const t = payAt(f, "annual_max");
+  const tot = payTotal(f);
+  const edges = t.map((x) => x.at);
+  const counts = [tot - t[0].c, ...t.slice(1).map((x, i) => t[i].c - x.c), t[t.length - 1].c];
+  return { f, tot, edges, counts };
+});
+const bandLabel = (edges: number[], i: number) =>
+  i === 0 ? (zh ? `${moneyK(edges[0])}以下` : `Under ${moneyK(edges[0])}`) : i === edges.length ? (zh ? `${moneyK(edges[i - 1])}及以上` : `${moneyK(edges[i - 1])} and up`) : zh ? `${moneyK(edges[i - 1])}到 ${moneyK(edges[i])}` : `${moneyK(edges[i - 1])} to ${moneyK(edges[i])}`;
+const [minLo, minHi] = midBand("all", "annual_min");
+const [maxLo, maxHi] = midBand("all", "annual_max");
+const rsTop = payAt("research-scientist", "annual_max").find((x) => x.at === 250000);
+const mlTop = payAt("ml-software-engineer", "annual_max").find((x) => x.at === 250000);
+if (!rsTop || !mlTop) throw new Error("Meta report: the 250,000 threshold is gone; rewrite figure 17's note");
+
+const u = (g: string, k: Stat) => num(stat(unit(g), k) as number | string, `${g} ${k}`);
+const genaiCount = num(unit("genai").count, "genai");
+const restMLE = num(tiOf("machine-learning-engineer").rest_share, "rest MLE");
+if (restMLE < 0.22 || restMLE > 0.28) throw new Error("Meta report: machine learning engineers are no longer a quarter of the rest; rewrite the brief");
+const payRE = payRows("research-engineer", null)[0];
+const flowAlt = flowGroups
+  .flatMap((gp) => gp.rows)
+  .map((r) => `${r.name}${zh ? `：离开 ${isNum(r.out) ? n(r.out) : r.out}，加入 ${isNum(r.in) ? n(r.in) : r.in}` : `: ${isNum(r.out) ? n(r.out) : r.out} left, ${isNum(r.in) ? n(r.in) : r.in} joined`}`)
+  .join(zh ? "；" : "; ");
+
+const parts2 = [
+  {
+    id: "part-shape",
+    figures: ["10", "11"],
+    title: zh ? "形态" : "The shape",
+    note: zh
+      ? "Meta 的 AI 员工写明了哪些单元，实验室在其中的位置，以及可见人数和 Meta 报告的员工数相比如何。"
+      : "Which units Meta's AI staff name, where the lab sits among them, and how the visible count compares with Meta's reported headcount.",
+  },
+  {
+    id: "part-work",
+    figures: ["12", "13", "14"],
+    title: zh ? "工作" : "The work",
+    note: zh
+      ? "实验室和 Meta 其他 AI 员工做什么、在什么层级、用什么职位名称、在哪些技术方向，以及 Meta 的岗位在招什么。"
+      : "What the lab and the rest of Meta's AI staff do, at what level, under which titles, and in which technical directions, against what Meta's postings ask for.",
+  },
+  {
+    id: "part-in-out",
+    figures: ["15", "16", "17"],
+    title: zh ? "流入与流出" : "In and out",
+    note: zh
+      ? "他们以前在哪里读书和工作，2025 年 6 月以来 Meta 和十家公司之间的人员流动，以及 Meta 的 AI 岗位写明的底薪。"
+      : "Where Meta's AI staff studied and worked before, who moved between Meta and ten employers since June 2025, and the base pay Meta's AI postings state.",
+  },
+];
 ---
 
 {section === "card" && null}
@@ -353,6 +712,7 @@ const parts = [
               <p class="mx-dek" set:html={titleHtml(entry.dek[lang], lang)} />
               <div class="mx-actions">
                 <a class="mx-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
+                <a class="mx-chip" href="#stage-2">{zh ? "第二阶段：组织地图" : "Stage 2: the map"}</a>
                 <a class="mx-chip" href="#run-reproduce">
                   {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
                 </a>
@@ -454,7 +814,7 @@ const parts = [
                     ["成立时已在 Meta", "有一段不是实习的 Meta 工作，开始于 2025 年 6 月以前，并且到 2025 年 5 月或更晚仍在进行。"],
                     ["外部加入", "其余的人：Meta 新人，离开后又回到 Meta 的人，以及只在 Meta 实习过的人。"],
                     ["日期", "工作开始日期截至 2026 年 4 月。个人档案更新有滞后，最后几个月的人数偏少。只写年份的日期按 1 月算。"],
-                    ["计数的含义", "这是自己写明实验室的人的可见档案，是下限，不是实验室的人数。不点任何人的名字。"],
+                    ["计数的含义", "这是自己写明实验室的人的可见档案，数的是档案，不是实验室的人数。不点任何人的名字。"],
                   ]
                 : [
                     ["Named the lab", `The headline or current title says superintelligence or MSL: ${n(total)} profiles, ${n(narrowTotal)} of which write superintelligence.`],
@@ -462,7 +822,7 @@ const parts = [
                     ["At Meta when it formed", "A Meta job, not an internship, that began before June 2025 and was still running in May 2025 or later."],
                     ["Outside hires", "Everyone else: people new to Meta, people who worked at Meta and came back, and people who had only interned there."],
                     ["Dates", "Job start dates run to April 2026. Profiles lag, so the last months are undercounted. A date given only as a year reads as January."],
-                    ["What a count is", "These are visible profiles of people who chose to name the lab: a lower bound, not the lab's headcount. No one is named."],
+                    ["What a count is", "These are visible profiles of people who chose to name the lab: a count of profiles, not the lab's headcount. No one is named."],
                   ]
               ).map(([term, text]) => (
                 <div>
@@ -1092,6 +1452,541 @@ const parts = [
           />
         </Figure>
       </div>
+
+      <section class="mx-stage" id="stage-2" aria-labelledby="stage2-title">
+        <div class="wrap">
+          <div class="mx-stage-top">
+            <div class="mx-stage-text">
+              <p class="mx-stage-eyebrow">{zh ? "第二阶段 · 组织地图" : "Stage 2 · The map"}</p>
+              <h2
+                id="stage2-title"
+                set:html={titleHtml(
+                  zh
+                    ? "实验室占 Meta 可见 AI 员工的九分之一；离开 Meta 去 AI 实验室的人，比从那里加入的人多"
+                    : "A ninth of Meta's visible AI staff name the lab; more left Meta for AI labs than joined",
+                  lang,
+                )}
+              />
+              <p
+                class="mx-stage-dek"
+                set:html={titleHtml(
+                  zh
+                    ? "第一阶段问的是实验室里谁是新人。第二阶段把实验室放回 Meta 全部可见的 AI 员工中：大家写明的单元，做什么、在什么层级，从哪里来、到哪里去，以及 Meta 的岗位写明的底薪。"
+                    : "Stage 1 asked who is new in the lab. Stage 2 places the lab among all of Meta's visible AI staff: the units people name, what they do and at what level, where they came from and where they went, and the base pay Meta's postings state.",
+                  lang,
+                )}
+              />
+              <p class="mx-stage-note">
+                {zh ? (
+                  <>
+                    Meta 在 <span class="nowrap">2025 年 6 月 30 日</span><a href={MEMO}>成立实验室</a>，<span class="nowrap">2025 年 8 月</span>
+                    <a href={SPLIT}>把它分成四个团队</a>（TBD Lab、FAIR、Products and Applied Research 和 MSL Infra），<span class="nowrap">2025 年 10 月</span>
+                    <a href={CUTS}>在其中三个团队裁减 600 多个职位</a>，TBD Lab 未受影响。截至 <span class="nowrap">2026 年 6 月 30 日</span>，Meta{" "}
+                    <a href={SEC}>报告员工 {n(HEADCOUNT)} 人</a>。
+                  </>
+                ) : (
+                  <>
+                    Meta <a href={MEMO}>formed the lab</a> on June 30, 2025, <a href={SPLIT}>split it into four teams</a> in August 2025 (TBD Lab, FAIR,
+                    Products and Applied Research, and MSL Infra), and <a href={CUTS}>cut more than 600 roles</a> in three of them in October 2025, leaving TBD Lab
+                    untouched. It <a href={SEC}>reported a headcount of {n(HEADCOUNT)}</a> as of June 30, 2026.
+                  </>
+                )}
+              </p>
+            </div>
+            <div class="mx-stage-side">
+              <h3 class="mx-stage-brief-title">{zh ? "要点" : "In brief"}</h3>
+              <ol class="brief-list">
+                {(zh
+                  ? [
+                      `${n(p2)} 个当前在 Meta 的个人档案写明了 AI 岗位。其中 ${pct(noneShare)} 九个单元都没写；写明的单元里实验室最大，有 ${n(total)} 人，其次是原组织名 GenAI，有 ${n(genaiCount)} 人。`,
+                      `没写实验室的 FAIR 是研究比例最高的单元：${pct(u("fair", "research_share"))} 做研究，${pct(u("fair", "doctorate_share"))} 写有博士学历。AI 基础设施 ${pct(u("infrastructure", "engineering_share"))} 是工程；广告与变现有 ${pct(u("ads", "manager_up_share"))} 在经理及以上，全体是 ${pct(num(stat(p2row, "manager_up_share") as number, "p2 mgr"))}。`,
+                      `实验室 ${pct(labR)} 做研究，Meta 其他可见 AI 员工是 ${pct(restR)}；其他人里 ${pct(restMLE)} 的职位是机器学习工程师。`,
+                      `2025 年 6 月以来，Meta 所有岗位中有 ${n(labsOut)} 人离开，去了五家 AI 实验室，从那里加入 Meta 的最多 ${n(labsInAtMost)} 人；同期从 Amazon 加入 ${n(num(flow("in", "amazon"), "in amazon"))} 人，从 Microsoft 加入 ${n(num(flow("in", "microsoft"), "in microsoft"))} 人。`,
+                    ]
+                  : [
+                      `${n(p2)} current Meta profiles name an AI role. ${pct(noneShare)} name none of the nine units searched; the lab is the largest unit named, with ${n(total)}, then GenAI, the former org, with ${n(genaiCount)}.`,
+                      `FAIR outside the lab is the most research-heavy unit: ${pct(u("fair", "research_share"))} research and ${pct(u("fair", "doctorate_share"))} doctorates. AI infrastructure is ${pct(u("infrastructure", "engineering_share"))} engineering, and ads has ${pct(u("ads", "manager_up_share"))} at manager or above, against ${pct(num(stat(p2row, "manager_up_share") as number, "p2 mgr"))} overall.`,
+                      `The lab is ${pct(labR)} research, against ${pct(restR)} for the rest of Meta's visible AI staff; ${pct(restMLE)} of the rest are titled machine learning engineer.`,
+                      `Since June 2025, ${n(labsOut)} people in any role left Meta for five AI labs and at most ${n(labsInAtMost)} joined from them, while ${n(num(flow("in", "amazon"), "in amazon"))} joined from Amazon and ${n(num(flow("in", "microsoft"), "in microsoft"))} from Microsoft.`,
+                    ]
+                ).map((text) => (
+                  <li>
+                    <span set:html={zh ? titleHtml(text, "zh") : text} />
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+          <Contents lang={lang} parts={parts2} start={4} />
+        </div>
+      </section>
+
+      <div class="wrap report-body">
+        <Chapter lang={lang} part={4} {...parts2[0]} />
+
+        <Figure
+          id="map"
+          level={3}
+          number="10"
+          lang={lang}
+          heading={
+            zh
+              ? `Meta 可见 AI 员工中 ${pct(noneShare, 0)} 九个单元都没写；写明的单元里实验室最大，占 ${pct(total / p2)}`
+              : `${pct(noneShare, 0)} of Meta's visible AI staff name none of nine units; the lab is the largest, at ${pct(total / p2)}`
+          }
+          sub={
+            zh
+              ? `每人只算一次，按说明里的固定顺序，算在标题或职位里最先写到的单元；各行按人数排序。条形是占 ${n(p2)} 人的比例，刻度 0 到 70%；右边各列是每一行内部的比例，颜色越深表示在这一列里越高`
+              : `Each person counts once, at the first unit named in the headline or current title, in the fixed order the notes give; rows are sorted by size. Bars are shares of the ${n(p2)} on a 0 to 70% scale; the columns are shares within each row, darker where higher within the column`
+          }
+          alt={zh ? "树形表格：Meta 可见的 AI 员工按单元分行，实验室下面是它的四个团队。下面的表格列出每一行的人数和各项比例。" : "A tree-shaped table: Meta's visible AI staff by unit, with the lab's four groups beneath the lab. The table that follows gives every row's count and shares."}
+          source={source}
+          queries={[...q2(PEOPLE, "population", "units"), { file: "population.json", endpoint: PEOPLE, spec: populationQuery }]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-lab">{zh ? "实验室" : "The lab"}</span>
+            <span class="lg lg-unit">{zh ? "其他单元" : "Other units"}</span>
+            <span class="lg lg-bound">{zh ? "下限" : "Lower bound"}</span>
+            <span class="lg-plain">{zh ? "· 为保护小群体而不公开" : "· withheld to protect a small group"}</span>
+          </p>
+          <div class="mx-map" aria-hidden="true">
+            <div class="mm-head">
+              <span class="mm-name">{zh ? "单元" : "Unit"}</span>
+              <span class="mm-ticks">
+                {axis(MAP_MAX).map((t) => (
+                  <span style={`left: ${t.at * 100}%`}>{t.label}</span>
+                ))}
+              </span>
+              <span class="mm-count">{zh ? "人数 · 占比" : "People · share"}</span>
+              {statCols.map((c) => (
+                <span class="mm-stat">{zh ? c.zh : c.en}</span>
+              ))}
+            </div>
+            {mapRows.map((m) => (
+              <div class:list={["mm-row", `lv${m.level}`, { lab: m.lab, last: m.last, first: m.first }]}>
+                <span class="mm-name">
+                  <span class="mm-label" set:html={titleHtml(m.name, lang)} />
+                </span>
+                <span class="mm-bar">
+                  {m.level > 0 && m.share !== null && <span class:list={{ lb: m.bound }} style={`width: ${Math.min(m.share / MAP_MAX, 1) * 100}%`} />}
+                  {m.level > 0 && m.share === null && <span class="sup" style={`width: ${(9 / p2 / MAP_MAX) * 100}%`} />}
+                </span>
+                <span class="mm-count">
+                  {isNum(m.count) ? n(m.count) : m.count}
+                  {m.level === 1 && m.share !== null && <em>{pct(m.share)}</em>}
+                </span>
+                {m.r ? (
+                  statCols.map((c) => {
+                    const v = stat(m.r as UnitRow, c.field);
+                    return (
+                      <span class="mm-stat" style={shade(c.field, v)}>
+                        <b class="mm-k">{zh ? c.zh : c.en}</b>
+                        {isNum(v) ? pct(v, 0) : "·"}
+                      </span>
+                    );
+                  })
+                ) : (
+                  <span class="mm-groups">{m.first ? (zh ? "四个团队会重叠，不再细分；见图 07" : "The four groups overlap and are not split further; see figure 07") : ""}</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <div class="visually-hidden">
+            <table>
+              <caption>{zh ? "Meta 可见的 AI 员工，按单元" : "Meta's visible AI staff, by unit"}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">{zh ? "单元" : "Unit"}</th>
+                  <th scope="col">{zh ? "人数" : "People"}</th>
+                  <th scope="col">{zh ? "占全部的比例" : "Share of all"}</th>
+                  {statCols.map((c) => (
+                    <th scope="col">{zh ? c.zh : c.en}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {mapRows.map((m) => (
+                  <tr>
+                    <th scope="row">{m.level === 2 ? (zh ? `其中（实验室）：${m.name}` : `Of the lab: ${m.name}`) : m.name}</th>
+                    <td>{isNum(m.count) ? n(m.count) : m.count}</td>
+                    <td>{m.share !== null ? `${m.bound ? "≥ " : ""}${pct(m.share)}` : zh ? "不到 10 人" : "fewer than 10"}</td>
+                    {statCols.map((c) => {
+                      const v = m.r ? stat(m.r, c.field) : undefined;
+                      return <td>{m.r ? (isNum(v) ? pct(v, 0) : zh ? "不公开" : "withheld") : ""}</td>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `{{hl|实验室}}占 Meta 可见 AI 员工的 ${pct(total / p2)}，其中 ${pct(labR)} 做研究，全体是 ${pct(num(stat(p2row, "research_share") as number, "p2 research"))}。没写实验室的 FAIR 是研究比例最高的单元（${pct(u("fair", "research_share"))} 做研究，${pct(u("fair", "doctorate_share"))} 写有博士学历）；AI 基础设施 ${pct(u("infrastructure", "engineering_share"))} 是工程；广告与变现有 ${pct(u("ads", "manager_up_share"))} 在经理及以上。在公开的单元中，中国大陆本科的比例从 Reality Labs 的 ${pct(u("reality-labs", "china_educated_share"))} 到排序与推荐的 ${pct(u("ranking", "china_educated_share"))}。`,
+                  ]
+                : [
+                    `{{hl|The lab}} is ${pct(total / p2)} of Meta's visible AI staff and ${pct(labR)} research, against ${pct(num(stat(p2row, "research_share") as number, "p2 research"))} overall. FAIR outside the lab is the most research-heavy unit (${pct(u("fair", "research_share"))} research, ${pct(u("fair", "doctorate_share"))} doctorates); AI infrastructure is ${pct(u("infrastructure", "engineering_share"))} engineering; ads has ${pct(u("ads", "manager_up_share"))} at manager or above. Among the units shown, the China-educated share runs from ${pct(u("reality-labs", "china_educated_share"))} in Reality Labs to ${pct(u("ranking", "china_educated_share"))} in ranking.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    `单元是大家自己写的，不是 Meta 的组织架构图。顺序是实验室、FAIR、Reality Labs、基础设施、广告、排序、内容安全、应用、GenAI；GenAI 排在各产品领域之后，因为抽读的 GenAI 中有三分之一指的是话题，不是原组织。实验室下面的四个团队来自第一阶段，会重叠。第一阶段有 ${n(num(row(teamsData.rows, "fair-only", "team").count, "fair only"))} 个档案写了 FAIR 但没写实验室，其中 ${n(num(unit("fair").count, "fair"))} 个符合第二阶段的定义。中国大陆本科的比例以写有本科者为分母。"·"是为了不让读者算出 1 到 9 人的小群体而不公开的格子。`,
+                  ]
+                : [
+                    `Units are what people write, not Meta's org chart. The order is the lab, FAIR, Reality Labs, infrastructure, ads, ranking, integrity, apps, and GenAI; GenAI comes after the product areas because a third of the GenAI mentions read name the topic, not the former org. The lab's four groups come from stage 1 and overlap. Stage 1 found ${n(num(row(teamsData.rows, "fair-only", "team").count, "fair only"))} profiles that name FAIR and not the lab; ${n(num(unit("fair").count, "fair"))} of them meet the stage-2 definition. The China-educated share is of people who list a bachelor's. A "·" is a cell withheld so that no group of 1 to 9 people can be worked out.`,
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="size"
+          level={3}
+          number="11"
+          lang={lang}
+          heading={
+            zh
+              ? `当前在 Meta 的个人档案是 Meta 报告员工数的 ${number(lang, coverage, 1)} 倍，所以这里数的是档案，不是员工`
+              : `Profiles at Meta outnumber its reported headcount ${number(lang, coverage, 1)} to 1; these count profiles, not staff`
+          }
+          sub={zh ? "条形共用一个刻度，最长的是当前在 Meta 的可见档案" : "The bars share one scale, set by the largest count, the current Meta profiles"}
+          alt={
+            zh
+              ? `可见档案 ${n(visibleMeta)}；报告员工数 ${n(HEADCOUNT)}；写明 AI 岗位 ${n(p2)}；写明实验室 ${n(total)}`
+              : `Visible profiles ${n(visibleMeta)}; reported headcount ${n(HEADCOUNT)}; naming an AI role ${n(p2)}; naming the lab ${n(total)}`
+          }
+          source={sourceBoth}
+          queries={q2(PEOPLE, "population")}
+        >
+          <div class="mx-violet">
+            <BarList
+              label={zh ? "档案与员工数" : "Profiles and headcount"}
+              rows={[
+                { label: zh ? "当前在 Meta 的可见个人档案" : "Current Meta profiles on the Platform", note: zh ? "观测值" : "observed", display: n(visibleMeta), width: 1, kind: "other" },
+                { label: zh ? "Meta 报告的员工人数，2026 年 6 月 30 日" : "Meta's reported headcount, June 30, 2026", note: zh ? "公开资料，SEC 文件" : "public, SEC filing", display: n(HEADCOUNT), width: HEADCOUNT / visibleMeta, kind: "residual" },
+                { label: zh ? "写明 AI 岗位的档案" : "Profiles that name an AI role", note: zh ? "观测值" : "observed", display: n(p2), width: p2 / visibleMeta, kind: "other" },
+                { label: zh ? "其中写明实验室" : "Of them, naming the lab", note: zh ? "观测值" : "observed", display: n(total), width: total / visibleMeta, kind: "focus" },
+              ]}
+            />
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `Meta 报告 2026 年 6 月 30 日有员工 ${n(HEADCOUNT)} 人，平台上当前在 Meta 的档案是 ${n(visibleMeta)} 个，每名员工对应 ${number(lang, coverage, 1)} 个。离职后没更新的档案和写 Meta 的外包人员都算作当前在职，所以这里数的是档案；${n(p2)} 这个数既不是 Meta AI 员工的下限，也不是上限。`,
+                  ]
+                : [
+                    `Meta reported ${n(HEADCOUNT)} employees on June 30, 2026, and the Platform shows ${n(visibleMeta)} current Meta profiles, ${number(lang, coverage, 1)} for each employee. Profiles of people who left without updating, and of contractors who list Meta, count as current, so a count here is of profiles, and the ${n(p2)} is neither a floor nor a ceiling on Meta's AI staff.`,
+                  ]
+            }
+            method={
+              zh
+                ? ["档案数是当前在 Meta（规模 10,001 人以上的这家公司）的档案，美国和美国以外相加。员工数是 Meta 自己的数字（SEC 文件，2026 年 7 月 29 日），其中包括约 8,000 名受 2026 年 5 月裁员影响的员工；档案日期截至 2026 年 4 月，所以数据里看不到这次裁员。"]
+                : ["The profile count is current entries at Meta, the 10,001+ company, in and outside the US. The headcount is Meta's own figure (SEC filing, July 29, 2026), which includes about 8,000 employees affected by the May 2026 reduction; profile dates stop in April 2026, so the data does not show that reduction."]
+            }
+          />
+        </Figure>
+
+        <Chapter lang={lang} part={5} {...parts2[1]} />
+
+        <Figure
+          id="functions"
+          level={3}
+          number="12"
+          lang={lang}
+          heading={
+            zh
+              ? `实验室 ${pct(labR)} 做研究，Meta 其他可见 AI 员工是 ${pct(restR)}`
+              : `${pct(labR)} of the lab work in research, against ${pct(restR)} of the rest of Meta's visible AI staff`
+          }
+          sub={
+            zh
+              ? `当前职能和层级，占各组的比例，刻度 0 到 60%：实验室 ${n(total)} 人，其他可见 AI 员工 ${n(p2 - total)} 人，Meta 的 AI 岗位 ${n(postAll)} 个（按职位名称归类，没有层级）`
+              : `Current function and level as a share of each group, on a 0 to 60% scale: the lab (${n(total)}), the rest of Meta's visible AI staff (${n(p2 - total)}), and Meta's AI postings (${n(postAll)}), placed by title family, with no level`
+          }
+          alt={roleRows.map((r) => `${r.name}: ${r.dots.filter((d) => d.v !== "").map((d) => (typeof d.v === "number" ? pct(d.v) : d.v)).join(" / ")}`).join(zh ? "；" : "; ")}
+          source={sourceBoth}
+          queries={q2(`${PEOPLE} · ${JOBS}`, "population", "functions", "levels", "postings")}
+        >
+          <DotRows
+            lang={lang}
+            max={0.6}
+            series={[
+              { s: "lab", label: zh ? "实验室" : "The lab" },
+              { s: "rest", label: zh ? "其他" : "The rest" },
+              { s: "post", label: zh ? "岗位" : "Postings" },
+            ]}
+            rows={roleRows}
+          />
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `{{hl|实验室}} ${pct(labR)} 做研究，${pct(num(fnOf("engineering").lab_share, "lab eng"))} 做工程；其他 AI 员工分别是 ${pct(restR)} 和 ${pct(num(fnOf("engineering").rest_share, "rest eng"))}。Meta 的 AI 岗位里，工程类职位占 ${pct(fam("ml-software-engineer") / postAll)}，研究类职位占 ${pct((fam("research-scientist") + fam("research-engineer")) / postAll)}。`,
+                    `层级上，{{hl|实验室}}经理及以上占 ${pct(mgrUp("lab_share"))}，其他人是 ${pct(mgrUp("rest_share"))}；负责人、总监或更高是 ${pct(num(lvOf("head-and-above").lab_share, "lab head"))} 对 ${pct(num(lvOf("head-and-above").rest_share, "rest head"))}。`,
+                  ]
+                : [
+                    `{{hl|The lab}} is ${pct(labR)} research and ${pct(num(fnOf("engineering").lab_share, "lab eng"))} engineering; the rest of Meta's AI staff are ${pct(restR)} and ${pct(num(fnOf("engineering").rest_share, "rest eng"))}. Among Meta's AI postings, ${pct(fam("ml-software-engineer") / postAll)} are engineering titles and ${pct((fam("research-scientist") + fam("research-engineer")) / postAll)} research titles.`,
+                    `By level, ${pct(mgrUp("lab_share"))} of {{hl|the lab}} are manager or above, against ${pct(mgrUp("rest_share"))} of the rest; heads, directors, and above are ${pct(num(lvOf("head-and-above").lab_share, "lab head"))} against ${pct(num(lvOf("head-and-above").rest_share, "rest head"))}.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    "职能是平台对当前工作的固定分类；职能不是研究的人，职位名称是数据类的先归到数据。实验室约 4% 的人写的是非技术职能或职位，为了和第一阶段一致仍算在实验室里；实验室的\"其他\"和\"未写明\"合并成一格，这样第一阶段的格子减不出小群体。岗位按职位名称归类：研究科学家和研究工程师算研究，机器学习和软件工程师算工程。这个比较本身不对称：实验室的人只要写明实验室就算，其他人要写有 AI 词语才算，所以约 2,200 个没有 AI 词语的研究类职位不在其他人里。如果其中很多是 AI 岗位，其他人的研究比例会更高，差距会更小。",
+                    `层级也是平台的固定分类，是按职称推出的可见层级，不是经过核实的汇报关系。实验室有 ${pct(num(lvOf("none").lab_share, "lab none"))}、其他人有 ${pct(num(lvOf("none").rest_share, "rest none"))} 没写层级。实验室的实习生和总监以上的人都不到 10 人，所以实习并入专员，负责人及以上合成一组。`,
+                  ]
+                : [
+                    "Function is the Platform's fixed value for the current job; where it is not Research, data titles are taken out first. About 4% of the lab list a non-technical function or title and stay in the lab so it matches stage 1; the lab's other and none-stated cells are merged so that no stage-1 cell can be subtracted down to a small group. Postings are placed by title: research scientist and research engineer as research, machine learning and software engineer as engineering. The comparison is uneven by construction: the lab counts everyone who names it, while the rest counts only profiles that name an AI term, which leaves out about 2,200 research-titled profiles with no AI term. If many of those hold AI roles, the rest's research share is higher and the gap smaller.",
+                    `Level is also the Platform's fixed value: a visible hierarchy inferred from titles, not a verified reporting line. ${pct(num(lvOf("none").lab_share, "lab none"))} of the lab and ${pct(num(lvOf("none").rest_share, "rest none"))} of the rest state none. The lab has fewer than 10 interns and fewer than 10 people above director, so interns join specialists and every level from head up is one group.`,
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="titles"
+          level={3}
+          number="13"
+          lang={lang}
+          heading={
+            zh
+              ? `其他 AI 员工中 ${pct(restMLE)} 的职位是机器学习工程师，实验室是 ${pct(num(tiOf("machine-learning-engineer").lab_share, "lab MLE"))}`
+              : `${pct(restMLE)} of the rest are titled machine learning engineer, against ${pct(num(tiOf("machine-learning-engineer").lab_share, "lab MLE"))} in the lab`
+          }
+          sub={zh ? "职位名称里含有这些词的人，占各组的比例，刻度 0 到 30%。一个职位可以算进多行" : "People whose current title contains the words, as a share of each group, on a 0 to 30% scale. A title can count in several rows"}
+          alt={tiRows.map((r) => `${r.name}: ${r.dots.map((d) => (typeof d.v === "number" ? pct(d.v) : d.v)).join(" / ")}`).join(zh ? "；" : "; ")}
+          source={source}
+          queries={q2(PEOPLE, "population", "titles")}
+        >
+          <DotRows
+            lang={lang}
+            max={0.3}
+            series={[
+              { s: "lab", label: zh ? "实验室" : "The lab" },
+              { s: "rest", label: zh ? "其他" : "The rest" },
+            ]}
+            rows={tiRows}
+          />
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`{{hl|实验室}}最常见的职位是研究科学家（${pct(num(tiOf("research-scientist").lab_share, "lab RS"))}）和软件工程师（${pct(num(tiOf("software-engineer").lab_share, "lab SWE"))}）；其他人里研究科学家是 ${pct(num(tiOf("research-scientist").rest_share, "rest RS"))}。`]
+                : [`In {{hl|the lab}}, the commonest titles are research scientist (${pct(num(tiOf("research-scientist").lab_share, "lab RS"))}) and software engineer (${pct(num(tiOf("software-engineer").lab_share, "lab SWE"))}); among the rest, ${pct(num(tiOf("research-scientist").rest_share, "rest RS"))} are research scientists.`]
+            }
+            method={
+              zh
+                ? ["职位名称含有候选词的全部单词就算，所以各行会重叠（Software Engineer, Machine Learning 两行都算）。候选词来自抽读档案里反复出现的职位，这里列出人数最多的十个。其他人不含没有 AI 词语的研究类职位（见图 12），这会抬高其中机器学习工程师的比例。"]
+                : ["A title counts when it contains all the words of a candidate, so rows overlap (Software Engineer, Machine Learning counts in two rows). The candidates are the titles that recur in the audit reads; the ten with the most profiles are shown. The rest leaves out research titles with no AI term (figure 12), which raises its machine learning engineer share."]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="directions"
+          level={3}
+          number="14"
+          lang={lang}
+          heading={
+            zh
+              ? "Meta 的 AI 岗位最常写排序与推荐、大语言模型和 AI 基础设施；实验室员工最偏向大语言模型"
+              : "Postings name ranking, LLMs, and infrastructure most; the lab's staff lean most to LLMs"
+          }
+          sub={
+            zh
+              ? `左边：写明该方向的员工，占各组的比例，刻度 0 到 30%。右边：写明该方向的岗位，占 Meta ${n(postAll)} 个 AI 岗位的比例，刻度 0 到 50%。按岗位的比例排序`
+              : `Left: staff who name the direction, as a share of each group, on a 0 to 30% scale. Right: postings that name it, as a share of Meta's ${n(postAll)} AI postings, on a 0 to 50% scale. Sorted by postings`
+          }
+          alt={drRows.map((r) => `${r.name}: ${r.dots.map((d) => (typeof d.v === "number" ? pct(d.v) : d.v)).join(" / ")}${zh ? "；岗位 " : "; postings "}${typeof r.bar === "number" ? pct(r.bar) : ""}`).join(zh ? "。" : ". ")}
+          source={sourceBoth}
+          queries={q2(`${PEOPLE} · ${JOBS}`, "population", "directions", "postings")}
+        >
+          <DotRows
+            lang={lang}
+            max={0.3}
+            series={[
+              { s: "lab", label: zh ? "实验室" : "The lab" },
+              { s: "rest", label: zh ? "其他" : "The rest" },
+            ]}
+            bar={{ label: zh ? "岗位" : "Postings", max: 0.5 }}
+            rows={drRows}
+          />
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`岗位写得最多的是排序与推荐（${pct(drPost("ranking-recommendations"))}），然后是大语言模型（${pct(drPost("foundation-models"))}）和 AI 基础设施（${pct(drPost("ai-infrastructure"))}）。员工里，{{hl|实验室}}偏向基础模型与大语言模型（${pct(num(drOf("foundation-models").lab_share, "lab fm"))}，其他人 ${pct(num(drOf("foundation-models").rest_share, "rest fm"))}），其他人更多是排序与推荐（${pct(num(drOf("ranking-recommendations").rest_share, "rest rank"))}，实验室 ${pct(num(drOf("ranking-recommendations").lab_share, "lab rank"))}）。`]
+                : [`Postings name ranking and recommendations most (${pct(drPost("ranking-recommendations"))}), then LLMs (${pct(drPost("foundation-models"))}) and AI infrastructure (${pct(drPost("ai-infrastructure"))}). Among staff, {{hl|the lab}} leans to foundation models and LLMs (${pct(num(drOf("foundation-models").lab_share, "lab fm"))} against ${pct(num(drOf("foundation-models").rest_share, "rest fm"))}), and the rest to ranking (${pct(num(drOf("ranking-recommendations").rest_share, "rest rank"))} against ${pct(num(drOf("ranking-recommendations").lab_share, "lab rank"))}).`]
+            }
+            method={
+              zh
+                ? [`一个人或一个岗位可以写多个方向。员工按个人资料标题、职位和技能匹配，岗位按职位名称和描述匹配。岗位描述比个人资料长，所以两边比的是顺序，不是高低。岗位是快照当天仍开放、近 180 天发布的 Meta 的 ${n(postAll)} 个 AI 岗位，同一个岗位在几个城市发布按城市各算一次；岗位数据没有雇主规模字段，所以可能包括少数其他名为 Meta 的公司的岗位。每个描述都有一段关于 AR 和 VR 的标准文字，所以描述只用有区分度的单词匹配。`]
+                : [`A profile or a posting can name several directions. Staff are matched on headline, title, and skills; postings on title and description. Descriptions run longer than headlines, so compare the order on each side, not the levels. Postings are Meta's ${n(postAll)} AI postings still open on the snapshot day, posted in the last 180 days, and a role posted in several cities counts once per city; the jobs index has no employer size, so a few postings at other companies named Meta may be included. Every description carries a standard paragraph on AR and VR, so descriptions match only on distinctive single words.`]
+            }
+          />
+        </Figure>
+
+        <Chapter lang={lang} part={6} {...parts2[2]} />
+
+        <Figure
+          id="sources"
+          level={3}
+          number="15"
+          lang={lang}
+          heading={
+            zh
+              ? `实验室在 Google 工作过的比例更高（${pct(num(srcOf("ever-worked-at", "google").lab_share, "lab google"))} 对 ${pct(num(srcOf("ever-worked-at", "google").rest_share, "rest google"))}）；中国大陆本科的比例和其他人一样，约 ${pct(num(cnAll.lab_share, "lab cn"), 0)}`
+              : `More of the lab once worked at Google (${pct(num(srcOf("ever-worked-at", "google").lab_share, "lab google"))} against ${pct(num(srcOf("ever-worked-at", "google").rest_share, "rest google"))}); China-educated shares match`
+          }
+          sub={zh ? "以前工作过的公司和就读过的学校，占各组的比例；中国大陆本科占写有本科者的比例。刻度 0 到 30%" : "Earlier employers and schools as a share of each group; China-educated as a share of those listing a bachelor's. Scale 0 to 30%"}
+          alt={srcRows.map((r) => `${r.name}: ${r.dots.map((d) => (typeof d.v === "number" ? pct(d.v) : d.v ?? "·")).join(" / ")}`).join(zh ? "；" : "; ")}
+          source={source}
+          queries={q2(PEOPLE, "population", "sources", "china_educated")}
+        >
+          <DotRows
+            lang={lang}
+            max={0.3}
+            series={[
+              { s: "lab", label: zh ? "实验室" : "The lab" },
+              { s: "rest", label: zh ? "其他" : "The rest" },
+            ]}
+            rows={srcRows}
+          />
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`{{hl|实验室}}在卡内基梅隆和伯克利读过书的比例（${pct(num(srcOf("school", "carnegie-mellon").lab_share, "lab cmu"))} 和 ${pct(num(srcOf("school", "berkeley").lab_share, "lab berkeley"))}，其他人是 ${pct(num(srcOf("school", "carnegie-mellon").rest_share, "rest cmu"))} 和 ${pct(num(srcOf("school", "berkeley").rest_share, "rest berkeley"))}）也更高；斯坦福的差距在随机波动范围内。其他 AI 员工里，个人贡献者中大陆本科的比例是 ${pct(num(cnIc.rest_share, "ic"))}，经理及以上是 ${pct(num(cnMgr.rest_share, "mgr"))}。`]
+                : [`{{hl|The lab}} also studied more often at Carnegie Mellon and Berkeley (${pct(num(srcOf("school", "carnegie-mellon").lab_share, "lab cmu"))} and ${pct(num(srcOf("school", "berkeley").lab_share, "lab berkeley"))}, against ${pct(num(srcOf("school", "carnegie-mellon").rest_share, "rest cmu"))} and ${pct(num(srcOf("school", "berkeley").rest_share, "rest berkeley"))}); the Stanford gap is within chance. Among the rest, ${pct(num(cnIc.rest_share, "ic"))} of individual contributors and ${pct(num(cnMgr.rest_share, "mgr"))} of managers and above are China-educated.`]
+            }
+            method={
+              zh
+                ? ["以前工作过指在那里有过一段不是实习的工作；学校指任何学位；各行会重叠。中国大陆本科沿用中国教育背景研究的院校清单。实验室按层级拆分达不到每格 20 人的门槛，所以不公开（\"·\"）。Anthropic 没列出：实验室里没有人，其他人里不到 10 人。"]
+                : ["An earlier employer is any past non-intern job there, and a school any degree there; rows overlap. China-educated uses the institution list of the China-educated study. The lab's split by level does not reach 20 in every cell, so it is not shown (\"·\"). Anthropic is left out: no one in the lab and fewer than 10 in the rest."]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="flows"
+          level={3}
+          number="16"
+          lang={lang}
+          heading={
+            zh
+              ? `2025 年 6 月以来，${n(num(flow("out", "openai"), "out openai"))} 人离开 Meta 去了 OpenAI，从那里加入的是 ${n(num(flow("in", "openai"), "in openai"))} 人；从 Amazon 加入的有 ${n(num(flow("in", "amazon"), "in amazon"))} 人`
+              : `Since June 2025, ${n(num(flow("out", "openai"), "out openai"))} left Meta for OpenAI and ${n(num(flow("in", "openai"), "in openai"))} joined from it; ${n(num(flow("in", "amazon"), "in amazon"))} joined from Amazon`
+          }
+          sub={zh ? "2025 年 6 月以来 Meta 和每家公司之间换工作的人数，所有岗位。两侧共用一个刻度" : "People who moved between Meta and each employer since June 2025, every role. Both sides share one scale"}
+          alt={flowAlt}
+          source={source}
+          queries={q2(PEOPLE, "flows")}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-out">{zh ? "离开 Meta 去了这家" : "Left Meta for it"}</span>
+            <span class="lg lg-in">{zh ? "从这家加入 Meta" : "Joined Meta from it"}</span>
+          </p>
+          <div class="mx-flow" aria-hidden="true">
+            {flowGroups.map((gp) => (
+              <>
+                <p class="fl-group">{gp.title}</p>
+                {gp.rows.map((r) => (
+                  <div class="fl-row">
+                    <span class="fl-name">{r.name}</span>
+                    <span class="fl-side out">
+                      <em>{isNum(r.out) ? n(r.out) : r.out}</em>
+                      <span class:list={["b", { sup: !isNum(r.out) }]} style={`width: ${flowW(r.out)}`} />
+                    </span>
+                    <span class="fl-side in">
+                      <span class:list={["b", { sup: !isNum(r.in) }]} style={`width: ${flowW(r.in)}`} />
+                      <em>{isNum(r.in) ? n(r.in) : r.in}</em>
+                    </span>
+                    <span class="fl-net">{r.net}</span>
+                  </div>
+                ))}
+              </>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`${n(labsOut)} 人离开 Meta 去了五家 AI 实验室，从那里加入的最多 ${n(labsInAtMost)} 人。和 ${listOf(moreIn)} 之间则相反，加入的多于离开的：从 Amazon 加入 ${n(num(flow("in", "amazon"), "in amazon"))} 人、离开去 Amazon ${n(num(flow("out", "amazon"), "out amazon"))} 人，从 Microsoft 加入 ${n(num(flow("in", "microsoft"), "in ms"))} 人、离开 ${n(num(flow("out", "microsoft"), "out ms"))} 人。${exceptions}${evenText}算上所有雇主，离开 ${n(allOut)} 人，加入 ${n(allIn)} 人。`]
+                : [`${n(labsOut)} people left Meta for the five AI labs and at most ${n(labsInAtMost)} joined from them. With ${listOf(moreIn)} it runs the other way: ${n(num(flow("in", "amazon"), "in amazon"))} joined from Amazon and ${n(num(flow("out", "amazon"), "out amazon"))} left for it, and ${n(num(flow("in", "microsoft"), "in ms"))} joined from Microsoft against ${n(num(flow("out", "microsoft"), "out ms"))}. ${exceptions}${evenText}Across all employers, ${n(allOut)} left and ${n(allIn)} joined.`]
+            }
+            method={
+              zh
+                ? ["新工作开始于 2025 年 6 月 1 日或以后、上一份工作在 2025 年 5 月 1 日或以后结束，才算一次换工作，不算实习；包括 Meta 的所有岗位，不只是 AI 岗位。去 AI 实验室的人大多职位里没有 AI 字样，这和这些实验室常用 Member of Technical Staff 的职称一致。档案日期截至 2026 年 4 月，之后的变动（包括 2026 年 5 月的裁员）都不在内；2025 年 10 月 Meta 在 AI 团队裁减 600 多个职位，这些人要等下一份工作出现在档案里才算。\"<10\" 画成可能的最大值处的空框。"]
+                : ["A move counts when the new job started on or after June 1, 2025 and the previous one ended on or after May 1, 2025, internships excluded, for every role at Meta, not only AI roles. Most who moved to the AI labs carry no AI words in their title, which fits labs that title staff members of technical staff. Profile dates stop in April 2026, so later moves, the May 2026 reduction among them, are not counted; people cut from Meta's AI teams in October 2025 count once their next job appears. A \"<10\" is drawn as an outline at the largest value it could hide."]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="pay"
+          level={3}
+          number="17"
+          lang={lang}
+          heading={
+            zh
+              ? `Meta AI 岗位写明的底薪上限，中位数在 ${moneyK(maxLo)}到 ${money(maxHi)}之间`
+              : `The median top of Meta's posted AI base ranges falls between ${money(maxLo)} and ${money(maxHi)}`
+          }
+          sub={zh ? "美国岗位写明的底薪区间上限，按档位分，每行是 100%" : "The top of the stated base range in US postings, by band; each row is 100%"}
+          alt={payBands.map((b) => `${payName[b.f][lang]} (${b.tot}): ${b.counts.map((c, i) => `${bandLabel(b.edges, i)} ${c}`).join(", ")}`).join(zh ? "；" : "; ")}
+          source={sourceJobs}
+          queries={q2(JOBS, "postings", "pay")}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            {payBands[0].counts.map((_, i) => (
+              <span class={`lg lg-pay p${i}`}>{bandLabel(payBands[0].edges, i)}</span>
+            ))}
+          </p>
+          <div class="mx-pay" aria-hidden="true">
+            {payBands.map((b) => (
+              <div class="py-row">
+                <p class="py-name">
+                  {payName[b.f][lang]} <span>{n(b.tot)}</span>
+                </p>
+                <div class="py-bar">
+                  {b.counts.map((c, i) => (
+                    <span class={`p${i}`} style={`flex: ${c} 1 0px`}>
+                      {c / b.tot >= 0.08 && <b>{pct(c / b.tot, 0)}</b>}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`写明底薪的 ${n(payTotal("all"))} 个美国 AI 岗位里，区间下限的中位数在 ${moneyK(minLo)}到 ${money(minHi)}之间，上限的中位数在 ${moneyK(maxLo)}到 ${money(maxHi)}之间。研究科学家岗位的上限并不更高：${pct(rsTop.c / payTotal("research-scientist"))} 达到 ${money(250000)} 或以上，机器学习和软件工程师岗位是 ${pct(mlTop.c / payTotal("ml-software-engineer"))}。`]
+                : [`Of the ${n(payTotal("all"))} US AI postings that state pay, the median start of the range falls between ${money(minLo)} and ${money(minHi)}, and the median top between ${money(maxLo)} and ${money(maxHi)}. Research scientist postings do not top out higher: ${pct(rsTop.c / payTotal("research-scientist"))} reach ${money(250000)} or more, against ${pct(mlTop.c / payTotal("ml-software-engineer"))} of machine learning and software engineer postings.`]
+            }
+            method={
+              zh
+                ? [`只算美国、以美元计、写明上下限的岗位；只是岗位写明的底薪，不含奖金、股票和福利，也不说明任何人实际拿多少。一类岗位至少有 15 个才公开，研究工程师（${n(num(payRE.count, "pay RE"))} 个）不公开。`]
+                : [`US postings in dollars that state both ends; base pay as posted, without bonus, equity, or benefits, and nothing here describes what anyone is paid. A family is shown only with 15 or more such postings; research engineer (${n(num(payRE.count, "pay RE"))}) is not.`]
+            }
+          />
+        </Figure>
+      </div>
     </>
   )
 }
@@ -1130,12 +2025,33 @@ const parts = [
         </p>
         <h3>局限</h3>
         <p>
-          这是自己写明实验室的人，不是实验室本身：只写 FAIR 或什么都不写的人不在里面；如果新人比老员工更爱写，或者更少写，这个比例会随之变化。人数是可见档案，是下限，不是员工总数。少数档案已经过时。只写年份的日期按 1 月算，所以只写了 2025 年的新人会算作实验室成立时已在 Meta，已在 Meta 的人也可能被算作离开后又回来。刚离开的雇主依赖结束日期，有 {pct(otherShare)} 的外部加入者在列出的雇主和大学都没有 2025 年或以后结束的工作。Microsoft 组人数少，包括招聘人员，个人档案的滞后对它的影响也比对 Meta 大。岗位只是一天的数据。不点任何人的名字，也不涉及薪资。
+          这是自己写明实验室的人，不是实验室本身：只写 FAIR 或什么都不写的人不在里面；如果新人比老员工更爱写，或者更少写，这个比例会随之变化。人数数的是可见档案，不是员工：不写实验室的人不在里面，离开后没更新的档案还在里面，所以它不是员工总数，也不保证是下限（图 11 显示当前在 Meta 的档案是 Meta 报告员工数的 {number(lang, coverage, 1)} 倍）。只写年份的日期按 1 月算，所以只写了 2025 年的新人会算作实验室成立时已在 Meta，已在 Meta 的人也可能被算作离开后又回来。刚离开的雇主依赖结束日期，有 {pct(otherShare)} 的外部加入者在列出的雇主和大学都没有 2025 年或以后结束的工作。Microsoft 组人数少，包括招聘人员，个人档案的滞后对它的影响也比对 Meta 大。岗位只是一天的数据。不点任何人的名字，也不涉及薪资。
+        </p>
+        <h3>第二阶段：统计的是谁</h3>
+        <p>
+          当前在 Meta（规模 10,001 人以上的这家公司）工作、个人资料标题或当前职位写有 AI 相关词语的档案（词表见 queries/mapping.json；单独的 AI 只在职位里算），去掉非技术职能和职位：共
+          {n(p2)} 人。实验室的 {n(total)} 人全部算进来，和第一阶段一致，其中约 4% 写的是非技术职能或职位。没有 AI 词语的研究类职位不算，因为在 Meta
+          这类职位也包括用户研究、调查科学和硬件。按八个完整切片抽读了 150 个档案，92% 是 AI 岗位。
+        </p>
+        <h3>第二阶段：单元、工作与方向</h3>
+        <p>
+          单元按实验室、FAIR、Reality Labs、基础设施、广告、排序、内容安全、应用、GenAI 的顺序，算在个人资料标题或职位里最先写到的那一个。职能和层级是平台对当前工作的固定分类；职位名称含有候选词的全部单词就算。方向可以多选：员工按标题、职位和技能匹配，近
+          180 天 Meta 的 {n(postAll)} 个 AI 岗位按职位名称和描述匹配。
+        </p>
+        <h3>第二阶段：流动与薪资</h3>
+        <p>
+          新工作开始于 2025 年 6 月 1 日或以后、上一份工作在 2025 年 5 月 1 日或以后结束，才算一次换工作，不算实习，包括 Meta 的所有岗位。薪资是美国岗位以美元写明的底薪区间，一类岗位至少有 15 个才公开。
+        </p>
+        <h3>局限：第二阶段</h3>
+        <p>
+          当前在 Meta 的档案是 Meta 报告员工数的 {number(lang, coverage, 1)} 倍，所以第二阶段数的都是档案，不是员工数的下限，也不是上限。单元是大家自己写的，不是
+          Meta 的组织架构图，{pct(noneShare)} 的人九个单元都没写。档案日期截至 2026 年 4 月，2026 年 5 月的裁员和之后的变动都不在数据里。层级是按职称推出的可见层级，不是汇报关系。岗位招聘难度不在范围内：它需要跨雇主的比较，不是一家公司能回答的。
         </p>
         <h3>来源</h3>
         <p>
-          <a href={MEMO}>Meta 宣布成立实验室</a>（CNBC，2025 年 6 月 30 日）；<a href={SCALE}>Meta 投资 Scale AI</a>（Axios，2025 年 6 月 13
-          日）；<a href={MSFT}>Microsoft 组建超级智能团队</a>（CNBC，2025 年 11 月 6 日）。
+          <a href={MEMO}>Meta 宣布成立实验室</a>（CNBC，2025 年 6 月 30 日）；<a href={SCALE}>Meta 投资 Scale AI</a>（Axios，2025 年 6 月 12
+          日）；<a href={MSFT}>Microsoft 组建超级智能团队</a>（CNBC，2025 年 11 月 6 日）；<a href={SPLIT}>实验室分成四个团队</a>（Built In，2025 年 8 月 27
+          日）；<a href={CUTS}>Meta 在 AI 团队裁员</a>（SiliconANGLE，2025 年 10 月 22 日）；<a href={SEC}>Meta 的员工人数</a>（SEC 文件，2026 年 7 月 29 日）。
         </p>
       </>
     ) : (
@@ -1180,17 +2096,46 @@ const parts = [
         <h3>Limits</h3>
         <p>
           This is people who chose to name the lab, not the lab: people in its groups who write only FAIR or nothing are missing, and
-          if newcomers name it more readily than long-time staff, or less, the share moves with them. Counts are visible profiles, a
-          lower bound and never a headcount. A few profiles are out of date. A date given only as a year reads as January, so a
+          if newcomers name it more readily than long-time staff, or less, the share moves with them. Counts are of visible profiles,
+          not staff: people who do not name the lab are missing and profiles left out of date remain, so a count is neither a headcount
+          nor a guaranteed floor (figure 11 finds {number(lang, coverage, 1)} current Meta profiles for each employee Meta reports). A date given only as a year reads as January, so a
           newcomer who wrote only 2025 counts among those at Meta when the lab formed, and someone who stayed can count among those
           who returned. Where outside hires came from rests on end dates, and {pct(otherShare)} of them have no job at the listed
           employers or a university that ended in 2025 or later. The Microsoft group is small and includes recruiters, and profile lag
           hides more of its months than of Meta's. Postings are one day. No one is named, and nothing here describes pay.
         </p>
+        <h3>Stage 2: who is counted</h3>
+        <p>
+          Profiles with a current job at Meta, the 10,001+ company, whose headline or current title names an AI term (listed in queries/mapping.json;
+          AI alone counts only in the title), outside non-technical functions and titles: {n(p2)} people. The lab's {n(total)} are included whole, so the
+          lab matches stage 1; about 4% of them list a non-technical function or title. Research titles that name no AI term are left out, because at
+          Meta they also cover people research, survey science, and hardware. Reads of 150 profiles in eight whole slices found 92% in AI roles.
+        </p>
+        <h3>Stage 2: units, work, and directions</h3>
+        <p>
+          A unit is the first of the lab, FAIR, Reality Labs, infrastructure, ads, ranking, integrity, apps, and GenAI whose words appear in the
+          headline or title. Function and level are the Platform's fixed values for the current job; a title counts when it contains a candidate's
+          words. Directions are multi-label: staff are matched on headline, title, and skills, and Meta's {n(postAll)} AI postings of the last 180 days
+          on title and description.
+        </p>
+        <h3>Stage 2: flows and pay</h3>
+        <p>
+          A move counts when the new job started on or after June 1, 2025 and the previous one ended on or after May 1, 2025, internships excluded, for
+          every role at Meta. Pay is the base range stated in US postings in dollars, shown for a title family with 15 or more such postings.
+        </p>
+        <h3>Limits of stage 2</h3>
+        <p>
+          Current Meta profiles outnumber Meta's reported headcount {number(lang, coverage, 1)} to 1, so every stage-2 count is of profiles, and none
+          is a floor or a ceiling on staff. Units are what people write, not Meta's org chart, and {pct(noneShare)} name none of the nine units searched. Profile dates stop in
+          April 2026, so the May 2026 reduction and later moves are not in the data. Levels are a visible hierarchy from titles, not reporting lines.
+          How hard roles are to fill is out of scope: it needs a comparison across employers, not one company.
+        </p>
         <h3>Sources</h3>
         <p>
           <a href={MEMO}>Meta's announcement of the lab</a> (CNBC, June 30, 2025); <a href={SCALE}>Meta's investment in Scale AI</a>{" "}
-          (Axios, June 13, 2025); <a href={MSFT}>Microsoft's superintelligence team</a> (CNBC, November 6, 2025).
+          (Axios, June 12, 2025); <a href={MSFT}>Microsoft's superintelligence team</a> (CNBC, November 6, 2025); <a href={SPLIT}>the lab's four
+          teams</a> (Built In, August 27, 2025); <a href={CUTS}>cuts in Meta's AI teams</a> (SiliconANGLE, October 22, 2025); <a href={SEC}>Meta's
+          headcount</a> (SEC filing, July 29, 2026).
         </p>
       </>
     ))
@@ -2033,6 +2978,687 @@ const parts = [
 
     .mx-sky-panel.after .mx-sky-x > span:first-child {
       padding-left: 0;
+    }
+  }
+
+  /* ================= stage 2 ================= */
+  .mx-stage,
+  .mx-map,
+  .mx-flow,
+  .mx-pay,
+  .legend {
+    --lab: #3d36c9;
+    --out: #b4532a;
+    /* People who joined Meta: a dark neutral of their own, apart from the context gray. */
+    --in: #4b4962;
+    --lab-rail: rgb(61 54 201 / 0.55);
+  }
+
+  .lg-lab::before {
+    background: var(--lab);
+  }
+
+  .lg-unit::before {
+    background: var(--ctx);
+  }
+
+  .lg-in::before {
+    background: var(--in);
+  }
+
+  /* Hatching means a lower bound, as everywhere on the site. */
+  .lg-bound::before {
+    background: repeating-linear-gradient(135deg, var(--lab) 0 2px, transparent 2px 4px);
+    box-shadow: inset 0 0 0 1px var(--lab);
+  }
+
+  .lg-out::before {
+    background: var(--out);
+  }
+
+  .lg-plain {
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-3);
+  }
+
+  /* The stage band: a light full-bleed field that opens stage 2, the finding on the left and the
+     brief on the right, on the page's halfway line, then the parts of stage 2. */
+  .mx-stage {
+    margin-top: clamp(56px, 7vw, 96px);
+    padding-block: clamp(40px, 6vw, 72px);
+    background: #f4f3fb;
+    border-block: 1px solid var(--line);
+  }
+
+  .mx-stage-top {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    align-items: start;
+    margin-bottom: clamp(32px, 4vw, 48px);
+  }
+
+  .mx-stage-eyebrow {
+    font: 500 12px/1.5 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  .mx-stage-eyebrow:lang(zh) {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .mx-stage h2 {
+    margin-top: 14px;
+    font: 700 clamp(28px, 3.3vw, 44px) / 1.08 var(--display);
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .mx-stage-dek {
+    margin-top: 18px;
+    max-width: 58ch;
+    font-size: clamp(16px, 1.4vw, 18px);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .mx-stage-note {
+    margin-top: 14px;
+    max-width: 62ch;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  .mx-stage-note a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .mx-stage h2:lang(zh),
+  .mx-stage-dek:lang(zh),
+  .mx-stage-note:lang(zh) {
+    letter-spacing: 0;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .mx-stage h2:lang(zh) {
+    line-height: 1.25;
+  }
+
+  .mx-stage-brief-title {
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--ink);
+    font: 600 20px/1.2 var(--display);
+    letter-spacing: -0.02em;
+  }
+
+  .mx-stage-side .brief-list {
+    margin-top: 14px;
+  }
+
+  /* ---------- 10: the map, a ledger shaped as a tree ---------- */
+  .mx-map {
+    --rail: rgb(11 10 31 / 0.3);
+    display: grid;
+    grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr) 6.5rem repeat(6, 5rem);
+    column-gap: 12px;
+  }
+
+  .mm-head,
+  .mm-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+  }
+
+  .mm-head {
+    align-items: end;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+    font: 500 12px/1.25 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .mm-head .mm-count,
+  .mm-head .mm-stat {
+    text-align: right;
+  }
+
+  /* Header cells keep the header's face and sit on the bottom line, so every label, the scale,
+     and a label that wraps end on one baseline. */
+  .mm-head > span {
+    align-self: end;
+  }
+
+  .mm-head .mm-name,
+  .mm-head .mm-stat {
+    align-items: flex-end;
+  }
+
+  .mm-head .mm-name,
+  .mm-head .mm-count,
+  .mm-head .mm-stat {
+    font: inherit;
+    background: none;
+  }
+
+  .mm-ticks {
+    position: relative;
+    height: 15px;
+  }
+
+  .mm-ticks span {
+    position: absolute;
+    bottom: 0;
+    line-height: 15px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .mm-ticks span:first-child {
+    transform: none;
+  }
+
+  .mm-ticks span:last-child {
+    transform: translateX(-100%);
+  }
+
+  .mm-row {
+    min-height: 44px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mm-name {
+    position: relative;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .mm-row.lv0 .mm-name {
+    font-weight: 600;
+  }
+
+  /* Chinese labels break only between words, at the hints titleHtml adds. */
+  .mm-label:lang(zh) {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .mm-row.lv1 .mm-name {
+    padding-left: 22px;
+  }
+
+  .mm-row.lv2 .mm-name {
+    padding-left: 46px;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+
+  .mm-row.lab .mm-name {
+    font-weight: 600;
+  }
+
+  /* Rails: the trunk runs down from the root; each unit hangs on it with a stub; the lab's groups
+     hang on a second rail under the lab. */
+  .mm-row.lv0 .mm-name::after,
+  .mm-row.lv1 .mm-name::before,
+  .mm-row.lv1 .mm-name::after,
+  .mm-row.lv2 .mm-name::before,
+  .mm-row.lv2 .mm-name::after,
+  .mm-row.lv2 .mm-label::before,
+  .mm-row.lab .mm-label::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .mm-row.lv0 .mm-name::after {
+    left: 6px;
+    top: calc(50% + 11px);
+    bottom: -1px;
+    border-left: 1px solid var(--rail);
+  }
+
+  .mm-row.lv1 .mm-name::before,
+  .mm-row.lv2 .mm-name::before {
+    left: 6px;
+    top: 0;
+    bottom: -1px;
+    border-left: 1px solid var(--rail);
+  }
+
+  .mm-row.lv1.last .mm-name::before {
+    bottom: 50%;
+  }
+
+  .mm-row.lv1 .mm-name::after {
+    left: 6px;
+    top: 50%;
+    width: 11px;
+    border-top: 1px solid var(--rail);
+  }
+
+  /* The lab's branch is drawn in the lab's color and starts at the bottom of the lab's row, so it
+     never crosses the lab's name when the name wraps. */
+  .mm-row.lab .mm-label::before {
+    display: none;
+  }
+
+  .mm-row.lv2 .mm-name::after {
+    left: 30px;
+    top: 0;
+    bottom: -1px;
+    border-left: 1px solid var(--lab-rail);
+  }
+
+  .mm-row.lv2.last .mm-name::after {
+    bottom: 50%;
+  }
+
+  .mm-row.lv2 .mm-label::before {
+    left: 30px;
+    top: 50%;
+    width: 11px;
+    border-top: 1px solid var(--lab-rail);
+  }
+
+  .mm-bar {
+    position: relative;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--surface-muted);
+  }
+
+  .mm-row.lv0 .mm-bar {
+    background: none;
+  }
+
+  .mm-bar span {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 3px;
+    background: var(--ctx);
+  }
+
+  .mm-row.lab .mm-bar span,
+  .mm-row.lv2 .mm-bar span {
+    background: var(--lab);
+  }
+
+  .mm-row.lv2 .mm-bar span.lb {
+    background: repeating-linear-gradient(135deg, var(--lab) 0 2px, transparent 2px 4px);
+    box-shadow: inset 0 0 0 1px var(--lab);
+  }
+
+  .mm-bar span.sup {
+    background: none;
+    box-shadow: inset 0 0 0 1.5px var(--lab);
+  }
+
+  /* Count and share on one line, the share lighter. */
+  .mm-count {
+    display: flex;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: 6px;
+    white-space: nowrap;
+    font: 600 14px/1.2 var(--mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mm-count em {
+    font: 500 12px/1.3 var(--mono);
+    font-style: normal;
+    color: var(--ink-3);
+  }
+
+  .mm-stat {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+    background: rgb(11 10 31 / var(--a, 0));
+    font: 500 13px/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .mm-k {
+    display: none;
+  }
+
+  /* The lab's groups have no columns of their own: one tinted block with one note. */
+  .mm-groups {
+    grid-column: 4 / -1;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding-inline: 12px;
+    background: var(--surface-muted);
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  /* ---------- 17: flows, out to the left of the axis and in to the right ---------- */
+  .mx-flow {
+    display: grid;
+    grid-template-columns: minmax(9rem, 14rem) minmax(0, 1fr) minmax(0, 1fr) minmax(8rem, 12rem);
+    row-gap: 10px;
+  }
+
+  .fl-group {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .fl-group:lang(zh) {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .fl-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+  }
+
+  .fl-name {
+    padding-right: 16px;
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .fl-side {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 24px;
+  }
+
+  .fl-side.out {
+    justify-content: flex-end;
+    padding-right: 1px;
+    border-right: 1px solid var(--ink);
+  }
+
+  .fl-side.in {
+    padding-left: 1px;
+  }
+
+  .fl-side .b {
+    flex: none;
+    height: 18px;
+  }
+
+  .fl-side.out .b {
+    border-radius: 3px 0 0 3px;
+    background: var(--out);
+  }
+
+  .fl-side.in .b {
+    border-radius: 0 3px 3px 0;
+    background: var(--in);
+  }
+
+  .fl-side.out .b.sup {
+    background: none;
+    box-shadow: inset 0 0 0 1.5px var(--out);
+  }
+
+  .fl-side.in .b.sup {
+    background: none;
+    box-shadow: inset 0 0 0 1.5px var(--in);
+  }
+
+  .fl-side em {
+    font: 500 13px/1 var(--mono);
+    font-style: normal;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .fl-net {
+    padding-left: 16px;
+    font: 500 12px/1.3 var(--mono);
+    color: var(--ink-2);
+  }
+
+  /* ---------- 18: bands of the posted range ---------- */
+  .mx-pay {
+    display: grid;
+    gap: 16px;
+  }
+
+  .py-row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 17rem) minmax(0, 1fr);
+    column-gap: 16px;
+    align-items: center;
+  }
+
+  .py-name {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .py-name span {
+    margin-left: 6px;
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .py-bar {
+    display: flex;
+    gap: 2px;
+    height: 30px;
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px var(--ctx);
+  }
+
+  .lg-pay::before {
+    box-shadow: inset 0 0 0 1px var(--ctx);
+  }
+
+  .py-bar span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .py-bar span:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .py-bar span:last-child {
+    border-radius: 0 4px 4px 0;
+  }
+
+  .py-bar b {
+    font: 600 12px/1 var(--mono);
+  }
+
+  .py-bar .p0,
+  .lg-pay.p0::before {
+    background: #dceaf7;
+  }
+
+  .py-bar .p1,
+  .lg-pay.p1::before {
+    background: #a9cbec;
+  }
+
+  .py-bar .p2,
+  .lg-pay.p2::before {
+    background: #6fa6db;
+  }
+
+  .py-bar .p3,
+  .lg-pay.p3::before {
+    background: #2f6fae;
+  }
+
+  .py-bar .p4,
+  .lg-pay.p4::before {
+    background: #17466f;
+  }
+
+  .py-bar .p0,
+  .py-bar .p1,
+  .py-bar .p2 {
+    color: var(--ink);
+  }
+
+  .py-bar .p3,
+  .py-bar .p4 {
+    color: #fff;
+  }
+
+  @media (max-width: 959px) {
+    .mx-stage-top {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 28px;
+    }
+  }
+
+  @media (max-width: 1279px) {
+    /* The map as a list: name and count, then the bar, then the columns as one line of labelled
+       values, still shaded. The rails move to the row edge: a branch starts at the bottom of its
+       parent row, so no rail crosses the values. */
+    .mx-map {
+      display: block;
+    }
+
+    .mm-head {
+      display: none;
+    }
+
+    .mm-row {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      column-gap: 12px;
+      row-gap: 6px;
+      padding-block: 10px;
+    }
+
+    .mm-row.lv1 {
+      padding-left: 22px;
+    }
+
+    .mm-row.lv2 {
+      padding-left: 46px;
+    }
+
+    .mm-row .mm-name,
+    .mm-row.lv1 .mm-name,
+    .mm-row.lv2 .mm-name {
+      position: static;
+      flex: 1 1 0;
+      min-width: 0;
+      padding-left: 0;
+    }
+
+    .mm-row.lv0 .mm-name::after,
+    .mm-row.lab .mm-label::before {
+      display: none;
+    }
+
+    .mm-row.lv1 .mm-name::after,
+    .mm-row.lv2 .mm-label::before {
+      top: 21px;
+    }
+
+    .mm-row.lv1.last .mm-name::before,
+    .mm-row.lv2.last .mm-name::after {
+      bottom: auto;
+      height: 21px;
+    }
+
+    .mm-count {
+      flex: none;
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .mm-bar {
+      order: 3;
+      flex: 1 0 100%;
+      height: 10px;
+    }
+
+    /* The root has no bar; an empty full-width line still starts its values on a line of their own. */
+    .mm-row.lv0 .mm-bar {
+      height: 0;
+    }
+
+    .mm-stat {
+      order: 4;
+      flex: none;
+      padding: 3px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .mm-groups {
+      order: 4;
+      flex: 1 0 100%;
+      padding: 0;
+      background: none;
+    }
+
+    .mm-groups:empty {
+      display: none;
+    }
+
+    .mm-stat:empty {
+      display: none;
+    }
+
+    .mm-k {
+      display: inline;
+      margin-right: 4px;
+      font-weight: 500;
+      color: var(--ink-3);
+    }
+  }
+
+  @media (max-width: 719px) {
+    .mx-flow {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .fl-name,
+    .fl-net {
+      grid-column: 1 / -1;
+      padding: 0;
+    }
+
+    .fl-name {
+      margin-top: 6px;
+    }
+
+    .py-row {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 6px;
     }
   }
 

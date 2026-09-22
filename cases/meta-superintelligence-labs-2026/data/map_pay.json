@@ -1,0 +1,261 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-22",
+  "query": "queries/population.json · queries/mapping.json",
+  "gate_count": 15,
+  "note": "US postings in USD that state both annual_min and annual_max: count is how many do, and each threshold row how many state a bound at or above at_least. Posted base ranges only, not pay, bonus, or equity. A family is published only with gate_count or more such postings.",
+  "rows": [
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": null,
+      "at_least": null,
+      "count": 197,
+      "share": null,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_min",
+      "at_least": 150000,
+      "count": 179,
+      "share": 0.9086,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_min",
+      "at_least": 180000,
+      "count": 116,
+      "share": 0.5888,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_min",
+      "at_least": 215000,
+      "count": 45,
+      "share": 0.2284,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_min",
+      "at_least": 265000,
+      "count": 8,
+      "share": 0.0406,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_max",
+      "at_least": 215000,
+      "count": 179,
+      "share": 0.9086,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_max",
+      "at_least": 250000,
+      "count": 120,
+      "share": 0.6091,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_max",
+      "at_least": 295000,
+      "count": 45,
+      "share": 0.2284,
+      "published": true
+    },
+    {
+      "family": "all",
+      "label": "All AI postings",
+      "bound": "annual_max",
+      "at_least": 340000,
+      "count": 8,
+      "share": 0.0406,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": null,
+      "at_least": null,
+      "count": 33,
+      "share": null,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_min",
+      "at_least": 150000,
+      "count": 30,
+      "share": 0.9091,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_min",
+      "at_least": 180000,
+      "count": 18,
+      "share": 0.5455,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_min",
+      "at_least": 215000,
+      "count": 5,
+      "share": 0.1515,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_min",
+      "at_least": 265000,
+      "count": 2,
+      "share": 0.0606,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_max",
+      "at_least": 215000,
+      "count": 30,
+      "share": 0.9091,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_max",
+      "at_least": 250000,
+      "count": 18,
+      "share": 0.5455,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_max",
+      "at_least": 295000,
+      "count": 5,
+      "share": 0.1515,
+      "published": true
+    },
+    {
+      "family": "research-scientist",
+      "label": "Research scientist",
+      "bound": "annual_max",
+      "at_least": 340000,
+      "count": 2,
+      "share": 0.0606,
+      "published": true
+    },
+    {
+      "family": "research-engineer",
+      "label": "Research engineer",
+      "bound": null,
+      "at_least": null,
+      "count": 12,
+      "share": null,
+      "published": false
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": null,
+      "at_least": null,
+      "count": 99,
+      "share": null,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_min",
+      "at_least": 150000,
+      "count": 91,
+      "share": 0.9192,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_min",
+      "at_least": 180000,
+      "count": 63,
+      "share": 0.6364,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_min",
+      "at_least": 215000,
+      "count": 26,
+      "share": 0.2626,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_min",
+      "at_least": 265000,
+      "count": 4,
+      "share": 0.0404,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_max",
+      "at_least": 215000,
+      "count": 91,
+      "share": 0.9192,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_max",
+      "at_least": 250000,
+      "count": 67,
+      "share": 0.6768,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_max",
+      "at_least": 295000,
+      "count": 26,
+      "share": 0.2626,
+      "published": true
+    },
+    {
+      "family": "ml-software-engineer",
+      "label": "Machine learning or software engineer",
+      "bound": "annual_max",
+      "at_least": 340000,
+      "count": 4,
+      "share": 0.0404,
+      "published": true
+    }
+  ]
+}
