@@ -79,6 +79,9 @@ const share = (r: Row) => r.us_mainland_count / r.us_bachelor_count;
 const byShare = [...labs].sort((a, b) => share(b) - share(a));
 const highest = byShare[0];
 const lowest = byShare[byShare.length - 1];
+// Notes mark the labs figure 01 highlights with the highlight key.
+const leadKey = (r: { group: string }) =>
+  r.group === highest.group || r.group === lowest.group ? `{{hl|${name(r.group)}}}` : name(r.group);
 const visibleShare = all.us_bachelor_count / all.us_visible_count;
 const visibility = labs.map((r) => r.us_bachelor_count / r.us_visible_count);
 // If nobody without a Bachelor entry studied in mainland China, the share among all visible staff.
@@ -403,20 +406,17 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
             <span class="lg solid">{zh ? `十家合计 ${pct(share(all))}` : `Ten labs ${pct(share(all))}`}</span>
             <span class="lg dashed">{zh ? `全美 AI 岗位上限 ${pctUp(ceiling)}` : `All US AI roles, at most ${pctUp(ceiling)}`}</span>
           </p>
-        </Figure>
-        <FigNotes
+                <FigNotes
+          slot="notes"
           lang={lang}
-          figure="01"
-          paras={zh
-            ? [
-                `全美当前职位属于 AI 岗位、写有本科经历的人超过 10 万，其中 ${number(lang, usMainland)} 人本科在中国大陆院校，所以全美整体水平最多是 ${pctUp(ceiling)}。${aboveCeiling.length} 家机构高于这个上限${belowCeiling.length ? `；${belowCeiling.map((r) => `${name(r.group)}（${pct(share(r))}）`).join("、")}低于上限，数据无法判断它是否高于全美实际水平` : ""}。`,
-                `一个人如果同时在两家机构有当前职位，只算在清单中靠前的那一家，所以各行不重叠，十家合计就是各行之和。十家在全球（不限美国）的比例是 ${pct(worldM / worldB)}。`,
-              ]
-            : [
-                `Across the US, more than 100,000 people in AI roles show a bachelor's degree, and ${number(lang, usMainland)} of them earned it in mainland China, so the level across all US AI roles is at most ${pctUp(ceiling)}. ${aboveCeiling.length} of the ten labs are above that ceiling${belowCeiling.length ? `; ${join(belowCeiling.map((r) => `${name(r.group)}, at ${pct(share(r))},`))} ${belowCeiling.length === 1 ? "is" : "are"} below it, so the data cannot say whether ${belowCeiling.length === 1 ? "it is" : "they are"} above the actual all-US level` : ""}.`,
-                `Someone with current jobs at two of the labs counts once, at the first in the list, so the rows do not overlap and the ten-lab row is their sum. Worldwide, not only in the US, the ten labs are at ${pct(worldM / worldB)}.`,
-              ]}
+          shows={zh
+            ? `全美当前职位属于 AI 岗位、写有本科经历的人超过 10 万，其中 ${number(lang, usMainland)} 人本科在中国大陆院校，所以全美整体水平{{dash|最多是 ${pctUp(ceiling)}}}。${aboveCeiling.length} 家机构高于这个上限${belowCeiling.length ? `；${belowCeiling.map((r) => `${leadKey(r)}（${pct(share(r))}）`).join("、")}低于上限，数据无法判断它是否高于全美实际水平` : ""}。`
+            : `Across the US, more than 100,000 people in AI roles show a bachelor's degree, and ${number(lang, usMainland)} of them earned it in mainland China, so the level across all US AI roles is {{dash|at most ${pctUp(ceiling)}}}. ${aboveCeiling.length} of the ten labs are above that ceiling${belowCeiling.length ? `; ${join(belowCeiling.map((r) => `${leadKey(r)}, at ${pct(share(r))},`))} ${belowCeiling.length === 1 ? "is" : "are"} below it, so the data cannot say whether ${belowCeiling.length === 1 ? "it is" : "they are"} above the actual all-US level` : ""}.`}
+          method={zh
+            ? `一个人如果同时在两家机构有当前职位，只算在清单中靠前的那一家，所以各行不重叠，{{line|十家合计}}就是各行合并计算的结果。十家在全球（不限美国）的比例是 ${pct(worldM / worldB)}。`
+            : `Someone with current jobs at two of the labs counts once, at the first in the list, so the rows do not overlap and {{line|the ten-lab line}} pools them. Worldwide, not only in the US, the ten labs are at ${pct(worldM / worldB)}.`}
         />
+        </Figure>
 
         <Figure
           id="cohorts"
@@ -481,20 +481,17 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
             <span class="lg open">{zh ? "当前工作开始得更早" : "Current job started earlier"}</span>
             <span class="lg filled">{zh ? "当前工作开始于最近 24 个月" : "Current job started in the last 24 months"}</span>
           </p>
-        </Figure>
-        <FigNotes
+                <FigNotes
+          slot="notes"
           lang={lang}
-          figure="02"
-          paras={zh
-            ? [
-                `十家合计的差距是 ${number(lang, gap * 100, 1)} 个百分点，其中一部分是因为最近 24 个月开始当前工作的人较多的机构，本身比例较低；按机构分别比较、再按这些人数加权，差距是 ${number(lang, Math.abs(adjusted) * 100, 1)} 个百分点。只有 ${join(drops.map((c) => name(c.row.group)))} 的差距大到不像偶然（把可见档案当作样本做双比例检验，|z| 至少 1.96）；其余机构的 |z| 不超过 ${up1(chanceMaxZ)}。${skipped.length ? `${skipped.map((r) => name(r.group)).join("、")} 的某一组不足 100 人，没有画。` : ""}`,
-                `这里看的是当前这份工作的开始时间，内部转岗也算，所以它描述的是现在的在职结构，不是招聘流程。更早的一组有更长时间流失离开的人：两类人离职快慢如果不同，差距反映的也可能是谁留下，而不只是招了谁。当前工作没有开始时间的档案归在更早的一组。这个比较也没有区分职位类型：职位名称含 scientist 或 researcher 的比例更高（见图 03），而数据看不出最近开始当前工作的人担任这类职位的比例是否一样，影响的方向也可能相反。`,
-              ]
-            : [
-                `Across the ten labs the gap is ${number(lang, gap * 100, 1)} points, partly because the labs where the most people started their current job recently have lower shares to begin with; compared lab by lab and weighted by those people, it is ${number(lang, Math.abs(adjusted) * 100, 1)} points. Only ${join(drops.map((c) => name(c.row.group)))} differ by more than chance would explain (a two-proportion test treating the visible profiles as a sample, |z| of at least 1.96); at the other labs |z| is at most ${up1(chanceMaxZ)}. ${skipped.length ? `${skipped.map((r) => name(r.group)).join(", ")} ${skipped.length === 1 ? "has" : "have"} a group under 100 and ${skipped.length === 1 ? "is" : "are"} not drawn. ` : ""}`,
-                `This is the start of the current job, internal moves included, so it describes today's staff by tenure, not a hiring pipeline. The earlier group has had longer to lose people who left, so if people with and without a mainland-China bachelor's leave at different rates, the gap may reflect who stayed as well as who was hired. Profiles with no start date on the current job fall in the earlier group. The comparison does not account for job type either: scientist and researcher titles have higher shares (figure 03), the data does not show whether recent starters hold them as often, and the effect could run in either direction.`,
-              ]}
+          shows={zh
+            ? `十家合计的差距是 ${number(lang, gap * 100, 1)} 个百分点，其中一部分是因为最近 24 个月开始当前工作的人较多的机构，本身比例较低；按机构分别比较、再按这些人数加权，差距是 ${number(lang, Math.abs(adjusted) * 100, 1)} 个百分点。只有 ${join(drops.map((c) => `{{hl|${name(c.row.group)}}}`))} 的差距大到不像偶然（把可见档案当作样本做双比例检验，|z| 至少 1.96）；其余机构的 |z| 不超过 ${up1(chanceMaxZ)}。${skipped.length ? `${skipped.map((r) => name(r.group)).join("、")} 的某一组不足 100 人，没有画。` : ""}`
+            : `Across the ten labs the gap is ${number(lang, gap * 100, 1)} points, partly because the labs where the most people started their current job recently have lower shares to begin with; compared lab by lab and weighted by those people, it is ${number(lang, Math.abs(adjusted) * 100, 1)} points. Only ${join(drops.map((c) => `{{hl|${name(c.row.group)}}}`))} differ by more than chance would explain (a two-proportion test treating the visible profiles as a sample, |z| of at least 1.96); at the other labs |z| is at most ${up1(chanceMaxZ)}. ${skipped.length ? `${skipped.map((r) => name(r.group)).join(", ")} ${skipped.length === 1 ? "has" : "have"} a group under 100 and ${skipped.length === 1 ? "is" : "are"} not drawn. ` : ""}`}
+          method={zh
+            ? `这里看的是当前这份工作的开始时间，内部转岗也算，所以它描述的是现在的在职结构，不是招聘流程。更早的一组有更长时间流失离开的人：两类人离职快慢如果不同，差距反映的也可能是谁留下，而不只是招了谁。当前工作没有开始时间的档案归在{{open|更早的一组}}。这个比较也没有区分职位类型：职位名称含 scientist 或 researcher 的比例更高（见图 03），而数据看不出最近开始当前工作的人担任这类职位的比例是否一样，影响的方向也可能相反。`
+            : `This is the start of the current job, internal moves included, so it describes today's staff by tenure, not a hiring pipeline. The earlier group has had longer to lose people who left, so if people with and without a mainland-China bachelor's leave at different rates, the gap may reflect who stayed as well as who was hired. Profiles with no start date on the current job fall in {{open|the earlier group}}. The comparison does not account for job type either: scientist and researcher titles have higher shares (figure 03), the data does not show whether recent starters hold them as often, and the effect could run in either direction.`}
         />
+        </Figure>
 
         <Figure
           id="research"
@@ -556,20 +553,17 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
             <span class="lg open">{zh ? "其他 AI 职位" : "Other AI titles"}</span>
             <span class="lg filled">{zh ? "scientist 或 researcher" : "Scientist or researcher"}</span>
           </p>
-        </Figure>
-        <FigNotes
+                <FigNotes
+          slot="notes"
           lang={lang}
-          figure="03"
-          paras={zh
-            ? [
-                `Applied Scientist 也算在内：Amazon 写有本科经历的 ${number(lang, amazon.us_bachelor_count)} 名 AI 员工中有 ${number(lang, int(amazon.us_research_bachelor_count) ?? 0)} 人是这类职位。${join(clearGap)} 的差距远超偶然范围${marginal.length ? `，${join(marginal)} 勉强超过（这里比较了 ${research.length} 家，按多重比较校正后不算）` : ""}；${join(noGap)} 看不出差距。`,
-                `${thinResearch.join("、")} 大多用 member of technical staff 之类的职位名称，这类职位不到 100 人，没有画；有几家的人数太少不能公开，所以这里不给十家合计，汇总行只合计图中这几家。`,
-              ]
-            : [
-                `Applied Scientist counts here: at Amazon, ${number(lang, int(amazon.us_research_bachelor_count) ?? 0)} of the ${number(lang, amazon.us_bachelor_count)} AI staff with a bachelor's hold such a title. The gap is far beyond chance at ${join(clearGap)}${marginal.length ? `, marginal at ${join(marginal)} (it passes 1.96 but not a correction for the ${research.length} comparisons)` : ""}, and absent at ${join(noGap)}.`,
-                `${join(thinResearch)} mostly use titles such as member of technical staff and have fewer than 100 scientist or researcher titles, so they are not drawn. Some of their cells are too small to publish, so there is no ten-lab figure here: the summary row pools the labs drawn.`,
-              ]}
+          shows={zh
+            ? `Applied Scientist 也算在内：Amazon 写有本科经历的 ${number(lang, amazon.us_bachelor_count)} 名 AI 员工中有 ${number(lang, int(amazon.us_research_bachelor_count) ?? 0)} 人是这类职位。${join(clearGap)} 的差距远超偶然范围${marginal.length ? `，${join(marginal)} 勉强超过（这里比较了 ${research.length} 家，按多重比较校正后不算）` : ""}；${join(noGap)} 看不出差距。`
+            : `Applied Scientist counts here: at Amazon, ${number(lang, int(amazon.us_research_bachelor_count) ?? 0)} of the ${number(lang, amazon.us_bachelor_count)} AI staff with a bachelor's hold such a title. The gap is far beyond chance at ${join(clearGap)}${marginal.length ? `, marginal at ${join(marginal)} (it passes 1.96 but not a correction for the ${research.length} comparisons)` : ""}, and absent at ${join(noGap)}.`}
+          method={zh
+            ? `${thinResearch.join("、")} 大多用 member of technical staff 之类的职位名称，这类职位不到 100 人，没有画；有几家的人数太少不能公开，所以这里不给十家合计，汇总行只合计图中这几家。`
+            : `${join(thinResearch)} mostly use titles such as member of technical staff and have fewer than 100 scientist or researcher titles, so they are not drawn. Some of their cells are too small to publish, so there is no ten-lab figure here: the summary row pools the labs drawn.`}
         />
+        </Figure>
 
         <Figure
           id="institutions"
@@ -624,20 +618,17 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
           <p class="legend" aria-hidden="true">
             <span class="lg strict">{zh ? "严格计数" : "Strict count"}</span>
           </p>
-        </Figure>
-        <FigNotes
+                <FigNotes
+          slot="notes"
           lang={lang}
-          figure="04"
-          paras={zh
-            ? [
-                `平台对院校名称按词匹配：名称的每个词都出现在记录里就算，所以"南京大学"也会匹配南京航空航天大学，"中国科学技术大学"也会匹配电子科技大学。斜线条的几行排除了含这些用词的记录，是严格计数，像"南京大学计算机科学与技术系"这样的写法也会被排除。`,
-                `人数按院校分别计数，一个人如果在两所院校读过本科会在两所都出现，所以十二行合计 ${number(lang, rowSum)} 人次，清单上其他院校的人数至少是 ${number(lang, elsewhereAtLeast)}。条形按占十家总数 ${number(lang, instBase)} 人的比例画。这十二所是提示词里事先列出的大型院校，不是全部院校的排名。`,
-              ]
-            : [
-                `The Platform matches institution names word by word: a name counts when each of its words appears in the entry, so Nanjing University also matches Nanjing University of Aeronautics and Astronautics, and the University of Science and Technology of China also matches the University of Electronic Science and Technology of China. The hatched rows leave out entries with those words, which makes them strict counts: an entry such as "Nanjing University, Department of Computer Science and Technology" drops out too.`,
-                `Each institution is counted on its own, and someone with bachelor's entries at two of them appears under both, so the twelve rows add up to ${number(lang, rowSum)} entries and at least ${number(lang, elsewhereAtLeast)} people studied at another listed institution. Every bar is a share of the ${number(lang, instBase)} at the ten labs. The twelve are large universities named in the prompt before any count ran, not a ranking of every institution.`,
-              ]}
+          shows={zh
+            ? `条形按占十家总数 ${number(lang, instBase)} 人的比例画。人数按院校分别计数，一个人如果在两所院校读过本科会在两所都出现，所以十二行合计 ${number(lang, rowSum)} 人次，清单上其他院校的人数至少是 ${number(lang, elsewhereAtLeast)}。这十二所是提示词里事先列出的大型院校，不是全部院校的排名。`
+            : `Every bar is a share of the ${number(lang, instBase)} at the ten labs. Each institution is counted on its own, and someone with bachelor's entries at two of them appears under both, so the twelve rows add up to ${number(lang, rowSum)} entries and at least ${number(lang, elsewhereAtLeast)} people studied at another listed institution. The twelve are large universities named in the prompt before any count ran, not a ranking of every institution.`}
+          method={zh
+            ? `平台对院校名称按词匹配：名称的每个词都出现在记录里就算，所以"南京大学"也会匹配南京航空航天大学，"中国科学技术大学"也会匹配电子科技大学。{{hatch|斜线条的几行}}排除了含这些用词的记录，是严格计数，像"南京大学计算机科学与技术系"这样的写法也会被排除。`
+            : `The Platform matches institution names word by word: a name counts when each of its words appears in the entry, so Nanjing University also matches Nanjing University of Aeronautics and Astronautics, and the University of Science and Technology of China also matches the University of Electronic Science and Technology of China. The {{hatch|hatched rows}} leave out entries with those words, which makes them strict counts: an entry such as "Nanjing University, Department of Computer Science and Technology" drops out too.`}
         />
+        </Figure>
 
         <section class="text-block rail-block" aria-labelledby="where-title">
           <div class="rail">

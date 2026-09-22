@@ -1,24 +1,49 @@
 ---
 /*
- * The reading of a figure, directly under it and aligned with the figure's content edge,
- * so it reads as that figure's caption: a label naming the figure, then the text at a
- * reading measure. The first paragraph is what the figure shows; any after it carry method
- * and caveats, at the same size.
+ * A figure's reading, inside its card between the chart and the source line, across the
+ * card's full content width. Two parts with fixed roles and places: what the figure shows
+ * on the left, its method and limits on the right, at one size and leading so the lines
+ * of both columns share baselines. On phones they stack.
+ *
+ * A term that names a mark in the chart can carry that mark's swatch, written in the text
+ * as {{kind|words}}. Kinds: hl (the highlight color), line (the solid reference line),
+ * dash (the dashed reference line), hatch (hatched bars), open and filled (dots). The text
+ * is escaped first, so only these keys become markup; an unknown kind fails the build.
  */
 import type { Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
-  figure: string;
-  paras: string[];
+  shows: string;
+  method: string;
 }
 
-const { lang, figure, paras } = Astro.props;
+const { lang, shows, method } = Astro.props;
+
+const KINDS = new Set(["hl", "line", "dash", "hatch", "open", "filled"]);
+const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const render = (s: string) => {
+  const html = escape(s).replace(/\{\{(\w+)\|([^{}]+)\}\}/g, (_, kind: string, words: string) => {
+    if (!KINDS.has(kind)) throw new Error(`FigNotes: unknown key kind "${kind}"`);
+    return `<span class="k k-${kind}">${words}</span>`;
+  });
+  if (html.includes("{{") || html.includes("}}")) throw new Error(`FigNotes: malformed key in "${s.slice(0, 80)}"`);
+  return html;
+};
+
+const parts = [
+  { label: lang === "zh" ? "要点" : "What it shows", html: render(shows) },
+  { label: lang === "zh" ? "方法与局限" : "Method and limits", html: render(method) },
+];
 ---
 
 <div class="fig-notes">
-  <p class="fn-label">{lang === "zh" ? `关于图 ${figure}` : `About figure ${figure}`}</p>
-  <div class="fn-text">
-    {paras.map((p) => <p>{p}</p>)}
-  </div>
+  {
+    parts.map((p) => (
+      <div class="fn-part">
+        <p class="fn-label">{p.label}</p>
+        <p class="fn-text" set:html={p.html} />
+      </div>
+    ))
+  }
 </div>

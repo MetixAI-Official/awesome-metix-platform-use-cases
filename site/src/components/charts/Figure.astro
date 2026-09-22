@@ -1,5 +1,6 @@
 ---
-/* A chart with its finding as the heading, a text alternative, a source line, and its queries. */
+/* A chart with its finding as the heading, a text alternative, its notes (the "notes" slot,
+   FigNotes), a source line, and its queries. */
 import QueryDetails, { type QueryItem } from "@site/components/QueryDetails.astro";
 import { titleHtml, type Lang } from "@site/i18n";
 
@@ -26,6 +27,7 @@ const { id, lang, heading, sub, alt, source, queries, cost, number } = Astro.pro
     <p class="visually-hidden" id={`${id}-alt`}>{alt}</p>
   </figcaption>
   <div class="fig-chart"><slot /></div>
+  <slot name="notes" />
   <div class="fig-foot">
     <p class="fig-source">{source}</p>
     {queries && <QueryDetails lang={lang} items={queries} />}

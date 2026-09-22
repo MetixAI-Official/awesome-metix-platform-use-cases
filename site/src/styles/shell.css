@@ -1920,20 +1920,23 @@ details.query[open]::details-content {
   }
 }
 
-/* Figure notes: the reading of a figure, directly under it and aligned with the figure's
-   content edge, so it reads as that figure's caption. The label sits above the text, and
-   every paragraph is the same size. */
-.report-body > .fig-notes {
-  margin-top: 20px;
-}
-
+/* Figure notes: a figure's reading, inside its card between the chart and the source line,
+   across the card's full content width. Two columns with fixed roles, what the figure shows
+   and then its method and limits, at one size and leading so the lines of both columns share
+   baselines. A light divider separates the reading from the chart. */
 .fig-notes {
-  padding-inline: clamp(20px, 3vw, 36px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(32px, 4vw, 56px);
+  row-gap: 22px;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
 }
 
 .fn-label {
   margin-bottom: 8px;
-  font: 500 12px/1.4 var(--mono);
+  font: 500 12px/16px var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-3);
@@ -1946,14 +1949,79 @@ details.query[open]::details-content {
 }
 
 .fn-text {
-  max-width: 36em;
-  font-size: 16px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 24px;
   color: var(--ink-2);
 }
 
-.fn-text p + p {
-  margin-top: 10px;
+@media (max-width: 719px) {
+  .fig-notes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Keys: a term in a note that names a mark in the chart carries that mark's swatch, so the
+   reader can find it there. The swatch is decorative; the words carry the meaning. */
+.k {
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.k::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  vertical-align: middle;
+  position: relative;
+  top: -1px;
+}
+
+.k-hl::before {
+  border-radius: 3px;
+  background: var(--key-hl, #3d36c9);
+}
+
+/* The reference lines are drawn on a small tinted tile, so at text size they read as a
+   symbol rather than as a bar or a colon. */
+.k-line::before,
+.k-dash::before {
+  width: 12px;
+  height: 14px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.k-line::before {
+  background: linear-gradient(var(--ink), var(--ink)) center / 2px 10px no-repeat, var(--surface-muted);
+}
+
+.k-dash::before {
+  background:
+    repeating-linear-gradient(to bottom, var(--ink-2) 0 3px, transparent 3px 5px) center / 1.5px 10px no-repeat,
+    var(--surface-muted);
+}
+
+.k-hatch::before {
+  width: 16px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(135deg, #858395 0 3px, transparent 3px 6px);
+  box-shadow: inset 0 0 0 1.5px #858395;
+}
+
+.k-open::before,
+.k-filled::before {
+  border-radius: 50%;
+}
+
+.k-open::before {
+  box-shadow: inset 0 0 0 2px #858395;
+}
+
+.k-filled::before {
+  background: #858395;
 }
 
 /* The one note style on the site: a muted panel with a label, no side stripe. */
