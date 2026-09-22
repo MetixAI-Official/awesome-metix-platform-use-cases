@@ -1,0 +1,30 @@
+---
+/*
+ * Something to paste into a terminal or an agent: a label saying what it is, Copy on the
+ * same bar, and the text below it, so the text never runs under the button. Every command
+ * and every prompt on the site uses this one panel, so it always means "paste this".
+ * Shell commands keep their lines and scroll sideways when they must (a command broken
+ * mid-URL is easy to mistype); prompts wrap.
+ */
+import { ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  label: string;
+  code: string;
+  wrap?: boolean;
+}
+
+const { lang, label, code, wrap = false } = Astro.props;
+const t = ui[lang];
+---
+
+<div class="code-block" data-copy-root>
+  <div class="cb-head">
+    <span class="cb-label">{label}</span>
+    <button class="cb-copy" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
+      {t.copy}
+    </button>
+  </div>
+  <pre class:list={["cb-code", { wrap }]}>{code}</pre>
+</div>

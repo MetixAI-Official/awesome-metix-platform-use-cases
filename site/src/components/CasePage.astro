@@ -89,26 +89,31 @@ const indexHref = (query: string) => `${href(lang)}?${query}#index`;
         </div>
       </section>
       {receipt && <Receipt lang={lang} slug={data.slug} receipt={receipt} exploration={data.exploration_credits} />}
-      <nav class="case-nav" aria-label={t.caseNav.all}>
-        {prev ? (
-          <a class="cn-link cn-prev" href={href(lang, `cases/${prev.slug}/`)}>
-            <span class="cn-label">← {t.caseNav.prev}</span>
-            <span class="cn-title" set:html={titleHtml(prev.title[lang], lang)} />
-          </a>
-        ) : (
-          <span />
-        )}
-        <a class="cn-all" href={`${href(lang)}#index`}>
-          {t.caseNav.all}
-        </a>
-        {next ? (
-          <a class="cn-link cn-next" href={href(lang, `cases/${next.slug}/`)}>
-            <span class="cn-label">{t.caseNav.next} →</span>
-            <span class="cn-title" set:html={titleHtml(next.title[lang], lang)} />
-          </a>
-        ) : (
-          <span />
-        )}
+      <nav class="case-nav" aria-labelledby="case-nav-title">
+        <div class="pg-head">
+          <h2 class="pg-heading" id="case-nav-title">{t.caseNav.more}</h2>
+          <a class="text-link" href={`${href(lang)}#index`}>{t.caseNav.all} →</a>
+        </div>
+        <div class:list={["pager", { single: !prev || !next }]}>
+          {prev && (
+            <a class="pg-link pg-prev" href={href(lang, `cases/${prev.slug}/`)} rel="prev">
+              <span class="pg-arrow" aria-hidden="true">←</span>
+              <span class="pg-text">
+                <span class="pg-label">{t.caseNav.prev}</span>
+                <span class="pg-title" set:html={titleHtml(prev.title[lang], lang)} />
+              </span>
+            </a>
+          )}
+          {next && (
+            <a class="pg-link pg-next" href={href(lang, `cases/${next.slug}/`)} rel="next">
+              <span class="pg-text">
+                <span class="pg-label">{t.caseNav.next}</span>
+                <span class="pg-title" set:html={titleHtml(next.title[lang], lang)} />
+              </span>
+              <span class="pg-arrow" aria-hidden="true">→</span>
+            </a>
+          )}
+        </div>
       </nav>
     </div>
   </div>

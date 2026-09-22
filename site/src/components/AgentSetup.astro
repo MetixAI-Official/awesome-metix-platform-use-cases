@@ -6,6 +6,7 @@
  * is remembered, so the home page and every case page show the same agent.
  * Without JavaScript all four panels are shown, one under another.
  */
+import CodeBlock from "@site/components/CodeBlock.astro";
 import { ui, type Lang } from "@site/i18n";
 
 interface Props {
@@ -70,12 +71,7 @@ const agents = [
       <div class="as-panel" role="tabpanel" id={`${id}-panel-${a.key}`} aria-labelledby={`${id}-tab-${a.key}`} data-agent-panel={a.key} data-copy-root>
         <p class="as-no-js-label">{a.label}</p>
         <p class="as-note">{a.note}</p>
-        <div class="code-copy">
-          <pre class="code">{a.command}</pre>
-          <button class="btn btn-small" type="button" data-copy="pre" data-done={t.copied} data-fail={t.copyFailed} aria-live="polite">
-            {t.copy}
-          </button>
-        </div>
+        <CodeBlock lang={lang} label={a.key === "other" ? t.code.mcp : t.code.shell} code={a.command} />
         {a.key === "skills" ? (
           <a class="as-docs" href="https://platform.metix.ai/docs/skills#install">
             {t.setup.skillsDocs} →

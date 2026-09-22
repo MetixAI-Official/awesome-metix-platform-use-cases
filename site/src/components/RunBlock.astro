@@ -12,6 +12,7 @@
  */
 import type { PromptModule, Receipt } from "@site/cases";
 import AgentSetup from "@site/components/AgentSetup.astro";
+import CodeBlock from "@site/components/CodeBlock.astro";
 import { FREE_CREDITS, REPO, dollars, ui, type Lang } from "@site/i18n";
 import { parsePrompt } from "@site/prompt";
 
@@ -101,12 +102,9 @@ const adaptSections = parsed.sections.filter((s) => !isAdapt(s.title));
         <ol class="run-steps">
           <li>
             <h4><span class="rs-n">1</span>{t.run.stepKey}</h4>
-            <p><a href="https://platform.metix.ai/api-keys">{t.run.createKey}{"\u00a0"}→</a></p>
+            <a class="text-link" href="https://platform.metix.ai/api-keys">{t.run.createKey}{"\u00a0"}→</a>
             <p>{t.run.keyBody}</p>
-            <div class="code-copy" data-copy-root>
-              <pre class="code prompt-line">export METIX_KEY=metix_xxxxxxxx</pre>
-              <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
-            </div>
+            <CodeBlock lang={lang} label={t.code.shell} code="export METIX_KEY=metix_xxxxxxxx" />
           </li>
           <li>
             <h4><span class="rs-n">2</span>{t.run.stepConnect}</h4>
@@ -115,10 +113,7 @@ const adaptSections = parsed.sections.filter((s) => !isAdapt(s.title));
           <li>
             <h4><span class="rs-n">3</span>{t.run.stepCheck}</h4>
             <p>{t.run.checkBody}</p>
-            <div class="code-copy" data-copy-root>
-              <pre class="code prompt-line">{t.run.checkPrompt}</pre>
-              <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
-            </div>
+            <CodeBlock lang={lang} label={t.code.prompt} code={t.run.checkPrompt} wrap />
           </li>
         </ol>
       </details>
@@ -183,10 +178,7 @@ const adaptSections = parsed.sections.filter((s) => !isAdapt(s.title));
         </p>
       </header>
       <p class="rp-lede">{t.run.reproduceLede(receipt.records)}</p>
-      <div class="code-copy" data-copy-root>
-        <pre class="code">{reproduceCommand}</pre>
-        <button class="btn btn-small" type="button" data-copy="pre" {...copy}>{t.copy}</button>
-      </div>
+      <CodeBlock lang={lang} label={t.code.shell} code={reproduceCommand} />
       <div class="run-get">
         <p class="rg-label">{t.run.getLabel}</p>
         <p>{t.run.reproduceGet(slug)}</p>

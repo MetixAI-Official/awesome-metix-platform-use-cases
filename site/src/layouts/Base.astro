@@ -89,7 +89,7 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
         } catch {
           // The clipboard can be blocked, and the prompt's source is hidden, so selecting
           // it would copy nothing. Show the text in a box, selected, next to the button.
-          const anchor = button.closest(".code-copy, .rs-head, .prompt-foot") || button.parentElement;
+          const anchor = button.closest(".code-block, .rs-head, .prompt-foot") || button.parentElement;
           let box = anchor.nextElementSibling;
           if (!box || !box.classList.contains("copy-fallback")) {
             box = document.createElement("textarea");

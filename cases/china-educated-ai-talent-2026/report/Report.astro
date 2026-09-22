@@ -239,17 +239,20 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
       </header>
 
       <div class="wrap report-body">
-        <section class="who" aria-labelledby="who-title">
-          <h2 id="who-title">{zh ? "统计的是谁" : "Who is counted"}</h2>
+        <section class="intro rail-block" aria-labelledby="who-title">
+          <div class="rail">
+            <h2 id="who-title">{zh ? "统计的是谁" : "Who is counted"}</h2>
+          </div>
+          <div class="rail-main">
           {zh ? (
-            <p>
+            <p class="intro-text">
               十家机构当前职位属于 AI 岗位的人（职位名称含 machine learning、research scientist、member of technical staff 等{" "}
               {population.ai_title_terms.length} 个词之一），档案所在国家为美国，并且档案里写有本科经历。本科院校位于中国大陆即计入，按一份由{" "}
               {instList.match.length} 个匹配词（城市、省份和独有校名）和 {instList.exact.length} 个院校名称组成的清单判断，包括外国和香港高校在中国大陆设立的校区（如昆山杜克大学、香港中文大学（深圳））。只看院校所在地，不从姓名、语言或国籍推断任何东西；清单按设计不含港澳台院校。人数都是
               Metix AI Platform 上可见档案的计数，是下限，不是这些机构的人数；比例是这些档案内部的比例，可能高于也可能低于全部员工中的实际比例。
             </p>
           ) : (
-            <p>
+            <p class="intro-text">
               People whose current job at one of the ten labs is an AI role (the title matches one of {population.ai_title_terms.length}{" "}
               terms such as machine learning, research scientist, or member of technical staff), whose profile lists the United States
               as its country, and whose profile shows a bachelor's degree. They count when that bachelor's institution is located in
@@ -261,30 +264,26 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
               share among all staff.
             </p>
           )}
+          </div>
         </section>
 
-        <section class="brief" aria-labelledby="brief-title">
-          <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
-          <ol>
+        <section class="intro rail-block" aria-labelledby="brief-title">
+          <div class="rail">
+            <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
+          </div>
+          <div class="rail-main">
+          <ol class="brief-list">
             {zh ? (
-              <>
+              [
+                `十家机构合计 ${pct(share(all))}，至少是全美 AI 岗位整体水平（按同一份清单不超过 ${pctUp(ceiling)}）的 ${down1(minRatio)} 倍。各家差别很大，从 ${name(lowest.group)} 的 ${pct(share(lowest))} 到 ${name(highest.group)} 的 ${pct(share(highest))}。`,
+                `当前工作开始于最近 24 个月的人里，这一比例是 ${pct(pooled.recent)}，当前工作开始得更早的人是 ${pct(pooled.earlier)}。按机构分别比较后差距是 ${number(lang, Math.abs(adjusted) * 100, 1)} 个百分点，超出偶然波动的只有 ${join(drops.map((c) => name(c.row.group)))}；其余机构的差距有高有低，都在偶然波动范围内。`,
+                `职位名称含 scientist 或 researcher 的是 ${pct(researchPooled.share)}，同几家机构的其他 AI 职位是 ${pct(researchPooled.other)}。差距在 ${join(clearGap)} 明显，在 ${join(noGap)} 看不出来。`,
+                `十二所大学里人数最多的依次是${instRows.slice(0, 5).map((r) => instZh[r.group]).join("、")}。${ustcFirst ? "中国科学技术大学排在北京大学之前，而且中国科学技术大学这一行是严格计数。" : ""}`,
+              ].map((text) => (
                 <li>
-                  十家机构合计 {pct(share(all))}，至少是全美 AI 岗位整体水平（按同一份清单不超过 {pctUp(ceiling)}）的 {down1(minRatio)}{" "}
-                  倍。各家差别很大，从 {name(lowest.group)} 的 {pct(share(lowest))} 到 {name(highest.group)} 的 {pct(share(highest))}。
+                  <span set:html={titleHtml(text, "zh")} />
                 </li>
-                <li>
-                  当前工作开始于最近 24 个月的人里，这一比例是 {pct(pooled.recent)}，当前工作开始得更早的人是 {pct(pooled.earlier)}。按机构分别比较后差距是{" "}
-                  {number(lang, Math.abs(adjusted) * 100, 1)} 个百分点，超出偶然波动的只有 {join(drops.map((c) => name(c.row.group)))}；其余机构的差距有高有低，都在偶然波动范围内。
-                </li>
-                <li>
-                  职位名称含 scientist 或 researcher 的是 {pct(researchPooled.share)}，同几家机构的其他 AI 职位是 {pct(researchPooled.other)}。差距在{" "}
-                  {join(clearGap)} 明显，在 {join(noGap)} 看不出来。
-                </li>
-                <li>
-                  十二所大学里人数最多的依次是{instRows.slice(0, 5).map((r) => instZh[r.group]).join("、")}。
-                  {ustcFirst && "中国科学技术大学排在北京大学之前，而且中国科学技术大学这一行是严格计数。"}
-                </li>
-              </>
+              ))
             ) : (
               <>
                 <li>
@@ -310,11 +309,15 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
               </>
             )}
           </ol>
-          <p class="caveat">
+          <aside class="note">
+            <p class="note-label">{zh ? "关于分母" : "About the denominator"}</p>
+            <p>
             {zh
               ? `分母只包括档案里写了本科经历的人：十家机构在美国的 AI 员工中占 ${pct(visibleShare, 0)}，各家在 ${pct(Math.min(...visibility), 0)} 到 ${pct(Math.max(...visibility), 0)} 之间。写本科比例越高的机构，本科在中国大陆的比例往往也越高；如果本科在中国大陆的人更常写出本科经历，这些比例就偏高。如果没写本科经历的人都不是在中国大陆读的本科，按全部可见员工算，十家合计至少是 ${pct(floorAllVisible)}（${number(lang, all.us_visible_count)} 人中 ${number(lang, all.us_mainland_count)} 人）。`
               : `The denominator is people whose profile shows a bachelor's degree: ${pct(visibleShare, 0)} of the ten labs' US-based AI staff, between ${pct(Math.min(...visibility), 0)} and ${pct(Math.max(...visibility), 0)} at each lab. Labs where more staff list a bachelor's also tend to have higher shares, so if people with a mainland-China bachelor's list education more often, these shares run high. Counted against all visible staff, the ten-lab figure is at least ${pct(floorAllVisible)} (${number(lang, all.us_mainland_count)} of ${number(lang, all.us_visible_count)}), if none of the people without a bachelor's entry studied in mainland China.`}
-          </p>
+            </p>
+          </aside>
+          </div>
         </section>
 
         <Figure
@@ -323,8 +326,8 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
           lang={lang}
           heading={
             zh
-              ? `从 ${name(lowest.group)} 的 ${pct(share(lowest))} 到 ${name(highest.group)} 的 ${pct(share(highest))}，${aboveCeiling.length} 家高于全美 AI 岗位的上限`
-              : `From ${pct(share(lowest))} at ${name(lowest.group)} to ${pct(share(highest))} at ${name(highest.group)}; ${aboveCeiling.length} of the ten are above the ceiling for all US AI roles`
+              ? `从 ${name(lowest.group)}\u00a0的\u00a0${pct(share(lowest))} 到 ${name(highest.group)}\u00a0的\u00a0${pct(share(highest))}，${aboveCeiling.length} 家高于全美 AI 岗位的上限`
+              : `From ${pct(share(lowest))} at ${name(lowest.group)} to ${pct(share(highest))} at ${name(highest.group)}; ${aboveCeiling.length}\u00a0of\u00a0the\u00a0ten are above the ceiling for all US AI roles`
           }
           sub={
             zh
@@ -369,8 +372,19 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
                 </span>
               </div>
             ))}
+            <div class="rate-axis ref-labels" aria-hidden="true">
+              <span />
+              <span class="axis-track">
+                <span class="ref-label ceiling" style={`left: ${x(ceiling)}`}>
+                  {zh ? `全美 AI 岗位上限 ${pctUp(ceiling)}` : `All US AI roles, at most ${pctUp(ceiling)}`}
+                </span>
+                <span class="ref-label all" style={`left: ${x(share(all))}`}>
+                  {zh ? `十家合计 ${pct(share(all))}` : `Ten labs ${pct(share(all))}`}
+                </span>
+              </span>
+            </div>
           </div>
-          <p class="legend" aria-hidden="true">
+          <p class="legend ref-legend" aria-hidden="true">
             <span class="lg solid">{zh ? `十家合计 ${pct(share(all))}` : `Ten labs ${pct(share(all))}`}</span>
             <span class="lg dashed">{zh ? `全美 AI 岗位上限 ${pctUp(ceiling)}` : `All US AI roles, at most ${pctUp(ceiling)}`}</span>
           </p>
@@ -890,54 +904,6 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     }
   }
 
-  .who {
-    max-width: 900px;
-    padding: 20px 22px;
-    border-left: 4px solid #5b54ef;
-    border-radius: 0 12px 12px 0;
-    background: #f3f2ff;
-  }
-
-  .who h2 {
-    font-size: 18px;
-  }
-
-  .who p {
-    margin-top: 8px;
-    color: var(--ink-2);
-  }
-
-  .brief {
-    max-width: 900px;
-  }
-
-  .brief h2 {
-    font-size: clamp(22px, 2.4vw, 28px);
-  }
-
-  .brief ol {
-    display: grid;
-    gap: 10px;
-    margin: 18px 0 0;
-    padding-left: 1.4em;
-    color: var(--ink-2);
-  }
-
-  .brief li::marker {
-    font-family: var(--mono);
-    color: #3d36c9;
-  }
-
-  .caveat {
-    margin-top: 20px;
-    padding: 16px 18px;
-    border-left: 3px solid #5b54ef;
-    border-radius: 0 10px 10px 0;
-    background: #f3f2ff;
-    font-size: 15px;
-    color: var(--ink-2);
-  }
-
   .fig-text {
     max-width: 72ch;
     margin-top: 14px !important;
@@ -945,9 +911,11 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
   }
 
   /* Rate charts: every one on the same 0 to 50% axis. */
+  /* Name, track, value, denominator. The value pair joins the row's grid, so every
+     value and every denominator is right-aligned in its own column on one line. */
   .rate {
     display: grid;
-    grid-template-columns: 12rem minmax(0, 1fr) 8.5rem;
+    grid-template-columns: 12rem minmax(0, 1fr) auto auto;
     column-gap: 16px;
     row-gap: 12px;
   }
@@ -960,6 +928,19 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     align-items: center;
   }
 
+  /* Name, value, and denominator share one baseline; each gets the track's 28px line
+     box, so the shared baseline still sits on the bar's center. */
+  @media (min-width: 641px) {
+    .rate-row {
+      align-items: baseline;
+    }
+
+    .rate-row > .rate-name,
+    .rate-val > * {
+      line-height: 28px;
+    }
+  }
+
   .axis-track {
     position: relative;
     height: 16px;
@@ -970,14 +951,6 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     transform: translateX(-50%);
     font: 12px/1 var(--mono);
     color: var(--ink-3);
-  }
-
-  .tick:first-child {
-    transform: none;
-  }
-
-  .tick:last-child {
-    transform: translateX(-100%);
   }
 
   .rate-name {
@@ -994,16 +967,34 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     border-top: 1px solid var(--line);
   }
 
+  /* The track fills its row, and its gridlines and reference lines reach half the row
+     gap past each edge, so on a 40px pitch they read as one line down the chart. */
   .rate-track {
     position: relative;
-    height: 24px;
+    align-self: stretch;
+    min-height: 28px;
     background: linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat;
+  }
+
+  .rate-track:has(.bar) {
+    background: none;
+  }
+
+  .rate-track::before {
+    content: "";
+    position: absolute;
+    inset: -6px 0;
+    background: linear-gradient(to right, rgb(11 10 31 / 0.07) 1px, transparent 1px) 0 0 / 20% 100% repeat-x;
+    box-shadow: inset -1px 0 0 rgb(11 10 31 / 0.07);
   }
 
   .rate-track .bar {
     position: absolute;
-    inset: 3px auto 3px 0;
-    border-radius: 3px;
+    top: 50%;
+    left: 0;
+    height: 16px;
+    margin-top: -8px;
+    border-radius: 0 3px 3px 0;
     background: #7e8787;
   }
 
@@ -1013,17 +1004,48 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
 
   .ref {
     position: absolute;
-    top: -4px;
-    bottom: -4px;
+    top: -6px;
+    bottom: -6px;
     z-index: 1;
   }
 
   .ref.all {
-    border-left: 2px solid #3d36c9;
+    width: 2px;
+    margin-left: -1px;
+    background: #3d36c9;
   }
 
+  /* Dashes drawn as a gradient on an 8px period, so they stay in phase across rows. */
   .ref.ceiling {
-    border-left: 1.5px dashed #4e4d4b;
+    width: 1.5px;
+    margin-left: -0.75px;
+    background: repeating-linear-gradient(to bottom, #4e4d4b 0 4px, transparent 4px 8px);
+  }
+
+  .ref-labels .axis-track {
+    height: 18px;
+  }
+
+  .ref-label {
+    position: absolute;
+    top: 0;
+    font: 12px/1.4 var(--mono);
+    white-space: nowrap;
+  }
+
+  .ref-label.ceiling {
+    transform: translateX(-100%);
+    padding-right: 8px;
+    color: #4e4d4b;
+  }
+
+  .ref-label.all {
+    padding-left: 8px;
+    color: #3d36c9;
+  }
+
+  .legend.ref-legend {
+    display: none;
   }
 
   .link {
@@ -1065,15 +1087,22 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
   }
 
   .rate-val {
-    display: grid;
-    font: 12px/1.3 var(--mono);
-    color: var(--ink-3);
+    display: contents;
+  }
+
+  .rate-val > * {
+    text-align: right;
+    white-space: nowrap;
   }
 
   .rate-val strong {
-    font-size: 14px;
-    font-weight: 600;
+    font: 600 14px/1.3 var(--mono);
     color: var(--ink);
+  }
+
+  .rate-val span {
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
   }
 
   .rate-row.focus .rate-val strong,
@@ -1198,12 +1227,51 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
   }
 
   @media (max-width: 640px) {
+    /* Phone: the denominator moves up beside the name, so the bar keeps the width. */
     .rate {
       grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: 12px;
+      row-gap: 6px;
+    }
+
+    .rate-row > .rate-name {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: baseline;
+    }
+
+    .rate-val > span {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: baseline;
+    }
+
+    .rate-row > .rate-track {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .rate-val > strong {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: center;
+    }
+
+    .rate-track::before,
+    .ref {
+      top: -3px;
+      bottom: -3px;
+    }
+
+    .ref-labels {
+      display: none;
+    }
+
+    .legend.ref-legend {
+      display: flex;
     }
 
     .rate-name {
-      grid-column: 1 / -1;
       margin-top: 6px;
     }
 

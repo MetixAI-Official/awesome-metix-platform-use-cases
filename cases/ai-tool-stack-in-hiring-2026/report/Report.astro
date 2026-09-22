@@ -207,24 +207,23 @@ const industryZh: Record<string, string> = {
       </header>
 
       <div class="wrap report-body">
-        <section class="brief" aria-labelledby="brief-title">
-          <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
-          <ol>
+        <section class="intro rail-block" aria-labelledby="brief-title">
+          <div class="rail">
+            <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
+          </div>
+          <div class="rail-main">
+          <ol class="brief-list">
             {zh ? (
-              <>
+              [
+                `九个名称不会有歧义的工具里，Claude Code 的缺口最大：${number(lang, leader.d)} 个在招岗位提到它，只有 ${number(lang, leader.s)} 个档案把它列为技能，每个档案对应 ${number(lang, leader.r, 1)} 个岗位。`,
+                `${names[lowest.id]} 正好相反：${number(lang, lowest.s)} 个档案，${number(lang, lowest.d)} 个岗位。${names[secondLowest.id]} 也是档案多于岗位（${number(lang, secondLowest.s)} 比 ${number(lang, secondLowest.d)}）。`,
+                `缺口在美国以外更大。Claude Code 在美国是每个档案 ${number(lang, cc.us, 1)} 个岗位，在美国以外是 ${number(lang, cc.out, 1)} 个。`,
+                `提到 AI 编程工具不会抬高薪资下限：这类美国岗位里起薪 15 万美元以上的占 ${pct(pay.rows[0].at_least["150000"] / pay.rows[0].count)}，软件工程师岗位是 ${pct(pay.rows[1].at_least["150000"] / pay.rows[1].count)}。`,
+              ].map((text) => (
                 <li>
-                  九个名称不会有歧义的工具里，Claude Code 的缺口最大：{number(lang, leader.d)} 个在招岗位提到它，只有 {number(lang, leader.s)}{" "}
-                  个档案把它列为技能，每个档案对应 {number(lang, leader.r, 1)} 个岗位。
+                  <span set:html={titleHtml(text, "zh")} />
                 </li>
-                <li>
-                  {names[lowest.id]} 正好相反：{number(lang, lowest.s)} 个档案，{number(lang, lowest.d)} 个岗位。{names[secondLowest.id]} 也是档案多于岗位（
-                  {number(lang, secondLowest.s)} 比 {number(lang, secondLowest.d)}）。
-                </li>
-                <li>
-                  缺口在美国以外更大。Claude Code 在美国是每个档案 {number(lang, cc.us, 1)} 个岗位，在美国以外是 {number(lang, cc.out, 1)} 个。
-                </li>
-                <li>提到 AI 编程工具不会抬高薪资下限：这类美国岗位里起薪 15 万美元以上的占 {pct(pay.rows[0].at_least["150000"] / pay.rows[0].count)}，软件工程师岗位是 {pct(pay.rows[1].at_least["150000"] / pay.rows[1].count)}。</li>
-              </>
+              ))
             ) : (
               <>
                 <li>
@@ -247,11 +246,15 @@ const industryZh: Record<string, string> = {
               </>
             )}
           </ol>
-          <p class="caveat">
+          <aside class="note">
+            <p class="note-label">{zh ? "档案比岗位更新得慢" : "Profiles lag behind postings"}</p>
+            <p>
             {zh
               ? "读这份报告之前要记住一点：岗位每天都在刷新，个人档案的技能栏却可能几个月才更新一次。越新的工具，档案越跟不上，所以越新的工具缺口看起来越大。这里的比值是需求和已公开技能之间的差距，不是劳动力缺口的直接测量。"
               : "One thing to hold while reading: postings refresh daily, while the skills on a profile may go months without an update. The newer the tool, the further profiles lag, so newer tools will look short of people partly for that reason. The ratios here compare demand with skills people have published, not with the skills people have."}
-          </p>
+            </p>
+          </aside>
+          </div>
         </section>
 
         <Figure
@@ -883,37 +886,6 @@ const industryZh: Record<string, string> = {
 
   .ks-dot.above .ks-val {
     top: -20px;
-  }
-
-  .brief {
-    max-width: 900px;
-  }
-
-  .brief h2 {
-    font-size: clamp(22px, 2.4vw, 28px);
-  }
-
-  .brief ol {
-    margin: 18px 0 0;
-    padding-left: 1.4em;
-    display: grid;
-    gap: 10px;
-    color: var(--ink-2);
-  }
-
-  .brief li::marker {
-    font-family: var(--mono);
-    color: #145a93;
-  }
-
-  .caveat {
-    margin-top: 20px;
-    padding: 16px 18px;
-    border-left: 3px solid #5b54ef;
-    background: #f3f2ff;
-    border-radius: 0 10px 10px 0;
-    color: var(--ink-2);
-    font-size: 15px;
   }
 
   .fig-text {

@@ -11,7 +11,10 @@
   --ink: #0b0a1f;
   --ink-2: #3f3d56;
   --ink-3: #6a6880;
-  --line: #d8dbe3;
+  /* Alpha, so a divider reads the same on the ground and on a surface. */
+  --line: rgb(11 10 31 / 0.13);
+  /* Control borders: 3:1 against the ground. */
+  --line-strong: #84829a;
   --accent: #5b54ef;
   --accent-ink: #3d36c9;
 
@@ -23,7 +26,18 @@
   --page: 1280px;
   --gutter: clamp(16px, 4vw, 48px);
   --radius: 14px;
+  /* Containers sit on a ring and a soft lift instead of a flat grey border. */
+  --ring: 0 0 0 1px rgb(11 10 31 / 0.08), 0 1px 2px -1px rgb(11 10 31 / 0.08), 0 2px 6px 0 rgb(11 10 31 / 0.04);
+  --ring-hover: 0 0 0 1px rgb(11 10 31 / 0.16), 0 2px 4px -1px rgb(11 10 31 / 0.1), 0 8px 20px -6px rgb(11 10 31 / 0.12);
+  /* Inputs and filters: 40px for a mouse, 44px for a finger. */
+  --control: 40px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (pointer: coarse) {
+  :root {
+    --control: 44px;
+  }
 }
 
 *,
@@ -366,20 +380,33 @@ main:focus {
   }
 }
 
-/* Below 340px the key link lives only in the footer. */
+/* Below 340px the key link lives only in the footer. Scoped to the header: the
+   masthead's "Run your first case" is a pill too and must stay. */
 @media (max-width: 340px) {
-  .pill {
+  .site-header .pill {
     display: none;
   }
 }
 
 /* ---------- masthead ---------- */
 
+/* The wordmark and the three stats share one baseline; the lede and the actions hang on
+   the wordmark's left edge below. On narrow screens the stats move under the actions. */
 .masthead {
-  padding-block: clamp(40px, 7vw, 88px) clamp(32px, 5vw, 56px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "eyebrow eyebrow" "title stats" "lede ." "actions .";
+  align-items: first baseline;
+  column-gap: 48px;
+  padding-block: clamp(40px, 7vw, 88px) clamp(40px, 5vw, 64px);
+}
+
+.masthead > .eyebrow {
+  grid-area: eyebrow;
 }
 
 .mast-title {
+  grid-area: title;
   margin-top: 12px;
   font-family: var(--display);
   font-weight: 700;
@@ -389,48 +416,91 @@ main:focus {
   margin-left: -0.04em;
 }
 
-.mast-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: 40px 64px;
-  align-items: end;
-  margin-top: clamp(24px, 3.5vw, 40px);
-}
-
-.mast-lede {
-  max-width: 54ch;
-  font-size: clamp(17px, 1.6vw, 20px);
-  color: var(--ink-2);
-}
-
 .mast-stats {
+  grid-area: stats;
   display: grid;
-  grid-template-columns: repeat(3, auto);
-  justify-content: space-between;
-  gap: 0 20px;
+  grid-template-columns: repeat(3, 11.5rem);
   margin: 0;
-  border-top: 2px solid var(--ink);
 }
 
 .mast-stats div {
-  padding-top: 14px;
+  padding-left: 20px;
+  border-left: 1px solid var(--line);
 }
 
 .mast-stats dt {
-  font: 600 clamp(20px, 2.2vw, 28px) / 1.1 var(--display);
-  letter-spacing: -0.02em;
+  font: 600 clamp(28px, 3vw, 40px) / 1 var(--display);
+  letter-spacing: -0.03em;
   white-space: nowrap;
 }
 
 .mast-stats dd {
-  margin: 6px 0 0;
-  font: 12px/1.4 var(--mono);
-  color: var(--ink-3);
+  margin: 10px 0 0;
+  font-size: 13px;
+  text-wrap: balance;
+  line-height: 1.45;
+  color: var(--ink-2);
 }
 
-@media (max-width: 860px) {
-  .mast-row {
-    grid-template-columns: 1fr;
+.mast-actions {
+  grid-area: actions;
+}
+
+.mast-lede {
+  grid-area: lede;
+  max-width: 60ch;
+  margin-top: clamp(24px, 3.5vw, 40px);
+  font-size: clamp(17px, 1.6vw, 20px);
+  color: var(--ink-2);
+}
+
+@media (max-width: 959px) {
+  .masthead {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "eyebrow" "title" "lede" "actions" "stats";
+  }
+
+  .mast-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .mast-stats div {
+    padding-left: 16px;
+  }
+
+  .mast-stats div:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 599px) {
+  .mast-stats {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 0;
+  }
+
+  .mast-stats div,
+  .mast-stats div:first-child {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    align-items: baseline;
+    padding: 12px 0;
+    border-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mast-stats dt {
+    font-size: 28px;
+  }
+
+  .mast-stats dd {
+    margin: 0;
+    max-width: none;
+    font-size: 14px;
   }
 }
 
@@ -440,15 +510,14 @@ main:focus {
   padding-block: clamp(32px, 5vw, 56px);
 }
 
+/* One head for every home section: the heading with its count on the same baseline,
+   the note under it at a reading measure, then the section rule. */
 .shelf-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px 24px;
-  flex-wrap: wrap;
-  padding-bottom: 16px;
-  margin-bottom: 24px;
-  border-bottom: 2px solid var(--ink);
+  display: grid;
+  gap: 10px;
+  padding-bottom: 20px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid var(--ink);
 }
 
 .shelf-head h2 {
@@ -457,17 +526,15 @@ main:focus {
 }
 
 .shelf-head h2 .count {
-  font: 500 14px/1 var(--mono);
+  margin-left: 0.2em;
+  font-weight: 400;
   color: var(--ink-3);
-  margin-left: 10px;
-  letter-spacing: 0;
-  vertical-align: 0.5em;
 }
 
 .shelf-head p {
-  max-width: 56ch;
+  max-width: 64ch;
   font-size: 15px;
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 
 /* Report bands */
@@ -860,43 +927,69 @@ main:focus {
 }
 
 
-/* Coming next */
-
-.planned-list {
-  list-style: none;
+/* Coming next: rows on the index's grid, marked as planned, with no second rule under
+   the section rule. */
+.planned {
   margin: 0;
   padding: 0;
+  list-style: none;
+}
+
+.pl-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  grid-template-areas: "dots text tag";
+  gap: 4px 16px;
+  align-items: baseline;
+  padding: 18px 4px;
+  border-bottom: 1px solid var(--line);
 }
 
-.planned-list li {
-  padding-top: 14px;
-  border-top: 1px solid var(--ink-3);
+.pl-row:first-child {
+  padding-top: 0;
 }
 
-.planned-list .meta {
-  font: 500 12px/1.3 var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-3);
+.pl-text {
+  grid-area: text;
+  min-width: 0;
 }
 
-.planned-list h3 {
-  margin-top: 10px;
-  font-size: 20px;
+.pl-title {
+  font: 600 17px/1.35 var(--sans);
+  letter-spacing: 0;
 }
 
-.planned-list p {
-  margin-top: 8px;
-  font-size: 14px;
+.pl-text .ci-meta {
+  display: block;
+  margin-top: 4px;
+}
+
+.pl-dek {
+  max-width: 72ch;
+  margin-top: 6px;
+  font-size: 15px;
   color: var(--ink-2);
 }
 
-@media (max-width: 860px) {
-  .planned-list {
-    grid-template-columns: 1fr;
+.pl-tag {
+  grid-area: tag;
+  padding: 5px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  font: 500 12px/1 var(--mono);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .pl-row {
+    grid-template-columns: 28px minmax(0, 1fr);
+    grid-template-areas: "dots text" ". tag";
+  }
+
+  .pl-tag {
+    justify-self: start;
+    margin-top: 10px;
   }
 }
 
@@ -1170,22 +1263,23 @@ pre.code {
 
 /* The prompt. The question is where the run starts, so it reads like a terminal. */
 .prompt-question {
-  padding: 18px 20px 20px;
-  border-radius: 14px;
+  overflow: hidden;
+  border-radius: 12px;
   background: var(--ink);
-  color: #fff;
+  color: #ecebf7;
 }
 
 .pq-label {
-  font: 500 12px/1 var(--mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #0defc8;
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
 }
 
 .pq-text {
-  margin-top: 12px;
   max-width: 78ch;
+  padding: 14px 16px 16px;
   font: 14px/1.7 var(--mono);
 }
 
@@ -1665,8 +1759,8 @@ details.query[open]::details-content {
   margin: 0;
   padding: clamp(20px, 3vw, 36px);
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 14px;
+  box-shadow: var(--ring);
   --bl-focus: #145a93;
   --bl-mark: #7e8787;
   --bl-track: var(--surface-muted);
@@ -1722,6 +1816,89 @@ details.query[open]::details-content {
   .chart-scroll-hint {
     display: block;
   }
+}
+
+/* Report intros hang on the same rail as the closing blocks: the heading in the left
+   column, the text at a reading measure in the right. */
+.report-body > .intro + .intro {
+  padding-top: clamp(28px, 4vw, 44px);
+  border-top: 1px solid var(--line);
+}
+
+.intro h2 {
+  font-size: clamp(22px, 2.4vw, 28px);
+}
+
+@media (min-width: 960px) {
+  .intro > .rail,
+  .intro > .rail-main {
+    align-self: first baseline;
+  }
+}
+
+/* One measure for everything in an intro's content column, set once at the body size:
+   ch in each child would resolve against its own font and give ragged right edges. */
+.intro > .rail-main {
+  max-width: calc(68ch + 3rem);
+}
+
+/* Prose alone takes a reading measure (about 75 characters); the list and the note keep
+   the column so their rules reach the figures' edge. */
+.intro-text {
+  max-width: 34em;
+  color: var(--ink-2);
+}
+
+.brief-list > li > span:lang(zh) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* The numbers sit in their own column on each finding's first baseline, inside the
+   text column rather than hanging outside it. Items must stay plain text: an element
+   inside one would become a grid item of its own. */
+.brief-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: brief;
+}
+
+.brief-list > li {
+  counter-increment: brief;
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  align-items: baseline;
+  padding-block: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.brief-list > li:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.brief-list > li::before {
+  content: counter(brief, decimal-leading-zero);
+  font: 500 13px/1 var(--mono);
+  color: var(--ink-3);
+}
+
+/* The one note style on the site: a muted panel with a label, no side stripe. */
+.note {
+  margin-top: 24px;
+  padding: 16px 20px 18px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.note-label {
+  margin-bottom: 6px;
+  font: 600 14px/1.3 var(--sans);
+  color: var(--ink);
 }
 
 .report-body > .fig:not(:first-child) {
@@ -1872,7 +2049,7 @@ details.query[open]::details-content {
 
 /* Chinese display titles break at spaces and punctuation first, anywhere only when
    a phrase cannot fit; CJK lines need more leading than Latin display type. */
-:is(.cf-title, .report-band h3, .planned-list h3, .card-hero h1, .report-hero h1, .fig h2, .figure h2, .ci-title, .cn-title):lang(zh) {
+:is(.cf-title, .report-band h3, .pl-title, .card-hero h1, .report-hero h1, .fig h2, .figure h2, .ci-title, .pg-title):lang(zh) {
   word-break: keep-all;
   overflow-wrap: anywhere;
   line-height: 1.25;
@@ -1988,8 +2165,7 @@ details.query[open]::details-content {
 /* Grid items default to their content's width; without this a long command widens its
    step past a phone screen instead of scrolling inside its own box. */
 .run-panel,
-.run-steps > li,
-.start-steps > li {
+.run-steps > li {
   min-width: 0;
 }
 
@@ -2028,7 +2204,7 @@ details.query[open]::details-content {
   color: var(--ink-2);
 }
 
-.run-steps .code-copy,
+.run-steps .code-block,
 .run-steps .agent-setup {
   margin-top: 14px;
 }
@@ -2084,42 +2260,105 @@ details.query[open]::details-content {
   margin-top: 10px;
 }
 
-/* A command with its Copy button in a column of its own, so the text can never run
-   under the button, whatever the width. The box is the container, not the pre. */
-.code-copy {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface-muted);
+/* ---------- code block ---------- */
+
+/* Anything to paste: a terminal panel with its label and Copy on one bar, the text
+   below, so the text never runs under the button at any width. */
+.code-block {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #ecebf7;
 }
 
-/* Shell commands keep their lines and scroll sideways on narrow screens: a command
-   broken mid-URL is hard to read and easy to mistype. Prose-like prompts wrap. */
-.code-copy pre.code {
-  overflow-x: auto;
-  padding: 14px 8px 14px 16px;
+.cb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 5px 0 16px;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+}
+
+.cb-label,
+.pq-label {
+  font: 500 12px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.62);
+}
+
+/* Uppercasing would turn the Latin words inside a Chinese label into capitals. */
+:is(.cb-label, .pq-label):lang(zh) {
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+/* 30px inside a 40px bar at a 5px inset: 12 - 5 = 7px keeps the corner concentric.
+   The hit area grows to 44px without changing the bar. */
+.cb-copy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
   border: 0;
-  border-radius: 10px 0 0 10px;
-  background: none;
+  border-radius: 7px;
+  background: transparent;
+  font: 500 12px/1 var(--mono);
+  color: rgb(255 255 255 / 0.82);
+  cursor: pointer;
+  transition: background-color 120ms var(--ease), color 120ms var(--ease);
+}
+
+.cb-copy::after {
+  content: "";
+  position: absolute;
+  inset: -7px -4px;
+}
+
+.cb-copy:hover {
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+}
+
+.cb-copy:focus-visible {
+  outline: 2px solid #a3e4ff;
+  outline-offset: 0;
+}
+
+.cb-code {
+  margin: 0;
+  padding: 14px 16px 16px;
+  overflow-x: auto;
+  font: 13px/1.65 var(--mono);
   white-space: pre;
   scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.25) transparent;
 }
 
-.code-copy pre.prompt-line {
+.cb-code.wrap {
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
 
-.code-copy > .btn {
-  margin: 8px 8px 8px 0;
+.code-block:not(:first-child) {
+  margin-top: 14px;
 }
 
-.btn-small {
-  min-height: 34px;
-  padding: 0 12px;
-  font-size: 12px;
+/* On a phone a command that scrolls fades at the edge, so it reads as continuing. The
+   fade covers only the end padding when scrolled to the end. */
+@media (max-width: 599px) {
+  .cb-code:not(.wrap) {
+    padding-right: 24px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  }
+}
+
+.code-block ::selection {
+  background: rgb(163 228 255 / 0.35);
 }
 
 .copy-fallback {
@@ -2139,9 +2378,9 @@ details.query[open]::details-content {
 
 .agent-setup {
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--surface);
+  box-shadow: var(--ring);
 }
 
 .as-tabs {
@@ -2191,14 +2430,24 @@ details.query[open]::details-content {
   color: var(--ink-2);
 }
 
-.as-panel .code-copy {
+.as-panel .code-block {
   margin-top: 12px;
 }
 
 .as-docs {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   margin-top: 10px;
   font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ink) 30%, transparent);
+  text-underline-offset: 4px;
+}
+
+.as-docs:hover {
+  text-decoration-color: var(--ink);
 }
 
 .as-no-js-label {
@@ -2274,51 +2523,106 @@ details.query[open]::details-content {
 }
 
 /* The start strip: the one place the home page asks for action, so it gets the
-   surface; everything else sits on the ground. */
+   surface. Each step hangs on the rail: the explanation on the left, the thing to paste
+   on the right, so every artifact is the same width and starts on the same line. A
+   hairline joins the numbers into one sequence. */
 .start {
-  padding-block: clamp(32px, 5vw, 56px);
+  padding-block: clamp(40px, 6vw, 72px);
   background: var(--surface);
   border-block: 1px solid var(--line);
 }
 
-.start-steps {
+.start-list {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr) minmax(0, 1fr);
-  gap: 32px;
+  gap: 48px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.start-steps h3 {
+.start-step {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.start-step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 13.5px;
+  top: 36px;
+  bottom: -40px;
+  width: 1px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.start-rail {
+  position: relative;
+  padding-left: 44px;
+}
+
+.start-main {
+  min-width: 0;
+  padding-left: 44px;
+}
+
+.start-rail h3 {
   display: flex;
   align-items: center;
-  gap: 12px;
+  min-height: 28px;
   font-size: 18px;
 }
 
-.start-steps p {
-  margin-top: 10px;
+.start-n {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ink);
+  font: 600 13px/1 var(--mono);
+  color: #fff;
+}
+
+.start-rail p {
+  max-width: 44ch;
+  margin-top: 8px;
   font-size: 15px;
   color: var(--ink-2);
 }
 
-.start-steps .code-copy,
-.start-steps .agent-setup {
-  margin-top: 14px;
+.start-rail .text-link {
+  margin-top: 2px;
 }
 
-.start-steps .text-link {
-  margin-top: 6px;
+@media (min-width: 960px) {
+  .start-step {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    gap: 56px;
+  }
+
+  .start-main {
+    padding-left: 0;
+  }
 }
 
-.start-pick {
-  margin-top: 14px !important;
-}
+@media (max-width: 599px) {
+  .start-step:not(:last-child)::before {
+    display: none;
+  }
 
-@media (max-width: 1080px) {
-  .start-steps {
-    grid-template-columns: minmax(0, 1fr);
+  .start-rail,
+  .start-main {
+    padding-left: 0;
+  }
+
+  .start-n {
+    position: static;
+    margin-right: 12px;
   }
 }
 
@@ -2335,112 +2639,271 @@ details.query[open]::details-content {
 
 /* ---------- index ---------- */
 
-.index-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 20px;
+/* ---------- index toolbar ---------- */
+
+/* Two rows that never reflow into each other: search and sort, then the filters and the
+   count. Inputs and filters are rounded rectangles; buttons are pills. */
+.toolbar {
+  display: grid;
+  gap: 12px;
 }
 
-.no-js .index-controls {
+.no-js .toolbar {
   display: none;
 }
 
-.ic-search {
-  flex: 1 1 260px;
-}
-
-.ic-search input {
-  width: 100%;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 1px solid #84829a;
-  border-radius: 999px;
-  background: var(--surface);
-  font: 15px/1 var(--sans);
-  color: var(--ink);
-}
-
-.ic-search input:focus {
-  border-color: var(--ink-3);
-}
-
-.ic-group {
+.tb-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 12px 28px;
+}
+
+.tb-search {
+  position: relative;
+  flex: 1 1 320px;
+}
+
+.tb-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  margin-top: -8px;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+
+/* 16px text, so iOS does not zoom the page on focus. */
+.tb-search input {
+  width: 100%;
+  height: var(--control);
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  font: 16px/1 var(--sans);
+  color: var(--ink);
+  appearance: none;
+  transition: border-color 120ms var(--ease), box-shadow 120ms var(--ease);
+}
+
+.tb-search input::placeholder {
+  color: var(--ink-3);
+}
+
+.tb-search input:hover {
+  border-color: var(--ink-3);
+}
+
+.tb-search input:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgb(91 84 239 / 0.28);
+}
+
+.tb-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink-3);
+}
+
+.tb-sort select {
+  height: var(--control);
+  padding: 0 36px 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%233f3d56' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+    no-repeat right 12px center / 12px;
+  font: 500 14px/1 var(--sans);
+  color: var(--ink);
+  appearance: none;
+  cursor: pointer;
+}
+
+.tb-sort select:hover {
+  border-color: var(--ink-3);
+}
+
+.tb-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
 
-.ic-group legend {
+.tb-group legend {
   float: left;
-  margin-right: 6px;
-  font-size: 13px;
+  padding: 0;
+  font-size: 14px;
+  line-height: var(--control);
   color: var(--ink-3);
 }
 
-.ic-group label {
+.tb-seg label,
+.tb-toggles label {
   position: relative;
 }
 
-.ic-group input {
+.tb-seg input,
+.tb-toggles input {
   position: absolute;
-  opacity: 0;
   inset: 0;
   margin: 0;
+  opacity: 0;
   cursor: pointer;
 }
 
-.ic-group label span {
+/* One choice: a segmented control. 3px padding around 7px segments inside a 10px
+   frame keeps the corners concentric. */
+.tb-seg {
   display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding: 0 14px;
-  border: 1px solid #84829a;
-  border-radius: 999px;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
   background: var(--surface);
-  font-size: 14px;
-  color: var(--ink-2);
 }
 
-.ic-group input:checked + span {
+.tb-seg span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: calc(var(--control) - 8px);
+  padding: 0 12px;
+  border-radius: 7px;
+  font: 500 14px/1 var(--sans);
+  color: var(--ink-2);
+  transition: background-color 120ms var(--ease), color 120ms var(--ease);
+}
+
+/* The segments sit inside the frame's padding, so their hit area reaches the frame's full
+   44px on touch screens without a larger segment. */
+.tb-seg label::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+
+.tb-seg label:hover span {
+  background: var(--surface-muted);
+  color: var(--ink);
+}
+
+.tb-seg input:checked + span {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* Several choices: toggles. */
+.tb-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tb-toggles span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--control);
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface);
+  font: 500 14px/1 var(--sans);
+  color: var(--ink-2);
+  transition: border-color 120ms var(--ease), background-color 120ms var(--ease), color 120ms var(--ease);
+}
+
+.tb-toggles label:hover span {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+
+.tb-toggles input:checked + span {
   border-color: var(--ink);
   background: var(--ink);
   color: #fff;
 }
 
-.ic-group input:focus-visible + span {
+.tb-toggles input:checked + span .dot {
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.85);
+}
+
+.tb-toggles input:disabled,
+.tb-toggles input:disabled + span {
+  cursor: not-allowed;
+}
+
+.tb-toggles input:disabled + span {
+  border-color: var(--line);
+  background: transparent;
+  color: var(--ink-3);
+}
+
+.tb-toggles input:disabled + span .dot {
+  opacity: 0.45;
+}
+
+:is(.tb-seg, .tb-toggles) input:focus-visible + span {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.ic-sort {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
+.ic-n {
+  font: 500 12px/1 var(--mono);
   color: var(--ink-3);
 }
 
-.ic-sort select {
-  min-height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-  font: 14px/1 var(--sans);
-  color: var(--ink);
+:is(.tb-seg, .tb-toggles) input:checked + span .ic-n {
+  color: rgb(255 255 255 / 0.72);
 }
 
 .index-count {
-  margin-top: 16px;
+  margin-left: auto;
   font: 13px/1.4 var(--mono);
   color: var(--ink-3);
 }
+
+@media (max-width: 639px) {
+  .tb-row {
+    gap: 12px;
+  }
+
+  .tb-search {
+    flex-basis: 100%;
+  }
+
+  .tb-group {
+    flex: 1 1 100%;
+  }
+
+  .tb-group legend,
+  .tb-sort > span {
+    width: 4.5em;
+    flex-shrink: 0;
+  }
+
+  .tb-seg {
+    flex: 1;
+  }
+
+  .tb-seg label {
+    flex: 1;
+  }
+
+  .tb-seg span {
+    width: 100%;
+  }
+}
+
 
 .dot {
   display: inline-block;
@@ -2451,7 +2914,7 @@ details.query[open]::details-content {
 }
 
 .case-index {
-  margin: 8px 0 0;
+  margin: 20px 0 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--line);
@@ -2480,8 +2943,14 @@ details.query[open]::details-content {
 .ci-dots {
   grid-area: dots;
   display: flex;
-  gap: 3px;
+  gap: 2px;
   padding-top: 5px;
+}
+
+.ci-dots .dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
 }
 
 .ci-title {
@@ -2519,7 +2988,7 @@ details.query[open]::details-content {
 }
 
 .index-empty {
-  padding: 32px 4px;
+  padding: 32px 0;
   color: var(--ink-2);
 }
 
@@ -2532,14 +3001,16 @@ details.query[open]::details-content {
   gap: 4px;
   margin-top: 24px;
   padding: 18px 20px;
-  border: 1px dashed var(--ink-3);
   border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--ring);
   color: var(--ink);
   text-decoration: none;
+  transition: box-shadow 160ms var(--ease);
 }
 
 .make-own:hover {
-  border-style: solid;
+  box-shadow: var(--ring-hover);
 }
 
 .mo-title {
@@ -2570,63 +3041,140 @@ details.query[open]::details-content {
   text-underline-offset: 3px;
 }
 
+/* The pager: one surface split by a hairline, labels and titles left-aligned in both
+   halves, the arrows on the outer edges. */
 .case-nav {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: stretch;
-  gap: 16px;
-  margin-top: 56px;
-  padding-top: 32px;
-  border-top: 1px solid var(--line);
+  margin-top: 64px;
 }
 
-.cn-link {
+.pg-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.pg-heading {
+  font-size: 18px;
+}
+
+.pg-head .text-link {
+  font-size: 15px;
+}
+
+.pager {
   display: grid;
-  gap: 4px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--ring);
+}
+
+.pager.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pg-link {
+  display: grid;
+  align-items: start;
+  gap: 20px;
+  min-height: 104px;
+  padding: 20px 24px;
   color: var(--ink);
   text-decoration: none;
+  transition: background-color 120ms var(--ease);
 }
 
-.cn-link:hover {
-  border-color: var(--ink-3);
+.pg-prev {
+  grid-template-columns: auto minmax(0, 1fr);
 }
 
-.cn-next {
-  text-align: right;
+.pg-next {
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.cn-label {
-  font: 500 13px/1.3 var(--mono);
+.pg-link + .pg-link {
+  box-shadow: inset 1px 0 0 var(--line);
+}
+
+.pg-link:hover {
+  background: var(--surface-muted);
+}
+
+.pg-link:focus-visible {
+  outline-offset: -3px;
+  border-radius: 14px;
+}
+
+.pg-text {
+  display: grid;
+  gap: 6px;
+}
+
+.pg-label {
+  font: 500 12px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--ink-3);
 }
 
-.cn-title {
+.pg-title {
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
+  text-wrap: balance;
 }
 
-.cn-all {
+.pg-arrow {
   align-self: center;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font: 500 14px/1 var(--mono);
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink-3);
+  transition: transform 160ms var(--ease), color 120ms var(--ease);
 }
 
-@media (max-width: 640px) {
-  .case-nav {
+.pg-prev:hover .pg-arrow {
+  transform: translateX(-3px);
+  color: var(--ink);
+}
+
+.pg-next:hover .pg-arrow {
+  transform: translateX(3px);
+  color: var(--ink);
+}
+
+@media (max-width: 639px) {
+  .pager {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .cn-next {
-    text-align: left;
+  .pg-link {
+    min-height: 0;
+    padding: 16px 18px;
   }
 
-  .cn-all {
-    order: 3;
+  .pg-link + .pg-link {
+    box-shadow: inset 0 1px 0 var(--line);
+  }
+
+  /* Stacked, an edge arrow would push one title off the other's left edge; the arrows
+     move into the labels instead. */
+  .pg-prev,
+  .pg-next {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pg-arrow {
+    display: none;
+  }
+
+  .pg-prev .pg-label::before {
+    content: "\2190\00a0";
+  }
+
+  .pg-next .pg-label::after {
+    content: "\00a0\2192";
   }
 }
 
@@ -2723,20 +3271,27 @@ details.query[open]::details-content {
 /* Step 4 of the start strip: the cheapest case, opened at its prompt. */
 .start-case {
   display: grid;
-  gap: 6px;
-  margin-top: 14px;
-  padding: 16px 18px;
-  border: 1px solid var(--line);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px 24px;
+  padding: 20px 20px 20px 24px;
   border-radius: 14px;
   background: var(--surface);
+  box-shadow: var(--ring);
   color: inherit;
   text-decoration: none;
-  transition: border-color 120ms var(--ease), transform 160ms var(--ease);
+  transition: box-shadow 160ms var(--ease), transform 160ms var(--ease);
 }
 
 .start-case:hover {
-  border-color: var(--ink-3);
-  transform: translateY(-2px);
+  box-shadow: var(--ring-hover);
+  transform: translateY(-1px);
+}
+
+.sc-text {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
 }
 
 .sc-meta {
@@ -2747,7 +3302,7 @@ details.query[open]::details-content {
 }
 
 .sc-title {
-  font: 600 17px/1.3 var(--display);
+  font: 600 18px/1.3 var(--display);
   text-wrap: balance;
 }
 
@@ -2756,6 +3311,7 @@ details.query[open]::details-content {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 10px;
+  margin-top: 4px;
   font-size: 14px;
   color: var(--ink-2);
 }
@@ -2765,32 +3321,43 @@ details.query[open]::details-content {
 }
 
 .sc-cta {
-  font-weight: 500;
-  color: var(--accent-ink);
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
 }
 
-.start-case + .text-link {
-  display: inline-block;
-  margin-top: 12px;
+.sr-browse {
+  margin-top: 8px;
 }
 
-/* Facet counts, and a value with no cases shown but not offered. */
-.ic-n {
-  font: 500 12px/1 var(--mono);
-  color: var(--ink-3);
+@media (max-width: 519px) {
+  .start-case {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px;
+  }
+
+  .sc-cta {
+    justify-self: start;
+  }
 }
 
-.ic-group input:checked + span .ic-n {
-  color: rgb(255 255 255 / 0.7);
-}
-
-.ic-group input:disabled + span {
-  opacity: 0.5;
-  cursor: not-allowed;
+.ci-cost .fits {
+  position: relative;
 }
 
 .ci-cost .fits::after {
-  content: " \2713";
+  content: "\2713";
+  content: "\2713" / "";
+  position: absolute;
+  left: 100%;
+  padding-left: 4px;
   color: #1f6f3a;
 }
 
@@ -2833,19 +3400,15 @@ html:lang(zh) :is(.cost-flag, .pq-label, .hero-chip, .chart-legend, .legend, .st
 /* The agent tabs wrap onto two rows on a phone instead of hiding the last one. */
 @media (max-width: 440px) {
   .as-tabs {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     overflow-x: visible;
-  }
-
-  .as-tabs button {
-    flex: 1 1 auto;
   }
 }
 
 /* Touch targets: 44px on phones, whatever the visual size. */
 @media (max-width: 640px) {
-  .btn,
-  .btn-small {
+  .btn {
     min-height: 44px;
   }
 
@@ -2855,7 +3418,6 @@ html:lang(zh) :is(.cost-flag, .pq-label, .hero-chip, .chart-legend, .legend, .st
     min-height: 38px;
   }
 
-  .site-header .pill,
   .as-docs,
   .links-line a,
   details.query > summary {
@@ -2863,90 +3425,9 @@ html:lang(zh) :is(.cost-flag, .pq-label, .hero-chip, .chart-legend, .legend, .st
     align-items: center;
     min-height: 44px;
   }
-}
 
-/* Step 4 runs under the first three as a band: the pitch on the left, the cheapest case beside it. */
-.start-steps > .start-run {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2.7fr);
-  gap: 14px 32px;
-  align-items: start;
-  padding-top: 28px;
-  border-top: 1px solid var(--line);
-}
-
-.start-run .start-case {
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px 24px;
-  margin-top: 0;
-  padding: 18px 22px;
-}
-
-.start-run .sc-meta,
-.start-run .sc-title {
-  grid-column: 1;
-}
-
-.start-run .sc-cost {
-  grid-column: 1;
-}
-
-.start-run .sc-cta {
-  grid-column: 2;
-  grid-row: 1 / span 3;
-  align-self: center;
-  justify-self: end;
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #fff;
-  white-space: nowrap;
-}
-
-.start-run .sr-browse {
-  grid-column: 2;
-  justify-self: start;
-  margin-top: 0;
-}
-
-@media (max-width: 1080px) {
-  .start-steps > .start-run {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .start-run .sr-browse {
-    grid-column: 1;
-  }
-}
-
-@media (max-width: 520px) {
-  .start-run .start-case {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .start-run .sc-cta {
-    grid-column: 1;
-    grid-row: auto;
-    justify-self: start;
-  }
-}
-
-/* On a phone the Copy button sits above the command, so a command that scrolls is never read
-   as cut off by the button beside it. */
-@media (max-width: 640px) {
-  .code-copy {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .code-copy > .btn {
-    grid-row: 1;
-    justify-self: end;
-    margin: 6px 6px 0 0;
-  }
-
-  .code-copy pre.code {
-    padding: 4px 16px 14px;
-    border-radius: 0 0 10px 10px;
+  /* A pill is already inline-flex; setting display here would undo the 340px rule. */
+  .site-header .pill {
+    min-height: 44px;
   }
 }
