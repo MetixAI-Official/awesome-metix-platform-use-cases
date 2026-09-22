@@ -1,0 +1,31 @@
+slug: entry-level-postings-by-occupation-2026
+type: study
+format: report
+status: published
+title:
+  en: Software and AI postings have the narrowest entry door of twelve US occupation families
+  zh: 十二个美国职业族里，软件和 AI 岗位留给新人的比例最低
+dek:
+  en: Open US job postings in twelve occupation families, by the seniority label and by the experience each posting asks for, on the Metix AI Platform on September 22, 2026.
+  zh: 2026 年 9 月 22 日 Metix AI Platform 上美国仍在招聘的岗位，分十二个职业族，按资历标签和岗位要求的工作经验统计。
+datasets: [jobs]
+integration: [rest]
+topics: [entry-level, ai-exposure, ai-hiring]
+regions: [US]
+snapshot: 2026-09-22
+published: 2026-09-22
+exploration_credits: 174
+agent_run: { low: 211, high: 261, cap: 300 }
+highlights:
+  - value: "13.4%"
+    label:
+      en: of open US software engineering postings are labelled Internship or Entry level
+      zh: 美国在招的软件工程岗位中，标为实习或入门级的比例
+  - value: "67.9%"
+    label:
+      en: in customer service, also among the cited paper's most AI-exposed occupations; 53.5% at employers outside retail and restaurants
+      zh: 客户服务岗位的这一比例，引用的论文同样把它列为 AI 暴露度最高的职业之一；零售和餐饮之外的雇主是 53.5%
+  - value: "10.7%"
+    label:
+      en: of software postings that state an experience requirement ask for 24 months or less
+      zh: 写明经验要求的软件岗位中，要求 24 个月以内的比例

@@ -1,0 +1,8 @@
+{
+  "ran_at": "2026-09-22T07:46:25Z",
+  "calls": 126,
+  "results": 126,
+  "records": 0,
+  "credits": 126,
+  "credits_source": "GET /auth/key/status before and after the run"
+}

@@ -1,0 +1,89 @@
+{
+  "unit": "jobs",
+  "snapshot": "2026-09-22",
+  "query": "queries/families.json · queries/measures.json",
+  "base": "Open job postings in the United States",
+  "note": "Each subgroup is part of the family named in family; the row after it is the rest of that family, by subtraction. ai-titled-software is part of the ai family, so its rest row is the ai family without software terms; the software family row in families.json holds software titles with no AI term.",
+  "rows": [
+    {
+      "group": "ai-training",
+      "family": "ai-training",
+      "total_count": 1009,
+      "label_door_count": 559,
+      "label_door_share": 0.554,
+      "note": "Taken out of every family; see queries/families.json."
+    },
+    {
+      "group": "ai-titled-software",
+      "family": "ai",
+      "total_count": 2562,
+      "label_door_count": 271,
+      "stated_count": 1753,
+      "stated_le24_count": 229,
+      "label_door_share": 0.1058,
+      "stated_share": 0.6842,
+      "requirement_door_share": 0.1306,
+      "note": "AI family postings whose title also has a software family term, such as AI Software Engineer. The software family row holds software titles with no AI term."
+    },
+    {
+      "group": "ai-without-software-terms",
+      "family": "ai",
+      "total_count": 28866,
+      "label_door_count": 3176,
+      "stated_count": 19147,
+      "stated_le24_count": 1497,
+      "label_door_share": 0.11,
+      "stated_share": 0.6633,
+      "requirement_door_share": 0.0782,
+      "note": "The ai family minus ai-titled-software, by subtraction."
+    },
+    {
+      "group": "customer-service-outside-retail-restaurants",
+      "family": "customer-service",
+      "total_count": 23542,
+      "label_door_count": 12604,
+      "stated_count": 7759,
+      "stated_le24_count": 6009,
+      "label_door_share": 0.5354,
+      "stated_share": 0.3296,
+      "requirement_door_share": 0.7745,
+      "note": "Customer service postings whose industries match neither Retail nor Restaurants. industries is filed with the employer and misses some store employers (a pizza chain's store jobs list a software industry), so this row still holds store jobs; it shows whether removing part of them changes the door."
+    },
+    {
+      "group": "customer-service-retail-restaurants",
+      "family": "customer-service",
+      "total_count": 31723,
+      "label_door_count": 24923,
+      "stated_count": 6436,
+      "stated_le24_count": 6316,
+      "label_door_share": 0.7856,
+      "stated_share": 0.2029,
+      "requirement_door_share": 0.9814,
+      "note": "The customer-service family minus customer-service-outside-retail-restaurants, by subtraction."
+    },
+    {
+      "group": "registered-nurse-travel",
+      "family": "registered-nurse",
+      "total_count": 23345,
+      "label_door_count": 21902,
+      "stated_count": 1263,
+      "stated_le24_count": 1138,
+      "label_door_share": 0.9382,
+      "stated_share": 0.0541,
+      "requirement_door_share": 0.901,
+      "note": "Registered nurse postings with travel in the title, mostly short contracts placed by staffing agencies."
+    },
+    {
+      "group": "registered-nurse-not-travel",
+      "family": "registered-nurse",
+      "total_count": 111386,
+      "label_door_count": 82310,
+      "stated_count": 59157,
+      "stated_le24_count": 49507,
+      "label_door_share": 0.739,
+      "stated_share": 0.5311,
+      "requirement_door_share": 0.8369,
+      "note": "The registered-nurse family minus registered-nurse-travel, by subtraction."
+    }
+  ]
+}

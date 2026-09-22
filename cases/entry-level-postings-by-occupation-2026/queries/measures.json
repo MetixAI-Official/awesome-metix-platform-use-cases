@@ -1,0 +1,48 @@
+{
+  "note": "What is counted for each family in queries/families.json. Every count adds base to the family's conditions and is sent with size 1, so it costs 1 Credit and reads no posting.",
+  "base": [
+    {"field": "is_open", "eq": true},
+    {"field": "location.country", "eq": "United States"}
+  ],
+  "base_note": "is_open is true on every posting in the searchable index (GET /docs/api/jobs says so, and software titles counted 33,740 both with and without it), so it narrows nothing today; it stays in every query so a rerun keeps counting open postings if that changes. location.country is the country of the job.",
+  "left_out_note": "Pay at the door is not published. An exploration count found that 532 of the 4,171 software postings labelled Internship or Entry level (12.8%) have salary.currency eq USD and a salary.annual_min, too few and too self-selected to describe the door.",
+  "label": {
+    "field": "seniority",
+    "door": ["Internship", "Entry level"],
+    "counted": {
+      "internship_count": "Internship",
+      "entry_count": "Entry level",
+      "associate_count": "Associate",
+      "not_applicable_count": "Not Applicable"
+    },
+    "note": "The seniority level the posting carries on its source platform: one of Associate, Director, Entry level, Executive, Internship, Mid-Senior level, Not Applicable. Every posting has one, so it is a label the source assigns, not a requirement the employer wrote. Not Applicable is a label with no level. Mid-Senior level, Director, and Executive are counted together as the rest of the total."
+  },
+  "requirement": {
+    "field": "min_experience_months",
+    "door_max_months": 24,
+    "note": "The experience the posting asks for, in months, where the posting states it. The door by requirement is a posting that asks for 24 months or less, 0 included; its denominator is the postings that state a requirement, and the share that states one is published beside it because it ranges widely between families."
+  },
+  "subgroups": [
+    {
+      "id": "ai-titled-software",
+      "rest_id": "ai-without-software-terms",
+      "family": "ai",
+      "title_terms_from": "software",
+      "note": "AI family postings whose title also has a software family term, such as AI Software Engineer. The software family row holds software titles with no AI term."
+    },
+    {
+      "id": "customer-service-outside-retail-restaurants",
+      "rest_id": "customer-service-retail-restaurants",
+      "family": "customer-service",
+      "not_industries": ["Retail", "Restaurants"],
+      "note": "Customer service postings whose industries match neither Retail nor Restaurants. industries is filed with the employer and misses some store employers (a pizza chain's store jobs list a software industry), so this row still holds store jobs; it shows whether removing part of them changes the door."
+    },
+    {
+      "id": "registered-nurse-travel",
+      "rest_id": "registered-nurse-not-travel",
+      "family": "registered-nurse",
+      "title_terms": ["travel"],
+      "note": "Registered nurse postings with travel in the title, mostly short contracts placed by staffing agencies."
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "note": "Occupation families, defined by words in the posting title and nothing else. The Platform matches a title term word by word: a title counts when every word of the term appears in it, in any order, so software engineer also matches Software Development Engineer and Engineer, Software. Each posting is counted in one family at most. The order below is the precedence: a posting belongs to the first family whose terms it matches and whose exclude words it does not match; a posting that matches a family's exclude words is tested against the families after it. A family with also needs one of those words as well. The first group, ai-training, is not an occupation in this study: it takes AI training and annotation postings out of every family and is reported on its own. A family with parts is counted as the sum of disjoint parts, each a title term and none of the terms of the parts before it, because a Search total of 100,000 or more comes back banded and cannot be added up.",
+  "sampling_note": "Every audit read one or more whole slices of a family: the open US postings with posted_date 2026-09-15 in a few named states, chosen so a slice held 10 to 50 postings, and every posting in the slice was read. Search returns postings in order of how well the title matches, so the first postings of an unsliced search are the cleanest titles in the family and overstate how on-topic it is; a whole slice does not depend on that order. Slices are small, one day and a few states each, so they find the kinds of noise in a family; they do not measure its size precisely. On topic means the title names a job in the occupation, whatever its level. Exclude words were added only for noise the reads found and a count sized. 336 postings were read across the twelve families; 38 of them repeat the title and employer of another posting in the same slice, mostly one employer posting the same job at several locations. Counts are postings, not distinct openings.",
+  "exposure_note": "paper names the occupation in Brynjolfsson, Chandar, and Chen, Canaries in the Coal Mine? Six Facts about the Recent Employment Effects of Artificial Intelligence (Stanford Digital Economy Lab, August 2026 revision), Online Appendix Tables A.2 to A.6: the top 50 occupations by ADP employment in each quintile of AI exposure, quintiles set by the GPT-4 beta measure of Eloundou et al. (2024), October 2022. Quintile 5 is the most exposed. The paper gives quintiles, not scores, and a title family here is the closest match to the occupation it lists, not the same set of jobs. null means the family has no occupation in those tables.",
+  "families": [
+    {
+      "id": "ai-training",
+      "role": "excluded",
+      "label": "AI training and annotation work",
+      "terms": ["machine learning", "artificial intelligence", "AI", "ML", "LLM", "deep learning"],
+      "also": ["trainer", "tutor", "annotator", "annotation", "rater"],
+      "why": "Postings that pay people to train, tutor, rate, or annotate for AI models name AI in the title without being AI or software jobs. They come first so that no family keeps them."
+    },
+    {
+      "id": "ai",
+      "role": "study",
+      "label": "AI and machine learning",
+      "terms": ["machine learning", "artificial intelligence", "AI", "ML", "LLM", "deep learning"],
+      "exclude": ["data center", "data centers"],
+      "paper": null,
+      "audit": {
+        "read": 23,
+        "on_topic": 21,
+        "found": "21 of 23 titles are jobs working on AI: 14 engineering or analyst roles and 7 management, consulting, or product roles. Two name AI only as the setting: a mechanical engineer for AI data centers and a construction lawyer for AI facilities. Data center titles (230 open US postings) now pass to the families after this one. Of 1,009 postings that also name trainer, tutor, annotator, annotation, or rater, the ai-training group takes all.",
+        "also_read": "40 titles from the top of an unsliced search (20 labelled Internship or Entry level, 20 not), all AI or machine learning roles. They are the best-matching titles and are not counted in read."
+      }
+    },
+    {
+      "id": "software",
+      "role": "study",
+      "label": "Software engineering",
+      "terms": ["software engineer", "software developer"],
+      "paper": {"occupations": ["Software Developers, Systems Software", "Computer Programmers"], "quintiles": [5], "table": "A.6"},
+      "audit": {
+        "read": 18,
+        "on_topic": 18,
+        "found": "All 18 are software engineering jobs, including controls software and security engineering titles. Titles that also name an AI term are in the ai family; subgroups.json counts them.",
+        "also_read": "40 titles from the top of an unsliced search, all software engineering jobs."
+      }
+    },
+    {
+      "id": "data-analyst",
+      "role": "study",
+      "label": "Data analyst",
+      "terms": ["data analyst"],
+      "exclude": ["security", "prevention"],
+      "paper": null,
+      "audit": {
+        "read": 36,
+        "on_topic": 32,
+        "found": "32 of 36 are data analysis jobs. One is a data loss prevention analyst, a security job; the words data and analyst need not be next to each other, so titles such as Analyst, Data Security also match. security and prevention remove 28 open US postings. Three more are borderline: a business analyst, an information management analyst, and a risk adjustment data integrity analyst.",
+        "also_read": "40 titles from the top of an unsliced search, all data analyst jobs."
+      }
+    },
+    {
+      "id": "financial-analyst",
+      "role": "study",
+      "label": "Financial analyst",
+      "terms": ["financial analyst", "finance analyst"],
+      "paper": {"occupations": ["Financial Analysts"], "quintiles": [4], "table": "A.5"},
+      "audit": {
+        "read": 49,
+        "on_topic": 47,
+        "found": "47 of 49 are finance analysis jobs, including planning, reporting, tax, and valuation analysts. Two are finance systems or application analysts, closer to IT jobs."
+      }
+    },
+    {
+      "id": "accountant",
+      "role": "study",
+      "label": "Accountant",
+      "terms": ["accountant"],
+      "paper": {"occupations": ["Accountants"], "quintiles": [5], "table": "A.6"},
+      "audit": {"read": 17, "on_topic": 17, "found": "All 17 are accountant jobs: staff, senior, project, tax, and financial reporting."}
+    },
+    {
+      "id": "paralegal",
+      "role": "study",
+      "label": "Paralegal and legal assistant",
+      "terms": ["paralegal", "legal assistant"],
+      "paper": {"occupations": ["Paralegals and Legal Assistants", "Legal Secretaries"], "quintiles": [5], "table": "A.6"},
+      "audit": {"read": 11, "on_topic": 11, "found": "All 11 are legal support jobs. Two are legal administrative or executive assistants, which the paper lists as legal secretaries, also in quintile 5."}
+    },
+    {
+      "id": "graphic-designer",
+      "role": "study",
+      "label": "Graphic designer",
+      "terms": ["graphic designer", "graphic design"],
+      "paper": {"occupations": ["Graphic Designers"], "quintiles": [4], "table": "A.5"},
+      "audit": {"read": 10, "on_topic": 9, "found": "9 of 10 are graphic design jobs; one volunteer posting is among them. One is a social media content job that asks for graphic design."}
+    },
+    {
+      "id": "marketing",
+      "role": "study",
+      "label": "Marketing",
+      "terms": ["marketing"],
+      "paper": {"occupations": ["Market Research Analysts and Marketing Specialists", "Marketing Managers"], "quintiles": [4, 5], "table": "A.5, A.6"},
+      "audit": {"read": 33, "on_topic": 27, "found": "27 of 33 are marketing jobs from coordinator to director. Four are sales or promotion jobs with marketing in the title (two event brand ambassadors, a sales associate, a food service account manager), one is a leasing job, and one is a university chief of staff."}
+    },
+    {
+      "id": "customer-service",
+      "role": "study",
+      "label": "Customer service",
+      "terms": ["customer service", "customer support", "customer care"],
+      "exclude": ["driver"],
+      "paper": {"occupations": ["Customer Service Representatives"], "quintiles": [5], "table": "A.6"},
+      "audit": {
+        "read": 53,
+        "on_topic": 50,
+        "found": "50 of 53 are customer service jobs; a delivery driver (driver removes 127 open US postings), a plasma center technician, and a medical screener are not. Of the 50, 23 are store and counter jobs at dollar stores, convenience stores, a pizza chain, a paint store, and home improvement and print shops, which the paper's occupation for customer service representatives may not cover. In the reads, 18 of those 23 and 19 of the other 27 carry the Internship or Entry level label, so the store jobs do not by themselves make the door wide. The industry filter in subgroups.json removes only some store jobs: the pizza chain's postings list a software industry."
+      }
+    },
+    {
+      "id": "registered-nurse",
+      "role": "study",
+      "label": "Registered nurse",
+      "terms": ["registered nurse", "RN"],
+      "parts": [["registered nurse"], ["RN"]],
+      "paper": {"occupations": ["Registered Nurses"], "quintiles": [3], "table": "A.4"},
+      "audit": {"read": 36, "on_topic": 36, "found": "All 36 are registered nurse jobs. 17 are travel or local contract postings from staffing agencies: 16 carry the Entry level label, 14 have Internship as their employment type, and none states an experience requirement. subgroups.json counts travel titles on their own."}
+    },
+    {
+      "id": "electrician",
+      "role": "study",
+      "label": "Electrician",
+      "terms": ["electrician"],
+      "paper": {"occupations": ["Electricians"], "quintiles": [2], "table": "A.3"},
+      "audit": {"read": 14, "on_topic": 14, "found": "All 14 are electrician jobs, from Electrician I to foreman and journeyman."}
+    },
+    {
+      "id": "truck-driver",
+      "role": "study",
+      "label": "Truck and CDL driver",
+      "terms": ["truck driver", "CDL driver"],
+      "paper": {"occupations": ["Heavy and Tractor-Trailer Truck Drivers", "Light Truck or Delivery Services Drivers"], "quintiles": [3], "table": "A.4"},
+      "audit": {"read": 36, "on_topic": 36, "found": "All 36 are driving jobs. 6 are light truck or non-CDL delivery jobs: Non-CDL Driver matches CDL driver because the Platform splits Non-CDL into two words. The paper puts light truck and delivery drivers in quintile 3 as well."}
+    }
+  ]
+}

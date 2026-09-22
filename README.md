@@ -10,6 +10,8 @@ Reports are long reads with many figures. Cards are one question, one number, on
 
 | Use case | Format | Data | Credits to rerun |
 | --- | --- | --- | --- |
+| [Software and AI postings have the narrowest entry door of twelve US occupation families](cases/entry-level-postings-by-occupation-2026/) | Report | Jobs | 126 |
+| [23.9% of US-based AI staff at ten labs who list a bachelor's earned it in mainland China](cases/china-educated-ai-talent-2026/) | Report | People | 104 |
 | [Job postings ask for Claude Code five times as often as profiles list it](cases/ai-tool-stack-in-hiring-2026/) | Report | Jobs, people | 92 |
 | [Claude Code is named in more job postings than any other AI coding tool](cases/ai-coding-tools-in-postings-2026/) | Card | Jobs | 14 |
 | [Nearly half of US inference openings are in the Bay Area](cases/inference-roles-us-metros-2026/) | Card | Jobs | 96 |

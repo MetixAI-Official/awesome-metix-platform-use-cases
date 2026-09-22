@@ -1,0 +1,1678 @@
+---
+/*
+ * Design
+ * Color follows data: a jobs report, so it lives in the jobs blue family, and it is the first
+ *   report on the site to open light (the others open dark).
+ * Hero: pale steel field #E6EEF7 and ink type. The door is blue: #145A93 for the families a
+ *   heading names, #5A8ABF for the rest (3.1:1 on the field), empty squares white with a hairline.
+ * Signature: the waffle wall. Twelve 10 by 10 grids, one per occupation, sorted from the
+ *   narrowest door to the widest, so the whole finding reads as one ramp across the column.
+ * Body: one 0 to 100% axis for every door chart. #145A93 for what a heading names, grey
+ *   #858395 for the rest, and software's share as a dashed ink-2 reference wherever a chart
+ *   compares to it.
+ * Wording: entry level is only what a posting labels or asks for, never age. One day of
+ *   postings, not a trend. Exposure groups are the cited paper's quintiles, not scores, and
+ *   nothing here says exposure causes a narrow door.
+ */
+import BarList from "@site/components/charts/BarList.astro";
+import FigNotes from "@site/components/charts/FigNotes.astro";
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, href, isoDate, longDate, number, titleHtml, type Lang } from "@site/i18n";
+import familiesData from "../data/families.json";
+import receipt from "../data/receipt.json";
+import subgroupsData from "../data/subgroups.json";
+import familiesQuery from "../queries/families.json";
+import measuresQuery from "../queries/measures.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: {
+    slug: string;
+    title: Record<Lang, string>;
+    dek: Record<Lang, string>;
+    snapshot?: Date;
+    exploration_credits?: number;
+  };
+}
+
+const { lang, section, entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(familiesData.snapshot);
+const iso = isoDate(snapshot);
+const pct = (x: number, d = 1) => `${number(lang, x * 100, d)}%`;
+const join = (items: string[]) =>
+  zh ? items.join("、") : items.length < 3 ? items.join(" and ") : `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+const source = zh ? `来源：Metix AI Platform 岗位数据，${iso}。` : `Source: Metix AI Platform, jobs, ${iso}.`;
+const queries = [
+  { file: "families.json", endpoint: "POST /v1/jobs/query", spec: familiesQuery },
+  { file: "measures.json", endpoint: "POST /v1/jobs/query", spec: measuresQuery },
+];
+const PAPER = "https://digitaleconomy.stanford.edu/publication/canaries-in-the-coal-mine-six-facts-about-the-recent-employment-effects-of-artificial-intelligence/";
+
+type Row = (typeof familiesData.rows)[number];
+const rows = familiesData.rows as Row[];
+const fam = (g: string) => {
+  const r = rows.find((x) => x.group === g);
+  if (!r) throw new Error(`entry-door report: no family ${g}`);
+  return r;
+};
+const sub = (g: string) => {
+  const r = subgroupsData.rows.find((x) => x.group === g);
+  if (!r) throw new Error(`entry-door report: no subgroup ${g}`);
+  return r;
+};
+// The two doors, both computed from counts so a reader can check them against the data.
+const ls = (r: { label_door_count: number; total_count: number }) => r.label_door_count / r.total_count;
+const rq = (r: { stated_le24_count: number; stated_count: number }) => r.stated_le24_count / r.stated_count;
+const cov = (r: Row) => r.stated_count / r.total_count;
+const dis = (r: Row) => (r.label_only_count + r.requirement_only_count) / r.stated_count;
+const withAssoc = (r: Row) => (r.label_door_count + r.associate_count) / r.total_count;
+const intern = (r: Row) => r.internship_count / r.label_door_count;
+
+const names: Record<string, Record<Lang, string>> = {
+  ai: { en: "AI and machine learning", zh: "AI 与机器学习" },
+  software: { en: "Software engineering", zh: "软件工程" },
+  "data-analyst": { en: "Data analyst", zh: "数据分析师" },
+  "financial-analyst": { en: "Financial analyst", zh: "财务分析师" },
+  accountant: { en: "Accountant", zh: "会计" },
+  paralegal: { en: "Paralegal and legal assistant", zh: "律师助理" },
+  "graphic-designer": { en: "Graphic designer", zh: "平面设计师" },
+  marketing: { en: "Marketing", zh: "市场营销" },
+  "customer-service": { en: "Customer service", zh: "客户服务" },
+  "registered-nurse": { en: "Registered nurse", zh: "注册护士" },
+  electrician: { en: "Electrician", zh: "电工" },
+  "truck-driver": { en: "Truck and CDL driver", zh: "卡车与 CDL 司机" },
+};
+const short: Record<string, Record<Lang, string>> = {
+  ai: { en: "AI and ML", zh: "AI 与机器学习" },
+  software: { en: "Software", zh: "软件工程" },
+  paralegal: { en: "Paralegal", zh: "律师助理" },
+  "truck-driver": { en: "Truck driver", zh: "卡车司机" },
+};
+const name = (g: string) => names[g][lang];
+const sname = (g: string) => short[g]?.[lang] ?? name(g);
+// A family name inside an English sentence: lower case, keeping AI and CDL.
+const lower: Record<string, string> = { ai: "AI and machine learning", "truck-driver": "truck and CDL driver" };
+const lc = (g: string) => (zh ? name(g) : (lower[g] ?? name(g).toLowerCase()));
+
+const sw = fam("software");
+const ai = fam("ai");
+const cs = fam("customer-service");
+const acc = fam("accountant");
+const par = fam("paralegal");
+const byLabel = [...rows].sort((a, b) => ls(a) - ls(b));
+// The hero and figure 01 name software and AI; they must be the two narrowest by label.
+if (new Set(byLabel.slice(0, 2).map((r) => r.group)).size !== 2 || !byLabel.slice(0, 2).every((r) => ["software", "ai"].includes(r.group))) {
+  throw new Error("entry-door report: software and AI are no longer the two narrowest doors; rewrite the headings");
+}
+const narrowest = new Set(["software", "ai"]);
+const others = rows.filter((r) => !narrowest.has(r.group));
+const othersFloor = Math.floor(Math.min(...others.map(ls)) * 10) * 10;
+const othersReqMin = Math.min(...others.map(rq));
+const bothNarrowest = Math.max(rq(sw), rq(ai)) < othersReqMin;
+const assocLowest = [...rows]
+  .sort((a, b) => withAssoc(a) - withAssoc(b))
+  .slice(0, 2)
+  .every((r) => narrowest.has(r.group));
+const times = ls(cs) / ls(sw);
+const covMin = rows.reduce((a, b) => (cov(a) < cov(b) ? a : b));
+const covMax = rows.reduce((a, b) => (cov(a) > cov(b) ? a : b));
+const totalPostings = rows.reduce((s, r) => s + r.total_count, 0);
+const aiTraining = sub("ai-training");
+
+// Exposure groups, from the quintile the cited paper gives each family's closest occupation.
+const groupOrder = ["[5]", "[4,5]", "[4]", "[3]", "[2]", "null"];
+const groupLabel: Record<string, Record<Lang, string>> = {
+  "[5]": { en: "Quintile 5, the most exposed", zh: "第 5 档，暴露度最高" },
+  "[4,5]": { en: "Quintiles 4 and 5", zh: "第 4 档和第 5 档" },
+  "[4]": { en: "Quintile 4", zh: "第 4 档" },
+  "[3]": { en: "Quintile 3", zh: "第 3 档" },
+  "[2]": { en: "Quintile 2", zh: "第 2 档" },
+  null: { en: "Not in the paper's tables", zh: "不在论文的表中" },
+};
+const qKey = (r: Row) => JSON.stringify(r.paper_quintiles ?? null);
+const groups = groupOrder
+  .map((k) => ({ key: k, rows: rows.filter((r) => qKey(r) === k).sort((a, b) => ls(a) - ls(b)) }))
+  .filter((g) => g.rows.length > 0);
+if (groups.reduce((s, g) => s + g.rows.length, 0) !== rows.length) throw new Error("entry-door report: a family has an unknown quintile");
+const q5 = groups.find((g) => g.key === "[5]")!.rows;
+const q5Low = q5[0];
+const q5High = q5[q5.length - 1];
+const qTag = (r: Row) => {
+  const q = r.paper_quintiles as number[] | null;
+  return q ? q.map((n) => `Q${n}`).join(zh ? "、" : ", ") : "";
+};
+const exposureFocus = new Set([q5Low.group, q5High.group]);
+
+// Figure 03: where the two measures disagree, most first.
+const byDis = [...rows].sort((a, b) => dis(b) - dis(a));
+const csMostlyReqOnly = cs.requirement_only_count > cs.label_only_count;
+const naShare = cs.not_applicable_count / cs.total_count;
+const widerByLabel = rows.filter((r) => ls(r) - rq(r) > 0.05).sort((a, b) => ls(b) - rq(b) - (ls(a) - rq(a)));
+const widerByReq = rows.filter((r) => rq(r) - ls(r) > 0.05).sort((a, b) => rq(b) - ls(b) - (rq(a) - ls(a)));
+
+// Figure 04: internships as a share of the label door, on a 0 to 30% scale.
+const byIntern = [...rows].sort((a, b) => intern(b) - intern(a));
+const internAxis = Math.ceil(Math.max(...rows.map(intern)) * 10) / 10;
+const internLow = rows.filter((r) => intern(r) < 0.01).sort((a, b) => intern(a) - intern(b));
+
+// Figure 05: the two widest doors without their largest special cases.
+const rnTravel = sub("registered-nurse-travel");
+const rnRest = sub("registered-nurse-not-travel");
+const csRetail = sub("customer-service-retail-restaurants");
+const csRest = sub("customer-service-outside-retail-restaurants");
+const rn = fam("registered-nurse");
+const robust = [
+  {
+    family: "registered-nurse",
+    items: [
+      { key: "travel", label: zh ? "标题含 travel" : "Travel titles", row: rnTravel, focus: false },
+      { key: "rest", label: zh ? "其他护士岗位" : "Other nursing postings", row: rnRest, focus: true },
+    ],
+  },
+  {
+    family: "customer-service",
+    items: [
+      { key: "retail", label: zh ? "零售和餐饮雇主" : "Retail and restaurant employers", row: csRetail, focus: false },
+      { key: "rest", label: zh ? "其他雇主" : "Other employers", row: csRest, focus: true },
+    ],
+  },
+];
+const x = (v: number) => `${(Math.min(1, Math.max(0, v)) * 100).toFixed(2)}%`;
+const ticks = [0, 0.25, 0.5, 0.75, 1];
+---
+
+{section === "card" && null}
+
+{
+  section === "body" && (
+    <>
+      <header class="ed-hero">
+        <div class="wrap">
+          <div class="ed-top">
+            <div class="ed-text">
+              <nav class="ed-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
+                <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
+                <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
+              </nav>
+              <p class="ed-meta">
+                {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=jobs#index`}>{zh ? "岗位" : "Jobs"}</a> ·{" "}
+                <span class="nowrap">{iso}</span>
+              </p>
+              <h1 set:html={titleHtml(entry.title[lang], lang)} />
+              <p class="ed-dek">{entry.dek[lang]}</p>
+              <div class="ed-actions">
+                <a class="ed-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
+                <a class="ed-chip" href="#run-reproduce">
+                  {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+                </a>
+                <span class="ed-note">{zh ? "复现只计数，不读取任何岗位" : "Reproducing reads no postings: every number is a count"}</span>
+              </div>
+            </div>
+            <div class="ed-side">
+            <dl class="ed-pair">
+              <div class="focus">
+                <dt>{pct(ls(sw))}</dt>
+                <dd>
+                  {zh
+                    ? "美国在招的软件工程岗位中，标为实习或入门级的比例"
+                    : "of open US software engineering postings are labelled Internship or Entry level "}
+                  <span class="nowrap">
+                    {zh
+                      ? `（${number(lang, sw.total_count)} 个中 ${number(lang, sw.label_door_count)} 个）`
+                      : `(${number(lang, sw.label_door_count)} of ${number(lang, sw.total_count)})`}
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt>{pct(ls(cs))}</dt>
+                <dd>
+                  {zh
+                    ? "客户服务岗位的同一比例"
+                    : "in customer service "}
+                  <span class="nowrap">
+                    {zh
+                      ? `（${number(lang, cs.total_count)} 个中 ${number(lang, cs.label_door_count)} 个）`
+                      : `(${number(lang, cs.label_door_count)} of ${number(lang, cs.total_count)})`}
+                  </span>
+                  {zh
+                    ? `；零售和餐饮之外的雇主是 ${pct(ls(csRest))}`
+                    : `; ${pct(ls(csRest))} at employers outside retail and restaurants`}
+                </dd>
+              </div>
+            </dl>
+            <p class="ed-pair-note">
+              {zh
+                ? "下文引用的论文把软件开发和客户服务都列在 AI 暴露度最高的五分之一职业里。"
+                : "The paper cited below puts both software developers and customer service representatives in its most AI-exposed fifth of occupations."}
+            </p>
+            </div>
+          </div>
+
+          <div class="ed-wall-head">
+            <p
+              class="ed-wall-title"
+              id="wall-title"
+              set:html={titleHtml(
+                zh ? "每 100 个在招岗位里，有几个标为实习或入门级" : "Of every 100 open postings, how many are labelled Internship or Entry level",
+                lang,
+              )}
+            />
+            <p class="ed-wall-key" aria-hidden="true">
+              <span class="wk on">{zh ? "标为入门" : "Labelled entry"}</span>
+              <span class="wk hl">{zh ? "标题提到的" : "Named in the title"}</span>
+              <span class="wk off">{zh ? "其他" : "Any other label"}</span>
+              <span class="wk q">{zh ? "Q = 论文中的暴露度档位" : "Q = exposure quintile in the paper"}</span>
+            </p>
+          </div>
+          <ol class="wall" aria-labelledby="wall-title">
+            {byLabel.map((r) => {
+              const filled = Math.round(ls(r) * 100);
+              return (
+                <li class:list={["waffle", { focus: narrowest.has(r.group) }]}>
+                  <span class="wf-grid" aria-hidden="true">
+                    {Array.from({ length: 100 }, (_, i) => {
+                      const fromBottom = (9 - Math.floor(i / 10)) * 10 + (i % 10);
+                      return <span class={fromBottom < filled ? "on" : undefined} />;
+                    })}
+                  </span>
+                  <span class="wf-val">{pct(ls(r))}</span>
+                  <span class="wf-name">{sname(r.group)}</span>
+                  {qTag(r) && <span class="wf-q">{qTag(r)}</span>}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </header>
+
+      <div class="wrap report-body">
+        <section class="text-block rail-block" aria-labelledby="who-title">
+          <div class="rail">
+            <h2 id="who-title">{zh ? "统计的是什么" : "What is counted"}</h2>
+          </div>
+          <div class="rail-main">
+            <dl class="criteria">
+              {(zh
+                ? [
+                    ["岗位", `${longDate(lang, snapshot)} Metix AI Platform 上地点在美国、仍在招聘的岗位。数的是岗位，不是空缺，也不是录用。`, null],
+                    ["职业", `按标题里的词定义十二个职业族，例如 software engineer、registered nurse，合计 ${number(lang, totalPostings)} 个岗位。每个岗位最多算进一个职业族；标题同时含 AI 词和 trainer、tutor、annotator、annotation 或 rater 的岗位（${number(lang, aiTraining.total_count)} 个）不计入任何职业族。`, null],
+                    ["标签口径", "岗位的资历标签是实习（Internship）或入门级（Entry level）。来源平台给每个岗位都设了资历标签，所以这个比例覆盖全部岗位。", null],
+                    ["要求口径", `岗位要求 24 个月以内的工作经验（含 0），占写明经验要求的岗位的比例。各职业族写明要求的比例从 ${pct(cov(covMin))}（${name(covMin.group)}）到 ${pct(cov(covMax))}（${name(covMax.group)}）不等。`, null],
+                    ["暴露度分档", "来自 Brynjolfsson、Chandar 和 Chen 的论文（斯坦福数字经济实验室，2026 年 8 月修订版）的附录表格，按 Eloundou 等人的 GPT-4 暴露度指标分为五档，第 5 档最高。论文只给档位，不给分数；每个职业族对应论文列出的最接近的职业。", PAPER],
+                    ["不做推断", "入门只看岗位怎么标、要求多少经验。数据里没有年龄，这里也不涉及最终录用了谁。", null],
+                  ]
+                : [
+                    ["Postings", `Open job postings located in the United States, on the Metix AI Platform on ${longDate(lang, snapshot)}. Counts are postings, not openings, and not hires.`, null],
+                    ["Occupations", `Twelve families defined by words in the title, such as software engineer or registered nurse: ${number(lang, totalPostings)} postings in all. Each posting counts in one family at most, and titles that pair an AI term with trainer, tutor, annotator, annotation, or rater (${number(lang, aiTraining.total_count)}) are left out of every family.`, null],
+                    ["Label door", "The posting's seniority is Internship or Entry level. The source sets a seniority on every posting, so this share covers all of them.", null],
+                    ["Requirement door", `The posting asks for 24 months of experience or less, 0 included, as a share of the postings that state a requirement. How many state one runs from ${pct(cov(covMin))} in the ${lc(covMin.group)} family to ${pct(cov(covMax))} in the ${lc(covMax.group)} family.`, null],
+                    ["Exposure groups", "Quintiles from Brynjolfsson, Chandar, and Chen (Stanford Digital Economy Lab, August 2026 revision), set by the GPT-4 exposure measure of Eloundou and colleagues; quintile 5 is the most exposed. The paper gives quintiles, not scores, and each family stands for the closest occupation the paper lists.", PAPER],
+                    ["Never inferred", "Entry level is only what a posting labels or asks for. The data has no ages, and nothing here says who is hired.", null],
+                  ]
+              ).map(([term, text, link]) => (
+                <div>
+                  <dt>{term}</dt>
+                  <dd>
+                    {text}
+                    {link && (
+                      <>
+                        {" "}
+                        <a href={link}>{zh ? "论文页面" : "The paper"}</a>
+                      </>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <section class="text-block rail-block" aria-labelledby="brief-title">
+          <div class="rail">
+            <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
+          </div>
+          <div class="rail-main">
+            <ol class="brief-list">
+              {(zh
+                ? [
+                    `软件工程和 AI 职位按两种口径都最窄：标为实习或入门级的分别是 ${pct(ls(sw))} 和 ${pct(ls(ai))}，写明经验要求的岗位里，要求 24 个月以内的分别是 ${pct(rq(sw))} 和 ${pct(rq(ai))}。其他职业族按标签都在 ${othersFloor}% 以上。`,
+                    `论文列为 AI 暴露度最高的五分之一职业，并不都这么窄。客户服务是 ${pct(ls(cs))}，是软件的 ${number(lang, times, 1)} 倍；会计和律师助理分别是 ${pct(ls(acc))} 和 ${pct(ls(par))}。`,
+                    `在写明经验要求的岗位里，两种口径在客户服务上有 ${pct(dis(cs))} 不一致，在软件上只有 ${pct(dis(sw))}${csMostlyReqOnly ? "；客户服务的不一致大多是要求很少经验、却标成了别的资历" : ""}。`,
+                    `去掉旅行护士岗位和零售、餐饮雇主之后，宽的依然宽：其他护士岗位是 ${pct(ls(rnRest))}，其他客户服务岗位是 ${pct(ls(csRest))}，软件是 ${pct(ls(sw))}。`,
+                  ]
+                : [
+                    `Software engineering and AI titles have the narrowest door by both measures: ${pct(ls(sw))} and ${pct(ls(ai))} are labelled Internship or Entry level, and ${pct(rq(sw))} and ${pct(rq(ai))} of those that state a requirement ask for 24 months or less. Every other family is above ${othersFloor}% by label.`,
+                    `The narrow door is not shared by every occupation the cited paper puts in its most AI-exposed fifth. Customer service is at ${pct(ls(cs))}, ${number(lang, times, 1)} times software, and accountants and paralegals are at ${pct(ls(acc))} and ${pct(ls(par))}.`,
+                    `Where a posting states a requirement, the two measures disagree on ${pct(dis(cs))} of customer service postings and ${pct(dis(sw))} of software's${csMostlyReqOnly ? ", in customer service mostly postings that ask for little experience under another label" : ""}.`,
+                    `Leaving out travel nursing titles and retail and restaurant employers keeps the wide doors wide: ${pct(ls(rnRest))} for other nursing postings and ${pct(ls(csRest))} for other customer service postings, against ${pct(ls(sw))} in software.`,
+                  ]
+              ).map((text) => (
+                <li>
+                  <span set:html={zh ? titleHtml(text, "zh") : text} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <Figure
+          id="doors"
+          lang={lang}
+          number="01"
+          heading={
+            zh
+              ? bothNarrowest
+                ? "按两种口径，软件工程和 AI 职位留给新人的比例都最低"
+                : "按标签口径，软件工程和 AI 职位留给新人的比例最低"
+              : bothNarrowest
+                ? "Software and AI titles have the narrowest entry door by both measures"
+                : "Software and AI titles have the narrowest entry door by label"
+          }
+          sub={
+            zh
+              ? "条形：标为实习或入门级的岗位比例。圆点：写明经验要求的岗位里，要求 24 个月以内的比例；右列是写明要求的岗位占比。刻度 0 到 100%"
+              : "Bar: share of open US postings labelled Internship or Entry level. Dot: share of postings stating an experience requirement that ask for 24 months or less; the last column is how many state one. Axis 0 to 100%"
+          }
+          alt={byLabel
+            .map((r) =>
+              zh
+                ? `${name(r.group)}：标签 ${pct(ls(r))}，要求 ${pct(rq(r))}，写明要求 ${pct(cov(r), 0)}`
+                : `${name(r.group)}: label ${pct(ls(r))}, requirement ${pct(rq(r))}, ${pct(cov(r), 0)} state one`,
+            )
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-bar">{zh ? "标为实习或入门级" : "Labelled Internship or Entry level"}</span>
+            <span class="lg lg-dot">{zh ? "要求 24 个月以内" : "Asks for 24 months or less"}</span>
+            <span class="lg lg-hl">{zh ? "标题提到的" : "Named in the title"}</span>
+          </p>
+          <div class="dr" aria-hidden="true">
+            <div class="dr-head">
+              <span />
+              <span class="dr-axis">
+                {ticks.map((t) => (
+                  <span style={`left: ${x(t)}`}>{pct(t, 0)}</span>
+                ))}
+              </span>
+              <span>{zh ? "标签" : "Label"}</span>
+              <span>{zh ? "要求" : "Req."}</span>
+              <span>{zh ? "写明" : "States"}</span>
+            </div>
+            {byLabel.map((r) => (
+              <div class:list={["dr-row", { focus: narrowest.has(r.group) }]}>
+                <span class="dr-name">
+                  <span class="nm-long">{name(r.group)}</span>
+                  <span class="nm-short">{sname(r.group)}</span>
+                </span>
+                <span class="dr-track">
+                  {ticks.slice(1, -1).map((t) => (
+                    <span class="grid" style={`left: ${x(t)}`} />
+                  ))}
+                  <span class="bar" style={`width: ${x(ls(r))}`} />
+                  <span class="req-dot" style={`left: ${x(rq(r))}`} />
+                </span>
+                <span class="dr-v strong">{pct(ls(r))}</span>
+                <span class="dr-v">{pct(rq(r))}</span>
+                <span class="dr-v muted">{pct(cov(r), 0)}</span>
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `其他十个职业族按标签都在 ${othersFloor}% 以上。${assocLowest ? `把"助理级"（Associate）也算作入门，软件升到 ${pct(withAssoc(sw))}，AI 升到 ${pct(withAssoc(ai))}，仍是十二个里最低的两个。` : ""}`,
+                  ]
+                : [
+                    `Every other family is above ${othersFloor}% by label.${assocLowest ? ` Counting the Associate label as part of the door, software rises to ${pct(withAssoc(sw))} and AI to ${pct(withAssoc(ai))}, still the two lowest of the twelve.` : ""}`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    `标签是来源平台给每个岗位设的，所以条形覆盖全部岗位；圆点只覆盖写明经验要求的岗位，各族从 ${pct(cov(covMin))} 到 ${pct(cov(covMax))} 不等。标为入门的岗位更少写明要求：软件的 ${number(lang, sw.label_door_count)} 个入门岗位里只有 ${number(lang, sw.door_stated_count)} 个写明了。`,
+                  ]
+                : [
+                    `The source sets a label on every posting, so the bar covers all of them. The dot covers only postings that state a requirement, from ${pct(cov(covMin))} to ${pct(cov(covMax))} of a family. Entry-labelled postings state one less often: ${number(lang, sw.door_stated_count)} of software's ${number(lang, sw.label_door_count)} do.`,
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="exposure"
+          lang={lang}
+          number="02"
+          heading={
+            zh
+              ? `在论文列为 AI 暴露度最高的五分之一职业里，留给新人的比例从${name(q5Low.group)}的 ${pct(ls(q5Low))} 到${name(q5High.group)}的 ${pct(ls(q5High))}`
+              : `In the paper's most AI-exposed fifth, the door runs from ${pct(ls(q5Low))} in ${lc(q5Low.group)} to ${pct(ls(q5High))} in ${lc(q5High.group)}`
+          }
+          sub={
+            zh
+              ? "标为实习或入门级的岗位比例，按引用论文给最接近职业的暴露度档位分组。刻度 0 到 100%"
+              : "Share labelled Internship or Entry level, grouped by the exposure quintile the cited paper gives each family's closest occupation. Axis 0 to 100%"
+          }
+          alt={groups
+            .map((g) => `${groupLabel[g.key][lang]}${zh ? "：" : ": "}${g.rows.map((r) => `${name(r.group)} ${pct(ls(r))}`).join(zh ? "，" : ", ")}`)
+            .join(zh ? "；" : "; ")}
+          source={
+            zh
+              ? `来源：Metix AI Platform 岗位数据，${iso}；暴露度档位来自 Brynjolfsson、Chandar 和 Chen（2026）。`
+              : `Source: Metix AI Platform, jobs, ${iso}; exposure quintiles from Brynjolfsson, Chandar, and Chen (2026).`
+          }
+          queries={queries}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-ref">{zh ? `软件工程 ${pct(ls(sw))}` : `Software engineering, ${pct(ls(sw))}`}</span>
+            <span class="lg lg-hl">{zh ? "标题提到的" : "Named in the title"}</span>
+          </p>
+          <div class="lp" aria-hidden="true">
+            <div class="ref-layer">
+              <span><span class="ref" style={`left: ${x(ls(sw))}`} /></span>
+            </div>
+            {groups.map((g) => (
+              <div class="lp-group">
+                <p class="lp-head">{groupLabel[g.key][lang]}</p>
+                {g.rows.map((r) => (
+                  <div class:list={["lp-row", { focus: exposureFocus.has(r.group) }]}>
+                    <span class="lp-name">{name(r.group)}</span>
+                    <span class="lp-track">
+                      <span class="ref" style={`left: ${x(ls(sw))}`} />
+                      <span class="stem" style={`width: ${x(ls(r))}`} />
+                      <span class="pt" style={`left: ${x(ls(r))}`} />
+                    </span>
+                    <span class="lp-v">{pct(ls(r))}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+            <div class="lp-row lp-scale">
+              <span />
+              <span class="lp-track">
+                {ticks.map((t) => (
+                  <span style={`left: ${x(t)}`}>{pct(t, 0)}</span>
+                ))}
+              </span>
+              <span />
+            </div>
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `同在第 5 档的会计和律师助理是 ${pct(ls(acc))} 和 ${pct(ls(par))}，分别约是软件的 ${number(lang, ls(acc) / ls(sw), 1)} 倍和 ${number(lang, ls(par) / ls(sw), 1)} 倍。零售和餐饮之外雇主的客户服务岗位仍有 ${pct(ls(csRest))}（见图 05）。按标签口径，最宽的是第 3 档的卡车司机和注册护士，这两个职业还需要执照，两种口径都记录不到。`,
+                  ]
+                : [
+                    `Accountants and paralegals, also in quintile 5, are at ${pct(ls(acc))} and ${pct(ls(par))}, ${number(lang, ls(acc) / ls(sw), 1)} and ${number(lang, ls(par) / ls(sw), 1)} times software. Customer service is still at ${pct(ls(csRest))} at employers outside retail and restaurants (figure 05). By label the widest doors are truck drivers and registered nurses in quintile 3, where a license, which neither measure records, is also required.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    "档位来自论文在线附录表 A.2 至 A.6，按 Eloundou 等人（2024）的 GPT-4 暴露度指标划分。论文只给档位，每个职业族只是它所列职业的最接近对应，不是同一批岗位。这是一天的岗位截面，既不能证实也不能检验论文，论文跟踪的是一段时间里的就业。",
+                  ]
+                : [
+                    "Quintiles are from the paper's Online Appendix Tables A.2 to A.6, set by the GPT-4 exposure measure of Eloundou and colleagues (2024). The paper gives quintiles only, and each family is the closest match to an occupation it lists, not the same set of jobs. This is one day of postings, so it neither confirms nor tests the paper, which follows employment over time.",
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="agreement"
+          lang={lang}
+          number="03"
+          heading={
+            zh
+              ? `在写明经验要求的岗位里，两种口径在客户服务上有 ${pct(dis(cs))} 不一致，在软件上只有 ${pct(dis(sw))}`
+              : `Where a posting states a requirement, the two measures disagree on ${pct(dis(cs))} of customer service postings and ${pct(dis(sw))} of software's`
+          }
+          sub={
+            zh
+              ? "写明经验要求的岗位，按两种口径是否一致拆成四部分，按不一致的比例排序"
+              : "Postings that state an experience requirement, split four ways by the two measures, sorted by how often they disagree"
+          }
+          alt={byDis
+            .map((r) => (zh ? `${name(r.group)}：不一致 ${pct(dis(r))}` : `${name(r.group)}: disagree ${pct(dis(r))}`))
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-s1">{zh ? "两者都算入门" : "Both say entry"}</span>
+            <span class="lg lg-s2">{zh ? "只按要求算入门" : "Only the requirement"}</span>
+            <span class="lg lg-s3">{zh ? "只按标签算入门" : "Only the label"}</span>
+            <span class="lg lg-s4">{zh ? "两者都不算" : "Neither"}</span>
+          </p>
+          <div class="sk" aria-hidden="true">
+            <div class="sk-head">
+              <span />
+              <span />
+              <span>{zh ? "不一致" : "Disagree"}</span>
+            </div>
+            {byDis.map((r) => (
+              <div class:list={["sk-row", { focus: r.group === "customer-service" || r.group === "software" }]}>
+                <span class="sk-name">{name(r.group)}</span>
+                <span class="sk-bar">
+                  <span class="s1" style={`flex-grow: ${r.agree_door_count}`} />
+                  <span class="s2" style={`flex-grow: ${r.requirement_only_count}`} />
+                  <span class="s3" style={`flex-grow: ${r.label_only_count}`} />
+                  <span class="s4" style={`flex-grow: ${r.agree_not_door_count}`} />
+                </span>
+                <span class="sk-v">{pct(dis(r))}</span>
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `客户服务有 ${number(lang, cs.requirement_only_count)} 个岗位要求 24 个月以内，资历标签却不是实习或入门级。按标签看更宽的有${join(widerByLabel.map((r) => name(r.group)))}；按要求看更宽的有${join(widerByReq.map((r) => name(r.group)))}。`,
+                  ]
+                : [
+                    `${number(lang, cs.requirement_only_count)} customer service postings ask for 24 months or less but carry a label other than Internship or Entry level. By label the ${join(widerByLabel.map((r) => lc(r.group)))} families look wider; by requirement the ${join(widerByReq.map((r) => lc(r.group)))} families do.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    `只拆分写明经验要求的岗位。中间职业族的排序在两种口径下会变，所以不宜给它们排名。两种比例相差超过 5 个百分点才算"更宽"。计数看不出这 ${number(lang, cs.requirement_only_count)} 个客户服务岗位标的是哪一种资历；整个客户服务族有 ${pct(naShare)} 的岗位标为"不适用"（Not Applicable）。`,
+                  ]
+                : [
+                    `Only postings that state a requirement are split here. The middle families change order between the two measures, so they should not be ranked. A family counts as wider one way when the two shares differ by more than 5 points. The counts do not show which label those ${number(lang, cs.requirement_only_count)} customer service postings carry; across the whole family, ${pct(naShare)} of postings are labelled Not Applicable.`,
+                  ]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="internships"
+          lang={lang}
+          number="04"
+          heading={
+            zh
+              ? `实习占 AI 入门岗位的 ${pct(intern(ai), 0)}，占软件的 ${pct(intern(sw), 0)}`
+              : `Internships are ${pct(intern(ai), 0)} of the AI door and ${pct(intern(sw), 0)} of software's`
+          }
+          sub={
+            zh
+              ? `标为实习的岗位占标为实习或入门级岗位的比例，刻度 0 到 ${pct(internAxis, 0)}`
+              : `Internship-labelled postings as a share of those labelled Internship or Entry level, on a 0 to ${pct(internAxis, 0)} scale`
+          }
+          alt={byIntern.map((r) => `${name(r.group)} ${pct(intern(r))}`).join(zh ? "，" : ", ")}
+          source={source}
+          queries={queries}
+        >
+          <BarList
+            label={zh ? "实习占入门岗位的比例" : "Internships as a share of the door"}
+            rows={byIntern.map((r) => ({
+              label: name(r.group),
+              display: pct(intern(r)),
+              width: intern(r) / internAxis,
+              kind: narrowest.has(r.group) ? ("focus" as const) : ("other" as const),
+            }))}
+          />
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [`${join(internLow.map((r) => `${name(r.group)}（${pct(intern(r))}）`))}的入门岗位几乎全是入门级，而不是实习。`]
+                : [`The ${join(internLow.map((r) => `${lc(r.group)} (${pct(intern(r))})`))} doors are almost entirely entry-level jobs, not internships.`]
+            }
+            method={
+              zh
+                ? ["这里的实习就是来源平台标成实习的岗位。"]
+                : ["An internship here is whatever the source labels one."]
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="special-cases"
+          lang={lang}
+          number="05"
+          heading={
+            zh
+              ? "去掉旅行护士岗位和零售、餐饮雇主，护士和客户服务留给新人的比例依然远高于软件"
+              : "Without travel nursing titles or retail and restaurant employers, nursing and customer service doors stay far wider than software's"
+          }
+          sub={
+            zh
+              ? "标为实习或入门级的岗位比例；每行下方是要求口径和写明要求的比例。刻度 0 到 100%"
+              : "Share labelled Internship or Entry level; under each bar, the requirement door and how many state one. Axis 0 to 100%"
+          }
+          alt={robust
+            .flatMap((g) => g.items.map((it) => `${name(g.family)}${zh ? "，" : ", "}${it.label}${zh ? "：" : ": "}${pct(ls(it.row))}`))
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={queries}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-ref">{zh ? `软件工程 ${pct(ls(sw))}` : `Software engineering, ${pct(ls(sw))}`}</span>
+            <span class="lg lg-hl">{zh ? "标题提到的" : "Named in the title"}</span>
+          </p>
+          <div class="rb" aria-hidden="true">
+            <div class="ref-layer over">
+              <span><span class="ref" style={`left: ${x(ls(sw))}`} /></span>
+            </div>
+            {robust.map((g) => (
+              <div class="rb-group">
+                <p class="rb-head">
+                  {name(g.family)} <span>{zh ? `全部 ${pct(ls(fam(g.family)))}` : `all ${pct(ls(fam(g.family)))}`}</span>
+                </p>
+                {g.items.map((it) => (
+                  <div class:list={["rb-row", { focus: it.focus }]}>
+                    <span class="rb-name">
+                      {it.label}
+                      <span class="rb-n">
+                        {zh
+                          ? `${number(lang, it.row.total_count)} 个，占 ${pct(it.row.total_count / fam(g.family).total_count, 0)}`
+                          : `${number(lang, it.row.total_count)}, ${pct(it.row.total_count / fam(g.family).total_count, 0)} of the family`}
+                      </span>
+                    </span>
+                    <span class="rb-track">
+                      <span class="ref" style={`left: ${x(ls(sw))}`} />
+                      <span class="bar" style={`width: ${x(ls(it.row))}`} />
+                    </span>
+                    <span class="rb-v">
+                      <strong>{pct(ls(it.row))}</strong>
+                      <span>
+                        {zh
+                          ? `要求 ${pct(rq(it.row))}，写明 ${pct(it.row.stated_count / it.row.total_count, 0)}`
+                          : `req. ${pct(rq(it.row))}, ${pct(it.row.stated_count / it.row.total_count, 0)} state one`}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? [
+                    `旅行护士占护士岗位的 ${pct(rnTravel.total_count / rn.total_count)}，其中 ${pct(ls(rnTravel))} 标为入门；其他护士岗位仍是 ${pct(ls(rnRest))}。零售和餐饮之外雇主的客户服务岗位是 ${pct(ls(csRest))}，是软件的 ${number(lang, ls(csRest) / ls(sw), 1)} 倍。`,
+                  ]
+                : [
+                    `Travel titles are ${pct(rnTravel.total_count / rn.total_count)} of nursing postings and ${pct(ls(rnTravel))} of them are labelled entry; the other nursing postings are still at ${pct(ls(rnRest))}. Customer service postings from employers outside retail and restaurants are at ${pct(ls(csRest))}, ${number(lang, ls(csRest) / ls(sw), 1)} times software.`,
+                  ]
+            }
+            method={
+              zh
+                ? [
+                    `旅行护士岗位很少写明经验要求（${pct(rnTravel.stated_count / rnTravel.total_count)}）。雇主行业只能部分过滤门店岗位：有的门店雇主登记的是别的行业，一家披萨连锁的门店岗位登记为软件行业，所以"其他雇主"这一行仍含部分门店岗位。`,
+                  ]
+                : [
+                    `Travel postings rarely state a requirement (${pct(rnTravel.stated_count / rnTravel.total_count)}). The employer's industry filters store jobs only in part: some store employers list another industry, and one pizza chain's store postings list software, so the other-employers row still holds some store jobs.`,
+                  ]
+            }
+          />
+        </Figure>
+      </div>
+    </>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>人群</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上地点在美国（岗位的 location.country）、仍在招聘（is_open）的岗位。目前索引里的岗位
+          is_open 都为 true，所以它不会缩小范围；查询里仍保留这个条件，以防以后变化。
+        </p>
+        <h3>职业族</h3>
+        <p>
+          每个职业族是一小组标题词，有的带排除词，都在{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/families.json`}>queries/families.json</a>
+          。标题里出现一个词组的每个词（顺序不限）就算匹配。每个岗位最多算进一个职业族：清单里第一个匹配、且没有命中排除词的那个。标题同时含 AI
+          词和软件词的岗位（例如 AI Software Engineer）算进 AI。标题同时含 AI 词和 trainer、tutor、annotator、annotation 或 rater 的岗位（AI 训练类岗位）先从所有职业族里拿掉，单独统计。
+        </p>
+        <h3>两种口径</h3>
+        <p>
+          标签口径：资历（seniority）为 Internship 或 Entry level 的岗位占全部岗位的比例。来源平台给每个岗位都设了七个固定值之一，所以这是标签，不是雇主写的要求。要求口径：写明经验要求（min_experience_months）且要求
+          24 个月以内（含 0）的岗位，占写明要求的岗位的比例。
+        </p>
+        <h3>抽读</h3>
+        <p>
+          先从 AI、软件和数据分析师三个搜索结果的最前面各读了 40 个标题，共 120 个，全部对口，后来发现原因：搜索按标题匹配程度排序，前几条最干净。这些读取作废，改为读完整切片（某一天、几个州、切片里的每个岗位），共
+          336 个岗位。切片里发现了 AI 数据中心设施岗位（230 个，交给后面的职业族）、数据分析师里的安全分析师（28 个，排除）、客户服务标题里的送货司机（127
+          个，排除），以及 AI 训练类岗位（1,009 个，先行拿掉）。
+        </p>
+        <h3>暴露度分档</h3>
+        <p>
+          来自 Erik Brynjolfsson、Bharat Chandar 和 Ruyu Chen 的《Canaries in the Coal Mine? Six Facts about the Recent Employment Effects of Artificial
+          Intelligence》，斯坦福数字经济实验室，2025 年 8 月首发，2025 年 11 月和 2026 年 8 月修订。论文在线附录表 A.2 至 A.6 列出了每个暴露度档位里就业人数最多的 50
+          个职业。<a href={PAPER}>论文页面</a>。
+        </p>
+        <h3>局限</h3>
+        <p>
+          一天的岗位截面，不是趋势，不能说明门槛是否变窄。岗位反映需求，不是录用；数的是岗位，不是空缺。职业族包含一个职业的所有级别，只是论文职业的近似。写明要求的比例各族不同，标为入门的岗位写得更少。资历标签来自来源平台，偶尔不一致。雇主排名和入门岗位薪资这两项没有做：前者要读完所有入门岗位，后者写明薪资的太少。
+        </p>
+      </>
+    ) : (
+      <>
+        <h3>Population</h3>
+        <p>
+          Open job postings (is_open) located in the United States (the job's location.country) on the Metix AI Platform on{" "}
+          {longDate(lang, snapshot)}. is_open is true on every posting in the searchable index today, so it narrows nothing; the
+          condition stays in the queries in case that changes.
+        </p>
+        <h3>Occupation families</h3>
+        <p>
+          Each family is a short list of title terms, some with exclude words the audits called for, in{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/families.json`}>queries/families.json</a>. A title matches a
+          term when every word of it appears, in any order. Each posting counts in one family at most: the first whose terms it
+          matches and whose exclude words it does not. A title with an AI term and a software term, such as AI Software Engineer,
+          counts as AI. Titles that pair an AI term with trainer, tutor, annotator, annotation, or rater (AI training work)
+          are taken out of every family first and counted on their own.
+        </p>
+        <h3>The two measures</h3>
+        <p>
+          The label door is the share of all postings whose seniority is Internship or Entry level. The source sets one of seven
+          fixed seniority values on every posting, so it is a label, not a requirement the employer wrote. The requirement door is
+          the share of postings that state an experience requirement (min_experience_months) and ask for 24 months or less, 0
+          included, among those that state one.
+        </p>
+        <h3>Audits</h3>
+        <p>
+          A first audit read 120 titles, 40 from the top of each of the AI, software, and data analyst searches, and found them clean, then found why: Search ranks postings by
+          how well the title matches, so the top of a search is the cleanest part of a family. Those reads were set aside, and every
+          family was then audited from whole slices (one posting day, a few states, every posting read): 336 postings. The slices
+          found AI data center facilities jobs in the AI family (230 postings, passed to later families), security analysts among
+          data analysts (28, removed), delivery drivers among customer service titles (127, removed), and AI training work (1,009,
+          taken out first).
+        </p>
+        <h3>Exposure groups</h3>
+        <p>
+          From Erik Brynjolfsson, Bharat Chandar, and Ruyu Chen, "Canaries in the Coal Mine? Six Facts about the Recent Employment
+          Effects of Artificial Intelligence", Stanford Digital Economy Lab, first released in August 2025 and revised in November
+          2025 and August 2026. Its Online Appendix Tables A.2 to A.6 list the 50 largest occupations by employment in each exposure
+          quintile. <a href={PAPER}>The paper</a>.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          One day of open postings, not a trend: the data cannot say whether the door narrowed. Postings describe demand, not
+          hires, and counts are postings, not openings. Title families include every level of an occupation and only approximate
+          the paper's occupations. Requirement coverage differs by family and is lower among entry-labelled postings. The seniority
+          label comes from the source and is sometimes inconsistent. Two cuts were left out: an employer ranking, which would mean
+          reading every entry-labelled posting, and pay at the door, which too few postings state.
+        </p>
+      </>
+    ))
+}
+
+<style>
+  /* ---------- hero: light, on the halfway line, then the waffle wall across the column ---------- */
+  .ed-hero {
+    --door: #145a93;
+    --door-2: #5a8abf;
+    background: #e6eef7;
+    color: var(--ink);
+    padding-block: clamp(36px, 6vw, 72px) clamp(40px, 5vw, 64px);
+  }
+
+  .ed-top {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    align-items: end;
+  }
+
+  .ed-eyebrow,
+  .ed-meta {
+    font: 500 12px/1.5 var(--mono);
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+  }
+
+  .ed-eyebrow {
+    text-transform: uppercase;
+  }
+
+  .ed-eyebrow a,
+  .ed-meta a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .ed-hero h1 {
+    margin-top: 18px;
+    font: 700 clamp(34px, 4.2vw, 56px) / 1.04 var(--display);
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  .ed-hero h1:lang(zh) {
+    letter-spacing: 0;
+    line-height: 1.18;
+  }
+
+  .ed-dek {
+    margin-top: 18px;
+    max-width: 58ch;
+    font-size: clamp(16px, 1.4vw, 18px);
+    color: var(--ink-2);
+  }
+
+  .ed-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin-top: 24px;
+  }
+
+  .ed-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--ink);
+    font: 500 13px/1 var(--mono);
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color 160ms var(--ease);
+  }
+
+  .ed-chip:hover {
+    background: rgb(255 255 255 / 0.7);
+  }
+
+  .ed-note {
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  /* the contrast pair: software over customer service, the two ends of quintile 5 */
+  /* The pair starts level with the title, beside it rather than under the empty corner. */
+  .ed-side {
+    align-self: start;
+    padding-top: var(--ed-title-top, 58px);
+  }
+
+  .ed-pair {
+    display: grid;
+    gap: 0;
+    margin: 0;
+  }
+
+  .ed-pair div {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 20px;
+    padding-block: 14px;
+    border-bottom: 1px solid rgb(11 10 31 / 0.14);
+  }
+
+  .ed-pair div:first-child {
+    border-top: 1px solid var(--ink);
+  }
+
+  .ed-pair dt {
+    font: 700 clamp(48px, 6vw, 84px) / 0.95 var(--display);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ed-pair .focus dt {
+    color: var(--door);
+  }
+
+  .ed-pair dd {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .ed-pair-note {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .ed-wall-head {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    align-items: last baseline;
+    margin-top: clamp(40px, 5vw, 64px);
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .ed-wall-title {
+    font: 600 clamp(17px, 1.6vw, 20px) / 1.3 var(--display);
+    letter-spacing: -0.01em;
+  }
+
+  .ed-wall-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .wk::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: -1px;
+  }
+
+  .wk.on::before {
+    background: var(--door-2);
+  }
+
+  .wk.hl::before {
+    background: var(--door);
+  }
+
+  .wk.off::before {
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgb(11 10 31 / 0.2);
+  }
+
+  .wk.q::before {
+    display: none;
+  }
+
+  .wall {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px 12px;
+    margin: 20px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .waffle {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    align-content: start;
+    gap: 4px;
+  }
+
+  .wf-grid {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 2px;
+    margin-bottom: 6px;
+  }
+
+  .wf-grid span {
+    aspect-ratio: 1;
+    border-radius: 1.5px;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgb(20 90 147 / 0.16);
+  }
+
+  .wf-grid span.on {
+    background: var(--door-2);
+    box-shadow: none;
+  }
+
+  .waffle.focus .wf-grid span.on {
+    background: var(--door);
+  }
+
+  .wf-val {
+    font: 600 17px/1.1 var(--display);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .waffle.focus .wf-val {
+    color: var(--door);
+  }
+
+  /* Two lines reserved, so every quintile tag in a row sits at one height. */
+  .wf-name {
+    min-height: calc(2em * 1.3);
+    font-size: 13px;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+
+  .wf-q {
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 1199px) {
+    .wall {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 28px 20px;
+    }
+  }
+
+  @media (max-width: 959px) {
+    .ed-top,
+    .ed-wall-head {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 28px;
+    }
+
+    .ed-wall-head {
+      row-gap: 8px;
+    }
+
+    .ed-side {
+      padding-top: 0;
+    }
+  }
+
+  @media (max-width: 719px) {
+    .wall {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px 16px;
+    }
+  }
+
+  /* On the narrowest phones a numeral leaves too little room beside it: the words go under it. */
+  @media (max-width: 439px) {
+    .ed-pair div {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 6px;
+    }
+  }
+
+  /* ---------- shared chart marks ---------- */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .lg::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: -1px;
+  }
+
+  .lg-bar::before {
+    background: #858395;
+  }
+
+  .lg-hl::before {
+    background: #145a93;
+  }
+
+  .lg-dot::before {
+    width: 10px;
+    border-radius: 50%;
+    background: var(--ink);
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgb(11 10 31 / 0.25);
+  }
+
+  .lg-ref::before {
+    width: 0;
+    height: 12px;
+    border-left: 1.5px dashed var(--ink-2);
+    border-radius: 0;
+  }
+
+  .lg-s1::before {
+    background: #858395;
+  }
+
+  .lg-s2::before {
+    background: #3f3d56;
+  }
+
+  .lg-s3::before {
+    background: #5a8abf;
+  }
+
+  .lg-s4::before {
+    background: #e4e3ec;
+  }
+
+  /* ---------- 01: both doors ---------- */
+  .dr {
+    display: grid;
+    gap: 10px;
+  }
+
+  .dr-head,
+  .dr-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr) 4.5rem 4.5rem 4rem;
+    column-gap: 16px;
+    align-items: center;
+  }
+
+  .dr-head {
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .dr-head > span:nth-child(n + 3) {
+    text-align: right;
+  }
+
+  .dr-axis {
+    position: relative;
+    height: 16px;
+  }
+
+  .dr-axis span {
+    position: absolute;
+    transform: translateX(-50%);
+  }
+
+  .dr-axis span:first-child {
+    transform: none;
+  }
+
+  .dr-axis span:last-child {
+    transform: translateX(-100%);
+  }
+
+  .dr-name {
+    font-size: 15px;
+  }
+
+  .dr-row.focus .dr-name {
+    font-weight: 600;
+  }
+
+  .dr-track {
+    position: relative;
+    height: 22px;
+    background: var(--surface-muted);
+    border-radius: 4px;
+  }
+
+  .dr-track .grid {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid rgb(11 10 31 / 0.08);
+  }
+
+  .dr-track .bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 4px;
+    background: #858395;
+  }
+
+  .dr-row.focus .bar {
+    background: #145a93;
+  }
+
+  .dr-track .req-dot {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: var(--ink);
+    box-shadow: 0 0 0 2px #fff;
+  }
+
+  .dr-v {
+    font: 500 14px/1 var(--mono);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dr-v.strong {
+    font-weight: 700;
+  }
+
+  .dr-row.focus .dr-v.strong {
+    color: #145a93;
+  }
+
+  .dr-v.muted {
+    color: var(--ink-3);
+  }
+
+  .nm-short {
+    display: none;
+  }
+
+  /* Below 960px each track runs the full width under its name and values; the header keeps
+     its column labels over the values and its axis over the tracks. */
+  @media (max-width: 959px) {
+    .dr-head,
+    .dr-row {
+      grid-template-columns: minmax(0, 1fr) 4.5rem 4.5rem 4rem;
+      row-gap: 6px;
+    }
+
+    :is(.dr-head, .dr-row) > :nth-child(1) {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    :is(.dr-head, .dr-row) > :nth-child(2) {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    :is(.dr-head, .dr-row) > :nth-child(3) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    :is(.dr-head, .dr-row) > :nth-child(4) {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+    :is(.dr-head, .dr-row) > :nth-child(5) {
+      grid-column: 4;
+      grid-row: 1;
+    }
+  }
+
+  /* ---------- 02: lollipops by exposure group ---------- */
+  .lp {
+    display: grid;
+    gap: 18px;
+  }
+
+  .lp-group {
+    display: grid;
+    gap: 8px;
+  }
+
+  .lp-head {
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .lp-head:lang(zh) {
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .lp-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr) 4.5rem;
+    column-gap: 16px;
+    align-items: center;
+  }
+
+  .lp-name {
+    font-size: 15px;
+  }
+
+  .lp-row.focus .lp-name {
+    font-weight: 600;
+  }
+
+  .lp-track {
+    position: relative;
+    height: 20px;
+  }
+
+  .lp-track::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid rgb(11 10 31 / 0.1);
+  }
+
+  .lp-track .stem {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    background: #858395;
+  }
+
+  .lp-track .pt {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: #858395;
+  }
+
+  .lp-row.focus .stem,
+  .lp-row.focus .pt {
+    background: #145a93;
+  }
+
+  /* The reference is one element per chart, laid on a grid with the rows' own columns, so it
+     runs unbroken through rows and group heads with one dash phase. Under the lollipops it
+     sits beneath the marks; over the bars of 05 it sits on top. Phones draw a segment per row. */
+  .lp,
+  .rb {
+    position: relative;
+  }
+
+  .ref-layer {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr) 4.5rem;
+    column-gap: 16px;
+    pointer-events: none;
+  }
+
+  .rb .ref-layer {
+    grid-template-columns: minmax(10rem, 17rem) minmax(0, 1fr) minmax(9rem, 12rem);
+  }
+
+  .ref-layer.over {
+    z-index: 1;
+  }
+
+  .ref-layer > span {
+    grid-column: 2;
+    position: relative;
+  }
+
+  .ref {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    margin-left: -0.75px;
+    background: repeating-linear-gradient(to bottom, var(--ink-2) 0 4px, transparent 4px 8px);
+  }
+
+  .lp-track .ref,
+  .rb-track .ref {
+    display: none;
+    top: -6px;
+    bottom: -6px;
+  }
+
+  .lp-v {
+    font: 600 14px/1 var(--mono);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lp-row.focus .lp-v {
+    color: #145a93;
+  }
+
+  .lp-scale .lp-track::before {
+    display: none;
+  }
+
+  .lp-scale .lp-track span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .lp-scale .lp-track span:first-child {
+    transform: none;
+  }
+
+  .lp-scale .lp-track span:last-child {
+    transform: translateX(-100%);
+  }
+
+  /* ---------- 03: agreement, 100% stacked ---------- */
+  .sk {
+    display: grid;
+    gap: 10px;
+  }
+
+  .sk-head,
+  .sk-row {
+    display: grid;
+    grid-template-columns: minmax(8rem, 15rem) minmax(0, 1fr) 5rem;
+    column-gap: 16px;
+    align-items: center;
+  }
+
+  .sk-head {
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .sk-head span:last-child {
+    text-align: right;
+  }
+
+  .sk-name {
+    font-size: 15px;
+  }
+
+  .sk-row.focus .sk-name {
+    font-weight: 600;
+  }
+
+  .sk-bar {
+    display: flex;
+    gap: 2px;
+    height: 22px;
+  }
+
+  .sk-bar span {
+    flex-basis: 0;
+    min-width: 0;
+  }
+
+  .sk-bar span:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+
+  .sk-bar span:last-child {
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* Agreement is grey (entry) and pale (neither); the two disagreements carry the colors of
+     their measures elsewhere: ink for the requirement (figure 01's dot), blue for the label. */
+  .sk-bar .s1 {
+    background: #858395;
+  }
+
+  .sk-bar .s2 {
+    background: #3f3d56;
+  }
+
+  .sk-bar .s3 {
+    background: #5a8abf;
+  }
+
+  .sk-bar .s4 {
+    background: #e4e3ec;
+  }
+
+  .sk-v {
+    font: 500 14px/1 var(--mono);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sk-row.focus .sk-v {
+    font-weight: 700;
+  }
+
+  /* ---------- 05: the widest doors without their special cases ---------- */
+  .rb {
+    display: grid;
+    gap: 22px;
+  }
+
+  .rb-group {
+    display: grid;
+    gap: 10px;
+  }
+
+  .rb-head {
+    font: 600 15px/1.3 var(--sans);
+  }
+
+  .rb-head span {
+    margin-left: 8px;
+    font: 12px/1 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .rb-row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 17rem) minmax(0, 1fr) minmax(9rem, 12rem);
+    column-gap: 16px;
+    align-items: center;
+  }
+
+  .rb-name {
+    display: grid;
+    gap: 2px;
+    font-size: 15px;
+  }
+
+  .rb-row.focus .rb-name {
+    font-weight: 600;
+  }
+
+  .rb-n {
+    font: 400 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .rb-track {
+    position: relative;
+    height: 22px;
+    background: var(--surface-muted);
+    border-radius: 4px;
+  }
+
+  .rb-track .bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 4px;
+    background: #858395;
+  }
+
+  .rb-row.focus .bar {
+    background: #145a93;
+  }
+
+  .rb-track .ref {
+    z-index: 1;
+  }
+
+  .rb-v {
+    display: grid;
+    gap: 2px;
+    text-align: right;
+  }
+
+  .rb-v strong {
+    font: 700 15px/1.1 var(--mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rb-row.focus .rb-v strong {
+    color: #145a93;
+  }
+
+  .rb-v span {
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  /* ---------- phones: name and values on one line, the track under them ---------- */
+  @media (max-width: 719px) {
+    .dr-head,
+    .dr-row {
+      grid-template-columns: minmax(0, 1fr) 3.25rem 3.25rem 2.75rem;
+      column-gap: 10px;
+    }
+
+    .dr-v {
+      font-size: 13px;
+    }
+
+    .nm-long {
+      display: none;
+    }
+
+    .nm-short {
+      display: inline;
+    }
+
+    /* each row draws its own reference segment here: one line through the names would cross them */
+    .ref-layer {
+      display: none;
+    }
+
+    .lp-track .ref,
+    .rb-track .ref {
+      display: block;
+    }
+
+    .lp-row,
+    .sk-head,
+    .sk-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      row-gap: 6px;
+    }
+
+    .lp-track,
+    .sk-bar {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .lp-scale > span:first-child,
+    .lp-scale > span:last-child,
+    .sk-head > span:nth-child(2) {
+      display: none;
+    }
+
+    .rb-row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      row-gap: 6px;
+    }
+
+    .rb-track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
+</style>
