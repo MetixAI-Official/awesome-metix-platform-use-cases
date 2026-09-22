@@ -118,11 +118,11 @@ const rows = order.map((r) => ({
           slot="notes"
           lang={lang}
           shows={zh
-            ? `全球标题写明推理或模型部署的在招岗位有 ${inf.count} 个，是预训练（${preT.count} 个）的 ${number(lang, ratio, 1)} 倍。后训练有 ${postT.count} 个，微调 ${fineT.count} 个。按标题看，招人的重心在把模型跑起来，而不是把模型训出来。各阶段在美国的比例不同。${labels[mostUs.group].zh}最集中，${mostUs.us_count} 个在美国，占 ${pct(mostUs.us_count / mostUs.count)}；预训练只有 ${pct(preT.us_count / preT.count)}。`
-            : `Worldwide, ${inf.count} open postings name inference or model serving in the title, ${number(lang, ratio, 1)} times the ${preT.count} that name pre-training. Post-training has ${postT.count} and fine-tuning ${fineT.count}. By job title, the hiring is about running models, not training them. The stages differ in where they hire. ${labels[mostUs.group].en} is the most concentrated in the US, with ${mostUs.us_count} postings there, ${pct(mostUs.us_count / mostUs.count)}; pre-training has ${pct(preT.us_count / preT.count)}.`}
+            ? [`全球标题写明推理或模型部署的在招岗位有 ${inf.count} 个，是预训练（${preT.count} 个）的 ${number(lang, ratio, 1)} 倍。后训练有 ${postT.count} 个，微调 ${fineT.count} 个。按标题看，招人的重心在把模型跑起来，而不是把模型训出来。`, `各阶段在美国的比例不同。${labels[mostUs.group].zh}最集中，${mostUs.us_count} 个在美国，占 ${pct(mostUs.us_count / mostUs.count)}；预训练只有 ${pct(preT.us_count / preT.count)}。`]
+            : [`Worldwide, ${inf.count} open postings name inference or model serving in the title, ${number(lang, ratio, 1)} times the ${preT.count} that name pre-training. Post-training has ${postT.count} and fine-tuning ${fineT.count}. By job title, the hiring is about running models, not training them.`, `The stages differ in where they hire. ${labels[mostUs.group].en} is the most concentrated in the US, with ${mostUs.us_count} postings there, ${pct(mostUs.us_count / mostUs.count)}; pre-training has ${pct(preT.us_count / preT.count)}.`]}
           method={zh
-            ? `这些数字只看标题。前沿实验室的很多人挂的是 "Member of Technical Staff" 这类通用头衔，不会被算进来，所以每一项都是下限，比较的是招聘标题怎么写，不是团队规模。`
-            : `These counts read titles only. Many people at frontier labs hold generic titles such as "Member of Technical Staff", which none of these filters match, so every number is a lower bound. The comparison is about how postings are titled, not about the size of teams.`}
+            ? [`这些数字只看标题。前沿实验室的很多人挂的是 "Member of Technical Staff" 这类通用头衔，不会被算进来，所以每一项都是下限，比较的是招聘标题怎么写，不是团队规模。`]
+            : [`These counts read titles only. Many people at frontier labs hold generic titles such as "Member of Technical Staff", which none of these filters match, so every number is a lower bound. The comparison is about how postings are titled, not about the size of teams.`]}
         />
       </Figure>
     </div>

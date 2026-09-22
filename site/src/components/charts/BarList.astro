@@ -26,6 +26,7 @@ const { rows, label } = Astro.props;
 const pct = (w: number) => `${Math.max(0, Math.min(1, w)) * 100}%`;
 ---
 
+<div class="bl-box">
 <ol class="bl" aria-label={label}>
   {
     rows.map((r) => (
@@ -43,3 +44,4 @@ const pct = (w: number) => `${Math.max(0, Math.min(1, w)) * 100}%`;
     ))
   }
 </ol>
+</div>

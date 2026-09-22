@@ -477,7 +477,7 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
               </div>
             ))}
           </div>
-          <p class="legend" aria-hidden="true">
+          <p class="legend" slot="legend" aria-hidden="true">
             <span class="lg open">{zh ? "当前工作开始得更早" : "Current job started earlier"}</span>
             <span class="lg filled">{zh ? "当前工作开始于最近 24 个月" : "Current job started in the last 24 months"}</span>
           </p>
@@ -549,7 +549,7 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
               </div>
             ))}
           </div>
-          <p class="legend" aria-hidden="true">
+          <p class="legend" slot="legend" aria-hidden="true">
             <span class="lg open">{zh ? "其他 AI 职位" : "Other AI titles"}</span>
             <span class="lg filled">{zh ? "scientist 或 researcher" : "Scientist or researcher"}</span>
           </p>
@@ -615,7 +615,7 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
               <span class="inst-n">{number(lang, elsewhereAtLeast)}</span>
             </li>
           </ol>
-          <p class="legend" aria-hidden="true">
+          <p class="legend" slot="legend" aria-hidden="true">
             <span class="lg strict">{zh ? "严格计数" : "Strict count"}</span>
           </p>
                 <FigNotes

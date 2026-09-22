@@ -1,10 +1,11 @@
 ---
 /*
  * A report chapter: the site's split header (title on the left, note on the right, one rule
- * under the full column), with a mono kicker naming the part and its figures. Figures inside
- * a chapter pass level={3} so the outline reads chapter, then figure.
+ * under the full column), opened by a large numeral in the accent with the chapter's figures
+ * beside it. The title comes first in the DOM so heading navigation lands on it; CSS puts the
+ * numeral row above. Figures inside a chapter pass level={3}.
  */
-import { chapterKicker, type Lang } from "@site/i18n";
+import { chapterFigures, type Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
@@ -19,7 +20,11 @@ const { lang, id, part, title, note, figures } = Astro.props;
 ---
 
 <header class="shelf-head chapter" id={id}>
-  <p class="ch-kicker">{chapterKicker(lang, part, figures)}</p>
   <h2>{title}</h2>
-  <p>{note}</p>
+  <p class="ch-kicker">
+    <span class="ch-num" aria-hidden="true">{part}</span>
+    <span class="visually-hidden">{lang === "zh" ? `第 ${part} 部分，` : `Part ${part}, `}</span>
+    <span>{chapterFigures(lang, figures)}</span>
+  </p>
+  <p class="ch-note">{note}</p>
 </header>

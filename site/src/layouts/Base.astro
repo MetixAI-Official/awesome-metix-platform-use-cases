@@ -1,5 +1,7 @@
 ---
 import "@fontsource-variable/sora";
+// The display face sets the fitted wordmark and every title; preloaded so they render at their measured width on first paint.
+import soraLatin from "@fontsource-variable/sora/files/sora-latin-wght-normal.woff2?url";
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 import "@site/styles/shell.css";
@@ -23,6 +25,7 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
 <html lang={t.htmlLang} class="no-js">
   <head>
     <meta charset="utf-8" />
+    <link rel="preload" href={soraLatin} as="font" type="font/woff2" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description ?? t.siteDescription} />

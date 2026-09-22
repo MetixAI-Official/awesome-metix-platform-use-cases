@@ -13,9 +13,9 @@ const CJK = /[\u3400-\u9fff\uf900-\ufaff\u3000-\u303f\uff00-\uffef]/;
 const CLOSING = /^[，。、：；！？）」』》％…]/;
 const OPENING = /[（「『《]$/;
 /** Chinese words ICU segments wrongly in these titles; add a term when a title needs it. */
-const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名"];
+const PROTECTED = ["清华大学", "北京大学", "浙江大学", "上海交通大学", "中国科学技术大学", "旧金山湾区", "湾区", "工程师", "编程", "薪资", "起薪", "预训练", "后训练", "写明", "本科", "中国大陆", "研究员", "个人档案", "前线部署", "以上", "以下", "职位名称", "点名", "留给新人", "客户服务", "注册护士", "暴露度", "五分之一", "软件工程", "职业族"];
 /** A line never starts with these particles; they belong to the word before. */
-const NO_BREAK_BEFORE = /^[的地得了着过吗呢吧]/;
+const NO_BREAK_BEFORE = /^[的地得了着过吗呢吧里]/;
 /** 被 and 把 bind to the verb that follows. */
 const NO_BREAK_AFTER = /[被把]$/;
 /** Measure words: a number, its classifier, and the noun after it stay on one line. */
@@ -354,7 +354,7 @@ export const ui = {
       ctaStart: "跑你的第一个案例",
       ctaBrowse: "浏览全部案例",
       statCases: "个已发布案例",
-      statCheapest: "Credits，交给 agent 跑最便宜的一个",
+      statCheapest: "Credits，最便宜的案例交给\u00a0agent\u00a0跑",
       statFree: "Credits，新账户赠送",
       featured: "精选",
       featuredNote: "最新的一份报告和三张卡片。全部案例都在下面的索引里。",
@@ -487,9 +487,9 @@ export const ui = {
 
 export type UI = (typeof ui)[Lang];
 
-/** "Part 2 · Figures 04 and 05" / "第 2 部分 · 图 04、05": the kicker of a report chapter. */
-export function chapterKicker(lang: Lang, part: number, figures: string[]): string {
-  if (lang === "zh") return `第 ${part} 部分 · 图 ${figures.join("、")}`;
+/** "Figures 04 and 05" / "图 04、05": the figures a report chapter holds. */
+export function chapterFigures(lang: Lang, figures: string[]): string {
+  if (lang === "zh") return `图 ${figures.join("、")}`;
   const list = figures.length === 1 ? figures[0] : figures.length === 2 ? figures.join(" and ") : `${figures[0]} to ${figures[figures.length - 1]}`;
-  return `Part ${part} · ${figures.length === 1 ? "Figure" : "Figures"} ${list}`;
+  return `${figures.length === 1 ? "Figure" : "Figures"} ${list}`;
 }

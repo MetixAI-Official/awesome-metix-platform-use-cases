@@ -443,6 +443,12 @@ main:focus {
   border-left: 1px solid var(--line);
 }
 
+/* the first stat's numeral starts on the halfway line itself */
+.mast-stats div:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+
 .mast-stats dt {
   font: 600 clamp(28px, 3vw, 40px) / 1 var(--display);
   letter-spacing: -0.03em;
@@ -479,11 +485,6 @@ main:focus {
     margin-top: 36px;
     padding-top: 20px;
     border-top: 1px solid var(--line);
-  }
-
-  .mast-stats div:first-child {
-    padding-left: 0;
-    border-left: 0;
   }
 }
 
@@ -551,7 +552,7 @@ main:focus {
   color: var(--ink-2);
 }
 
-@media (max-width: 859px) {
+@media (max-width: 959px) {
   .shelf-head {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -1940,12 +1941,18 @@ details.query[open]::details-content {
   }
 }
 
-/* Report chapters: the split header with a kicker across both halves. A chapter opens with
-   more room above than any figure, and its first figure follows the header's own margin. */
+/* Report chapters: the split header, opened by a row with a large numeral in the accent and
+   the chapter's figures beside it on the numeral's baseline. The title is first in the DOM;
+   the grid places the numeral row above it. A chapter opens with more room above than any
+   figure, and its first figure follows the header's own margin. */
 .chapter .ch-kicker {
+  grid-row: 1;
   grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
   max-width: none;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font: 500 12px/1.4 var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1958,21 +1965,47 @@ details.query[open]::details-content {
   text-transform: none;
 }
 
+.ch-num {
+  font: 700 clamp(56px, 6vw, 88px) / 0.85 var(--display);
+  letter-spacing: -0.05em;
+  color: var(--accent-ink);
+}
+
+.chapter h2 {
+  grid-row: 2;
+  grid-column: 1;
+}
+
+.chapter .ch-note {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+@media (max-width: 959px) {
+  .chapter .ch-note {
+    grid-row: 3;
+    grid-column: 1;
+  }
+}
+
 .report-body > .chapter {
   margin-top: clamp(64px, 8vw, 112px);
   margin-bottom: 0;
-  scroll-margin-top: 88px;
 }
 
 .report-body > .chapter + .fig {
   margin-top: 32px;
 }
 
-/* Contents: the report's parts as one strip across the column, under a heavy rule, each part
-   a link separated by hairlines. Stacks on phones. */
+/* Contents: the report's parts as one strip across the column under a heavy rule. The
+   columns use the split gap, so with four parts the third starts on the halfway line; the
+   hairlines sit in the gaps. Four across from 1100px, two by two from 600px, a list below.
+   Hover draws the accent bar over the rule above that part only; nothing moves. */
 .contents ol {
+  --ct-cols: 4;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  grid-template-columns: repeat(var(--ct-cols), minmax(0, 1fr));
+  column-gap: var(--split-gap);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1980,15 +2013,19 @@ details.query[open]::details-content {
   border-bottom: 1px solid var(--line);
 }
 
-.contents li + li {
-  border-left: 1px solid var(--line);
-}
-
 .contents li {
   position: relative;
 }
 
-/* Hover marks the part with a bar over the heavy rule; nothing moves. */
+.contents li:not(:nth-child(4n + 1))::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 18px;
+  left: calc(var(--split-gap) / -2);
+  border-left: 1px solid var(--line);
+}
+
 .contents li::before {
   content: "";
   position: absolute;
@@ -2008,26 +2045,19 @@ details.query[open]::details-content {
 .contents a {
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 6px;
   height: 100%;
-  padding: 16px 20px 20px;
+  padding: 16px 0 20px;
   color: var(--ink);
   text-decoration: none;
 }
 
-.contents li:first-child a {
-  padding-left: 0;
-}
-
-.contents a:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: -2px;
-}
-
 .ct-part {
+  order: -1;
   font: 500 12px/1.4 var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--ink-3);
 }
 
@@ -2043,25 +2073,114 @@ details.query[open]::details-content {
   text-wrap: balance;
 }
 
+.contents a:focus-visible {
+  outline-offset: -2px;
+}
+
 .contents a:hover .ct-title {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
 
+@media (max-width: 1099px) {
+  .contents ol {
+    --ct-cols: 2;
+  }
+
+  .contents li:not(:nth-child(4n + 1))::after {
+    content: none;
+  }
+
+  .contents li:nth-child(even)::after {
+    content: "";
+  }
+
+  /* the second row starts under a hairline, not the heavy rule */
+  .contents li:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
+}
+
 @media (max-width: 599px) {
+  .contents ol {
+    --ct-cols: 1;
+  }
+
+  .contents li::after,
+  .contents li:nth-child(even)::after {
+    content: none;
+  }
+
   .contents li + li {
-    border-left: 0;
     border-top: 1px solid var(--line);
   }
 
-  .contents a,
-  .contents li:first-child a {
+  .contents a {
     padding: 14px 0;
   }
 
   .contents li::before {
     display: none;
+  }
+}
+
+/* A figure's legend sits in the right half of its header, on the halfway line, its last line
+   on the subtitle's last baseline, so the header runs edge to edge and the key is read before
+   the chart. */
+.fig.has-legend > figcaption {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--split-gap);
+  align-items: last baseline;
+}
+
+.fig-legend > * {
+  margin-top: 0;
+}
+
+/* layout="side": the chart and its notes side by side on the halfway line; the notes stack
+   their two parts. Below 960px the figure returns to the usual order. */
+.fig.side {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--split-gap);
+}
+
+.fig.side > figcaption,
+.fig.side > .fig-foot {
+  grid-column: 1 / -1;
+}
+
+.fig.side > .fig-notes {
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  margin-top: 26px;
+  padding-top: 0;
+  border-top: 0;
+}
+
+@media (max-width: 959px) {
+  .fig.has-legend > figcaption {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 14px;
+  }
+
+  .fig.side {
+    display: block;
+  }
+
+  .fig.side > .fig-notes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 30px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 719px) {
+  .fig.side > .fig-notes {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -2097,6 +2216,10 @@ details.query[open]::details-content {
   font-size: 15px;
   line-height: 24px;
   color: var(--ink-2);
+}
+
+.fn-text p + p {
+  margin-top: 10px;
 }
 
 @media (max-width: 719px) {
@@ -2272,7 +2395,13 @@ details.query[open]::details-content {
   font-weight: 600;
 }
 
-@media (max-width: 640px) {
+/* The list answers to its own width, not the page's, so a half-width figure or a phone both
+   get the stacked form: label on its own line, then the track and the value. */
+.bl-box {
+  container-type: inline-size;
+}
+
+@container (max-width: 560px) {
   .bl {
     grid-template-columns: minmax(0, 1fr) auto;
     row-gap: 4px;
@@ -2320,7 +2449,7 @@ details.query[open]::details-content {
 
 /* Chinese display titles break at spaces and punctuation first, anywhere only when
    a phrase cannot fit; CJK lines need more leading than Latin display type. */
-:is(.cf-title, .report-band h3, .pl-title, .card-hero h1, .report-hero h1, .fig-title, .figure h2, .ci-title, .pg-title):lang(zh) {
+:is(.cf-title, .report-band h3, .pl-title, .card-hero h1, .report-hero h1, .ed-hero h1, .ed-wall-title, .fig-title, .figure h2, .ci-title, .pg-title):lang(zh) {
   word-break: keep-all;
   overflow-wrap: anywhere;
   line-height: 1.25;
@@ -2329,6 +2458,11 @@ details.query[open]::details-content {
 
 .mast-stats dd:lang(zh) {
   word-break: keep-all;
+}
+
+.fig-sub:lang(zh) {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- run it ---------- */

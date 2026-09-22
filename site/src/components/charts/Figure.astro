@@ -1,6 +1,11 @@
 ---
-/* A chart with its finding as the heading, a text alternative, its notes (the "notes" slot,
-   FigNotes), a source line, and its queries. */
+/*
+ * A chart with its finding as the heading, a text alternative, its notes (the "notes" slot,
+ * FigNotes), a source line, and its queries. A figure's legend goes in the "legend" slot: it
+ * sits in the right half of the header, on the halfway line, beside the title it explains.
+ * layout="side" sets the chart and its notes side by side, split on the halfway line, for a
+ * chart that reads well at half width.
+ */
 import QueryDetails, { type QueryItem } from "@site/components/QueryDetails.astro";
 import { titleHtml, type Lang } from "@site/i18n";
 
@@ -16,23 +21,41 @@ interface Props {
   number?: string;
   /** 3 inside a report chapter, so the outline reads chapter, then figure. */
   level?: 2 | 3;
+  layout?: "stack" | "side";
 }
 
-const { id, lang, heading, sub, alt, source, queries, cost, number, level = 2 } = Astro.props;
+const { id, lang, heading, sub, alt, source, queries, number, level = 2, layout = "stack" } = Astro.props;
 const Heading = level === 3 ? "h3" : "h2";
+const hasLegend = Astro.slots.has("legend");
+const escapeText = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const sourceHtml = escapeText(source).replace(/\b(\d{4}-\d{2}-\d{2})\b/g, '<span class="nowrap">$1</span>');
 ---
 
-<figure class="fig" id={id} aria-labelledby={`${id}-title`} aria-describedby={`${id}-alt`}>
+<figure
+  class:list={["fig", { side: layout === "side", "has-legend": hasLegend }]}
+  id={id}
+  aria-labelledby={`${id}-title`}
+  aria-describedby={`${id}-alt`}
+>
   <figcaption>
-    {number && <p class="fig-number">{number}</p>}
-    <Heading class="fig-title" id={`${id}-title`} set:html={titleHtml(heading, lang)} />
-    {sub && <p class="fig-sub">{sub}</p>}
+    <div class="fig-head">
+      {number && <p class="fig-number">{number}</p>}
+      <Heading class="fig-title" id={`${id}-title`} set:html={titleHtml(heading, lang)} />
+      {sub && (lang === "zh" ? <p class="fig-sub" set:html={titleHtml(sub, lang)} /> : <p class="fig-sub">{sub}</p>)}
+    </div>
+    {
+      hasLegend && (
+        <div class="fig-legend">
+          <slot name="legend" />
+        </div>
+      )
+    }
     <p class="visually-hidden" id={`${id}-alt`}>{alt}</p>
   </figcaption>
   <div class="fig-chart"><slot /></div>
   <slot name="notes" />
   <div class="fig-foot">
-    <p class="fig-source">{source}</p>
+    <p class="fig-source" set:html={sourceHtml} />
     {queries && <QueryDetails lang={lang} items={queries} />}
   </div>
 </figure>

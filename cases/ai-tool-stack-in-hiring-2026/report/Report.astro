@@ -100,7 +100,7 @@ const parts = [
   {
     id: "part-supply",
     figures: ["01", "02", "03"],
-    title: zh ? "岗位对档案" : "Postings against profiles",
+    title: zh ? "岗位与档案对比" : "Postings against profiles",
     note: zh
       ? "每个工具的在招岗位数和把它列为技能的档案数，全球以及美国内外分开比较。"
       : "Each tool's open postings against the profiles that list it as a skill, worldwide and inside and outside the US.",
@@ -461,7 +461,7 @@ const industryZh: Record<string, string> = {
               </div>
             ))}
           </div>
-          <p class="legend" aria-hidden="true">
+          <p class="legend" slot="legend" aria-hidden="true">
             <span class="lg us">{zh ? "美国" : "US"}</span>
             <span class="lg out">{zh ? "美国以外" : "Outside the US"}</span>
           </p>
@@ -513,6 +513,7 @@ const industryZh: Record<string, string> = {
         <Figure
           id="together"
           level={3}
+          layout="side"
           number="05"
           lang={lang}
           heading={
@@ -629,7 +630,7 @@ const industryZh: Record<string, string> = {
           <div class="ind-groups">
             {(["tech", "beyond"] as const).map((sector) => (
               <div>
-                <h3 class="ind-head">{sector === "tech" ? (zh ? "科技行业" : "Technology") : zh ? "科技以外" : "Beyond technology"}</h3>
+                <h4 class="ind-head">{sector === "tech" ? (zh ? "科技行业" : "Technology") : zh ? "科技以外" : "Beyond technology"}</h4>
                 <BarList
                   label={sector === "tech" ? "Technology" : "Beyond technology"}
                   rows={industries.rows
@@ -652,6 +653,7 @@ const industryZh: Record<string, string> = {
         <Figure
           id="pay"
           level={3}
+          layout="side"
           number="08"
           lang={lang}
           heading={zh ? "点名 AI 编程工具并不会抬高薪资下限" : "Naming an AI coding tool does not raise the posted pay floor"}
@@ -689,7 +691,7 @@ const industryZh: Record<string, string> = {
               );
             })}
           </div>
-          <p class="legend" aria-hidden="true">
+          <p class="legend" slot="legend" aria-hidden="true">
             <span class="lg assistant">{zh ? "提到 AI 编程助手" : "Names an AI coding assistant"}</span>
             <span class="lg baseline">{zh ? "软件工程师标题" : "Software engineer title"}</span>
           </p>
@@ -1272,6 +1274,8 @@ const industryZh: Record<string, string> = {
   }
 
   /* 07: industries */
+  /* One column: the two groups share one scale and one set of edges, and a 3-row group never
+     sits beside a 10-row one. */
   .ind-groups {
     display: grid;
     gap: 28px;
@@ -1289,7 +1293,6 @@ const industryZh: Record<string, string> = {
   .pay {
     display: grid;
     gap: 16px;
-    max-width: 820px;
   }
 
   .pay-row {
@@ -1303,9 +1306,12 @@ const industryZh: Record<string, string> = {
     font-size: 15px;
   }
 
+  /* A full-width track behind each of the two bars shows where the scale ends at 100%. */
   .pay-bars {
     display: grid;
     gap: 4px;
+    background: repeating-linear-gradient(to bottom, var(--surface-muted) 0 22px, transparent 22px 26px);
+    border-radius: 4px;
   }
 
   .pay-bar {

@@ -168,11 +168,11 @@ const altText = zh
         <FigNotes
           lang={lang}
           shows={zh
-            ? `美国标题含 inference 或 model serving 的去重岗位共 ${number(lang, distinct)} 个，旧金山湾区占 ${bay.count} 个，即 ${pct(bay.share)}。纽约（${ny.count} 个）和西雅图（${sea.count} 个）合计再占 ${pct(nextTwo, 0)}，其余都市区都不到 ${pct(largestSmall, 0)}。共有 ${companyCount} 家公司在招这类岗位，前五家占了 ${topSum} 个，约三分之一：${companyList}。名单里有一家芯片公司、两家云服务商、一家模型公司和一家银行。`
-            : `The San Francisco Bay Area holds ${bay.count} of the ${number(lang, distinct)} distinct US postings with inference or model serving in the title, ${pct(bay.share)}. New York (${ny.count}) and Seattle (${sea.count}) together hold another ${pct(nextTwo, 0)}. No other metro reaches ${pct(largestSmall, 0)}. ${companyCount} companies posted these roles, and five of them account for ${topSum}, about a third: ${companyList}. The list mixes a chip maker, two cloud providers, a model lab, and a bank.`}
+            ? [`美国标题含 inference 或 model serving 的去重岗位共 ${number(lang, distinct)} 个，旧金山湾区占 ${bay.count} 个，即 ${pct(bay.share)}。纽约（${ny.count} 个）和西雅图（${sea.count} 个）合计再占 ${pct(nextTwo, 0)}，其余都市区都不到 ${pct(largestSmall, 0)}。`, `共有 ${companyCount} 家公司在招这类岗位，前五家占了 ${topSum} 个，约三分之一：${companyList}。名单里有一家芯片公司、两家云服务商、一家模型公司和一家银行。`]
+            : [`The San Francisco Bay Area holds ${bay.count} of the ${number(lang, distinct)} distinct US postings with inference or model serving in the title, ${pct(bay.share)}. New York (${ny.count}) and Seattle (${sea.count}) together hold another ${pct(nextTwo, 0)}. No other metro reaches ${pct(largestSmall, 0)}.`, `${companyCount} companies posted these roles, and five of them account for ${topSum}, about a third: ${companyList}. The list mixes a chip maker, two cloud providers, a model lab, and a bank.`]}
           method={zh
-            ? `这个 ${pct(bay.share)} 是下限：分母里包含 ${noCity.count} 个未注明城市的岗位。只看写了城市的 ${number(lang, withCity)} 个岗位，湾区的占比是 ${pct(bay.count / withCity)}。放到全球看，Platform 上符合同一标题条件的在招岗位共 ${number(lang, world)} 个，其中 ${number(lang, usPostings)} 个在美国，约占 ${pct(usPostings / world, 0)}。这两个数都是去重前的数字，所以要和读取的 ${number(lang, read)} 个美国岗位比，而不是和去重后的 ${number(lang, distinct)} 个比。`
-            : `That ${pct(bay.share)} is a lower bound: the ${noCity.count} postings that name no city are in the denominator. Among the ${number(lang, withCity)} postings that do name a city, the Bay Area's share is ${pct(bay.count / withCity)}. Worldwide, the Platform lists ${number(lang, world)} open postings that match the same title filter, and ${number(lang, usPostings)} of them, about ${pct(usPostings / world, 0)}, are in the United States. Both counts are before reposts are collapsed, so they compare with the ${number(lang, read)} US postings read, not with the ${number(lang, distinct)} distinct ones.`}
+            ? [`这个 ${pct(bay.share)} 是下限：分母里包含 ${noCity.count} 个未注明城市的岗位。只看写了城市的 ${number(lang, withCity)} 个岗位，湾区的占比是 ${pct(bay.count / withCity)}。`, `放到全球看，Platform 上符合同一标题条件的在招岗位共 ${number(lang, world)} 个，其中 ${number(lang, usPostings)} 个在美国，约占 ${pct(usPostings / world, 0)}。这两个数都是去重前的数字，所以要和读取的 ${number(lang, read)} 个美国岗位比，而不是和去重后的 ${number(lang, distinct)} 个比。`]
+            : [`That ${pct(bay.share)} is a lower bound: the ${noCity.count} postings that name no city are in the denominator. Among the ${number(lang, withCity)} postings that do name a city, the Bay Area's share is ${pct(bay.count / withCity)}.`, `Worldwide, the Platform lists ${number(lang, world)} open postings that match the same title filter, and ${number(lang, usPostings)} of them, about ${pct(usPostings / world, 0)}, are in the United States. Both counts are before reposts are collapsed, so they compare with the ${number(lang, read)} US postings read, not with the ${number(lang, distinct)} distinct ones.`]}
         />
         <div class="figure-foot">
           <p class="source">
@@ -282,8 +282,8 @@ const altText = zh
     margin: 0;
     padding: clamp(20px, 3vw, 36px);
     background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: 14px;
+    box-shadow: var(--ring);
   }
 
   .figure h2 {
@@ -408,21 +408,6 @@ const altText = zh
   .source {
     font-size: 13px;
     color: var(--ink-3);
-  }
-
-  .findings {
-    max-width: 880px;
-    padding-top: 48px;
-  }
-
-  .findings h2 {
-    font-size: clamp(22px, 2.4vw, 28px);
-  }
-
-  .findings p {
-    margin-top: 16px;
-    max-width: 72ch;
-    color: var(--ink-2);
   }
 
   @media (max-width: 640px) {

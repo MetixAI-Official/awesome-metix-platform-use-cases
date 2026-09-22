@@ -14,16 +14,20 @@ import type { Lang } from "@site/i18n";
 
 interface Props {
   lang: Lang;
-  shows: string;
-  method: string;
+  /** One string per paragraph. */
+  shows: string | string[];
+  method: string | string[];
 }
 
 const { lang, shows, method } = Astro.props;
 
 const KINDS = new Set(["hl", "line", "dash", "hatch", "open", "filled"]);
 const escape = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// Chinese breaks between any two characters, so a short quoted term ("不适用") is kept whole.
+// This runs on the escaped text, before any markup exists, so it never touches an attribute.
+const keepQuotes = (s: string) => (lang === "zh" ? s.replace(/"([^"<>{}|]{1,12})"/g, '<span class="nowrap">"$1"</span>') : s);
 const render = (s: string) => {
-  const html = escape(s).replace(/\{\{(\w+)\|([^{}]+)\}\}/g, (_, kind: string, words: string) => {
+  const html = keepQuotes(escape(s)).replace(/\{\{(\w+)\|([^{}]+)\}\}/g, (_, kind: string, words: string) => {
     if (!KINDS.has(kind)) throw new Error(`FigNotes: unknown key kind "${kind}"`);
     return `<span class="k k-${kind}">${words}</span>`;
   });
@@ -31,9 +35,10 @@ const render = (s: string) => {
   return html;
 };
 
+const paras = (v: string | string[]) => (Array.isArray(v) ? v : [v]).map(render);
 const parts = [
-  { label: lang === "zh" ? "图中所见" : "What it shows", html: render(shows) },
-  { label: lang === "zh" ? "方法与局限" : "Method and limits", html: render(method) },
+  { label: lang === "zh" ? "图中所见" : "What it shows", paras: paras(shows) },
+  { label: lang === "zh" ? "方法与局限" : "Method and limits", paras: paras(method) },
 ];
 ---
 
@@ -42,7 +47,11 @@ const parts = [
     parts.map((p) => (
       <div class="fn-part">
         <p class="fn-label">{p.label}</p>
-        <p class="fn-text" set:html={p.html} />
+        <div class="fn-text">
+          {p.paras.map((html) => (
+            <p set:html={html} />
+          ))}
+        </div>
       </div>
     ))
   }

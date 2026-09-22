@@ -4,7 +4,7 @@
  * is a link with its number, title, and figures, so a reader can see the report's shape and
  * jump to a part. It stacks on phones.
  */
-import { chapterKicker, type Lang } from "@site/i18n";
+import type { Lang } from "@site/i18n";
 
 export interface Part {
   id: string;
@@ -26,8 +26,8 @@ const { lang, parts } = Astro.props;
       parts.map((p, i) => (
         <li>
           <a href={`#${p.id}`}>
-            <span class="ct-part">{chapterKicker(lang, i + 1, p.figures)}</span>
             <span class="ct-title">{p.title}</span>
+            <span class="ct-part">{lang === "zh" ? `第 ${i + 1} 部分` : `Part ${i + 1}`}</span>
           </a>
         </li>
       ))

@@ -118,11 +118,11 @@ const lowestUs = byUs[byUs.length - 1];
           slot="notes"
           lang={lang}
           shows={zh
-            ? `全球有 ${number(lang, any)} 个在招岗位的职位描述至少提到五个 AI 编程工具之一，其中 ${number(lang, lead.count)} 个提到 Claude Code，占 ${pct(lead.count / any)}。各工具在美国的占比不同：Claude Code 是 ${pct(lead.us_count / lead.count)}，${names[lowestUs.group]} 只有 ${pct(lowestUs.us_count / lowestUs.count)}。美国以外的招聘方同样在点名这些工具。`
-            : `Worldwide, ${number(lang, any)} open postings name at least one of five AI coding tools in the job description, and ${number(lang, lead.count)} of them name Claude Code, ${pct(lead.count / any)}. The tools differ in where they are asked for: ${pct(lead.us_count / lead.count)} of the Claude Code postings are in the US, against ${pct(lowestUs.us_count / lowestUs.count)} for ${names[lowestUs.group]}. Employers outside the US name these tools too.`}
+            ? [`全球有 ${number(lang, any)} 个在招岗位的职位描述至少提到五个 AI 编程工具之一，其中 ${number(lang, lead.count)} 个提到 Claude Code，占 ${pct(lead.count / any)}。`, `各工具在美国的占比不同：Claude Code 是 ${pct(lead.us_count / lead.count)}，${names[lowestUs.group]} 只有 ${pct(lowestUs.us_count / lowestUs.count)}。美国以外的招聘方同样在点名这些工具。`]
+            : [`Worldwide, ${number(lang, any)} open postings name at least one of five AI coding tools in the job description, and ${number(lang, lead.count)} of them name Claude Code, ${pct(lead.count / any)}.`, `The tools differ in where they are asked for: ${pct(lead.us_count / lead.count)} of the Claude Code postings are in the US, against ${pct(lowestUs.us_count / lowestUs.count)} for ${names[lowestUs.group]}. Employers outside the US name these tools too.`]}
           method={zh
-            ? `Cursor、Codex 和 Windsurf 这几个词本身有别的意思（数据库游标、食品法典、帆板运动），抽检里只有九成多是指编程工具，所以只在同一段描述里还提到另一个 AI 编程工具时才计入。它们的数字是下限，图里的轮廓是只看这个词时的数量。`
-            : `Cursor, Codex, and Windsurf are also ordinary words (a database cursor, a food standard, a water sport), and in the audit only about nine in ten matches meant the tool. So they count only when the same description names another AI coding tool. Their numbers are lower bounds, and the outline in the chart shows the count for the word alone.`}
+            ? [`Cursor、Codex 和 Windsurf 这几个词本身有别的意思（数据库游标、食品法典、帆板运动），抽检里只有九成多是指编程工具，所以只在同一段描述里还提到另一个 AI 编程工具时才计入。它们的数字是下限，图里的轮廓是只看这个词时的数量。`]
+            : [`Cursor, Codex, and Windsurf are also ordinary words (a database cursor, a food standard, a water sport), and in the audit only about nine in ten matches meant the tool. So they count only when the same description names another AI coding tool. Their numbers are lower bounds, and the outline in the chart shows the count for the word alone.`]}
         />
       </Figure>
     </div>
