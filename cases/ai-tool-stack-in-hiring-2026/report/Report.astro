@@ -9,6 +9,8 @@
  *   so demand and supply for every tool are read on the same scale at a glance.
  */
 import BarList from "@site/components/charts/BarList.astro";
+import Chapter from "@site/components/Chapter.astro";
+import Contents from "@site/components/Contents.astro";
 import FigNotes from "@site/components/charts/FigNotes.astro";
 import Figure from "@site/components/charts/Figure.astro";
 import { REPO, href, isoDate, longDate, number, titleHtml, type Lang } from "@site/i18n";
@@ -92,6 +94,36 @@ const cc = split.find((p) => p.id === "claude-code")!;
 // Figure 01's finding: the two largest tools on either side, and whether they lean opposite ways.
 const biggest = [...ratios].sort((a, b) => Math.max(b.d, b.s) - Math.max(a.d, a.s)).slice(0, 2);
 const opposite = (biggest[0].r - 1) * (biggest[1].r - 1) < 0;
+
+// The report's four parts: the contents strip after In brief and each chapter header.
+const parts = [
+  {
+    id: "part-supply",
+    figures: ["01", "02", "03"],
+    title: zh ? "岗位对档案" : "Postings against profiles",
+    note: zh
+      ? "每个工具的在招岗位数和把它列为技能的档案数，全球以及美国内外分开比较。"
+      : "Each tool's open postings against the profiles that list it as a skill, worldwide and inside and outside the US.",
+  },
+  {
+    id: "part-assistants",
+    figures: ["04", "05"],
+    title: zh ? "AI 编程助手" : "The coding assistants",
+    note: zh ? "雇主点名每个助手的频率，以及哪些助手常被一起点名。" : "How often employers name each assistant, and which ones they name together.",
+  },
+  {
+    id: "part-where",
+    figures: ["06", "07"],
+    title: zh ? "岗位在哪里" : "Where the postings are",
+    note: zh ? "点名 AI 编程助手的岗位分布在哪些国家和行业。" : "The countries and industries of the postings that name an assistant.",
+  },
+  {
+    id: "part-pay",
+    figures: ["08"],
+    title: zh ? "薪资" : "Pay",
+    note: zh ? "在美国，点名 AI 编程助手的岗位写出的薪资下限是否更高。" : "Whether naming an assistant comes with a higher posted pay floor in the US.",
+  },
+];
 
 // Log scale for postings per profile, shared by the ratio charts.
 const LO = 0.25;
@@ -261,8 +293,13 @@ const industryZh: Record<string, string> = {
           </div>
         </section>
 
+        <Contents lang={lang} parts={parts} />
+
+        <Chapter lang={lang} part={1} {...parts[0]} />
+
         <Figure
           id="both-sides"
+          level={3}
           number="01"
           lang={lang}
           heading={
@@ -317,6 +354,7 @@ const industryZh: Record<string, string> = {
 
         <Figure
           id="gap"
+          level={3}
           number="02"
           lang={lang}
           heading={
@@ -370,6 +408,7 @@ const industryZh: Record<string, string> = {
 
         <Figure
           id="us-and-rest"
+          level={3}
           number="03"
           lang={lang}
           heading={
@@ -438,8 +477,11 @@ const industryZh: Record<string, string> = {
         />
         </Figure>
 
+        <Chapter lang={lang} part={2} {...parts[1]} />
+
         <Figure
           id="assistants"
+          level={3}
           number="04"
           lang={lang}
           heading={
@@ -470,6 +512,7 @@ const industryZh: Record<string, string> = {
         </Figure>
         <Figure
           id="together"
+          level={3}
           number="05"
           lang={lang}
           heading={
@@ -530,8 +573,11 @@ const industryZh: Record<string, string> = {
         />
         </Figure>
 
+        <Chapter lang={lang} part={3} {...parts[2]} />
+
         <Figure
           id="countries"
+          level={3}
           number="06"
           lang={lang}
           heading={
@@ -563,6 +609,7 @@ const industryZh: Record<string, string> = {
 
         <Figure
           id="industries"
+          level={3}
           number="07"
           lang={lang}
           heading={
@@ -600,8 +647,11 @@ const industryZh: Record<string, string> = {
           </div>
         </Figure>
 
+        <Chapter lang={lang} part={4} {...parts[3]} />
+
         <Figure
           id="pay"
+          level={3}
           number="08"
           lang={lang}
           heading={zh ? "点名 AI 编程工具并不会抬高薪资下限" : "Naming an AI coding tool does not raise the posted pay floor"}
@@ -1166,7 +1216,6 @@ const industryZh: Record<string, string> = {
   /* 05: co-mentions */
   .cm {
     width: 100%;
-    max-width: 640px;
     table-layout: fixed;
     border-collapse: separate;
     border-spacing: 4px;

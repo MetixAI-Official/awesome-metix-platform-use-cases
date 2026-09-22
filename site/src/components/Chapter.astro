@@ -1,0 +1,25 @@
+---
+/*
+ * A report chapter: the site's split header (title on the left, note on the right, one rule
+ * under the full column), with a mono kicker naming the part and its figures. Figures inside
+ * a chapter pass level={3} so the outline reads chapter, then figure.
+ */
+import { chapterKicker, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  id: string;
+  part: number;
+  title: string;
+  note: string;
+  figures: string[];
+}
+
+const { lang, id, part, title, note, figures } = Astro.props;
+---
+
+<header class="shelf-head chapter" id={id}>
+  <p class="ch-kicker">{chapterKicker(lang, part, figures)}</p>
+  <h2>{title}</h2>
+  <p>{note}</p>
+</header>

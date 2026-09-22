@@ -6,6 +6,7 @@
  * Signature: the 100% strip on the card: the US against every other country, the next three named in text.
  */
 import BarList from "@site/components/charts/BarList.astro";
+import FigNotes from "@site/components/charts/FigNotes.astro";
 import Figure from "@site/components/charts/Figure.astro";
 import { REPO, isoDate, longDate, number, type Lang } from "@site/i18n";
 import countries from "../data/countries.json";
@@ -114,42 +115,17 @@ const nextThree = leaders.map((r) => `${name(r.group)} ${pct(r.share, 0)}`).join
         queries={[{ file: "forward-deployed.json", endpoint: "POST /v1/jobs/query", spec: fde }]}
       >
         <BarList rows={barRows} label={zh ? "各国岗位数" : "Postings by country"} />
+        <FigNotes
+          slot="notes"
+          lang={lang}
+          shows={zh
+            ? `全球标题含 forward deployed 的在招岗位有 ${number(lang, world)} 个，美国 ${number(lang, us.count)} 个，占 ${pct(us.share)}。印度（ ${second.count} 个）排第二，然后是英国和德国。欧洲五国（英国、德国、法国、荷兰、西班牙）合计 ${number(lang, europeCount)} 个，占 ${pct(europeCount / world)}，和列表之外的其他国家和地区（ ${number(lang, rest.count)} 个）差不多。这个头衔还主要是美国的现象。`
+            : `Worldwide, ${number(lang, world)} open postings have "forward deployed" in the title, and ${number(lang, us.count)} of them, ${pct(us.share)}, are in the US. India is second with ${second.count}, then the United Kingdom and Germany. Five European countries (the United Kingdom, Germany, France, the Netherlands, and Spain) have ${number(lang, europeCount)} together, ${pct(europeCount / world)}, about as many as every country outside the list combined (${number(lang, rest.count)}). The title is still mostly an American one.`}
+          method={zh
+            ? `一个岗位挂在多个城市或反复发布，会被计为多个岗位，所以这些数字衡量的是招聘的声量，不是职位数。`
+            : `A role listed in several cities or reposted counts more than once, so these numbers measure how loudly the title is advertised, not how many seats exist.`}
+        />
       </Figure>
-
-      <section class="findings" aria-labelledby="findings-title">
-        <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
-        {zh ? (
-          <>
-            <p>
-              全球标题含 forward deployed 的在招岗位有 {number(lang, world)} 个，美国 {number(lang, us.count)} 个，占 {pct(us.share)}。印度（
-              {second.count} 个）排第二，然后是英国和德国。
-            </p>
-            <p>
-              欧洲五国（英国、德国、法国、荷兰、西班牙）合计 {number(lang, europeCount)} 个，占 {pct(europeCount / world)}，和列表之外的其他国家和地区（
-              {number(lang, rest.count)} 个）差不多。这个头衔还主要是美国的现象。
-            </p>
-            <p>
-              一个岗位挂在多个城市或反复发布，会被计为多个岗位，所以这些数字衡量的是招聘的声量，不是职位数。
-            </p>
-          </>
-        ) : (
-          <>
-            <p>
-              Worldwide, {number(lang, world)} open postings have "forward deployed" in the title, and {number(lang, us.count)} of them,{" "}
-              {pct(us.share)}, are in the US. India is second with {second.count}, then the United Kingdom and Germany.
-            </p>
-            <p>
-              Five European countries (the United Kingdom, Germany, France, the Netherlands, and Spain) have{" "}
-              {number(lang, europeCount)} together, {pct(europeCount / world)}, about as many as every country outside the list
-              combined ({number(lang, rest.count)}). The title is still mostly an American one.
-            </p>
-            <p>
-              A role listed in several cities or reposted counts more than once, so these numbers measure how loudly the title is
-              advertised, not how many seats exist.
-            </p>
-          </>
-        )}
-      </section>
     </div>
   )
 }

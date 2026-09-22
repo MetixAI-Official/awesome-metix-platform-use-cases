@@ -486,3 +486,10 @@ export const ui = {
 } as const;
 
 export type UI = (typeof ui)[Lang];
+
+/** "Part 2 · Figures 04 and 05" / "第 2 部分 · 图 04、05": the kicker of a report chapter. */
+export function chapterKicker(lang: Lang, part: number, figures: string[]): string {
+  if (lang === "zh") return `第 ${part} 部分 · 图 ${figures.join("、")}`;
+  const list = figures.length === 1 ? figures[0] : figures.length === 2 ? figures.join(" and ") : `${figures[0]} to ${figures[figures.length - 1]}`;
+  return `Part ${part} · ${figures.length === 1 ? "Figure" : "Figures"} ${list}`;
+}

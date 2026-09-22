@@ -25,6 +25,8 @@
 
   --page: 1280px;
   --gutter: clamp(16px, 4vw, 48px);
+  /* the gap of every half-and-half split (masthead, section heads), so their halfway lines match */
+  --split-gap: clamp(32px, 4vw, 56px);
   --radius: 14px;
   /* Containers sit on a ring and a soft lift instead of a flat grey border. */
   --ring: 0 0 0 1px rgb(11 10 31 / 0.08), 0 1px 2px -1px rgb(11 10 31 / 0.08), 0 2px 6px 0 rgb(11 10 31 / 0.04);
@@ -390,15 +392,18 @@ main:focus {
 
 /* ---------- masthead ---------- */
 
-/* The wordmark and the three stats share one baseline; the lede and the actions hang on
-   the wordmark's left edge below. On narrow screens the stats move under the actions. */
+/* The wordmark is fitted to the content column, so its ink runs from one edge to the other;
+   the ratio and the optical offset are measured for Sora 700 at this tracking. Under the
+   wordmark's rule the lede (with the actions) and the three stats share one top line, and
+   the stats end on the column's right edge. Narrow screens stack them. */
 .masthead {
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "eyebrow eyebrow" "title stats" "lede ." "actions .";
-  align-items: first baseline;
-  column-gap: 48px;
-  padding-block: clamp(40px, 7vw, 88px) clamp(40px, 5vw, 64px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas: "eyebrow eyebrow" "title title" "lede stats" "actions stats";
+  align-items: start;
+  column-gap: var(--split-gap);
+  padding-block: clamp(40px, 6vw, 72px) clamp(40px, 5vw, 64px);
 }
 
 .masthead > .eyebrow {
@@ -407,24 +412,34 @@ main:focus {
 
 .mast-title {
   grid-area: title;
-  margin-top: 12px;
+  margin-top: 14px;
+  padding-bottom: clamp(18px, 2.4cqi, 30px);
+  border-bottom: 1px solid var(--ink);
   font-family: var(--display);
   font-weight: 700;
-  font-size: clamp(48px, 8vw, 112px);
-  line-height: 0.9;
+  font-size: calc(var(--fit) * 1cqi);
+  line-height: 0.8;
   letter-spacing: -0.06em;
-  margin-left: -0.04em;
+  white-space: nowrap;
+  overflow: clip;
+  overflow-clip-margin: 0.08em;
+  --fit: 20.78;
+}
+
+.mast-title span {
+  display: inline-block;
+  margin-left: -0.0432em;
 }
 
 .mast-stats {
   grid-area: stats;
   display: grid;
-  grid-template-columns: repeat(3, 11.5rem);
-  margin: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: clamp(24px, 3vw, 36px) 0 0;
 }
 
 .mast-stats div {
-  padding-left: 20px;
+  padding-left: 16px;
   border-left: 1px solid var(--line);
 }
 
@@ -449,7 +464,7 @@ main:focus {
 .mast-lede {
   grid-area: lede;
   max-width: 60ch;
-  margin-top: clamp(24px, 3.5vw, 40px);
+  margin-top: clamp(24px, 3vw, 36px);
   font-size: clamp(17px, 1.6vw, 20px);
   color: var(--ink-2);
 }
@@ -461,14 +476,9 @@ main:focus {
   }
 
   .mast-stats {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    margin-top: 40px;
+    margin-top: 36px;
     padding-top: 20px;
     border-top: 1px solid var(--line);
-  }
-
-  .mast-stats div {
-    padding-left: 16px;
   }
 
   .mast-stats div:first-child {
@@ -510,11 +520,15 @@ main:focus {
   padding-block: clamp(32px, 5vw, 56px);
 }
 
-/* One head for every home section: the heading with its count on the same baseline,
-   the note under it at a reading measure, then the section rule. */
+/* One head for every section, home and report chapters alike: a split header. The heading
+   (with its count) takes the left half and the note the right half, the note's last line on
+   the heading's baseline, and the rule under both runs the full column. Narrow screens
+   stack them. */
 .shelf-head {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: last baseline;
+  gap: 10px var(--split-gap);
   padding-bottom: 20px;
   margin-bottom: 32px;
   border-bottom: 1px solid var(--ink);
@@ -532,9 +546,15 @@ main:focus {
 }
 
 .shelf-head p {
-  max-width: 64ch;
+  max-width: 62ch;
   font-size: 15px;
   color: var(--ink-2);
+}
+
+@media (max-width: 859px) {
+  .shelf-head {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Report bands */
@@ -1773,7 +1793,7 @@ details.query[open]::details-content {
 }
 
 /* One step below the section heads (28px), so the evidence and the closing blocks read as different levels. */
-.fig h2 {
+.fig-title {
   font-size: clamp(20px, 2vw, 24px);
   max-width: 40ch;
 }
@@ -1920,6 +1940,131 @@ details.query[open]::details-content {
   }
 }
 
+/* Report chapters: the split header with a kicker across both halves. A chapter opens with
+   more room above than any figure, and its first figure follows the header's own margin. */
+.chapter .ch-kicker {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin-bottom: 6px;
+  font: 500 12px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.chapter .ch-kicker:lang(zh) {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.report-body > .chapter {
+  margin-top: clamp(64px, 8vw, 112px);
+  margin-bottom: 0;
+  scroll-margin-top: 88px;
+}
+
+.report-body > .chapter + .fig {
+  margin-top: 32px;
+}
+
+/* Contents: the report's parts as one strip across the column, under a heavy rule, each part
+   a link separated by hairlines. Stacks on phones. */
+.contents ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--line);
+}
+
+.contents li + li {
+  border-left: 1px solid var(--line);
+}
+
+.contents li {
+  position: relative;
+}
+
+/* Hover marks the part with a bar over the heavy rule; nothing moves. */
+.contents li::before {
+  content: "";
+  position: absolute;
+  inset: -2px 0 auto;
+  height: 2px;
+  background: var(--accent-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms var(--ease);
+}
+
+.contents li:hover::before,
+.contents li:focus-within::before {
+  transform: scaleX(1);
+}
+
+.contents a {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  height: 100%;
+  padding: 16px 20px 20px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.contents li:first-child a {
+  padding-left: 0;
+}
+
+.contents a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
+.ct-part {
+  font: 500 12px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.ct-part:lang(zh) {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.ct-title {
+  font: 600 20px/1.2 var(--display);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.contents a:hover .ct-title {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 599px) {
+  .contents li + li {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .contents a,
+  .contents li:first-child a {
+    padding: 14px 0;
+  }
+
+  .contents li::before {
+    display: none;
+  }
+}
+
 /* Figure notes: a figure's reading, inside its card between the chart and the source line,
    across the card's full content width. Two columns with fixed roles, what the figure shows
    and then its method and limits, at one size and leading so the lines of both columns share
@@ -2043,20 +2188,6 @@ details.query[open]::details-content {
 
 .report-body > .fig:not(:first-child) {
   margin-top: clamp(40px, 5vw, 64px);
-}
-
-.findings {
-  max-width: 880px;
-}
-
-.findings h2 {
-  font-size: clamp(22px, 2.4vw, 28px);
-}
-
-.findings p {
-  margin-top: 16px;
-  max-width: 72ch;
-  color: var(--ink-2);
 }
 
 /* BarList */
@@ -2189,7 +2320,7 @@ details.query[open]::details-content {
 
 /* Chinese display titles break at spaces and punctuation first, anywhere only when
    a phrase cannot fit; CJK lines need more leading than Latin display type. */
-:is(.cf-title, .report-band h3, .pl-title, .card-hero h1, .report-hero h1, .fig h2, .figure h2, .ci-title, .pg-title):lang(zh) {
+:is(.cf-title, .report-band h3, .pl-title, .card-hero h1, .report-hero h1, .fig-title, .figure h2, .ci-title, .pg-title):lang(zh) {
   word-break: keep-all;
   overflow-wrap: anywhere;
   line-height: 1.25;

@@ -7,6 +7,7 @@
  * Signature: the count of postings that state pay at all (61 of 386) sits next to the number,
  *   so the band never reads as the whole market.
  */
+import FigNotes from "@site/components/charts/FigNotes.astro";
 import Figure from "@site/components/charts/Figure.astro";
 import { REPO, isoDate, longDate, number, type Lang } from "@site/i18n";
 import bands from "../data/bands.json";
@@ -102,40 +103,17 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
             </div>
           ))}
         </div>
+        <FigNotes
+          slot="notes"
+          lang={lang}
+          shows={zh
+            ? `美国标题含 inference 或 model serving 的 ${usTotal} 个在招岗位里，只有 ${stated} 个写明了美元年薪，占 ${pct(stated / usTotal)}。这 ${stated} 个里，${peak.count} 个的薪资下限在 15 万到 20 万美元之间，占一半；${above250} 个在 25 万以上，低于 15 万的只有 ${rows[0].count} 个。`
+            : `Of the ${usTotal} open US postings with inference or model serving in the title, only ${stated} state an annual salary in USD, ${pct(stated / usTotal)}. Among those ${stated}, ${peak.count} have a posted minimum between $150k and $200k, half of them. ${above250} start at $250k or more, and ${rows[0].count} start below $150k.`}
+          method={zh
+            ? `写出来的是底薪区间的下限，不含奖金和股票，不能当作总包。愿意写薪资的公司和不写的公司可能不一样，所以这不是整个市场的薪资分布。`
+            : `The figure is the bottom of the posted base range, without bonus or equity, so it is not total pay. Companies that publish pay may differ from those that do not, so this is not the pay of the whole market.`}
+        />
       </Figure>
-
-      <section class="findings" aria-labelledby="findings-title">
-        <h2 id="findings-title">{zh ? "数字说明了什么" : "What the numbers say"}</h2>
-        {zh ? (
-          <>
-            <p>
-              美国标题含 inference 或 model serving 的 {usTotal} 个在招岗位里，只有 {stated} 个写明了美元年薪，占 {pct(stated / usTotal)}。
-            </p>
-            <p>
-              这 {stated} 个里，{peak.count} 个的薪资下限在 15 万到 20 万美元之间，占一半；{above250} 个在 25 万以上，低于 15 万的只有{" "}
-              {rows[0].count} 个。
-            </p>
-            <p>
-              写出来的是底薪区间的下限，不含奖金和股票，不能当作总包。愿意写薪资的公司和不写的公司可能不一样，所以这不是整个市场的薪资分布。
-            </p>
-          </>
-        ) : (
-          <>
-            <p>
-              Of the {usTotal} open US postings with inference or model serving in the title, only {stated} state an annual salary
-              in USD, {pct(stated / usTotal)}.
-            </p>
-            <p>
-              Among those {stated}, {peak.count} have a posted minimum between $150k and $200k, half of them. {above250} start at
-              $250k or more, and {rows[0].count} start below $150k.
-            </p>
-            <p>
-              The figure is the bottom of the posted base range, without bonus or equity, so it is not total pay. Companies that
-              publish pay may differ from those that do not, so this is not the pay of the whole market.
-            </p>
-          </>
-        )}
-      </section>
     </div>
   )
 }
@@ -193,7 +171,6 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
     gap: clamp(8px, 2vw, 20px);
     align-items: end;
     height: 300px;
-    max-width: 760px;
   }
 
   .col {

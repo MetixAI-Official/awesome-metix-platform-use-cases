@@ -14,15 +14,18 @@ interface Props {
   queries?: QueryItem[];
   cost?: string;
   number?: string;
+  /** 3 inside a report chapter, so the outline reads chapter, then figure. */
+  level?: 2 | 3;
 }
 
-const { id, lang, heading, sub, alt, source, queries, cost, number } = Astro.props;
+const { id, lang, heading, sub, alt, source, queries, cost, number, level = 2 } = Astro.props;
+const Heading = level === 3 ? "h3" : "h2";
 ---
 
 <figure class="fig" id={id} aria-labelledby={`${id}-title`} aria-describedby={`${id}-alt`}>
   <figcaption>
     {number && <p class="fig-number">{number}</p>}
-    <h2 id={`${id}-title`} set:html={titleHtml(heading, lang)} />
+    <Heading class="fig-title" id={`${id}-title`} set:html={titleHtml(heading, lang)} />
     {sub && <p class="fig-sub">{sub}</p>}
     <p class="visually-hidden" id={`${id}-alt`}>{alt}</p>
   </figcaption>

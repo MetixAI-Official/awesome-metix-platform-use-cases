@@ -1,0 +1,36 @@
+---
+/*
+ * The parts of a long report as one strip across the full column, after In brief: each part
+ * is a link with its number, title, and figures, so a reader can see the report's shape and
+ * jump to a part. It stacks on phones.
+ */
+import { chapterKicker, type Lang } from "@site/i18n";
+
+export interface Part {
+  id: string;
+  title: string;
+  figures: string[];
+}
+
+interface Props {
+  lang: Lang;
+  parts: Part[];
+}
+
+const { lang, parts } = Astro.props;
+---
+
+<nav class="contents" aria-label={lang === "zh" ? "本报告的各部分" : "Parts of this report"}>
+  <ol>
+    {
+      parts.map((p, i) => (
+        <li>
+          <a href={`#${p.id}`}>
+            <span class="ct-part">{chapterKicker(lang, i + 1, p.figures)}</span>
+            <span class="ct-title">{p.title}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</nav>
