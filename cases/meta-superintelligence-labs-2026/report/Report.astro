@@ -450,6 +450,76 @@ const mapRows: MapRow[] = [
   { key: "none", name: unitName.none[lang], count: unit("none").count, share: noneShare, r: unit("none"), level: 1, last: true },
 ];
 
+// Everything a row prints, so the root and the body rows share one shape.
+type MapView = {
+  key: string;
+  level: 0 | 1 | 2;
+  lab: boolean;
+  last: boolean;
+  first: boolean;
+  html: string;
+  count: string;
+  share: string | null;
+  bar: { w: number; lb?: boolean; sup?: boolean } | null;
+  cells: { k: string; v: string; style: string }[] | null;
+  note: string;
+};
+const mapView: MapView[] = mapRows.map((m) => ({
+  key: m.key,
+  level: m.level,
+  lab: !!m.lab,
+  last: !!m.last,
+  first: !!m.first,
+  html: titleHtml(m.name, lang),
+  count: isNum(m.count) ? n(m.count) : String(m.count),
+  share: m.level === 1 && m.share !== null ? pct(m.share) : null,
+  bar:
+    m.level === 0
+      ? null
+      : m.share !== null
+        ? { w: Math.min(m.share / MAP_MAX, 1) * 100, lb: !!m.bound }
+        : { w: (9 / p2 / MAP_MAX) * 100, sup: true },
+  cells: m.r
+    ? statCols.map((c) => {
+        const v = stat(m.r as UnitRow, c.field);
+        return { k: zh ? c.zh : c.en, v: isNum(v) ? pct(v, 0) : "·", style: shade(c.field, v) };
+      })
+    : null,
+  note: m.first ? (zh ? "四个团队会重叠，不再细分；见图 07" : "The four groups overlap and are not split further; see figure 07") : "",
+}));
+
+// The fan. On wide screens the map is drawn: the 8,257 as one column, divided into units, each
+// division led to its row. Rows are a fixed height there, so one geometry serves the drawing and
+// the table. The lab's groups overlap, so they hang on a bracket that connects without measuring.
+const ROW_H = 52;
+const FAN = { unit: 16, bracket: 10, w: 112 };
+const fanBody = mapRows.slice(1);
+const fanH = fanBody.length * ROW_H;
+const rowMid = (i: number) => i * ROW_H + ROW_H / 2;
+type FanSeg = { key: string; y: number; h: number; kind: "lab" | "unit" | "none"; to: number };
+const fanSegs: FanSeg[] = [];
+let fanAt = 0;
+fanBody.forEach((m, i) => {
+  if (m.level !== 1) return;
+  const h = (num(m.count, m.key) / p2) * fanH;
+  fanSegs.push({ key: m.key, y: fanAt, h, kind: m.lab ? "lab" : m.key === "none" ? "none" : "unit", to: rowMid(i) });
+  fanAt += h;
+});
+if (Math.abs(fanAt - fanH) > 0.5) throw new Error("Meta report: the map's units no longer fill the column");
+const labSeg = fanSegs.find((f) => f.kind === "lab");
+if (!labSeg) throw new Error("Meta report: the map has no lab segment");
+const fanGroups = fanBody.map((m, i) => ({ m, i })).filter(({ m }) => m.level === 2);
+const tickTop = labSeg.y + Math.min(10, labSeg.h * 0.18);
+const tickSpan = labSeg.y + labSeg.h - 3 - tickTop;
+const fanTicks = fanGroups.map(({ i }, k) => ({ y: tickTop + (tickSpan * k) / Math.max(fanGroups.length - 1, 1), to: rowMid(i) }));
+const fanFrom = (f: FanSeg) => (f.kind === "lab" ? f.y + 3 : f.y + f.h / 2);
+// A leader leaves and lands flat, so it reads as a branch rather than a wire.
+const lead = (x0: number, y0: number, y1: number) => {
+  const x1 = FAN.w - 1;
+  const dx = (x1 - x0) * 0.42;
+  return `M ${x0} ${y0.toFixed(2)} C ${(x0 + dx).toFixed(1)} ${y0.toFixed(2)}, ${(x1 - dx).toFixed(1)} ${y1.toFixed(2)}, ${x1} ${y1.toFixed(2)}`;
+};
+
 // ---------- functions and levels, titles (figures 12 and 13)
 // A count of "<10" in a column of shares prints the share it stays under and draws an open ring
 // at the largest share it could hide.
@@ -1536,10 +1606,10 @@ const parts2 = [
           }
           sub={
             zh
-              ? `每人只算一次，按说明里的固定顺序，算在标题或职位里最先写到的单元；各行按人数排序。条形是占 ${n(p2)} 人的比例，刻度 0 到 70%；右边各列是每一行内部的比例，颜色越深表示在这一列里越高`
-              : `Each person counts once, at the first unit named in the headline or current title, in the fixed order the notes give; rows are sorted by size. Bars are shares of the ${n(p2)} on a 0 to 70% scale; the columns are shares within each row, darker where higher within the column`
+              ? `每人只算一次，按说明里的固定顺序，算在标题或职位里最先写到的单元；各行按人数排序。左边那一列就是这 ${n(p2)} 人，按单元划分，每一块连到它自己那一行（窄屏上改为每行一条）；右边各列是每一行内部的比例，颜色越深表示在这一列里越高`
+              : `Each person counts once, at the first unit named in the headline or current title, in the fixed order the notes give; rows are sorted by size. The column at the left is the ${n(p2)}, divided by unit, each division led to its row (a bar in each row on narrow screens); the columns to the right are shares within each row, darker where higher within the column`
           }
-          alt={zh ? "树形表格：Meta 可见的 AI 员工按单元分行，实验室下面是它的四个团队。下面的表格列出每一行的人数和各项比例。" : "A tree-shaped table: Meta's visible AI staff by unit, with the lab's four groups beneath the lab. The table that follows gives every row's count and shares."}
+          alt={zh ? "一张地图：左边一列按单元划分 Meta 可见的 AI 员工，每一块连到右边表格里对应的一行，实验室那一块下面连着它的四个团队。下面的表格列出每一行的人数和各项比例。" : "A map: a column at the left divides Meta's visible AI staff by unit, each division led to its row in the table at the right, with the lab's division leading on to its four groups. The table that follows gives every row's count and shares."}
           source={source}
           queries={[...q2(PEOPLE, "population", "units"), { file: "population.json", endpoint: PEOPLE, spec: populationQuery }]}
         >
@@ -1551,6 +1621,7 @@ const parts2 = [
           </p>
           <div class="mx-map" aria-hidden="true">
             <div class="mm-head">
+              <span class="mm-fan-h">{zh ? "8,257 的划分" : "8,257 divided"}</span>
               <span class="mm-name">{zh ? "单元" : "Unit"}</span>
               <span class="mm-ticks">
                 {axis(MAP_MAX).map((t) => (
@@ -1562,34 +1633,55 @@ const parts2 = [
                 <span class="mm-stat">{zh ? c.zh : c.en}</span>
               ))}
             </div>
-            {mapRows.map((m) => (
-              <div class:list={["mm-row", `lv${m.level}`, { lab: m.lab, last: m.last, first: m.first }]}>
-                <span class="mm-name">
-                  <span class="mm-label" set:html={titleHtml(m.name, lang)} />
+            <div class="mm-row lv0" data-row={mapView[0].key}>
+              <span class="mm-name">
+                <span class="mm-label" set:html={mapView[0].html} />
+              </span>
+              <span class="mm-bar" />
+              <span class="mm-count">{mapView[0].count}</span>
+              {(mapView[0].cells ?? []).map((c) => (
+                <span class="mm-stat" style={c.style}>
+                  <b class="mm-k">{c.k}</b>
+                  {c.v}
                 </span>
-                <span class="mm-bar">
-                  {m.level > 0 && m.share !== null && <span class:list={{ lb: m.bound }} style={`width: ${Math.min(m.share / MAP_MAX, 1) * 100}%`} />}
-                  {m.level > 0 && m.share === null && <span class="sup" style={`width: ${(9 / p2 / MAP_MAX) * 100}%`} />}
-                </span>
-                <span class="mm-count">
-                  {isNum(m.count) ? n(m.count) : m.count}
-                  {m.level === 1 && m.share !== null && <em>{pct(m.share)}</em>}
-                </span>
-                {m.r ? (
-                  statCols.map((c) => {
-                    const v = stat(m.r as UnitRow, c.field);
-                    return (
-                      <span class="mm-stat" style={shade(c.field, v)}>
-                        <b class="mm-k">{zh ? c.zh : c.en}</b>
-                        {isNum(v) ? pct(v, 0) : "·"}
+              ))}
+            </div>
+            <div class="mm-body">
+              <svg class="mm-fan" width={FAN.w} height={fanH} viewBox={`0 0 ${FAN.w} ${fanH}`} focusable="false">
+                {fanSegs.map((f) => (
+                  <rect class={`fan-seg fan-${f.kind}`} x="0" y={f.y + 0.5} width={FAN.unit} height={Math.max(f.h - 1, 1)} rx="1.5" />
+                ))}
+                <path class="fan-bracket" d={`M ${FAN.unit + FAN.bracket} ${labSeg.y + 1} L ${FAN.unit + 4} ${labSeg.y + 1} L ${FAN.unit + 4} ${labSeg.y + labSeg.h - 1} L ${FAN.unit + FAN.bracket} ${labSeg.y + labSeg.h - 1}`} />
+                {fanSegs.map((f) => (
+                  <path class={`fan-lead fan-${f.kind}`} d={lead(FAN.unit, fanFrom(f), f.to)} />
+                ))}
+                {fanTicks.map((t) => (
+                  <path class="fan-lead fan-lab" d={lead(FAN.unit + FAN.bracket, t.y, t.to)} />
+                ))}
+              </svg>
+              {mapView.slice(1).map((r) => (
+                <div class:list={["mm-row", `lv${r.level}`, { lab: r.lab, last: r.last, first: r.first }]} data-row={r.key}>
+                  <span class="mm-name">
+                    <span class="mm-label" set:html={r.html} />
+                  </span>
+                  <span class="mm-bar">{r.bar && <span class:list={{ lb: r.bar.lb, sup: r.bar.sup }} style={`width: ${r.bar.w}%`} />}</span>
+                  <span class="mm-count">
+                    {r.count}
+                    {r.share && <em>{r.share}</em>}
+                  </span>
+                  {r.cells ? (
+                    r.cells.map((c) => (
+                      <span class="mm-stat" style={c.style}>
+                        <b class="mm-k">{c.k}</b>
+                        {c.v}
                       </span>
-                    );
-                  })
-                ) : (
-                  <span class="mm-groups">{m.first ? (zh ? "四个团队会重叠，不再细分；见图 07" : "The four groups overlap and are not split further; see figure 07") : ""}</span>
-                )}
-              </div>
-            ))}
+                    ))
+                  ) : (
+                    <span class="mm-groups">{r.note}</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
           <div class="visually-hidden">
             <table>
@@ -3106,8 +3198,73 @@ const parts2 = [
   .mx-map {
     --rail: rgb(11 10 31 / 0.3);
     display: grid;
-    grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr) 6.5rem repeat(6, 5rem);
+    grid-template-columns: 112px minmax(0, 1fr) 6.5rem repeat(6, 5rem);
     column-gap: 12px;
+  }
+
+  /* The body is one box the fan can span: the rows inside it keep the table's columns. */
+  .mm-body {
+    position: relative;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+
+  .mm-fan {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .fan-seg.fan-lab {
+    fill: var(--lab);
+  }
+
+  .fan-seg.fan-unit {
+    fill: #5c5a70;
+  }
+
+  /* The unnamed majority stays quieter than the named units, and still clears 3:1 on the card. */
+  .fan-seg.fan-none {
+    fill: #9391a4;
+  }
+
+  .fan-lead {
+    fill: none;
+    stroke: #8b8999;
+    stroke-width: 1;
+  }
+
+  .fan-lead.fan-lab,
+  .fan-bracket {
+    stroke: var(--lab);
+    stroke-opacity: 0.6;
+  }
+
+  .fan-bracket {
+    fill: none;
+    stroke-width: 1;
+  }
+
+  /* Rows take the fan's geometry: one fixed height, names in the second column, no bars. */
+  .mm-head .mm-name,
+  .mm-row .mm-name {
+    grid-column: 2;
+  }
+
+  .mm-row {
+    height: var(--row-h, 52px);
+  }
+
+  .mm-bar,
+  .mm-head .mm-ticks {
+    display: none;
+  }
+
+  /* The fan's column gets the header that says what it divides. */
+  .mm-head .mm-fan-h {
+    grid-column: 1;
+    font-size: 11.5px;
   }
 
   .mm-head,
@@ -3177,22 +3334,9 @@ const parts2 = [
   .mm-row {
     position: relative;
     min-height: 44px;
-    /* Where this row's bottom separator starts: always clear of any rail crossing it. */
-    --sep: 18px;
-  }
-
-  .mm-row.lab,
-  .mm-row.lv2 {
-    --sep: 36px;
-  }
-
-  .mm-row.lv2.last {
-    --sep: 18px;
-  }
-
-  /* The table's closing line spans it, since no rail reaches that far. */
-  .mm-row.lv1.last {
-    --sep: 0;
+    /* Where this row's bottom separator starts. On wide screens the fan owns the first column, so
+       a separator starts after it; in the list layout it clears the rails instead. */
+    --sep: 124px;
   }
 
   .mm-row::after {
@@ -3215,7 +3359,6 @@ const parts2 = [
   }
 
   .mm-row.lv0 .mm-name {
-    padding-left: 18px;
     font-weight: 600;
   }
 
@@ -3226,104 +3369,17 @@ const parts2 = [
   }
 
   .mm-row.lv1 .mm-name {
-    padding-left: 36px;
+    padding-left: 0;
   }
 
   .mm-row.lv2 .mm-name {
-    padding-left: 54px;
+    padding-left: 16px;
     font-size: 14px;
     color: var(--ink-2);
   }
 
   .mm-row.lab .mm-name {
     font-weight: 600;
-  }
-
-  /* Rails. A branch starts in its parent's row, in the gutter left of the parent's name, runs
-     down that gutter, and meets each child with a stub that stops short of the name. The last
-     child closes the branch with a rounded elbow instead of a stub, so a branch has a visible
-     start and a visible end. Nothing is ever drawn where a name sits. */
-  .mm-row.lv0 .mm-name::after,
-  .mm-row.lab .mm-label::before,
-  .mm-row.lv1 .mm-name::before,
-  .mm-row.lv1 .mm-name::after,
-  .mm-row.lv2 .mm-name::before,
-  .mm-row.lv2 .mm-name::after,
-  .mm-row.lv2 .mm-label::before {
-    content: "";
-    position: absolute;
-    pointer-events: none;
-  }
-
-  /* The two branch starts: the root's trunk, and the lab's own branch. */
-  .mm-row.lv0 .mm-name::after {
-    left: 6px;
-    top: var(--stub-y, 50%);
-    bottom: 0;
-    border-left: 1px solid var(--rail);
-  }
-
-  .mm-row.lab .mm-label::before {
-    left: 24px;
-    top: var(--stub-y, 50%);
-    bottom: 0;
-    border-left: 1px solid var(--lab-rail);
-  }
-
-  /* The trunk, passing every unit row. */
-  .mm-row.lv1 .mm-name::before,
-  .mm-row.lv2 .mm-name::before {
-    left: 6px;
-    top: 0;
-    bottom: 0;
-    border-left: 1px solid var(--rail);
-  }
-
-  /* The lab's branch, passing its groups. */
-  .mm-row.lv2 .mm-name::after {
-    left: 24px;
-    top: 0;
-    bottom: 0;
-    border-left: 1px solid var(--lab-rail);
-  }
-
-  /* Stubs reach from a rail to within 4px of the name. */
-  .mm-row.lv1 .mm-name::after,
-  .mm-row.lv2 .mm-label::before {
-    top: var(--stub-y, 50%);
-    width: 26px;
-  }
-
-  .mm-row.lv1 .mm-name::after {
-    left: 6px;
-    border-top: 1px solid var(--rail);
-  }
-
-  .mm-row.lv2 .mm-label::before {
-    left: 24px;
-    border-top: 1px solid var(--lab-rail);
-  }
-
-  /* The last child turns the corner: one element carries the rail down and the stub across. */
-  .mm-row.lv1.last .mm-name::before,
-  .mm-row.lv2.last .mm-name::after {
-    bottom: auto;
-    height: var(--stub-y, 50%);
-    width: 26px;
-    border-bottom-left-radius: 7px;
-  }
-
-  .mm-row.lv1.last .mm-name::before {
-    border-bottom: 1px solid var(--rail);
-  }
-
-  .mm-row.lv2.last .mm-name::after {
-    border-bottom: 1px solid var(--lab-rail);
-  }
-
-  .mm-row.lv1.last .mm-name::after,
-  .mm-row.lv2.last .mm-label::before {
-    display: none;
   }
 
   .mm-bar {
@@ -3634,8 +3690,132 @@ const parts2 = [
       padding-left: 0;
     }
 
+  /* Rails. A branch starts in its parent's row, in the gutter left of the parent's name, runs
+     down that gutter, and meets each child with a stub that stops short of the name. The last
+     child closes the branch with a rounded elbow instead of a stub, so a branch has a visible
+     start and a visible end. Nothing is ever drawn where a name sits. */
+  .mm-row.lv0 .mm-name::after,
+  .mm-row.lab .mm-label::before,
+  .mm-row.lv1 .mm-name::before,
+  .mm-row.lv1 .mm-name::after,
+  .mm-row.lv2 .mm-name::before,
+  .mm-row.lv2 .mm-name::after,
+  .mm-row.lv2 .mm-label::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  /* The two branch starts: the root's trunk, and the lab's own branch. */
+  .mm-row.lv0 .mm-name::after {
+    left: 6px;
+    top: var(--stub-y, 50%);
+    bottom: 0;
+    border-left: 1px solid var(--rail);
+  }
+
+  .mm-row.lab .mm-label::before {
+    left: 24px;
+    top: var(--stub-y, 50%);
+    bottom: 0;
+    border-left: 1px solid var(--lab-rail);
+  }
+
+  /* The trunk, passing every unit row. */
+  .mm-row.lv1 .mm-name::before,
+  .mm-row.lv2 .mm-name::before {
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid var(--rail);
+  }
+
+  /* The lab's branch, passing its groups. */
+  .mm-row.lv2 .mm-name::after {
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid var(--lab-rail);
+  }
+
+  /* Stubs reach from a rail to within 4px of the name. */
+  .mm-row.lv1 .mm-name::after,
+  .mm-row.lv2 .mm-label::before {
+    top: var(--stub-y, 50%);
+    width: 26px;
+  }
+
+  .mm-row.lv1 .mm-name::after {
+    left: 6px;
+    border-top: 1px solid var(--rail);
+  }
+
+  .mm-row.lv2 .mm-label::before {
+    left: 24px;
+    border-top: 1px solid var(--lab-rail);
+  }
+
+  /* The last child turns the corner: one element carries the rail down and the stub across. */
+  .mm-row.lv1.last .mm-name::before,
+  .mm-row.lv2.last .mm-name::after {
+    bottom: auto;
+    height: var(--stub-y, 50%);
+    width: 26px;
+    border-bottom-left-radius: 7px;
+  }
+
+  .mm-row.lv1.last .mm-name::before {
+    border-bottom: 1px solid var(--rail);
+  }
+
+  .mm-row.lv2.last .mm-name::after {
+    border-bottom: 1px solid var(--lab-rail);
+  }
+
+  .mm-row.lv1.last .mm-name::after,
+  .mm-row.lv2.last .mm-label::before {
+    display: none;
+  }
+
     .mm-row {
       --stub-y: 21px;
+      height: auto;
+      --sep: 18px;
+    }
+
+    .mm-body {
+      display: contents;
+    }
+
+    .mm-fan {
+      display: none;
+    }
+
+    .mm-bar,
+    .mm-head .mm-ticks {
+      display: block;
+    }
+
+    .mm-head .mm-fan-h {
+      display: none;
+    }
+
+    .mm-row.lab,
+    .mm-row.lv2 {
+      --sep: 36px;
+    }
+
+    .mm-row.lv2.last {
+      --sep: 18px;
+    }
+
+    .mm-row.lv1.last {
+      --sep: 0;
+    }
+
+    .mm-head .mm-name,
+    .mm-row .mm-name {
+      grid-column: auto;
     }
 
     .mm-count {
