@@ -3149,6 +3149,10 @@ const parts2 = [
     background: none;
   }
 
+  .mm-head .mm-name {
+    padding-left: 18px;
+  }
+
   .mm-ticks {
     position: relative;
     height: 15px;
@@ -3185,6 +3189,7 @@ const parts2 = [
   }
 
   .mm-row.lv0 .mm-name {
+    padding-left: 18px;
     font-weight: 600;
   }
 
@@ -3195,11 +3200,11 @@ const parts2 = [
   }
 
   .mm-row.lv1 .mm-name {
-    padding-left: 22px;
+    padding-left: 36px;
   }
 
   .mm-row.lv2 .mm-name {
-    padding-left: 46px;
+    padding-left: 54px;
     font-size: 14px;
     color: var(--ink-2);
   }
@@ -3208,9 +3213,10 @@ const parts2 = [
     font-weight: 600;
   }
 
-  /* Rails: the trunk runs down from the root; each unit hangs on it with a stub; the lab's groups
-     hang on a second rail under the lab. */
-  .mm-row.lv0 .mm-name::after,
+  /* Rails: the trunk starts at the root's bottom edge and runs down the gutter left of the unit
+     names; each unit hangs on it with a stub that reaches its name; the lab's groups hang on a
+     second rail, in the lab's color, that starts at the bottom of the lab's row. No rail is drawn
+     beside the name it belongs to, so none can cross a name that wraps. */
   .mm-row.lv1 .mm-name::before,
   .mm-row.lv1 .mm-name::after,
   .mm-row.lv2 .mm-name::before,
@@ -3220,13 +3226,6 @@ const parts2 = [
     content: "";
     position: absolute;
     pointer-events: none;
-  }
-
-  .mm-row.lv0 .mm-name::after {
-    left: 6px;
-    top: calc(50% + 11px);
-    bottom: -1px;
-    border-left: 1px solid var(--rail);
   }
 
   .mm-row.lv1 .mm-name::before,
@@ -3244,18 +3243,16 @@ const parts2 = [
   .mm-row.lv1 .mm-name::after {
     left: 6px;
     top: 50%;
-    width: 11px;
+    width: 26px;
     border-top: 1px solid var(--rail);
   }
 
-  /* The lab's branch is drawn in the lab's color and starts at the bottom of the lab's row, so it
-     never crosses the lab's name when the name wraps. */
   .mm-row.lab .mm-label::before {
     display: none;
   }
 
   .mm-row.lv2 .mm-name::after {
-    left: 30px;
+    left: 24px;
     top: 0;
     bottom: -1px;
     border-left: 1px solid var(--lab-rail);
@@ -3266,9 +3263,9 @@ const parts2 = [
   }
 
   .mm-row.lv2 .mm-label::before {
-    left: 30px;
+    left: 24px;
     top: 50%;
-    width: 11px;
+    width: 26px;
     border-top: 1px solid var(--lab-rail);
   }
 
@@ -3559,12 +3556,16 @@ const parts2 = [
       padding-block: 10px;
     }
 
+    .mm-row.lv0 {
+      padding-left: 18px;
+    }
+
     .mm-row.lv1 {
-      padding-left: 22px;
+      padding-left: 36px;
     }
 
     .mm-row.lv2 {
-      padding-left: 46px;
+      padding-left: 54px;
     }
 
     .mm-row .mm-name,
@@ -3576,7 +3577,6 @@ const parts2 = [
       padding-left: 0;
     }
 
-    .mm-row.lv0 .mm-name::after,
     .mm-row.lab .mm-label::before {
       display: none;
     }
