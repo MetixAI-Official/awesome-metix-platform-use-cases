@@ -428,10 +428,6 @@ const statCols: { field: Stat; en: string; zh: string }[] = [
   { field: "us_share", en: "US", zh: "美国" },
 ];
 const stat = (r: UnitRow, k: Stat): Cell => (r as unknown as Record<string, Cell>)[k];
-// Each column is shaded within itself, against the highest value among the named units.
-const colMax = Object.fromEntries(statCols.map((c) => [c.field, Math.max(...named.map((r) => (isNum(stat(r, c.field)) ? (stat(r, c.field) as number) : 0)))]));
-const shade = (k: Stat, v: Cell) => (isNum(v) ? `--a: ${((v / colMax[k]) * 0.2).toFixed(3)}` : "");
-const MAP_MAX = 0.7; // the map's bars: shares of P2 on a 0 to 70% scale
 type MapRow = { key: string; name: string; count: Cell; share: number | null; r: UnitRow | null; level: 0 | 1 | 2; lab?: boolean; last?: boolean; bound?: boolean; first?: boolean };
 const labGroups = ["fair", "infra", "tbd-lab", "par"].map((g) => row(teamsData.rows, g, "team"));
 // The groups overlap, so at most their sum (a "<10" at 9) names one; the rest name none of them.
@@ -450,52 +446,191 @@ const mapRows: MapRow[] = [
   { key: "none", name: unitName.none[lang], count: unit("none").count, share: noneShare, r: unit("none"), level: 1, last: true },
 ];
 
-// Everything a row prints, so the root and the body rows share one shape.
-type MapView = {
-  key: string;
-  level: 0 | 1 | 2;
-  lab: boolean;
-  last: boolean;
-  first: boolean;
-  html: string;
-  count: string;
-  share: string | null;
-  cells: { k: string; v: string; style: string }[] | null;
-  note: string;
+// ---------- the org map (figure 10)
+// A flow tree drawn to scale. The total stands on the left; one ribbon per unit leaves it, as tall
+// at both ends as the count it carries; the lab's ribbon runs on as a band and fans out into its
+// four groups, drawn at a larger scale that the figure states. Every shape is a measure, so the
+// drawing has no connectors of its own. Two layouts are computed here, one for a wide figure and
+// one for a narrow one, and CSS shows one of them. Horizontal positions are in a viewBox 1000 wide
+// that stretches with the figure; vertical positions are pixels, so every height stays exact.
+type OrgKind = "lab" | "unit" | "none";
+type OrgUnit = { key: string; kind: OrgKind; name: string; count: number; share: number };
+const mapName: Record<string, Record<Lang, string>> = {
+  lab: { en: "Meta Superintelligence Labs", zh: "Meta 超级智能实验室" },
+  genai: { en: "GenAI, the former org", zh: "GenAI（原组织名）" },
+  "reality-labs": { en: "Reality Labs", zh: "Reality Labs" },
+  infrastructure: { en: "AI infrastructure", zh: "AI 基础设施" },
+  ads: { en: "Ads and monetization", zh: "广告与变现" },
+  fair: { en: "FAIR, outside the lab", zh: "FAIR（没写实验室）" },
+  ranking: { en: "Ranking and recsys", zh: "排序与推荐" },
+  apps: { en: "Instagram and other apps", zh: "Instagram 等应用" },
+  integrity: { en: "Integrity", zh: "内容安全" },
+  none: { en: "Names none of these", zh: "以上都没写" },
 };
-const mapView: MapView[] = mapRows.map((m) => ({
-  key: m.key,
-  level: m.level,
-  lab: !!m.lab,
-  last: !!m.last,
-  first: !!m.first,
-  html: titleHtml(m.name, lang),
-  count: isNum(m.count) ? n(m.count) : String(m.count),
-  share: m.level === 1 && m.share !== null ? pct(m.share) : null,
-  cells: m.r
-    ? statCols.map((c) => {
-        const v = stat(m.r as UnitRow, c.field);
-        return { k: zh ? c.zh : c.en, v: isNum(v) ? pct(v, 0) : "·", style: shade(c.field, v) };
-      })
-    : null,
-  note: m.first ? (zh ? "四个团队会重叠，不再细分；见图 07" : "The four groups overlap and are not split further; see figure 07") : "",
-}));
-
-// The whole, divided. One strip under the total says what the table lists: the named units and
-// the majority that names none, in the table's order and colours. Its widths are exact shares; the
-// hairline between segments is drawn inside a segment, so nothing is taken from the count it
-// stands for. Hierarchy is the table's rails, at every width.
-const stripSegs = mapRows
+const orgUnits: OrgUnit[] = mapRows
   .filter((m) => m.level === 1)
-  .map((m) => {
-    const c = num(m.count, m.key);
-    const kind = m.lab ? "lab" : m.key === "none" ? "none" : "unit";
-    const name = m.lab ? (zh ? "实验室" : "The lab") : m.name;
-    return { key: m.key, kind, w: (c / p2) * 100, label: kind === "unit" ? "" : `${name} ${pct(c / p2)}` };
-  });
-if (Math.abs(stripSegs.reduce((t, x) => t + x.w, 0) - 100) > 0.2) {
-  throw new Error("Meta report: the map's units no longer fill the strip");
-}
+  .map((m) => ({
+    key: m.key,
+    kind: m.lab ? "lab" : m.key === "none" ? "none" : "unit",
+    name: mapName[m.key][lang],
+    count: num(m.count as number, m.key),
+    share: num(m.count as number, m.key) / p2,
+  }));
+// The lab's groups, largest first, then the ones that name none of them. A "<10" is drawn at 9 as
+// an outline, the most it could be; the remainder is then the least that names none, and hatched.
+type OrgKid = { key: string; name: string; count: number; label: string; kind: "group" | "upTo" | "atLeast" };
+const orgKids: OrgKid[] = [
+  ...labGroups
+    .slice()
+    .sort((a, b) => (isNum(b.count) ? b.count : 0) - (isNum(a.count) ? a.count : 0))
+    .map((t): OrgKid =>
+      isNum(t.count)
+        ? { key: t.group, name: teamName[t.group][lang], count: t.count, label: n(t.count), kind: "group" }
+        : { key: t.group, name: teamName[t.group][lang], count: 9, label: "<10", kind: "upTo" },
+    ),
+  { key: "lab-none", name: zh ? "四个团队都没写" : "Names none of the four", count: labNamesNone, label: `≥ ${n(labNamesNone)}`, kind: "atLeast" },
+];
+if (orgKids.reduce((s, k) => s + k.count, 0) !== total) throw new Error("Meta report: the lab's groups no longer fill its ribbon");
+
+type OrgShape = { k: string; cls: string; d: string };
+type OrgBox = { k: string; x: number; y: number; w: number; h: number };
+type OrgPlan = {
+  h: number;
+  rootY: number;
+  rootH: number;
+  shapes: OrgShape[];
+  units: (OrgUnit & { slotY: number; slotH: number; barY: number; barH: number })[];
+  kids: (OrgKid & { slotY: number; slotH: number; barY: number; barH: number })[];
+  cap: number;
+  dock: number;
+};
+const f2 = (v: number) => +v.toFixed(2);
+const ribbon = (x0: number, a0: number, b0: number, x1: number, a1: number, b1: number) => {
+  const m = f2((x0 + x1) / 2);
+  return `M${f2(x0)} ${f2(a0)}C${m} ${f2(a0)} ${m} ${f2(a1)} ${f2(x1)} ${f2(a1)}L${f2(x1)} ${f2(b1)}C${m} ${f2(b1)} ${m} ${f2(b0)} ${f2(x0)} ${f2(b0)}Z`;
+};
+const rect = (x: number, y: number, w: number, h: number) => `M${f2(x)} ${f2(y)}h${f2(w)}v${f2(h)}h${f2(-w)}Z`;
+const ORG_ZOOM = 4;
+type OrgGeo = {
+  wide: boolean;
+  rootH: number;
+  rootW: number;
+  unitX: number;
+  unitW: number;
+  bandEnd: number;
+  kidX: number;
+  kidW: number;
+  slot: number;
+  kidSlot: number;
+  labLabel: number;
+  kidTop: number;
+  dockH: number;
+};
+const orgPlan = (g: OrgGeo): OrgPlan => {
+  const k = g.rootH / p2;
+  const shapes: OrgShape[] = [];
+  const units: OrgPlan["units"] = [];
+  const kids: OrgPlan["kids"] = [];
+  let y = 0;
+  const stackKids = (labBarY: number, x0: number) => {
+    let cum = 0;
+    for (const kid of orgKids) {
+      const barH = kid.count * k * ORG_ZOOM;
+      const slotH = Math.max(g.kidSlot, barH + 12);
+      const barY = y + (slotH - barH) / 2;
+      kids.push({ ...kid, slotY: y, slotH, barY, barH });
+      const a0 = labBarY + cum * k;
+      cum += kid.count;
+      shapes.push({ k: "lab", cls: `og-kr og-${kid.kind}`, d: ribbon(x0, a0, labBarY + cum * k, g.kidX, barY, barY + barH) });
+      shapes.push({ k: "lab", cls: `og-kb og-${kid.kind}`, d: rect(g.kidX, barY, g.kidW, barH) });
+      y += slotH;
+    }
+  };
+  let labBarY = 0;
+  let kidsEnd = 0;
+  for (const u of orgUnits) {
+    const barH = u.count * k;
+    // Wide: the lab's name rides inside its band. Narrow: it sits above the bar, and the groups
+    // follow directly under it, so its ribbons never cross another unit's label.
+    const lead = !g.wide && u.kind === "lab" ? g.labLabel : 0;
+    const slotH = Math.max(g.slot, barH + 12) + lead;
+    const barY = y + lead + (slotH - lead - barH) / 2;
+    units.push({ ...u, slotY: y, slotH, barY, barH });
+    y += slotH;
+    if (u.kind === "lab") {
+      labBarY = barY;
+      if (!g.wide) {
+        stackKids(barY, g.unitX + g.unitW);
+        kidsEnd = y;
+      }
+    }
+  }
+  const unitsH = y;
+  const rootY = (unitsH - g.rootH) / 2;
+  let cum = 0;
+  for (const u of units) {
+    const a0 = rootY + cum * k;
+    cum += u.count;
+    shapes.unshift({ k: u.key, cls: `og-r og-${u.kind}`, d: ribbon(g.rootW, a0, rootY + cum * k, g.unitX, u.barY, u.barY + u.barH) });
+    shapes.push({ k: u.key, cls: `og-b og-${u.kind}`, d: rect(g.unitX, u.barY, g.unitW, u.barH) });
+  }
+  shapes.push({ k: "p2", cls: "og-b og-root", d: rect(0, rootY, g.rootW, g.rootH) });
+  if (g.wide) {
+    shapes.push({ k: "lab", cls: "og-band", d: rect(g.unitX + g.unitW, labBarY, g.bandEnd - g.unitX - g.unitW, units[0].barH) });
+    y = g.kidTop;
+    stackKids(labBarY, g.bandEnd);
+    kidsEnd = y;
+  }
+  const dock = g.wide ? kidsEnd + 36 : 0;
+  return { h: Math.ceil(Math.max(unitsH, g.wide ? dock + g.dockH : kidsEnd)), rootY, rootH: g.rootH, shapes, units, kids, cap: g.kidTop, dock };
+};
+const orgWide = orgPlan({ wide: true, rootH: 330, rootW: 12, unitX: 240, unitW: 12, bandEnd: 590, kidX: 720, kidW: 12, slot: 46, kidSlot: 56, labLabel: 0, kidTop: 40, dockH: 470 });
+const orgNarrow = orgPlan({ wide: false, rootH: 220, rootW: 24, unitX: 180, unitW: 24, bandEnd: 0, kidX: 340, kidW: 24, slot: 46, kidSlot: 56, labLabel: 44, kidTop: 0, dockH: 0 });
+// The lab's name is set inside its band, two lines high.
+if (orgWide.units[0].barH < 34) throw new Error("Meta report: the lab's band is too thin for its name; raise rootH");
+
+// The profile beside the map: the chosen unit's six shares, against Meta overall, each with its
+// place among the nine named units.
+const ordinal = (i: number) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = i % 100;
+  return `${i}${s[(v - 20) % 10] || s[v] || s[0]}`;
+};
+type OrgStat = { label: string; v: number | null; text: string; meta: number; rank: string };
+type OrgDoc = { key: string; kind: OrgKind | "root"; title: string; count: string; share: string; rows: OrgStat[]; note: string };
+const namedUnits = orgUnits.filter((u) => u.kind !== "none");
+const orgDocs: OrgDoc[] = [
+  { key: "p2", kind: "root" as const, r: p2row, title: zh ? "Meta · 可见的 AI 员工" : "Meta · visible AI staff", count: p2, share: 1 },
+  ...orgUnits.map((u) => ({ key: u.key, kind: u.kind, r: unit(u.key), title: mapRows.find((m) => m.key === u.key)!.name, count: u.count, share: u.share })),
+].map((d) => ({
+  key: d.key,
+  kind: d.kind,
+  title: d.title,
+  count: zh ? `${n(d.count)} 个档案` : `${n(d.count)} profiles`,
+  share: d.kind === "root" ? (zh ? "第二阶段的全部人群" : "the whole stage-2 population") : zh ? `占 Meta 可见 AI 员工的 ${pct(d.share)}` : `${pct(d.share)} of Meta's visible AI staff`,
+  rows: statCols.map((c) => {
+    const v = stat(d.r, c.field);
+    const meta = num(stat(p2row, c.field) as number, `p2 ${c.field}`);
+    let rank = "";
+    if (isNum(v) && d.kind !== "root" && d.kind !== "none") {
+      const vals = namedUnits.map((u) => stat(unit(u.key), c.field)).filter(isNum);
+      const i = 1 + vals.filter((x) => x > v).length;
+      const of = vals.length;
+      rank = zh
+        ? i === 1 ? `${of} 个单元中最高` : i === of ? `${of} 个单元中最低` : `${of} 个单元中第 ${i}`
+        : i === 1 ? `Highest of ${of}` : i === of ? `Lowest of ${of}` : `${ordinal(i)} of ${of}`;
+    }
+    return { label: zh ? c.zh : c.en, v: isNum(v) ? v : null, text: isNum(v) ? pct(v, 0) : zh ? "不公开" : "Withheld", meta, rank };
+  }),
+  note:
+    d.key === "lab"
+      ? zh ? "四个团队会重叠，图 07 分别列出。" : "Its four groups can overlap; figure 07 lists them."
+      : d.key === "none"
+        ? zh ? "这里大部分比例不公开，否则可以用减法算出小群体。" : "Most shares are withheld here, or a small group could be worked out by subtraction."
+        : d.kind === "root"
+          ? zh ? "其他单元的竖线就是这里的数值。" : "These are the ticks on every other unit's bars."
+          : "",
+}));
 
 // ---------- functions and levels, titles (figures 12 and 13)
 // A count of "<10" in a column of shares prints the share it stays under and draws an open ring
@@ -1583,10 +1718,10 @@ const parts2 = [
           }
           sub={
             zh
-              ? `每人只算一次，按说明里的固定顺序，算在标题或职位里最先写到的单元；各行按人数排序。总人数下面那条就是这 ${n(p2)} 人，按单元划分：最左边是实验室，中间是写明的其他单元，右边是一个单元都没写的大多数；右边各列是每一行内部的比例，颜色越深表示在这一列里越高`
-              : `Each person counts once, at the first unit named in the headline or current title, in the fixed order the notes give; rows are sorted by size. The strip under the total is the ${n(p2)} divided by unit: the lab at the left, the named units next, then the majority that names none; the columns to the right are shares within each row, darker where higher within the column`
+              ? `每人只算一次，按说明里的固定顺序，算在标题或职位里最先写到的单元；写明的单元按人数排序，一个都没写的放最后。每条色带把一个单元的人从总数引出来，两端的高度都按人数画；实验室的色带继续向右，分成它的四个团队，这一段放大 ${ORG_ZOOM} 倍。点一个单元，看它和 Meta 全体的对比`
+              : `Each person counts once, at the first unit named in the headline or current title, in the fixed order the notes give; the named units are sorted by size, the residual last. Each ribbon carries a unit's people out of the total, as tall at both ends as its count; the lab's ribbon runs on and splits into its four groups, drawn ${ORG_ZOOM} times larger. Choose a unit to see its profile against Meta overall`
           }
-          alt={zh ? `一张地图：总人数下面一条横条把 Meta 可见的 AI 员工按单元划分，实验室占 ${pct(total / p2)}，一个单元都没写的占 ${pct(noneShare)}；下面的表格按同样的顺序列出各单元，实验室的四个团队缩进列在它下面，并给出每一行的人数和各项比例。` : `A map: a strip under the total divides Meta's visible AI staff by unit, the lab ${pct(total / p2)} of it and the majority that names no unit ${pct(noneShare)}; the table below lists the units in the same order, with the lab's four groups indented beneath it, and gives every row's count and shares.`}
+          alt={zh ? `一张流向图：左边 Meta 可见的 AI 员工 ${n(p2)} 人，按比例分成十条色带流向各单元，实验室占 ${pct(total / p2)}，一个单元都没写的占 ${pct(noneShare)}；实验室的色带再分给它的四个团队，放大 ${ORG_ZOOM} 倍画，${n(total)} 人中至少 ${n(labNamesNone)} 人四个团队都没写。旁边的面板给出所选单元六项比例和 Meta 全体的对比。` : `A flow map: Meta's ${n(p2)} visible AI staff on the left split into ten ribbons drawn to scale, the lab ${pct(total / p2)} and the majority that names no unit ${pct(noneShare)}; the lab's ribbon splits again into its four groups, drawn ${ORG_ZOOM} times larger, and at least ${n(labNamesNone)} of its ${n(total)} name none of them. A panel gives the chosen unit's six shares against Meta overall.`}
           source={source}
           queries={[...q2(PEOPLE, "population", "units"), { file: "population.json", endpoint: PEOPLE, spec: populationQuery }]}
         >
@@ -1594,56 +1729,105 @@ const parts2 = [
             <span class="lg lg-lab">{zh ? "实验室" : "The lab"}</span>
             <span class="lg lg-unit">{zh ? "其他单元" : "Other units"}</span>
             <span class="lg lg-none">{zh ? "都没写" : "Names none"}</span>
-            <span class="lg-plain">{zh ? "· 为保护小群体而不公开" : "· withheld to protect a small group"}</span>
+            <span class="lg lg-bound">{zh ? "至少这么多" : "At least"}</span>
+            <span class="lg lg-upto">{zh ? "少于 10，画到 9" : "Fewer than 10, drawn at 9"}</span>
           </p>
-          <div class="mx-map" aria-hidden="true">
-            <div class="mm-head">
-              <span class="mm-name">{zh ? "单元" : "Unit"}</span>
-              <span class="mm-count">{zh ? "人数 · 占比" : "People · share"}</span>
-              {statCols.map((c) => (
-                <span class="mm-stat">{zh ? c.zh : c.en}</span>
-              ))}
-            </div>
-            <div class="mm-row lv0" data-row={mapView[0].key}>
-              <span class="mm-name">
-                <span class="mm-label" set:html={mapView[0].html} />
-              </span>
-              <span class="mm-count">{mapView[0].count}</span>
-              {(mapView[0].cells ?? []).map((c) => (
-                <span class="mm-stat" style={c.style}>
-                  <b class="mm-k">{c.k}</b>
-                  {c.v}
-                </span>
-              ))}
-            </div>
-            <div class="mm-strip">
-              {stripSegs.map((g) => (
-                <span class={`ms ms-${g.kind}`} style={`flex: 0 0 ${g.w.toFixed(3)}%`}>
-                  {g.label && <b>{g.label}</b>}
-                </span>
-              ))}
-            </div>
-            {mapView.slice(1).map((r) => (
-                <div class:list={["mm-row", `lv${r.level}`, { lab: r.lab, last: r.last, first: r.first }]} data-row={r.key}>
-                  <span class="mm-name">
-                    <span class="mm-label" set:html={r.html} />
+          <div class="og" data-org>
+            {[
+              { plan: orgWide, v: "wide" },
+              { plan: orgNarrow, v: "narrow" },
+            ].map(({ plan, v }) => (
+              <div class={`og-${v}`}>
+                <button type="button" class="og-top" data-pick="p2" aria-pressed="false" style={v === "wide" ? `top: ${f2(plan.rootY + plan.rootH / 2)}px` : undefined}>
+                  <span class="og-root-k">
+                    <b>Meta</b> {zh ? "可见的 AI 员工" : "visible AI staff"}
                   </span>
-                  <span class="mm-count">
-                    {r.count}
-                    {r.share && <em>{r.share}</em>}
-                  </span>
-                  {r.cells ? (
-                    r.cells.map((c) => (
-                      <span class="mm-stat" style={c.style}>
-                        <b class="mm-k">{c.k}</b>
-                        {c.v}
+                  <span class="og-root-n">{n(p2)}</span>
+                </button>
+                {v === "wide" && (
+                  <p class="og-scale" aria-hidden="true" style={`top: ${f2(plan.rootY + plan.rootH)}px`}>
+                    <i style={`height: ${f2((1000 / p2) * plan.rootH)}px`} />
+                    {zh ? "1,000 个档案" : "1,000 profiles"}
+                  </p>
+                )}
+                <div class="og-stage" style={`height: ${plan.h}px`}>
+                  <svg viewBox={`0 0 1000 ${plan.h}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    <defs>
+                      <pattern id={`og-hatch-${v}`} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                        <rect width="2" height="4" fill="#3d36c9" />
+                      </pattern>
+                    </defs>
+                    {plan.shapes.map((s) => (
+                      <path class={s.cls} data-k={s.k} d={s.d} fill={s.cls.includes("og-kb og-atLeast") ? `url(#og-hatch-${v})` : undefined} vector-effect="non-scaling-stroke" />
+                    ))}
+                  </svg>
+                  {plan.units.map((u) => (
+                    <button
+                      type="button"
+                      class={`og-u og-${u.kind}`}
+                      data-pick={u.key}
+                      aria-pressed={u.kind === "lab" ? "true" : "false"}
+                      style={
+                        v === "wide" && u.kind === "lab"
+                          ? `top: ${f2(u.slotY)}px; height: ${f2(u.slotH)}px`
+                          : v === "narrow" && u.kind === "lab"
+                            ? `top: ${f2(u.slotY)}px; height: 44px`
+                            : `top: ${f2(u.slotY)}px; height: ${f2(u.slotH)}px`
+                      }
+                    >
+                      <span class="og-name" set:html={titleHtml(u.name, lang)} />
+                      <span class="og-count">
+                        {n(u.count)} <em>{pct(u.share)}</em>
                       </span>
-                    ))
-                  ) : (
-                    <span class="mm-groups">{r.note}</span>
+                    </button>
+                  ))}
+                  {v === "wide" && (
+                    <p class="og-cap" style={`top: ${f2(plan.cap - 34)}px`}>
+                      {zh ? `实验室的 ${n(total)} 人，放大 ${ORG_ZOOM} 倍` : `The lab's ${n(total)}, drawn ${ORG_ZOOM} times larger`}
+                    </p>
                   )}
+                  {plan.kids.map((k) => (
+                    <p class={`og-k og-${k.kind}`} style={`top: ${f2(k.slotY)}px; height: ${f2(k.slotH)}px`}>
+                      <span class="og-name" set:html={titleHtml(k.name, lang)} />
+                      <span class="og-count">{k.label}</span>
+                    </p>
+                  ))}
                 </div>
+              </div>
             ))}
+            <div class="og-dock" style={`--dock: ${orgWide.dock}px`} aria-live="polite">
+              {orgDocs.map((d) => (
+                <section class={`og-doc og-${d.kind}`} data-doc={d.key} hidden={d.key !== "lab"} aria-label={d.title}>
+                  <p class="og-doc-k">{zh ? "单元画像" : "Unit profile"}</p>
+                  <h4 class="og-doc-t" set:html={titleHtml(d.title, lang)} />
+                  <p class="og-doc-c">
+                    <b>{d.count}</b> · {d.share}
+                  </p>
+                  <ul class="og-stats">
+                    {d.rows.map((r) => (
+                      <li>
+                        <span class="og-sl">{r.label}</span>
+                        <span class="og-sr">{r.rank}</span>
+                        <b class:list={["og-sv", { off: r.v === null }]}>{r.text}</b>
+                        <span class="og-track" aria-hidden="true">
+                          {r.v !== null && <i style={`width: ${f2(r.v * 100)}%`} />}
+                          {d.kind !== "root" && <s style={`left: ${f2(r.meta * 100)}%`} />}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p class="og-doc-f">
+                    {d.kind !== "root" && (
+                      <span class="og-tick-key">
+                        <s aria-hidden="true" />
+                        {zh ? "竖线：Meta 全体" : "Tick: Meta overall"}
+                      </span>
+                    )}
+                    {d.note}
+                  </p>
+                </section>
+              ))}
+            </div>
           </div>
           <div class="visually-hidden">
             <table>
@@ -2195,6 +2379,50 @@ const parts2 = [
       </>
     ))
 }
+
+<script>
+  // Figure 10: a unit's label or ribbon opens its profile. Pointing at one lights its ribbon; once a
+  // unit is chosen, its ribbon stays lit.
+  for (const org of document.querySelectorAll<HTMLElement>("[data-org]")) {
+    const buttons = [...org.querySelectorAll<HTMLButtonElement>("[data-pick]")];
+    const paths = [...org.querySelectorAll<SVGPathElement>("path[data-k]")];
+    const docs = [...org.querySelectorAll<HTMLElement>("[data-doc]")];
+    const dock = org.querySelector<HTMLElement>(".og-dock");
+    let chosen: string | null = null;
+    const light = (key: string | null) => {
+      if (key && key !== "p2") org.dataset.hot = key;
+      else delete org.dataset.hot;
+      for (const p of paths) p.classList.toggle("is-hot", p.dataset.k === key);
+    };
+    const choose = (key: string) => {
+      chosen = key;
+      for (const b of buttons) b.setAttribute("aria-pressed", String(b.dataset.pick === key));
+      for (const d of docs) d.hidden = d.dataset.doc !== key;
+      light(key);
+      // In the narrow layout the profile follows the map; bring it into view if it is off screen.
+      if (dock && getComputedStyle(dock).position !== "absolute") {
+        const r = dock.getBoundingClientRect();
+        if (r.top > innerHeight || r.bottom < 0) {
+          const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+          dock.scrollIntoView({ block: "nearest", behavior: still ? "auto" : "smooth" });
+        }
+      }
+    };
+    const keyOf = (t: EventTarget | null) => (t instanceof Element ? t.closest<HTMLElement | SVGElement>("[data-pick], path[data-k]") : null);
+    const pick = (el: HTMLElement | SVGElement | null) => el?.dataset.pick ?? el?.dataset.k ?? null;
+    org.addEventListener("click", (e) => {
+      const key = pick(keyOf(e.target));
+      if (key && (key !== "p2" || keyOf(e.target) instanceof HTMLElement)) choose(key);
+    });
+    org.addEventListener("pointerover", (e) => {
+      const key = pick(keyOf(e.target));
+      if (key) light(key);
+    });
+    org.addEventListener("pointerleave", () => light(chosen));
+    org.addEventListener("focusin", (e) => light(pick(keyOf(e.target))));
+    org.addEventListener("focusout", () => light(chosen));
+  }
+</script>
 
 <style>
   /* ---------- palette: color follows cohort ---------- */
@@ -3038,7 +3266,7 @@ const parts2 = [
 
   /* ================= stage 2 ================= */
   .mx-stage,
-  .mx-map,
+  .og,
   .mx-flow,
   .mx-pay,
   .legend {
@@ -3069,6 +3297,12 @@ const parts2 = [
   /* Hatching means a lower bound, as everywhere on the site. */
   .lg-bound::before {
     background: repeating-linear-gradient(135deg, var(--lab) 0 2px, transparent 2px 4px);
+    box-shadow: inset 0 0 0 1px var(--lab);
+  }
+
+  /* Open: fewer than 10, drawn at the most it could be. */
+  .lg-upto::before {
+    background: none;
     box-shadow: inset 0 0 0 1px var(--lab);
   }
 
@@ -3162,217 +3396,518 @@ const parts2 = [
     margin-top: 14px;
   }
 
-  /* ---------- 10: the map, a ledger shaped as a tree ---------- */
-  .mx-map {
-    --rail: rgb(11 10 31 / 0.3);
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 6.5rem repeat(6, 5rem);
-    column-gap: 12px;
-  }
-
-  /* The body is one box the fan can span: the rows inside it keep the table's columns. */
-
-  .mm-head,
-  .mm-row {
-    display: grid;
-    grid-template-columns: subgrid;
-    grid-column: 1 / -1;
-    align-items: center;
-  }
-
-  .mm-head {
-    align-items: end;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--ink);
-    font: 500 12px/1.25 var(--mono);
-    color: var(--ink-3);
-  }
-
-  .mm-head .mm-count,
-  .mm-head .mm-stat {
-    text-align: right;
-  }
-
-  /* Header cells keep the header's face and sit on the bottom line, so every label, the scale,
-     and a label that wraps end on one baseline. */
-  .mm-head > span {
-    align-self: end;
-  }
-
-  .mm-head .mm-name,
-  .mm-head .mm-stat {
-    align-items: flex-end;
-  }
-
-  .mm-head .mm-name,
-  .mm-head .mm-count,
-  .mm-head .mm-stat {
-    font: inherit;
-    background: none;
-  }
-
-  .mm-head .mm-name {
-    padding-left: 18px;
-  }
-
-  .mm-row.lab,
-  .mm-row.lv2 {
-    --sep: 36px;
-  }
-
-  .mm-row.lv2.last {
-    --sep: 18px;
-  }
-
-  .mm-row.lv1.last {
-    --sep: 0;
-  }
-
-  .mm-row {
+  /* ---------- 10: the org map, a flow tree drawn to scale ---------- */
+  /* Horizontal positions below are the same fractions of the drawing as the viewBox units in the
+     frontmatter (unitX 240 is 24%), so the labels land on the shapes at every width. */
+  .og {
+    --root-col: 144px;
     position: relative;
-    min-height: 44px;
-    /* Where this row's bottom separator starts: clear of the rails that carry the hierarchy. */
-    --sep: 18px;
+    container-type: inline-size;
   }
 
-  /* The whole, divided: one strip under the total, in the table's order and colours. Widths are
-     exact shares, and the hairline between segments is drawn inside a segment, so no width is
-     taken from the count it stands for. */
-  .mm-strip {
-    grid-column: 1 / -1;
-    display: flex;
-    height: 30px;
-    margin-bottom: 6px;
-    border-radius: 3px;
-    overflow: hidden;
+  .og-stage {
+    position: relative;
   }
 
-  .ms {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    background: var(--unit);
-    box-shadow: inset -1px 0 0 #fff;
+  .og-stage svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
   }
 
-  .ms:last-child {
-    box-shadow: none;
+  .og path {
+    transition: opacity 0.16s ease;
   }
 
-  .ms-lab {
-    background: var(--lab);
+  .og path[data-k]:not([data-k="p2"]) {
+    cursor: pointer;
   }
 
-  .ms-none {
-    background: var(--ctx);
+  /* Ribbons carry a unit's people; its bar, at full strength, is where they arrive. */
+  path.og-r.og-lab {
+    fill: rgb(61 54 201 / 0.3);
   }
 
-  .ms b {
-    padding-inline: 10px;
-    font: 600 12px/1 var(--mono);
-    color: #fff;
-    white-space: nowrap;
+  path.og-r.og-unit {
+    fill: rgb(92 90 112 / 0.22);
   }
 
-  /* Ink on the lighter residual, white on the two dark fills. */
-  .ms-none b {
-    color: var(--ink);
+  path.og-r.og-none {
+    fill: rgb(133 131 149 / 0.2);
   }
 
-  /* Below this the lab's segment is narrower than its own label, so the strip carries no text and
-     the rows give the shares. */
-  @media (max-width: 999px) {
-    .ms b {
-      display: none;
+  path.og-root {
+    fill: var(--ink);
+  }
+
+  path.og-b.og-lab,
+  path.og-band,
+  path.og-kb.og-group {
+    fill: var(--lab);
+  }
+
+  path.og-b.og-unit {
+    fill: var(--unit);
+  }
+
+  path.og-b.og-none {
+    fill: var(--ctx);
+  }
+
+  path.og-kr {
+    fill: rgb(61 54 201 / 0.2);
+  }
+
+  path.og-kr.og-atLeast {
+    fill: rgb(61 54 201 / 0.1);
+  }
+
+  /* Hatched: at least this many. Open: fewer than 10, drawn at the most it could be. */
+  path.og-kb.og-atLeast {
+    stroke: var(--lab);
+    stroke-width: 1;
+  }
+
+  path.og-kr.og-upTo,
+  path.og-kb.og-upTo {
+    fill: none;
+    stroke: var(--lab);
+    stroke-width: 1;
+  }
+
+  /* The ribbon to a group of fewer than 10 is a hairline: it must not read as a leader line. */
+  path.og-kr.og-upTo {
+    stroke: rgb(61 54 201 / 0.35);
+  }
+
+  /* Pointing at a unit strengthens its ribbon and fades the other ribbons. Bars and the lab's
+     band never fade: they carry the counts and the lab's name. */
+  .og[data-hot] path:is(.og-r, .og-kr):not(.is-hot) {
+    opacity: 0.3;
+  }
+
+  path.og-r.og-lab.is-hot {
+    fill: rgb(61 54 201 / 0.5);
+  }
+
+  path.og-r.og-unit.is-hot {
+    fill: rgb(92 90 112 / 0.45);
+  }
+
+  path.og-r.og-none.is-hot {
+    fill: rgb(133 131 149 / 0.4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .og path {
+      transition: none;
     }
   }
 
-  .mm-row::after {
-    content: "";
+  /* Labels are buttons: each opens its unit's profile. */
+  .og-top,
+  .og-u {
+    appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .og-u {
     position: absolute;
-    left: var(--sep);
-    right: 0;
-    bottom: 0;
-    border-bottom: 1px solid var(--line);
-    pointer-events: none;
-  }
-
-  .mm-name {
-    position: relative;
-    align-self: stretch;
     display: flex;
-    align-items: center;
-    font-size: 15px;
-    line-height: 1.3;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding-inline: 8px;
+    border-radius: 6px;
   }
 
-  .mm-row.lv0 .mm-name {
-    padding-left: 18px;
+  .og-u:hover {
+    background: rgb(11 10 31 / 0.04);
+  }
+
+  .og-u[aria-pressed="true"] {
+    background: rgb(61 54 201 / 0.08);
+  }
+
+  .og-u[aria-pressed="true"]:not(.og-lab) .og-name {
+    color: var(--lab);
+  }
+
+  .og-top:focus-visible,
+  .og-u:focus-visible {
+    outline: 2px solid var(--lab);
+    outline-offset: 2px;
+  }
+
+  .og-name {
+    font-size: 14px;
     font-weight: 600;
+    line-height: 1.25;
   }
 
-  .mm-row.lv1 .mm-name {
-    padding-left: 36px;
-  }
-
-  /* Chinese labels break only between words, at the hints titleHtml adds. */
-  .mm-label:lang(zh) {
+  .og-name:lang(zh) {
     word-break: keep-all;
     overflow-wrap: anywhere;
   }
 
-  .mm-row.lv2 .mm-name {
-    padding-left: 54px;
-    font-size: 14px;
+  /* The residual is half of the heading's finding: its name is set larger. */
+  .og-u.og-none .og-name {
+    font-size: 17px;
+  }
+
+  .og-u.og-none .og-count {
+    font-size: 13px;
+  }
+
+  .og-count {
+    font: 500 12px/1.3 var(--mono);
+    font-variant-numeric: tabular-nums;
     color: var(--ink-2);
   }
 
-  .mm-row.lab .mm-name {
-    font-weight: 600;
-  }
-
-  /* Count and share on one line, the share lighter. */
-  .mm-count {
-    display: flex;
-    justify-content: flex-end;
-    align-items: baseline;
-    gap: 6px;
-    white-space: nowrap;
-    font: 600 14px/1.2 var(--mono);
-    font-variant-numeric: tabular-nums;
-  }
-
-  .mm-count em {
-    font: 500 12px/1.3 var(--mono);
+  .og-count em {
+    margin-left: 6px;
     font-style: normal;
     color: var(--ink-3);
   }
 
-  .mm-stat {
-    align-self: stretch;
+  .og-k {
+    position: absolute;
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding-right: 6px;
-    background: rgb(11 10 31 / var(--a, 0));
-    font: 500 13px/1 var(--mono);
-    font-variant-numeric: tabular-nums;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    margin: 0;
+    padding-inline: 8px;
   }
 
-  .mm-k {
+  .og-k .og-name {
+    font-weight: 500;
+    color: var(--ink-2);
+  }
+
+  .og-k.og-atLeast .og-name {
+    color: var(--ink);
+  }
+
+  /* ----- wide: the total, the units, and the lab's groups side by side; the profile under the groups */
+  .og-wide {
+    display: none;
+    position: relative;
+    padding-left: var(--root-col);
+  }
+
+  .og-wide .og-top {
+    position: absolute;
+    left: 0;
+    width: calc(var(--root-col) - 14px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 6px 0;
+    border-radius: 6px;
+    text-align: right;
+    transform: translateY(-50%);
+  }
+
+  .og-root-k {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.3;
+    color: var(--ink-2);
+  }
+
+  .og-root-k b {
+    color: var(--ink);
+  }
+
+  .og-wide .og-root-k b {
+    display: block;
+    font-size: 18px;
+  }
+
+  .og-root-n {
+    font: 600 34px/1 var(--display);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .og-top[aria-pressed="true"] .og-root-k {
+    color: var(--lab);
+  }
+
+  /* The scale key stands on the root bar's baseline. */
+  .og-scale {
+    position: absolute;
+    left: 0;
+    transform: translateY(-100%);
+    width: calc(var(--root-col) - 14px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0;
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .og-scale i {
+    order: 2;
+    width: 10px;
+    background: var(--ink);
+  }
+
+  .og-wide .og-u {
+    left: 26.2%;
+    width: 32.8%;
+  }
+
+  /* The lab's name rides in its band, in white. */
+  .og-wide .og-u.og-lab {
+    left: 25.2%;
+    width: 33.8%;
+    padding-left: 14px;
+    color: #fff;
+  }
+
+  .og-wide .og-u.og-lab .og-count,
+  .og-wide .og-u.og-lab .og-count em {
+    color: rgb(255 255 255 / 0.86);
+  }
+
+  .og-wide .og-u.og-lab:hover,
+  .og-wide .og-u.og-lab[aria-pressed="true"] {
+    background: rgb(61 54 201 / 0.14);
+  }
+
+  .og-wide .og-k {
+    left: 74.2%;
+    width: 25.8%;
+  }
+
+  .og-cap {
+    position: absolute;
+    left: 58%;
+    right: 0;
+    margin: 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--lab-rail);
+    font: 500 12px/1.3 var(--mono);
+    color: var(--lab);
+    text-align: right;
+  }
+
+  /* ----- narrow: one column; the lab's groups follow the lab, and the profile follows the map */
+  .og-narrow .og-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    width: 100%;
+    min-height: 44px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .og-narrow .og-root-n {
+    font-size: 26px;
+  }
+
+  .og-narrow .og-u {
+    left: 22.2%;
+    right: 0;
+  }
+
+  .og-narrow .og-u.og-lab {
+    left: 18%;
+    justify-content: flex-start;
+    padding: 2px 8px 0 0;
+  }
+
+  .og-narrow .og-u.og-lab .og-name {
+    color: var(--lab);
+  }
+
+  .og-narrow .og-k {
+    left: 38%;
+    right: 0;
+  }
+
+  .og-dock {
+    margin-top: 28px;
+  }
+
+  @container (min-width: 820px) {
+    .og-wide {
+      display: block;
+    }
+
+    .og-narrow {
+      display: none;
+    }
+
+    .og-dock {
+      position: absolute;
+      top: var(--dock);
+      left: calc(var(--root-col) + (100% - var(--root-col)) * 0.62);
+      right: 0;
+      margin: 0;
+    }
+  }
+
+  /* ----- the profile */
+  .og-doc {
+    padding-top: 12px;
+    border-top: 2px solid var(--ink);
+  }
+
+  .og-doc.og-lab {
+    border-top-color: var(--lab);
+  }
+
+  .og-doc-k {
+    margin: 0;
+    font: 500 12px/1.3 var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .og-doc-k:lang(zh) {
+    letter-spacing: 0.02em;
+  }
+
+  .og-doc-t {
+    margin: 6px 0 0;
+    font: 600 22px/1.2 var(--display);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .og-doc-t:lang(zh) {
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .og-doc-c {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+
+  .og-doc-c b {
+    font-family: var(--mono);
+    color: var(--ink);
+  }
+
+  .og-stats {
+    display: grid;
+    row-gap: 10px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .og-stats li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: baseline;
+    column-gap: 10px;
+    row-gap: 5px;
+  }
+
+  .og-sl {
+    font-size: 13px;
+  }
+
+  .og-sr {
+    font: 12px/1.2 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .og-sv {
+    min-width: 3.4em;
+    font: 600 13px/1.2 var(--mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .og-sv.off {
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+
+  .og-track {
+    grid-column: 1 / -1;
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: rgb(11 10 31 / 0.07);
+  }
+
+  .og-track i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 3px;
+    background: var(--unit);
+  }
+
+  .og-doc.og-lab .og-track i {
+    background: var(--lab);
+  }
+
+  .og-doc.og-none .og-track i {
+    background: var(--ctx);
+  }
+
+  .og-doc.og-root .og-track i {
+    background: var(--ink);
+  }
+
+  .og-track s,
+  .og-tick-key s {
+    width: 2px;
+    background: var(--ink);
+  }
+
+  .og-track s {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    margin-left: -1px;
+  }
+
+  .og-doc-f {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin: 12px 0 0;
+    font: 12px/1.45 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .og-doc-f:empty {
     display: none;
   }
 
-  /* The lab's groups have no columns of their own: one tinted block with one note. */
-  .mm-groups {
-    grid-column: 4 / -1;
-    align-self: stretch;
-    display: flex;
-    align-items: center;
-    padding-inline: 12px;
-    background: var(--surface-muted);
-    font: 12px/1.3 var(--mono);
-    color: var(--ink-3);
+  .og-tick-key s {
+    display: inline-block;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -2px;
   }
 
   /* ---------- 17: flows, out to the left of the axis and in to the right ---------- */
@@ -3560,187 +4095,6 @@ const parts2 = [
     .mx-stage-top {
       grid-template-columns: minmax(0, 1fr);
       row-gap: 28px;
-    }
-  }
-
-  /* Rails. A branch starts in its parent's row, in the gutter left of the parent's name, runs
-     down that gutter, and meets each child with a stub that stops short of the name. The last
-     child closes the branch with a rounded elbow instead of a stub, so a branch has a visible
-     start and a visible end. Nothing is ever drawn where a name sits. */
-  .mm-row.lv0 .mm-name::after,
-  .mm-row.lab .mm-label::before,
-  .mm-row.lv1 .mm-name::before,
-  .mm-row.lv1 .mm-name::after,
-  .mm-row.lv2 .mm-name::before,
-  .mm-row.lv2 .mm-name::after,
-  .mm-row.lv2 .mm-label::before {
-    content: "";
-    position: absolute;
-    pointer-events: none;
-  }
-
-  /* The two branch starts: the root's trunk, and the lab's own branch. */
-  .mm-row.lv0 .mm-name::after {
-    left: 6px;
-    top: var(--stub-y, 50%);
-    bottom: 0;
-    border-left: 1px solid var(--rail);
-  }
-
-  .mm-row.lab .mm-label::before {
-    left: 24px;
-    top: var(--stub-y, 50%);
-    bottom: 0;
-    border-left: 1px solid var(--lab-rail);
-  }
-
-  /* The trunk, passing every unit row. */
-  .mm-row.lv1 .mm-name::before,
-  .mm-row.lv2 .mm-name::before {
-    left: 6px;
-    top: 0;
-    bottom: 0;
-    border-left: 1px solid var(--rail);
-  }
-
-  /* The lab's branch, passing its groups. */
-  .mm-row.lv2 .mm-name::after {
-    left: 24px;
-    top: 0;
-    bottom: 0;
-    border-left: 1px solid var(--lab-rail);
-  }
-
-  /* Stubs reach from a rail to within 4px of the name. */
-  .mm-row.lv1 .mm-name::after,
-  .mm-row.lv2 .mm-label::before {
-    top: var(--stub-y, 50%);
-    width: 26px;
-  }
-
-  .mm-row.lv1 .mm-name::after {
-    left: 6px;
-    border-top: 1px solid var(--rail);
-  }
-
-  .mm-row.lv2 .mm-label::before {
-    left: 24px;
-    border-top: 1px solid var(--lab-rail);
-  }
-
-  /* The last child turns the corner: one element carries the rail down and the stub across. */
-  .mm-row.lv1.last .mm-name::before,
-  .mm-row.lv2.last .mm-name::after {
-    bottom: auto;
-    height: var(--stub-y, 50%);
-    width: 26px;
-    border-bottom-left-radius: 7px;
-  }
-
-  .mm-row.lv1.last .mm-name::before {
-    border-bottom: 1px solid var(--rail);
-  }
-
-  .mm-row.lv2.last .mm-name::after {
-    border-bottom: 1px solid var(--lab-rail);
-  }
-
-  .mm-row.lv1.last .mm-name::after,
-  .mm-row.lv2.last .mm-label::before {
-    display: none;
-  }
-
-  @media (max-width: 1279px) {
-    /* The map as a list: name and count, then the bar, then the columns as one line of labelled
-       values, still shaded. The rails move to the row edge: a branch starts at the bottom of its
-       parent row, so no rail crosses the values. */
-    .mx-map {
-      display: block;
-    }
-
-    .mm-head {
-      display: none;
-    }
-
-    .mm-row {
-      position: relative;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      column-gap: 12px;
-      row-gap: 6px;
-      padding-block: 10px;
-    }
-
-    .mm-row.lv0 {
-      padding-left: 18px;
-    }
-
-    .mm-row.lv1 {
-      padding-left: 36px;
-    }
-
-    .mm-row.lv2 {
-      padding-left: 54px;
-    }
-
-    .mm-row .mm-name,
-    .mm-row.lv1 .mm-name,
-    .mm-row.lv2 .mm-name {
-      position: static;
-      flex: 1 1 0;
-      min-width: 0;
-      padding-left: 0;
-    }
-
-    .mm-row {
-      --stub-y: 21px;
-    }
-
-    /* A zero-height full-width item between the name line and the values, so the name keeps the
-       width it needs. The bar used to do this. */
-    .mm-row::before {
-      content: "";
-      order: 3;
-      flex: 1 0 100%;
-      height: 0;
-    }
-
-    .mm-count {
-      flex: none;
-      display: flex;
-      gap: 8px;
-      align-items: baseline;
-    }
-
-    .mm-stat {
-      order: 4;
-      flex: none;
-      padding: 3px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-    }
-
-    .mm-groups {
-      order: 4;
-      flex: 1 0 100%;
-      padding: 0;
-      background: none;
-    }
-
-    .mm-groups:empty {
-      display: none;
-    }
-
-    .mm-stat:empty {
-      display: none;
-    }
-
-    .mm-k {
-      display: inline;
-      margin-right: 4px;
-      font-weight: 500;
-      color: var(--ink-3);
     }
   }
 
