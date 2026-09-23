@@ -1662,14 +1662,22 @@ details.query[open]::details-content {
   margin-top: 16px;
 }
 
+/* The endpoint and the file name sit on one line where there is room and wrap onto two where
+   there is not, rather than running past the panel on a narrow phone. */
 .query-item-head {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 4px 12px;
   margin-bottom: 8px;
   font: 12px/1.4 var(--mono);
   color: var(--ink-3);
+  overflow-wrap: anywhere;
+}
+
+.query-item-head > * {
+  min-width: 0;
 }
 
 .query-item-head strong {
