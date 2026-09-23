@@ -1583,8 +1583,8 @@ const parts2 = [
           }
           sub={
             zh
-              ? `每人只算一次，按说明里的固定顺序，算在标题或职位里最先写到的单元；各行按人数排序。总人数下面那条就是这 ${n(p2)} 人，按同样的顺序划分成各单元；右边各列是每一行内部的比例，颜色越深表示在这一列里越高`
-              : `Each person counts once, at the first unit named in the headline or current title, in the fixed order the notes give; rows are sorted by size. The strip under the total divides the ${n(p2)} by unit in that same order; the columns to the right are shares within each row, darker where higher within the column`
+              ? `每人只算一次，按说明里的固定顺序，算在标题或职位里最先写到的单元；各行按人数排序。总人数下面那条就是这 ${n(p2)} 人，按单元划分：最左边是实验室，中间是写明的其他单元，右边是一个单元都没写的大多数；右边各列是每一行内部的比例，颜色越深表示在这一列里越高`
+              : `Each person counts once, at the first unit named in the headline or current title, in the fixed order the notes give; rows are sorted by size. The strip under the total is the ${n(p2)} divided by unit: the lab at the left, the named units next, then the majority that names none; the columns to the right are shares within each row, darker where higher within the column`
           }
           alt={zh ? `一张地图：总人数下面一条横条把 Meta 可见的 AI 员工按单元划分，实验室占 ${pct(total / p2)}，一个单元都没写的占 ${pct(noneShare)}；下面的表格按同样的顺序列出各单元，实验室的四个团队缩进列在它下面，并给出每一行的人数和各项比例。` : `A map: a strip under the total divides Meta's visible AI staff by unit, the lab ${pct(total / p2)} of it and the majority that names no unit ${pct(noneShare)}; the table below lists the units in the same order, with the lab's four groups indented beneath it, and gives every row's count and shares.`}
           source={source}
