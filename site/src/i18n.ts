@@ -47,8 +47,8 @@ export function titleHtml(text: string, lang: Lang): string {
   // ICU's dictionary splits some domain words (旧金山湾|区, 工程|师, 预|训练); never break inside these.
   let at = 0;
   const cuts = new Set(units.slice(0, -1).map((u) => (at += u.length)));
-  // ICU returns compounds it does not know as single characters (标|为, 占|比, 右|列); a line
-  // never breaks between two of them.
+  // ICU returns compounds it does not know as single characters (标|为, 占|比, 右|列, 都没|写); a
+  // lone character beside Chinese is nearly always half of one, so a line never breaks there.
   const single = (u: string) => (u.match(/[\u3400-\u9fff]/g) ?? []).length === 1 && !/[A-Za-z0-9]/.test(u);
   const around = new Map<number, [string, string]>();
   let edge = 0;
@@ -64,8 +64,8 @@ export function titleHtml(text: string, lang: Lang): string {
       (/\d[\s\u00a0]$/.test(before) && /^[\u3400-\u9fff%]/.test(after)) ||
       (/[一二三四五六七八九十两百千几每这那]$/.test(before) && /^[个份家名条位倍万亿岁成种类项]/.test(after));
     const [left, right] = around.get(cut) ?? ["", ""];
-    const pair = single(left) && single(right);
-    if (NO_BREAK_BEFORE.test(after) || NO_BREAK_AFTER.test(before) || numbered || unit || pair) cuts.delete(cut);
+    const lone = (single(left) || single(right)) && CJK.test(left.slice(-1)) && CJK.test(right.slice(0, 1));
+    if (NO_BREAK_BEFORE.test(after) || NO_BREAK_AFTER.test(before) || numbered || unit || lone) cuts.delete(cut);
   }
   for (const term of PROTECTED) {
     for (let i = kept.indexOf(term); i !== -1; i = kept.indexOf(term, i + 1)) {
