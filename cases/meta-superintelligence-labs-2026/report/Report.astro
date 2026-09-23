@@ -3175,8 +3175,34 @@ const parts2 = [
   }
 
   .mm-row {
+    position: relative;
     min-height: 44px;
+    /* Where this row's bottom separator starts: always clear of any rail crossing it. */
+    --sep: 18px;
+  }
+
+  .mm-row.lab,
+  .mm-row.lv2 {
+    --sep: 36px;
+  }
+
+  .mm-row.lv2.last {
+    --sep: 18px;
+  }
+
+  /* The table's closing line spans it, since no rail reaches that far. */
+  .mm-row.lv1.last {
+    --sep: 0;
+  }
+
+  .mm-row::after {
+    content: "";
+    position: absolute;
+    left: var(--sep);
+    right: 0;
+    bottom: 0;
     border-bottom: 1px solid var(--line);
+    pointer-events: none;
   }
 
   .mm-name {
@@ -3213,60 +3239,91 @@ const parts2 = [
     font-weight: 600;
   }
 
-  /* Rails: the trunk starts at the root's bottom edge and runs down the gutter left of the unit
-     names; each unit hangs on it with a stub that reaches its name; the lab's groups hang on a
-     second rail, in the lab's color, that starts at the bottom of the lab's row. No rail is drawn
-     beside the name it belongs to, so none can cross a name that wraps. */
+  /* Rails. A branch starts in its parent's row, in the gutter left of the parent's name, runs
+     down that gutter, and meets each child with a stub that stops short of the name. The last
+     child closes the branch with a rounded elbow instead of a stub, so a branch has a visible
+     start and a visible end. Nothing is ever drawn where a name sits. */
+  .mm-row.lv0 .mm-name::after,
+  .mm-row.lab .mm-label::before,
   .mm-row.lv1 .mm-name::before,
   .mm-row.lv1 .mm-name::after,
   .mm-row.lv2 .mm-name::before,
   .mm-row.lv2 .mm-name::after,
-  .mm-row.lv2 .mm-label::before,
-  .mm-row.lab .mm-label::before {
+  .mm-row.lv2 .mm-label::before {
     content: "";
     position: absolute;
     pointer-events: none;
   }
 
+  /* The two branch starts: the root's trunk, and the lab's own branch. */
+  .mm-row.lv0 .mm-name::after {
+    left: 6px;
+    top: var(--stub-y, 50%);
+    bottom: 0;
+    border-left: 1px solid var(--rail);
+  }
+
+  .mm-row.lab .mm-label::before {
+    left: 24px;
+    top: var(--stub-y, 50%);
+    bottom: 0;
+    border-left: 1px solid var(--lab-rail);
+  }
+
+  /* The trunk, passing every unit row. */
   .mm-row.lv1 .mm-name::before,
   .mm-row.lv2 .mm-name::before {
     left: 6px;
     top: 0;
-    bottom: -1px;
+    bottom: 0;
     border-left: 1px solid var(--rail);
   }
 
-  .mm-row.lv1.last .mm-name::before {
-    bottom: 50%;
+  /* The lab's branch, passing its groups. */
+  .mm-row.lv2 .mm-name::after {
+    left: 24px;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid var(--lab-rail);
+  }
+
+  /* Stubs reach from a rail to within 4px of the name. */
+  .mm-row.lv1 .mm-name::after,
+  .mm-row.lv2 .mm-label::before {
+    top: var(--stub-y, 50%);
+    width: 26px;
   }
 
   .mm-row.lv1 .mm-name::after {
     left: 6px;
-    top: 50%;
-    width: 26px;
     border-top: 1px solid var(--rail);
-  }
-
-  .mm-row.lab .mm-label::before {
-    display: none;
-  }
-
-  .mm-row.lv2 .mm-name::after {
-    left: 24px;
-    top: 0;
-    bottom: -1px;
-    border-left: 1px solid var(--lab-rail);
-  }
-
-  .mm-row.lv2.last .mm-name::after {
-    bottom: 50%;
   }
 
   .mm-row.lv2 .mm-label::before {
     left: 24px;
-    top: 50%;
-    width: 26px;
     border-top: 1px solid var(--lab-rail);
+  }
+
+  /* The last child turns the corner: one element carries the rail down and the stub across. */
+  .mm-row.lv1.last .mm-name::before,
+  .mm-row.lv2.last .mm-name::after {
+    bottom: auto;
+    height: var(--stub-y, 50%);
+    width: 26px;
+    border-bottom-left-radius: 7px;
+  }
+
+  .mm-row.lv1.last .mm-name::before {
+    border-bottom: 1px solid var(--rail);
+  }
+
+  .mm-row.lv2.last .mm-name::after {
+    border-bottom: 1px solid var(--lab-rail);
+  }
+
+  .mm-row.lv1.last .mm-name::after,
+  .mm-row.lv2.last .mm-label::before {
+    display: none;
   }
 
   .mm-bar {
@@ -3577,19 +3634,8 @@ const parts2 = [
       padding-left: 0;
     }
 
-    .mm-row.lab .mm-label::before {
-      display: none;
-    }
-
-    .mm-row.lv1 .mm-name::after,
-    .mm-row.lv2 .mm-label::before {
-      top: 21px;
-    }
-
-    .mm-row.lv1.last .mm-name::before,
-    .mm-row.lv2.last .mm-name::after {
-      bottom: auto;
-      height: 21px;
+    .mm-row {
+      --stub-y: 21px;
     }
 
     .mm-count {
