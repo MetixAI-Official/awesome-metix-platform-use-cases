@@ -147,7 +147,7 @@ export const ui = {
       "Copy the prompt template, change the question, and let your agent run it on your own key. Every card here started as a prompt like that.",
     makeCta: "Prompt template",
     resultsNote: (records: number) =>
-      `Search results are IDs returned by searches, one per count query and one per match on a full search. Records are postings or profiles read in full: ${records === 0 ? "this case reads none" : `${records} here`}.`,
+      `Search results are IDs returned by searches, one per count query and one per match on a full search. Records are postings or profiles read in full: ${records === 0 ? "this case reads none" : `${number("en", records)} here`}.`,
     siteName: "Metix AI Platform use cases",
     siteDescription:
       "Job-market reports made by an AI agent on the Metix AI Platform, each with its queries, its cost in Credits, and the prompt that produced it.",
@@ -207,13 +207,13 @@ export const ui = {
       pathsLabel: "How to run it",
       reproduce: "Reproduce the numbers",
       reproduceHint: (records: number) =>
-        records === 0 ? "Counts only, no agent needed" : `Counts plus ${records} records read, no agent needed`,
+        records === 0 ? "Counts only, no agent needed" : `Counts plus ${number("en", records)} records read, no agent needed`,
       agent: "Run it in your agent",
       agentHint: (same: boolean) => (same ? "The same queries, run by your agent" : "The whole method, with its audits"),
       adapt: "Adapt it",
       adaptHint: "Ask your own question",
       reproduceLede: (records: number) =>
-        `A short standard-library Python script sends the committed queries${records === 0 ? " as counts" : `, reads the ${records} records the method needs,`} and writes the aggregate files this page is built from. It needs Python and METIX_KEY set in the shell (step 1 of the agent path); your agent can run these lines for you as well.`,
+        `A short standard-library Python script sends the committed queries${records === 0 ? " as counts" : `, reads the ${number("en", records)} records the method needs,`} and writes the aggregate files this page is built from. It needs Python and METIX_KEY set in the shell (step 1 of the agent path); your agent can run these lines for you as well.`,
       reproduceGet: (slug: string) =>
         `data/*.json and data/receipt.json. Run git diff cases/${slug}/data to see what moved: the numbers should match, apart from what changed in the data since the snapshot.`,
       agentLede:
@@ -244,8 +244,8 @@ export const ui = {
       title: "What it costs",
       reproduce: "Reproduce",
       agent: "Agent run",
-      credits: (lo: number, hi: number = lo) => (lo === hi ? `${lo} Credits` : `${lo} to ${hi} Credits`),
-      capNote: (n: number) => `Your agent stops and asks before spending more than ${n} Credits.`,
+      credits: (lo: number, hi: number = lo) => (lo === hi ? `${number("en", lo)} Credits` : `${number("en", lo)} to ${number("en", hi)} Credits`),
+      capNote: (n: number) => `Your agent stops and asks before spending more than ${number("en", n)} Credits.`,
       free: "Fits in the 100 free Credits",
       maybe: "May run past the 100 free Credits",
       notFree: "More than the 100 free Credits",
@@ -297,7 +297,7 @@ export const ui = {
     recordsLabel: "Records read",
     creditsLabel: "Credits",
     exploration: (n: number) =>
-      `Making this case cost about ${n} Credits more: the agent's audits, trial queries, and earlier runs that the published replay replaced. You do not pay that again.`,
+      `Making this case cost about ${number("en", n)} Credits more: the agent's audits, trial queries, and earlier runs that the published replay replaced. You do not pay that again.`,
     rerun: "Reproduce it",
     caseFolder: "Case folder on GitHub",
     pricing: "Credits and pricing",
@@ -336,7 +336,7 @@ export const ui = {
     makeBody: "复制提示词模板，换成你的问题，让你的 agent 用你自己的 key 去跑。这里的每张卡片都是这样开始的。",
     makeCta: "提示词模板",
     resultsNote: (records: number) =>
-      `搜索结果是搜索返回的 ID 数，每次计数查询算一个，完整搜索按命中数算。记录是完整读取的岗位或档案：${records === 0 ? "这个案例一条都没读" : `这里读了 ${records} 条`}。`,
+      `搜索结果是搜索返回的 ID 数，每次计数查询算一个，完整搜索按命中数算。记录是完整读取的岗位或档案：${records === 0 ? "这个案例一条都没读" : `这里读了 ${number("zh", records)} 条`}。`,
     siteName: "Metix AI Platform 案例集",
     siteDescription:
       "由 AI agent 在 Metix AI Platform 上完成的就业市场报告，每份都附带查询、Credits 花费和生成它的提示词。",
@@ -394,13 +394,13 @@ export const ui = {
       lede: "三种方式，每一种都先告诉你要花多少。",
       pathsLabel: "运行方式",
       reproduce: "复现数字",
-      reproduceHint: (records: number) => (records === 0 ? "只计数，不需要 agent" : `计数，另读取 ${records} 条记录，不需要 agent`),
+      reproduceHint: (records: number) => (records === 0 ? "只计数，不需要 agent" : `计数，另读取 ${number("zh", records)} 条记录，不需要 agent`),
       agent: "交给你的 agent 来跑",
       agentHint: (same: boolean) => (same ? "同样的查询，由你的 agent 来跑" : "完整方法，包括抽检"),
       adapt: "改成你的问题",
       adaptHint: "问你自己的问题",
       reproduceLede: (records: number) =>
-        `一个只用 Python 标准库的小脚本，把已提交的查询${records === 0 ? "按计数发出去" : `发出去，读取方法需要的 ${records} 条记录`}，写出这个页面所用的聚合文件。需要 Python，并在终端里设置好 METIX_KEY（见 agent 路径的第 1 步），也可以让你的 agent 替你运行这几行。`,
+        `一个只用 Python 标准库的小脚本，把已提交的查询${records === 0 ? "按计数发出去" : `发出去，读取方法需要的 ${number("zh", records)} 条记录`}，写出这个页面所用的聚合文件。需要 Python，并在终端里设置好 METIX_KEY（见 agent 路径的第 1 步），也可以让你的 agent 替你运行这几行。`,
       reproduceGet: (slug: string) =>
         `data/*.json 和 data/receipt.json。运行 git diff cases/${slug}/data 看哪些数字变了：除去快照之后数据本身的变化，数字应该一致。`,
       agentLede:
@@ -428,8 +428,8 @@ export const ui = {
       title: "花费",
       reproduce: "复现",
       agent: "agent 运行",
-      credits: (lo: number, hi: number = lo) => (lo === hi ? `${lo} Credits` : `${lo} 到 ${hi} Credits`),
-      capNote: (n: number) => `花费超过 ${n} Credits 之前，agent 会先停下来问你。`,
+      credits: (lo: number, hi: number = lo) => (lo === hi ? `${number("zh", lo)} Credits` : `${number("zh", lo)} 到 ${number("zh", hi)} Credits`),
+      capNote: (n: number) => `花费超过 ${number("zh", n)} Credits 之前，agent 会先停下来问你。`,
       free: "新账户赠送的 100 Credits 够用",
       maybe: "可能超出赠送的 100 Credits",
       notFree: "超过新账户赠送的 100 Credits",
@@ -478,7 +478,7 @@ export const ui = {
     recordsLabel: "读取记录",
     creditsLabel: "Credits",
     exploration: (n: number) =>
-      `做这个案例另外花了大约 ${n} Credits：agent 做的抽检、试探性查询，以及被公开复现取代的早先运行。你不需要再花这部分。`,
+      `做这个案例另外花了大约 ${number("zh", n)} Credits：agent 做的抽检、试探性查询，以及被公开复现取代的早先运行。你不需要再花这部分。`,
     rerun: "复现",
     caseFolder: "GitHub 上的案例目录",
     pricing: "Credits 与价格",

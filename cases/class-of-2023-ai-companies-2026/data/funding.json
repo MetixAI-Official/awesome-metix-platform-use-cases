@@ -1,0 +1,216 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/measures.json",
+  "note": "How many AI companies in each cohort have a latest funding round with a date and with an amount. last_funding is the latest round only.",
+  "quarters": [
+    {
+      "quarter": "2023Q1",
+      "all_years_count": 369,
+      "class_count": 45
+    },
+    {
+      "quarter": "2023Q2",
+      "all_years_count": 356,
+      "class_count": 55
+    },
+    {
+      "quarter": "2023Q3",
+      "all_years_count": 367,
+      "class_count": 85
+    },
+    {
+      "quarter": "2023Q4",
+      "all_years_count": 360,
+      "class_count": 97
+    },
+    {
+      "quarter": "2024Q1",
+      "all_years_count": 519,
+      "class_count": 175
+    },
+    {
+      "quarter": "2024Q2",
+      "all_years_count": 454,
+      "class_count": 168
+    },
+    {
+      "quarter": "2024Q3",
+      "all_years_count": 508,
+      "class_count": 180
+    },
+    {
+      "quarter": "2024Q4",
+      "all_years_count": 540,
+      "class_count": 209
+    },
+    {
+      "quarter": "2025Q1",
+      "all_years_count": 452,
+      "class_count": 183
+    },
+    {
+      "quarter": "2025Q2",
+      "all_years_count": 518,
+      "class_count": 220
+    },
+    {
+      "quarter": "2025Q3",
+      "all_years_count": 555,
+      "class_count": 228
+    },
+    {
+      "quarter": "2025Q4",
+      "all_years_count": 512,
+      "class_count": 192
+    },
+    {
+      "quarter": "2026Q1",
+      "all_years_count": 276,
+      "class_count": 114
+    },
+    {
+      "quarter": "2026Q2",
+      "all_years_count": 3,
+      "class_count": 0
+    },
+    {
+      "quarter": "2026Q3",
+      "all_years_count": 0,
+      "class_count": 0
+    }
+  ],
+  "quarters_note": "AI companies whose latest round is dated in the quarter: all founding years, and the class. Rounds stop after 2026Q1 (3 in 2026Q2, none in 2026Q3) because the company records were last refreshed in April and May 2026 (lag.json); a chart should end at 2026Q1, and 2026Q1 itself may be incomplete.",
+  "amounts": [
+    {
+      "cohort": "before",
+      "group": "under-1m",
+      "count": 258,
+      "share": 0.3241
+    },
+    {
+      "cohort": "before",
+      "group": "1m-5m",
+      "count": 221,
+      "share": 0.2776
+    },
+    {
+      "cohort": "before",
+      "group": "5m-20m",
+      "count": 204,
+      "share": 0.2563
+    },
+    {
+      "cohort": "before",
+      "group": "20m-50m",
+      "count": 67,
+      "share": 0.0842
+    },
+    {
+      "cohort": "before",
+      "group": "50m-100m",
+      "count": 22,
+      "share": 0.0276
+    },
+    {
+      "cohort": "before",
+      "group": "100m-1b",
+      "count": 23,
+      "share": 0.0289
+    },
+    {
+      "cohort": "before",
+      "group": "1b-plus",
+      "count": 1,
+      "share": 0.0013
+    },
+    {
+      "cohort": "before",
+      "group": "total",
+      "count": 796
+    },
+    {
+      "cohort": "class",
+      "group": "under-1m",
+      "count": 361,
+      "share": 0.4308
+    },
+    {
+      "cohort": "class",
+      "group": "1m-5m",
+      "count": 228,
+      "share": 0.2721
+    },
+    {
+      "cohort": "class",
+      "group": "5m-20m",
+      "count": 166,
+      "share": 0.1981
+    },
+    {
+      "cohort": "class",
+      "group": "20m-50m",
+      "count": 44,
+      "share": 0.0525
+    },
+    {
+      "cohort": "class",
+      "group": "50m-100m",
+      "count": 17,
+      "share": 0.0203
+    },
+    {
+      "cohort": "class",
+      "group": "100m-1b",
+      "count": 18,
+      "share": 0.0215
+    },
+    {
+      "cohort": "class",
+      "group": "1b-plus",
+      "count": 4,
+      "share": 0.0048
+    },
+    {
+      "cohort": "class",
+      "group": "total",
+      "count": 838
+    }
+  ],
+  "amounts_note": "United States headquarters only, because amounts elsewhere are often in local currency. Shares are of the companies with an amount.",
+  "rows": [
+    {
+      "cohort": "before",
+      "us_count": 3151,
+      "us_amount_count": 796,
+      "us_amount_share": 0.2526,
+      "count": 10553,
+      "dated_count": 2649,
+      "dated_share": 0.251,
+      "amount_count": 1727,
+      "amount_share": 0.1637
+    },
+    {
+      "cohort": "class",
+      "us_count": 5671,
+      "us_amount_count": 838,
+      "us_amount_share": 0.1478,
+      "count": 17871,
+      "dated_count": 2023,
+      "dated_share": 0.1132,
+      "amount_count": 1496,
+      "amount_share": 0.0837
+    },
+    {
+      "cohort": "partial",
+      "us_count": 196,
+      "us_amount_count": 1,
+      "us_amount_share": 0.0051,
+      "count": 867,
+      "dated_count": 4,
+      "dated_share": 0.0046,
+      "amount_count": 2,
+      "amount_share": 0.0023
+    }
+  ]
+}

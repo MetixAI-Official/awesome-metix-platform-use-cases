@@ -1,0 +1,2027 @@
+---
+/*
+ * Design
+ * Color follows data: a companies report, so the focus is the companies teal ink #07545E; the
+ *   years before ChatGPT, and every comparison group, are the neutral grey #858395. Staff counts
+ *   (profiles) keep the profiles violet #3D36C9 where they appear.
+ * Hero: a pale mint field and ink type. The signature is the founding wave across the column:
+ *   one column per founding year, the AI share of that year's new companies, with the launch of
+ *   ChatGPT marked inside 2022, eleven twelfths of the way through the year.
+ * Body: shares, never raw counts, wherever founding years are compared, because recent years are
+ *   still filling in. The class is teal ink, the years before are grey, the partial year 2026 is
+ *   a light teal and labelled "so far".
+ * The roster: the small-team, big-round companies set as a yearbook page, the only place in the
+ *   report where companies are named.
+ * Wording: "companies that describe themselves as AI" (the definition reads tags and names, and
+ *   about one in five it counts is not an AI company); counts are companies on the
+ *   Metix AI Platform; staff counts are visible profiles, never a headcount.
+ */
+import BarList from "@site/components/charts/BarList.astro";
+import FigNotes from "@site/components/charts/FigNotes.astro";
+import Chapter from "@site/components/Chapter.astro";
+import Contents from "@site/components/Contents.astro";
+import Figure from "@site/components/charts/Figure.astro";
+import { REPO, href, isoDate, longDate, number, titleHtml, type Lang } from "@site/i18n";
+import controlsData from "../data/controls.json";
+import countriesData from "../data/countries.json";
+import growthData from "../data/growth.json";
+import leanData from "../data/lean.json";
+import metrosData from "../data/metros.json";
+import receipt from "../data/receipt.json";
+import sizeData from "../data/size.json";
+import staffData from "../data/staff.json";
+import themesData from "../data/themes.json";
+import waveData from "../data/wave.json";
+import cohortsQuery from "../queries/cohorts.json";
+import definitionQuery from "../queries/definition.json";
+import measuresQuery from "../queries/measures.json";
+import placesQuery from "../queries/places.json";
+import staffQuery from "../queries/staff.json";
+import themesQuery from "../queries/themes.json";
+
+interface Props {
+  lang: Lang;
+  section: "card" | "body" | "method";
+  size?: "compact" | "full";
+  entry: {
+    slug: string;
+    title: Record<Lang, string>;
+    dek: Record<Lang, string>;
+    snapshot?: Date;
+    exploration_credits?: number;
+  };
+}
+
+const { lang, section, entry } = Astro.props;
+const zh = lang === "zh";
+const snapshot = entry.snapshot ?? new Date(waveData.snapshot);
+const iso = isoDate(snapshot);
+const pct = (x: number, d = 1) => `${number(lang, x * 100, d)}%`;
+const n = (x: number) => number(lang, x);
+const times = (x: number) => (zh ? `${number(lang, x, 1)} 倍` : `${number(lang, x, 1)} times`);
+const fail = (what: string): never => {
+  throw new Error(`class-of-2023 report: ${what}`);
+};
+const COMPANIES = "POST /v1/companies/query";
+const PEOPLE = "POST /v1/people/query";
+const source = zh ? `来源：Metix AI Platform 公司数据，${iso}。` : `Source: Metix AI Platform, companies, ${iso}.`;
+const sourceBoth = zh ? `来源：Metix AI Platform 公司与人才数据，${iso}。` : `Source: Metix AI Platform, companies and profiles, ${iso}.`;
+const q = (file: string, spec: unknown, endpoint = COMPANIES) => ({ file, endpoint, spec });
+const qDef = q("definition.json", definitionQuery);
+const qCohorts = q("cohorts.json", cohortsQuery);
+const qMeasures = q("measures.json", measuresQuery);
+const qPlaces = q("places.json", placesQuery);
+const qThemes = q("themes.json", themesQuery);
+const qStaff = q("staff.json", staffQuery, PEOPLE);
+const LAUNCH = "2022-11-30";
+const LAUNCH_URL = "https://openai.com/index/chatgpt/";
+
+// ---------- the founding wave (hero and figure 01)
+type WaveRow = (typeof waveData.rows)[number];
+const wave = waveData.rows as WaveRow[];
+const yr = (y: number) => wave.find((r) => r.year === y) ?? fail(`no founding year ${y}`);
+const span = (a: number, b: number) => wave.filter((r) => r.year >= a && r.year <= b);
+const BEFORE = span(2019, 2022);
+const CLASS = span(2023, 2025);
+if (CLASS.length !== 3 || BEFORE.length !== 4) fail("a cohort is missing a year");
+const sum = (rows: WaveRow[], k: keyof WaveRow) => rows.reduce((t, r) => t + (r[k] as number), 0);
+// The denominator is every company of the same types the AI counts keep (nonprofits, educational
+// institutions, and government agencies are left out of both).
+const BASE = ("all_typed_count" in wave[0] ? "all_typed_count" : "all_count") as keyof WaveRow;
+const shareIn = (rows: WaveRow[], k: keyof WaveRow, base: keyof WaveRow = BASE) => sum(rows, k) / sum(rows, base);
+const classAi = sum(CLASS, "ai_count");
+const classAll = sum(CLASS, BASE);
+const beforeAi = sum(BEFORE, "ai_count");
+const beforeAll = sum(BEFORE, BASE);
+const classShare = classAi / classAll;
+const beforeShare = beforeAi / beforeAll;
+const jump = classShare / beforeShare;
+if (jump < 2.5 || jump > 3.5) fail("the class is no longer about three times the share before; rewrite the title");
+const y22 = yr(2022);
+const y23 = yr(2023);
+const share = (r: WaveRow) => r.ai_count / (r[BASE] as number);
+const waveYears = wave.filter((r) => r.year >= 2010 && r.year <= 2026);
+const waveMax = 0.018;
+if (Math.max(...waveYears.map(share)) > waveMax) fail("a year's share runs past the wave's scale");
+const waveTicks = [0, 0.005, 0.01, 0.015];
+
+// The same jump under every definition the audit tested. The probe and the name path are biased in
+// opposite directions (the audit's catch rates by era), so they bracket the definition.
+// probe and loose keep every company type, so they are set against every company; the rest leave
+// out nonprofits, educational institutions, and government agencies, as the base does.
+type Def = { id: string; en: string; zh: string; noteEn: string; noteZh: string; focus?: boolean; everyType?: boolean };
+const defs: Def[] = [
+  { id: "probe", everyType: true, en: "Four broad tags", zh: "四个宽泛标签", noteEn: "understates: catches fewer new AI companies", noteZh: "偏低：新公司抓得少" },
+  { id: "technical_neutral", en: "Three older technical tags", zh: "三个旧技术标签", noteEn: "deep learning, computer vision, NLP", noteZh: "深度学习、计算机视觉、自然语言处理" },
+  { id: "technical", en: "Five technical tags", zh: "五个技术标签", noteEn: "the three, plus generative AI and LLMs", noteZh: "上面三个，加生成式 AI 和大语言模型" },
+  { id: "loose", everyType: true, en: "Nine loose tags", zh: "九个宽松标签", noteEn: "43% precise", noteZh: "精度 43%" },
+  { id: "ai", en: "This report's definition", zh: "本报告的定义", noteEn: "78% precise, same catch in every era", noteZh: "精度 78%，各时期覆盖率相同", focus: true },
+  { id: "name_path", en: "AI in the company name", zh: "公司名里有 AI", noteEn: "overstates: new companies put AI in the name", noteZh: "偏高：新公司更爱把 AI 写进名字" },
+];
+const ratioOf = (key: string) => {
+  const k = `${key}_count` as keyof WaveRow;
+  if (!(k in wave[0])) return null;
+  const base = (defs.find((d) => d.id === key)?.everyType ? "all_count" : BASE) as keyof WaveRow;
+  return shareIn(CLASS, k, base) / shareIn(BEFORE, k, base);
+};
+const bracket = defs
+  .map((d) => ({ ...d, ratio: ratioOf(d.id) }))
+  .filter((d): d is Def & { ratio: number } => d.ratio !== null)
+  .sort((a, b) => a.ratio - b.ratio);
+const lowest = bracket[0];
+const highest = bracket[bracket.length - 1];
+if (lowest.ratio <= 1) fail("a definition shows no jump; rewrite figure 01");
+const RATIO_MAX = Math.ceil(highest.ratio);
+
+// ---------- where (figure 02): shares of the companies that give a country or a city
+type CountryRow = (typeof countriesData.rows)[number];
+const cRows = countriesData.rows as CountryRow[];
+const cOf = (cohort: string, g: string) => cRows.find((r) => r.cohort === cohort && r.group === g);
+const stated = (cohort: string) => (cOf(cohort, "total")?.count ?? fail("country total")) - (cOf(cohort, "no-country")?.count ?? 0);
+const cShare = (cohort: string, g: string) => (cOf(cohort, g)?.count ?? 0) / stated(cohort);
+const countryNames: Record<string, Record<Lang, string>> = {
+  "United States": { en: "United States", zh: "美国" },
+  India: { en: "India", zh: "印度" },
+  "United Kingdom": { en: "United Kingdom", zh: "英国" },
+  Canada: { en: "Canada", zh: "加拿大" },
+  Germany: { en: "Germany", zh: "德国" },
+  France: { en: "France", zh: "法国" },
+  Australia: { en: "Australia", zh: "澳大利亚" },
+  Netherlands: { en: "Netherlands", zh: "荷兰" },
+  Spain: { en: "Spain", zh: "西班牙" },
+  Pakistan: { en: "Pakistan", zh: "巴基斯坦" },
+  Brazil: { en: "Brazil", zh: "巴西" },
+  Italy: { en: "Italy", zh: "意大利" },
+  Singapore: { en: "Singapore", zh: "新加坡" },
+  Israel: { en: "Israel", zh: "以色列" },
+  "United Arab Emirates": { en: "United Arab Emirates", zh: "阿联酋" },
+  Switzerland: { en: "Switzerland", zh: "瑞士" },
+};
+const cName = (g: string) => countryNames[g]?.[lang] ?? fail(`no name for country ${g}`);
+// Only countries in both cohorts' top 15: a country missing from one list is not 0, only below its 15th.
+const ranked = (cohort: string) => new Set(cRows.filter((r) => r.cohort === cohort && typeof (r as { rank?: number }).rank === "number").map((r) => r.group));
+const topCountries = [...ranked("class")].filter((g) => ranked("before").has(g))
+  .map((g) => ({ g, before: cShare("before", g), klass: cShare("class", g) }))
+  .sort((a, b) => b.klass - a.klass);
+const us = topCountries.find((c) => c.g === "United States") ?? fail("no US row");
+const noCountry = (cohort: string) => (cOf(cohort, "no-country")?.count ?? 0) / (cOf(cohort, "total")?.count ?? 1);
+const china = countriesData.coverage as { year: number; all_count: number; ai_count: number }[];
+const china23 = china.find((r) => r.year === 2023) ?? fail("no China 2023");
+
+type MetroRow = { cohort: string; group: string; count: number; share?: number; city_count?: number; stated_share?: number };
+const mRows = metrosData.rows as MetroRow[];
+const mOf = (cohort: string, g: string) => mRows.find((r) => r.cohort === cohort && r.group === g);
+const cityStated = (cohort: string) => mOf(cohort, "total")?.city_count ?? fail("metro city total");
+const mShare = (cohort: string, g: string) => (mOf(cohort, g)?.count ?? 0) / cityStated(cohort);
+const metroNames: Record<string, Record<Lang, string>> = {
+  "sf-bay-area": { en: "San Francisco Bay Area", zh: "旧金山湾区" },
+  "new-york-city": { en: "New York City", zh: "纽约市" },
+  london: { en: "London", zh: "伦敦" },
+  paris: { en: "Paris", zh: "巴黎" },
+  berlin: { en: "Berlin", zh: "柏林" },
+  toronto: { en: "Toronto", zh: "多伦多" },
+  bengaluru: { en: "Bengaluru", zh: "班加罗尔" },
+  "tel-aviv": { en: "Tel Aviv", zh: "特拉维夫" },
+  singapore: { en: "Singapore", zh: "新加坡" },
+  seattle: { en: "Seattle", zh: "西雅图" },
+  boston: { en: "Boston and Cambridge", zh: "波士顿与剑桥" },
+  austin: { en: "Austin", zh: "奥斯汀" },
+  "los-angeles": { en: "Los Angeles", zh: "洛杉矶" },
+  dubai: { en: "Dubai", zh: "迪拜" },
+};
+const metros = Object.keys(metroNames)
+  .map((g) => ({ g, before: mShare("before", g), klass: mShare("class", g) }))
+  .sort((a, b) => b.klass - a.klass);
+const bay = metros.find((m) => m.g === "sf-bay-area") ?? fail("no Bay Area row");
+const GEO_MAX = 0.4;
+if (Math.max(...topCountries.map((c) => Math.max(c.before, c.klass))) > GEO_MAX) fail("a country runs past the geography scale");
+const METRO_MAX = 0.12;
+if (Math.max(...metros.map((m) => Math.max(m.before, m.klass))) > METRO_MAX) fail("a metro runs past the metro scale");
+
+// ---------- what they say they build (figure 03)
+type ThemeRow = { year: number; group: string; count: number; ai_count: number; share: number; loose_share?: number };
+const tRows = themesData.rows as ThemeRow[];
+const themeNames: Record<string, Record<Lang, string>> = {
+  agents: { en: "AI agents", zh: "AI Agent" },
+  "generative-ai": { en: "Generative AI", zh: "生成式 AI" },
+  llm: { en: "Large language models", zh: "大语言模型" },
+  "machine-learning": { en: "Machine learning", zh: "机器学习" },
+  "computer-vision": { en: "Computer vision", zh: "计算机视觉" },
+  robotics: { en: "Robotics", zh: "机器人" },
+  health: { en: "Health", zh: "医疗健康" },
+  "data-analytics": { en: "Data and analytics", zh: "数据与分析" },
+};
+const THEME_YEARS = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+const themeSeries = Object.keys(themeNames).map((g) => {
+  const pts = THEME_YEARS.map((y) => tRows.find((r) => r.group === g && r.year === y) ?? fail(`no theme ${g} ${y}`));
+  return { g, pts };
+});
+const themeAt = (g: string, y: number, k: "share" | "loose_share" = "share") => {
+  const r = tRows.find((x) => x.group === g && x.year === y) ?? fail(`no theme ${g} ${y}`);
+  return (r[k] as number | undefined) ?? fail(`no ${k} for ${g} ${y}`);
+};
+const THEME_MAX = 0.6;
+if (Math.max(...tRows.filter((r) => themeNames[r.group]).map((r) => r.share)) > THEME_MAX) fail("a theme runs past its scale");
+
+// ---------- the roster (figure 06)
+type LeanRow = (typeof leanData.rows)[number];
+const bandOrder = ["1b-plus", "250m-1b", "100m-250m", "50m-100m"];
+// The roster is the class only; the companies founded in 2022, just before the launch, are named in
+// the notes.
+const leanAll = [...(leanData.rows as LeanRow[])];
+const pre2023 = leanAll.filter((r) => r.founded_year < 2023).sort((a, b) => a.company.localeCompare(b.company));
+const roster = leanAll.filter((r) => r.founded_year >= 2023).sort(
+  (a, b) => bandOrder.indexOf(a.amount_band) - bandOrder.indexOf(b.amount_band) || b.month.localeCompare(a.month) || a.company.localeCompare(b.company),
+);
+if (roster.some((r) => !bandOrder.includes(r.amount_band))) fail("a roster band is not in the order");
+const bandName: Record<string, Record<Lang, string>> = {
+  "1b-plus": { en: "$1 billion or more", zh: "10 亿美元以上" },
+  "250m-1b": { en: "$250 million to $1 billion", zh: "2.5 亿到 10 亿美元" },
+  "100m-250m": { en: "$100 to $250 million", zh: "1 亿到 2.5 亿美元" },
+  "50m-100m": { en: "$50 to $100 million", zh: "5,000 万到 1 亿美元" },
+};
+const rosterBands = bandOrder
+  .map((b) => ({ b, rows: roster.filter((r) => r.amount_band === b) }))
+  .filter((x) => x.rows.length > 0);
+const leanCount = (g: string) =>
+  ((leanData.counts as { group: string; count: number }[]).find((c) => c.group === g) ?? fail(`no lean count ${g}`)).count;
+const staffBand = (b: string) => (zh ? `${b.replace("-", " 到 ")} 人` : `${b.replace("-", " to ")} staff`);
+const monthLabel = (m: string) => {
+  const [y, mo] = m.split("-").map(Number);
+  return zh ? `${y} 年 ${mo} 月` : new Date(Date.UTC(y, mo - 1, 1)).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+};
+
+// ---------- growth and money against every company of the same age (figures 04 and 05)
+type Ctl = { measure: string; cohort?: string; year?: number; group: string; ai_count: number; non_ai_count: number; ai_share: number; non_ai_share: number };
+const ctl = controlsData.rows as Ctl[];
+const ctlOf = (measure: string, cohort: string, g: string) =>
+  ctl.find((r) => r.measure === measure && r.cohort === cohort && r.group === g) ?? fail(`no control ${measure} ${cohort} ${g}`);
+// Growth shares are of the companies that state a figure, so not-stated is taken out of the base.
+const grown = (cohort: string, side: "ai" | "non_ai", g: string) => {
+  const total = ctlOf("growth", cohort, "total");
+  const ns = ctlOf("growth", cohort, "not-stated");
+  const base = side === "ai" ? total.ai_count - ns.ai_count : total.non_ai_count - ns.non_ai_count;
+  const r = ctlOf("growth", cohort, g);
+  return (side === "ai" ? r.ai_count : r.non_ai_count) / base;
+};
+const shrank = (cohort: string, side: "ai" | "non_ai") => grown(cohort, side, "below-minus-20") + grown(cohort, side, "minus-20-to-0");
+const doubled = (cohort: string, side: "ai" | "non_ai") => grown(cohort, side, "100-plus");
+const growthBase = (cohort: string, side: "ai" | "non_ai") => {
+  const total = ctlOf("growth", cohort, "total");
+  const ns = ctlOf("growth", cohort, "not-stated");
+  return side === "ai" ? total.ai_count - ns.ai_count : total.non_ai_count - ns.non_ai_count;
+};
+if (Math.abs(doubled("class", "ai") - (growthData.rows.find((r) => r.cohort === "class" && r.group === "100-plus")?.share_of_stated ?? 0)) > 0.001) {
+  fail("growth.json and controls.json disagree on the class's doubled share");
+}
+const gap = doubled("class", "ai") - doubled("class", "non_ai");
+const dated = (cohort: string, side: "ai" | "non_ai") => ctlOf("funding", cohort, "dated")[`${side}_share`];
+const datedTimes = dated("class", "ai") / dated("class", "non_ai");
+const AMOUNT_BANDS = ["under-1m", "1m-5m", "5m-20m", "20m-50m", "50m-100m", "100m-1b", "1b-plus"];
+const amountName: Record<string, Record<Lang, string>> = {
+  "under-1m": { en: "Under $1 million", zh: "100 万美元以下" },
+  "1m-5m": { en: "$1 to $5 million", zh: "100 万到 500 万" },
+  "5m-20m": { en: "$5 to $20 million", zh: "500 万到 2,000 万" },
+  "20m-50m": { en: "$20 to $50 million", zh: "2,000 万到 5,000 万" },
+  "50m-100m": { en: "$50 to $100 million", zh: "5,000 万到 1 亿" },
+  "100m-1b": { en: "$100 million to $1 billion", zh: "1 亿到 10 亿" },
+  "1b-plus": { en: "$1 billion or more", zh: "10 亿美元以上" },
+};
+const amounts = AMOUNT_BANDS.map((g) => ({ g, ai: ctlOf("us-amount", "class", g).ai_share, non: ctlOf("us-amount", "class", g).non_ai_share }));
+const amountN = ctlOf("us-amount", "class", "total");
+const AMOUNT_MAX = 0.5;
+if (Math.max(...amounts.map((a) => Math.max(a.ai, a.non))) > AMOUNT_MAX) fail("an amount band runs past its scale");
+const sizeOf = (year: number, g: string) =>
+  ctl.find((r) => r.measure === "size" && r.year === year && r.group === g) ?? fail(`no size ${year} ${g}`);
+const solo25 = sizeOf(2025, "Myself Only");
+
+// ---------- staff (figure 07): visible profiles at the largest companies of each cohort
+// Two sets: every kept company, and the same without the data-labeling marketplaces, whose visible
+// staff are mostly contractors. The chart shows the full set; the notes give the other.
+type StaffRow = { cohort: string; set: string; group: string; kind: string; count: number | string | null; share: number | null };
+const sRows = staffData.rows as StaffRow[];
+const sIn = (set: string) => (cohort: string, g: string) =>
+  sRows.find((r) => r.set === set && r.cohort === cohort && r.group === g) ?? fail(`no staff row ${set} ${cohort} ${g}`);
+const sOf = sIn("all");
+const sNoLab = sIn("without-labeling");
+const bigNoLab = (cohort: string) => sNoLab(cohort, "big-tech").share ?? fail(`big tech without labeling is withheld for ${cohort}`);
+const staffTotal = (cohort: string) => sOf(cohort, "total").count as number;
+const employerNames: Record<string, Record<Lang, string>> = {
+  "big-tech": { en: "Any of the big tech companies below", zh: "下面任一大型科技公司" },
+  google: { en: "Google, Google DeepMind included", zh: "Google（含 Google DeepMind）" },
+  amazon: { en: "Amazon", zh: "Amazon" },
+  microsoft: { en: "Microsoft", zh: "Microsoft" },
+  meta: { en: "Meta", zh: "Meta" },
+  apple: { en: "Apple", zh: "Apple" },
+  nvidia: { en: "NVIDIA", zh: "NVIDIA" },
+  "founder-title": { en: "Current title names founder", zh: "当前职位写着创始人" },
+};
+// The rollup first, the employers by the class's share, and the founder titles apart at the end.
+const staffRows = Object.keys(employerNames)
+  .map((g) => ({ g, klass: sOf("class", g), base: sOf("baseline", g) }))
+  .sort((a, b) => {
+    const rank = (g: string) => (g === "big-tech" ? 0 : g === "founder-title" ? 2 : 1);
+    return rank(a.g) - rank(b.g) || (b.klass.share ?? 0) - (a.klass.share ?? 0);
+  });
+const STAFF_MAX = 0.08;
+if (Math.max(...staffRows.flatMap((r) => [r.klass.share ?? 0, r.base.share ?? 0])) > STAFF_MAX) fail("a staff row runs past its scale");
+
+const uaeRank = (cohort: string) => (cOf(cohort, "United Arab Emirates") as { rank?: number } | undefined)?.rank ?? fail(`no UAE rank for ${cohort}`);
+const ordinal = (i: number) => {
+  const s = ["th", "st", "nd", "rd"];
+  const v = i % 100;
+  return `${i}${s[(v - 20) % 10] || s[v] || s[0]}`;
+};
+const parts = [
+  {
+    id: "part-rise",
+    figures: ["01", "02"],
+    title: zh ? "增幅与新词" : "The rise, in new words",
+    note: zh
+      ? "换不同的定义看增幅有多大，以及这一届用什么词描述自己。"
+      : "How large the rise is under each definition the audit tested, and the words the class uses to describe itself.",
+  },
+  {
+    id: "part-where",
+    figures: ["03"],
+    title: zh ? "总部在哪里" : "Where they are",
+    note: zh ? "这一届和之前的 AI 公司，总部所在的国家和城市圈。" : "The headquarters countries and metros of the class, against the AI companies founded before it.",
+  },
+  {
+    id: "part-money",
+    figures: ["04", "05", "06"],
+    title: zh ? "规模与融资" : "Size and money",
+    note: zh
+      ? "和同一批成立年份的其他公司比员工增长和融资，以及员工很少、融资很大的那些公司。"
+      : "Staff growth and funding against other companies founded in the same years, and the small teams with large rounds.",
+  },
+  {
+    id: "part-people",
+    figures: ["07"],
+    title: zh ? "员工从哪里来" : "Where their staff came from",
+    note: zh ? "这一届最大的那些公司，可见员工以前在哪里工作。" : "Where the visible staff of the class's largest companies worked before.",
+  },
+];
+
+// "The Bay Area rises under every definition": checked here, or the build stops.
+type Cmp = Record<string, number | string>;
+for (const d of ["definition", "probe", "loose"]) {
+  const row = (c: string) => (metrosData.comparison as Cmp[]).find((r) => r.definition === d && r.cohort === c) ?? fail(`no comparison ${d} ${c}`);
+  if ((row("class")["sf-bay-area_share_of_city"] as number) <= (row("before")["sf-bay-area_share_of_city"] as number)) fail(`the Bay Area does not rise under ${d}`);
+}
+---
+
+{section === "card" && null}
+
+{
+  section === "body" && (
+    <>
+      <header class="cl-hero">
+        <div class="wrap">
+          <div class="cl-top">
+            <div class="cl-text">
+              <nav class="cl-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
+                <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
+                <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
+              </nav>
+              <p class="cl-meta">
+                {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=companies#index`}>{zh ? "公司" : "Companies"}</a> ·{" "}
+                <a href={`${href(lang)}?data=people#index`}>{zh ? "人才" : "Profiles"}</a> · <span class="nowrap">{iso}</span>
+              </p>
+              <h1 set:html={titleHtml(entry.title[lang], lang)} />
+              <p class="cl-dek">{entry.dek[lang]}</p>
+              <div class="cl-actions">
+                <a class="cl-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
+                <a class="cl-chip" href="#run-reproduce">
+                  {zh ? `复现需 ${n(receipt.credits)} Credits` : `${n(receipt.credits)} Credits to reproduce`}
+                </a>
+                <span class="cl-note">
+                  {zh
+                    ? `复现读取 ${n(receipt.records)} 条公司和人才记录，其余都是计数`
+                    : `Reproducing reads ${n(receipt.records)} company and profile records; everything else is a count`}
+                </span>
+              </div>
+            </div>
+            <div class="cl-side">
+              <dl class="cl-pair">
+                <div class="focus">
+                  <dt>{pct(classShare, 2)}</dt>
+                  <dd>
+                    {zh ? "2023 到 2025 年成立的公司中，自述为 AI 公司的比例" : "of companies founded in 2023 to 2025 describe themselves as AI companies "}
+                    {zh ? `（${n(classAll)} 家中 ${n(classAi)} 家）` : <span class="nowrap">{`(${n(classAi)} of ${n(classAll)})`}</span>}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{pct(beforeShare, 2)}</dt>
+                  <dd>
+                    {zh ? "2019 到 2022 年成立的公司中的同一比例" : "of those founded in 2019 to 2022 "}
+                    {zh ? `（${n(beforeAll)} 家中 ${n(beforeAi)} 家）` : <span class="nowrap">{`(${n(beforeAi)} of ${n(beforeAll)})`}</span>}
+                  </dd>
+                </div>
+              </dl>
+              <p class="cl-pair-note">
+                {zh
+                  ? `ChatGPT 于 2022 年 11 月 30 日发布。只看发布前就有的三个技术标签，增幅是 ${times(ratioOf("technical_neutral") ?? 0)}：这一届用的是新词（图 01、图 02）。`
+                  : `ChatGPT launched on November 30, 2022. Counted by only the three technical tags that predate it, the rise is ${times(ratioOf("technical_neutral") ?? 0)}: the class describes itself in new words (figures 01 and 02).`}
+              </p>
+            </div>
+          </div>
+
+          <div class="cl-wave-head">
+            <p
+              class="cl-wave-title"
+              id="wave-title"
+              set:html={titleHtml(zh ? "每年新成立的公司里，自述为 AI 公司的比例" : "Of each year's new companies, the share describing themselves as AI companies", lang)}
+            />
+            <p class="cl-wave-key" aria-hidden="true">
+              <span class="wk class">{zh ? "2023 到 2025 年：这一届" : "2023 to 2025: the class"}</span>
+              <span class="wk before">{zh ? "此前各年" : "Earlier years"}</span>
+              <span class="wk partial">{zh ? "2026 年：至今" : "2026: so far"}</span>
+            </p>
+          </div>
+          <div class="wave-box">
+            <div class="wv-grid" aria-hidden="true">
+              {waveTicks.map((t) => (
+                <span style={`--t: ${(t / waveMax).toFixed(4)}`}>
+                  <em>{t === 0 ? "0" : pct(t, 1)}</em>
+                </span>
+              ))}
+            </div>
+            <ol class="wave" aria-labelledby="wave-title">
+              {waveYears.map((r) => (
+                <li class:list={[r.year >= 2026 ? "partial" : r.year >= 2023 ? "class" : "before", { first: r.year === 2023 }]}>
+                  <span class="wv-y">{r.year}</span>
+                  <span class="wv-v">
+                    <span class="visually-hidden">: </span>
+                    {pct(share(r), 2)}
+                  </span>
+                  <span class="wv-bar" aria-hidden="true" style={`--v: ${(share(r) / waveMax).toFixed(4)}`} />
+                </li>
+              ))}
+            </ol>
+            <p class="wv-launch" aria-hidden="true">
+              <span>{zh ? "ChatGPT 发布 · 2022 年 11 月 30 日" : "ChatGPT · Nov 30, 2022"}</span>
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <div class="wrap report-body">
+        <section class="text-block rail-block" aria-labelledby="who-title">
+          <div class="rail">
+            <h2 id="who-title">{zh ? "统计的是什么" : "What is counted"}</h2>
+          </div>
+          <div class="rail-main">
+            <dl class="criteria">
+              {(zh
+                ? [
+                    ["公司", `${longDate(lang, snapshot)} Metix AI Platform 上的公司记录，按记录上的成立年份（founded_year）统计。非营利组织、教育机构和政府机构不计入。`],
+                    ["AI 公司", "公司名里有 AI 这个词、同时标签里有一个 AI 词；或者标签里有深度学习、计算机视觉、自然语言处理、大语言模型、生成式 AI 之一。这是公司怎么描述自己，不是我们的判断。"],
+                    ["有多准", `人工读了 215 家这个定义算进来的公司，${pct(167 / 215)} 真的以 AI 为产品或核心，其余多是列了几十项服务的外包和咨询公司，也有活动、媒体和基金。它大约能抓到四成 AI 公司，而且在 2016 到 2019、2020 到 2022、2023 到 2025 三个时期里比例相近，所以不同年份之间可以比较。`],
+                    ["这一届", `2023 到 2025 年成立的公司；2026 年只有几个月，单独列出。ChatGPT 于 ${longDate(lang, new Date(LAUNCH))}发布，成立年份只精确到年，2022 年的十二个月里有十一个在发布之前，所以 2022 算作之前。对照组是 2019 到 2022 年成立的公司。`],
+                    ["比例，不是数量", `最近几年的记录还在补：所有公司里，2023 年成立的有 ${n(y23.all_count)} 家，2025 年只有 ${n(yr(2025).all_count)} 家。比较年份时用 AI 公司占当年新公司的比例，因为分子和分母一起在补。`],
+                    ["不是全世界", `平台上的中国公司很少：2023 年成立、总部在中国的公司一共只有 ${n(china23.all_count)} 家。这里的地图是平台看得到的那部分世界。`],
+                  ]
+                : [
+                    ["Companies", `Company records on the Metix AI Platform on ${longDate(lang, snapshot)}, by the founding year on the record (founded_year). Nonprofits, educational institutions, and government agencies are left out.`],
+                    ["AI company", "A company whose name has the word AI and whose tags name AI, or whose tags name deep learning, computer vision, natural language processing, large language models, or generative AI. It is how a company describes itself, not a verdict."],
+                    ["How precise", `Of 215 companies the definition counts, read by hand, ${pct(167 / 215)} make AI their product or its core; most of the rest are software and IT service houses that list AI among dozens of services, and a few are events, media, or funds. It catches about four in ten AI companies, and about the same share in 2016 to 2019, 2020 to 2022, and 2023 to 2025, so founding years compare.`],
+                    ["The class", `Companies founded in 2023, 2024, and 2025; 2026 covers a few months and is shown apart. ChatGPT launched on ${longDate(lang, new Date(LAUNCH))}; a founding year has no month, and eleven of 2022's twelve months came before the launch, so 2022 counts as before. The comparison is companies founded in 2019 to 2022.`],
+                    ["Shares, not counts", `Recent years are still filling in: ${n(y23.all_count)} companies of every kind on the Platform were founded in 2023, and ${n(yr(2025).all_count)} in 2025. Founding years are compared by the AI share of each year's new companies, since both parts fill in together.`],
+                    ["Not the whole world", `The Platform holds few Chinese companies: ${n(china23.all_count)} of every kind founded in 2023 have a headquarters in China. The map here is the part of the world the Platform sees.`],
+                  ]
+              ).map(([term, text]) => (
+                <div>
+                  <dt>{term}</dt>
+                  <dd set:html={zh ? titleHtml(text, "zh") : text} />
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <section class="text-block rail-block" aria-labelledby="brief-title">
+          <div class="rail">
+            <h2 id="brief-title">{zh ? "要点" : "In brief"}</h2>
+          </div>
+          <div class="rail-main">
+            <ol class="brief-list">
+              {(zh
+                ? [
+                    `2023 到 2025 年成立的公司里，自述为 AI 公司的占 ${pct(classShare, 2)}，2019 到 2022 年是 ${pct(beforeShare, 2)}，升到 ${times(jump)}。2022 年是 ${pct(share(y22), 2)}，2023 年一年就到了 ${pct(share(y23), 2)}。`,
+                    `只看发布前就有的三个技术标签（深度学习、计算机视觉、自然语言处理），只升到 ${times(ratioOf("technical_neutral") ?? 0)}。这一届是另一种 AI 公司：2025 年成立的 AI 公司里 ${pct(themeAt("agents", 2025), 0)} 标了 AI Agent，机器学习从 2016 年的 ${pct(themeAt("machine-learning", 2016), 0)} 降到 ${pct(themeAt("machine-learning", 2025), 0)}。`,
+                    `美国在写明国家的 AI 公司里的份额从 ${pct(us.before)} 升到 ${pct(us.klass)}，旧金山湾区在写明城市的公司里从 ${pct(bay.before)} 升到 ${pct(bay.klass)}，换任何定义都是上升。`,
+                    `和同龄的其他公司比，这一届 AI 公司更常一年员工翻倍（${pct(doubled("class", "ai"))} 对 ${pct(doubled("class", "non_ai"))}），有记录融资的是 ${times(datedTimes)}，但在美国融资额的分布几乎一样。另有 ${roster.length} 家美国 AI 公司不到 50 人、最近一轮却在 5,000 万美元以上。`,
+                  ]
+                : [
+                    `Companies that describe themselves as AI companies are ${pct(classShare, 2)} of those founded in 2023 to 2025, against ${pct(beforeShare, 2)} of those founded in 2019 to 2022: ${times(jump)} the share. It went from ${pct(share(y22), 2)} in 2022 to ${pct(share(y23), 2)} in 2023 alone.`,
+                    `Counted by only the three technical tags that predate the launch (deep learning, computer vision, natural language processing), the share rose ${times(ratioOf("technical_neutral") ?? 0)}. The class is a different kind of AI company: ${pct(themeAt("agents", 2025), 0)} of AI companies founded in 2025 tag AI agents, and machine learning fell from ${pct(themeAt("machine-learning", 2016), 0)} of 2016's to ${pct(themeAt("machine-learning", 2025), 0)}.`,
+                    `The United States went from ${pct(us.before)} to ${pct(us.klass)} of AI companies that give a country, and the San Francisco Bay Area from ${pct(bay.before)} to ${pct(bay.klass)} of those that give a city; the Bay Area rises under every definition.`,
+                    `Against other companies the same age, the class's AI companies more often doubled their staff (${pct(doubled("class", "ai"))} against ${pct(doubled("class", "non_ai"))}) and are ${times(datedTimes)} as likely to have a recorded round, yet in the United States their rounds are about the same size. ${roster.length} US AI companies with 50 or fewer staff have a latest round of $50 million or more.`,
+                  ]
+              ).map((text) => (
+                <li>
+                  <span set:html={zh ? titleHtml(text, "zh") : text} />
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <Contents lang={lang} parts={parts} />
+
+        <Chapter lang={lang} part={1} {...parts[0]} />
+
+        <Figure
+          id="bracket"
+          level={3}
+          lang={lang}
+          number="01"
+          heading={
+            zh
+              ? `按发布前就有的技术标签，增幅只有 ${times(lowest.ratio)}；按本报告的定义是 ${times(jump)}；按公司名是 ${times(highest.ratio)}`
+              : `By the technical tags that predate ChatGPT the share rose ${times(lowest.ratio)}; by this report's definition, ${times(jump)}; by AI in the name, ${times(highest.ratio)}`
+          }
+          sub={
+            zh
+              ? "2023 到 2025 年成立的公司中 AI 公司的比例，除以 2019 到 2022 年的同一比例；虚线是 1 倍，即没有变化"
+              : "The AI share of companies founded in 2023 to 2025, divided by the same share for 2019 to 2022; the dashed line at 1× is no change"
+          }
+          alt={bracket.map((d) => `${zh ? d.zh : d.en} ${times(d.ratio)}`).join(zh ? "；" : "; ")}
+          source={source}
+          queries={[qDef, qCohorts]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg class">{zh ? "本报告的定义" : "This report's definition"}</span>
+            <span class="lg other">{zh ? "审计过的对照定义" : "Other definitions the audit tested"}</span>
+            <span class="lg lg-one">{zh ? "1 倍：没有变化" : "1×: no change"}</span>
+          </p>
+          <ol class="ratios" aria-label={zh ? "各种定义下的增幅" : "The rise under each definition"}>
+            <li class="rt-axis" aria-hidden="true">
+              <span />
+              <span class="rt-ticks">
+                {Array.from({ length: RATIO_MAX + 1 }, (_, i) => (
+                  <em style={`left: ${((i / RATIO_MAX) * 100).toFixed(2)}%`}>{zh ? `${i} 倍` : `${i}×`}</em>
+                ))}
+              </span>
+              <span />
+            </li>
+            {bracket.map((d) => (
+              <li class:list={{ focus: d.focus }}>
+                <span class="rt-name">
+                  <b>{zh ? d.zh : d.en}</b>
+                  <small>{zh ? d.noteZh : d.noteEn}</small>
+                </span>
+                <span class="rt-track" aria-hidden="true">
+                  {Array.from({ length: RATIO_MAX - 1 }, (_, i) => (
+                    <u style={`left: ${(((i + 2) / RATIO_MAX) * 100).toFixed(2)}%`} />
+                  ))}
+                  <i style={`width: ${((d.ratio / RATIO_MAX) * 100).toFixed(2)}%`} />
+                  <s style={`left: ${((1 / RATIO_MAX) * 100).toFixed(2)}%`} />
+                </span>
+                <span class="rt-val">{zh ? `${number(lang, d.ratio, 1)} 倍` : `${number(lang, d.ratio, 1)}×`}</span>
+              </li>
+            ))}
+          </ol>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? `{{hl|本报告的定义}}是 ${times(jump)}：${pct(beforeShare, 2)} 到 ${pct(classShare, 2)}。只看公司名的定义偏高，因为新公司更常把 AI 写进名字；四个宽泛标签偏低，因为它抓到的新 AI 公司比例更少。只看三个旧技术标签几乎没变：这一届 AI 公司多半用生成式 AI、大语言模型、Agent 这些新词描述自己（图 02）。审计显示本报告的定义在各时期抓到的 AI 公司比例相近，所以增幅以它为准。`
+                : `{{hl|This report's definition}} gives ${times(jump)}: ${pct(beforeShare, 2)} to ${pct(classShare, 2)}. The name-only definition overstates the rise, because new companies put AI in their names more often; the four broad tags understate it, because they catch a smaller share of new AI companies. The three older technical tags barely moved, because the class mostly describes itself with new words: generative AI, language models, agents (figure 02). The audit finds this report's definition catches about the same share of AI companies in every era, so its rise is the one to use.`
+            }
+            method={
+              zh
+                ? "每种定义都人工读过整段切片（不从搜索结果顶部读）。精度是读到的公司里真正以 AI 为产品或核心的比例。三个技术标签只用发布前就有的词，不受新词和起名潮流影响。"
+                : "Every definition was audited on whole slices read by hand, never the top of a search. Precision is the share of companies read that make AI their product or its core. The three technical tags use only words that predate the launch, so neither new vocabulary nor naming fashion can drive them."
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="themes"
+          level={3}
+          lang={lang}
+          number="02"
+          heading={
+            zh
+              ? `2021 年成立的 AI 公司里 ${pct(themeAt("agents", 2021), 0)} 标了 AI Agent，2025 年成立的是 ${pct(themeAt("agents", 2025), 0)}`
+              : `${pct(themeAt("agents", 2025), 0)} of AI companies founded in 2025 tag themselves with AI agents, against ${pct(themeAt("agents", 2021), 0)} of those founded in 2021`
+          }
+          sub={
+            zh
+              ? `每个小图：按成立年份，标签里有这个主题的 AI 公司占比，2016 到 2026 年；竖线是 ChatGPT 发布；各图刻度都是 0 到 ${pct(THEME_MAX, 0)}`
+              : `Each panel: the share of AI companies founded each year whose tags name the theme, 2016 to 2026; the rule marks ChatGPT's launch; every panel runs 0 to ${pct(THEME_MAX, 0)}`
+          }
+          alt={themeSeries
+            .map((t) => `${themeNames[t.g][lang]} ${pct(t.pts[0].share, 0)} (2016), ${pct(themeAt(t.g, 2022), 0)} (2022), ${pct(themeAt(t.g, 2025), 0)} (2025)`)
+            .join(zh ? "；" : "; ")}
+          source={source}
+          queries={[qDef, qThemes]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-line before">{zh ? "发布之前" : "Before the launch"}</span>
+            <span class="lg lg-line class">{zh ? "发布之后到 2025 年" : "After it, to 2025"}</span>
+            <span class="lg lg-line partial">{zh ? "2026 年：至今" : "2026: so far"}</span>
+          </p>
+          <ol class="themes">
+            {themeSeries.map((t) => {
+              const X = (i: number) => (i / (THEME_YEARS.length - 1)) * 100;
+              const Y = (v: number) => 100 - (v / THEME_MAX) * 100;
+              const seg = (a: number, b: number) =>
+                t.pts.slice(a, b + 1).map((p, k) => `${k ? "L" : "M"}${X(a + k).toFixed(2)} ${Y(p.share).toFixed(2)}`).join("");
+              const i22 = THEME_YEARS.indexOf(2022);
+              const i25 = THEME_YEARS.indexOf(2025);
+              const launchX = X(2022 - 2016 + 11 / 12);
+              return (
+                <li>
+                  <p class="th-name">{themeNames[t.g][lang]}</p>
+                  <p class="th-vals">
+                    <span>2016 {pct(t.pts[0].share, 0)}</span>
+                    <b>2025 {pct(themeAt(t.g, 2025), 0)}</b>
+                  </p>
+                  <svg class="th-plot" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    <line class="th-launch" x1={launchX} x2={launchX} y1="0" y2="100" vector-effect="non-scaling-stroke" />
+                    <path class="th-line before" d={seg(0, i22)} vector-effect="non-scaling-stroke" />
+                    <path class="th-line class" d={seg(i22, i25)} vector-effect="non-scaling-stroke" />
+                    <path class="th-line partial" d={seg(i25, THEME_YEARS.length - 1)} vector-effect="non-scaling-stroke" />
+                  </svg>
+                </li>
+              );
+            })}
+          </ol>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? `机器学习从 2016 年的 ${pct(themeAt("machine-learning", 2016), 0)} 降到 2025 年的 ${pct(themeAt("machine-learning", 2025), 0)}；生成式 AI 在 2023 年成立的公司里最高，${pct(themeAt("generative-ai", 2023), 0)}。`
+                : `Machine learning falls from ${pct(themeAt("machine-learning", 2016), 0)} of 2016's AI companies to ${pct(themeAt("machine-learning", 2025), 0)} of 2025's; generative AI peaks among companies founded in 2023, at ${pct(themeAt("generative-ai", 2023), 0)}.`
+            }
+            method={
+              zh
+                ? "一家公司可以有多个主题。生成式 AI、大语言模型和计算机视觉也是定义里的词，它们的水平部分由定义决定，年份之间的变化仍可比较。标签是公司现在的描述，不是成立时的：2016 年成立、后来转向生成式 AI 的公司也会带这个标签。2026 年只有几个月。"
+                : "A company can carry several themes. Generative AI, large language models, and computer vision are also terms of the definition, so their level partly reflects how it was built; their movement across years still compares. Tags describe a company today, not at its founding: a company founded in 2016 that later took up generative AI carries the tag. 2026 covers a few months."
+            }
+          />
+        </Figure>
+
+        <Chapter lang={lang} part={2} {...parts[1]} />
+
+        <Figure
+          id="where"
+          level={3}
+          lang={lang}
+          number="03"
+          heading={
+            zh
+              ? `这一届更集中在美国：写明国家的公司里 ${pct(us.klass)} 在美国，之前是 ${pct(us.before)}`
+              : `The class leans further to the United States: ${pct(us.klass)} of those that give a country, up from ${pct(us.before)}`
+          }
+          sub={
+            zh
+              ? "国家：总部所在国家，占写明国家的 AI 公司的比例。城市圈：总部所在城市圈，占写明城市的 AI 公司的比例。都按这一届排序"
+              : "Country: the headquarters country, as a share of AI companies that give one. Metro: the headquarters metro, as a share of those that give a city. Both sorted by the class"
+          }
+          alt={
+            (zh ? "国家：" : "Countries: ") +
+            topCountries.map((c) => `${cName(c.g)} ${pct(c.before)} → ${pct(c.klass)}`).join(zh ? "；" : "; ") +
+            (zh ? "。城市：" : ". Metros: ") +
+            metros.map((m) => `${metroNames[m.g][lang]} ${pct(m.before)} → ${pct(m.klass)}`).join(zh ? "；" : "; ")
+          }
+          source={source}
+          queries={[qDef, qCohorts, qPlaces]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-ring before">{zh ? "2019 到 2022 年" : "2019 to 2022"}</span>
+            <span class="lg lg-dot class">{zh ? "2023 到 2025 年" : "2023 to 2025"}</span>
+          </p>
+          <div class="geo">
+            {[
+              { title: zh ? "国家" : "Country", rows: topCountries.slice(0, 12).map((c) => ({ name: cName(c.g), ...c })), max: GEO_MAX },
+              { title: zh ? "城市圈" : "Metro", rows: metros.slice(0, 12).map((m) => ({ name: metroNames[m.g][lang], ...m })), max: METRO_MAX },
+            ].map((panel) => (
+              <div class="geo-panel">
+                <p class="geo-title">
+                  {panel.title}
+                  <span>{zh ? `刻度 0 到 ${pct(panel.max, 0)}` : `Scale 0 to ${pct(panel.max, 0)}`}</span>
+                </p>
+                <ol class="dumb" aria-label={panel.title}>
+                  {panel.rows.map((r) => {
+                    const lo = Math.min(r.before, r.klass) / panel.max;
+                    const hi = Math.max(r.before, r.klass) / panel.max;
+                    return (
+                      <li class:list={{ up: r.klass > r.before }}>
+                        <span class="db-name">{r.name}</span>
+                        <span class="db-track" aria-hidden="true">
+                          <i class="db-link" style={`left: ${(lo * 100).toFixed(2)}%; width: ${((hi - lo) * 100).toFixed(2)}%`} />
+                          <i class="db-dot class" style={`left: ${((r.klass / panel.max) * 100).toFixed(2)}%`} />
+                          <i class="db-dot before" style={`left: ${((r.before / panel.max) * 100).toFixed(2)}%`} />
+                        </span>
+                        <span class="db-val">
+                          <span class="b">{pct(r.before)}</span>
+                          <span aria-hidden="true"> → </span>
+                          <span class="visually-hidden">{zh ? " 到 " : " to "}</span>
+                          <span class="c">{pct(r.klass)}</span>
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? `美国的份额从 ${pct(us.before)} 升到 ${pct(us.klass)}；阿联酋从第 ${uaeRank("before")} 位升到第 ${uaeRank("class")} 位。城市圈里旧金山湾区最大，${pct(bay.before)} 到 ${pct(bay.klass)}。`
+                : `The United States rose from ${pct(us.before)} to ${pct(us.klass)}, and the United Arab Emirates from ${ordinal(uaeRank("before"))} to ${ordinal(uaeRank("class"))}. The San Francisco Bay Area is the largest metro, ${pct(bay.before)} to ${pct(bay.klass)}.`
+            }
+            method={
+              zh
+                ? `比例的分母是写明国家（或城市）的公司：这一届有 ${pct(noCountry("class"))} 没写国家，之前是 ${pct(noCountry("before"))}，新公司的记录更不完整。城市圈是一组经过核对的城市名（见 places.json）。平台上的中国公司很少，中国城市不在图中。`
+                : `Shares are of the companies that give a country (or a city): ${pct(noCountry("class"))} of the class give no country, against ${pct(noCountry("before"))} before, because new records are less complete. A metro is a checked list of city names (places.json). The Platform holds few Chinese companies, so no Chinese city is shown.`
+            }
+          />
+        </Figure>
+
+        <Chapter lang={lang} part={3} {...parts[2]} />
+
+        <Figure
+          id="growth"
+          level={3}
+          lang={lang}
+          number="04"
+          heading={
+            zh
+              ? `这一届 AI 公司里 ${pct(doubled("class", "ai"))} 一年内员工翻倍，同龄的其他公司是 ${pct(doubled("class", "non_ai"))}`
+              : `${pct(doubled("class", "ai"))} of the class's AI companies doubled their staff in a year, against ${pct(doubled("class", "non_ai"))} of other companies the same age`
+          }
+          sub={
+            zh
+              ? "员工 11 人以上、写明年度员工增幅的公司。年轻公司本来就长得快，所以和同一批成立年份的非 AI 公司比"
+              : "Companies with 11 or more staff that state a year-on-year headcount change. Young companies grow fast anyway, so each group is set against the non-AI companies founded in the same years"
+          }
+          alt={
+            zh
+              ? `一年内员工翻倍：这一届 AI 公司 ${pct(doubled("class", "ai"))}，其他公司 ${pct(doubled("class", "non_ai"))}；2019 到 2022 年成立的 AI 公司 ${pct(doubled("before", "ai"))}，其他公司 ${pct(doubled("before", "non_ai"))}。员工减少：这一届 AI 公司 ${pct(shrank("class", "ai"))}，其他公司 ${pct(shrank("class", "non_ai"))}。`
+              : `Doubled in a year: the class's AI companies ${pct(doubled("class", "ai"))}, other companies ${pct(doubled("class", "non_ai"))}; AI companies founded 2019 to 2022 ${pct(doubled("before", "ai"))}, others ${pct(doubled("before", "non_ai"))}. Shrank: the class's AI companies ${pct(shrank("class", "ai"))}, others ${pct(shrank("class", "non_ai"))}.`
+          }
+          source={source}
+          queries={[qDef, qCohorts, qMeasures]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg class">{zh ? "这一届的 AI 公司" : "The class's AI companies"}</span>
+            <span class="lg other">{zh ? "其他各组" : "Every other group"}</span>
+          </p>
+          <div class="pairs">
+            {[
+              { title: zh ? "一年内员工至少翻倍" : "Doubled their staff or more in a year", f: doubled },
+              { title: zh ? "员工减少" : "Lost staff", f: shrank },
+            ].map((panel) => (
+              <div class="pair-panel">
+                <p class="geo-title">{panel.title}</p>
+                <BarList
+                  label={panel.title}
+                  ticks={[0, 0.1, 0.2, 0.3, 0.4, 0.5].map((t) => ({ at: t / 0.5, label: pct(t, 0) }))}
+                  rows={[
+                    { label: zh ? "这一届：AI 公司" : "The class: AI companies", display: pct(panel.f("class", "ai")), width: panel.f("class", "ai") / 0.5, kind: "focus" as const, note: zh ? `${n(growthBase("class", "ai"))} 家` : `${n(growthBase("class", "ai"))} companies` },
+                    { label: zh ? "这一届：其他公司" : "The class: other companies", display: pct(panel.f("class", "non_ai")), width: panel.f("class", "non_ai") / 0.5, kind: "other" as const, note: zh ? `${n(growthBase("class", "non_ai"))} 家` : `${n(growthBase("class", "non_ai"))} companies` },
+                    { label: zh ? "2019 到 2022 年：AI 公司" : "2019 to 2022: AI companies", display: pct(panel.f("before", "ai")), width: panel.f("before", "ai") / 0.5, kind: "other" as const, note: zh ? `${n(growthBase("before", "ai"))} 家` : `${n(growthBase("before", "ai"))} companies` },
+                    { label: zh ? "2019 到 2022 年：其他公司" : "2019 to 2022: other companies", display: pct(panel.f("before", "non_ai")), width: panel.f("before", "non_ai") / 0.5, kind: "other" as const, note: zh ? `${n(growthBase("before", "non_ai"))} 家` : `${n(growthBase("before", "non_ai"))} companies` },
+                  ]}
+                />
+              </div>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? `{{hl|这一届 AI 公司}}比同龄的其他公司多 ${number(lang, gap * 100, 0)} 个百分点翻倍；2019 到 2022 年成立的两组几乎一样（${pct(doubled("before", "ai"))} 和 ${pct(doubled("before", "non_ai"))}）。AI 公司也更少是一人公司：2025 年成立的 AI 公司 ${pct(solo25.ai_share)} 是一人公司，其他公司是 ${pct(solo25.non_ai_share)}。`
+                : `{{hl|The class's AI companies}} doubled ${number(lang, gap * 100, 0)} points more often than other companies the same age; among companies founded in 2019 to 2022 the two groups barely differ (${pct(doubled("before", "ai"))} and ${pct(doubled("before", "non_ai"))}). AI companies are also less often one person: ${pct(solo25.ai_share)} of those founded in 2025, against ${pct(solo25.non_ai_share)} of other companies.`
+            }
+            method={
+              zh
+                ? "年度员工增幅是公司页面上的数字，11 人以下的公司不计，因为几个人的变化就是很大的百分比。比例的分母是写明增幅的公司。"
+                : "The year-on-year change is what company pages report. Companies under 11 staff are left out, where a person or two is a large percentage. Shares are of the companies that state a change."
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="money"
+          level={3}
+          lang={lang}
+          number="05"
+          heading={
+            zh
+              ? `这一届 AI 公司有记录融资的是同龄其他公司的 ${times(datedTimes)}，但在美国，融资额的分布几乎一样`
+              : `The class's AI companies are ${times(datedTimes)} as likely as other new companies to have a recorded round, but in the United States the rounds are about the same size`
+          }
+          sub={
+            zh
+              ? "有记录的融资：有日期的最近一轮融资，占各组公司的比例。金额：美国这一届公司最近一轮的金额，占写明金额的公司的比例"
+              : "Recorded round: companies with a dated latest round, as a share of each group. Amounts: the latest round of the class's United States companies, as a share of those with an amount"
+          }
+          alt={
+            (zh
+              ? `有记录融资：这一届 AI 公司 ${pct(dated("class", "ai"))}，其他 ${pct(dated("class", "non_ai"))}；2019 到 2022 年 AI 公司 ${pct(dated("before", "ai"))}，其他 ${pct(dated("before", "non_ai"))}。金额：`
+              : `Recorded round: the class's AI companies ${pct(dated("class", "ai"))}, others ${pct(dated("class", "non_ai"))}; 2019 to 2022 AI companies ${pct(dated("before", "ai"))}, others ${pct(dated("before", "non_ai"))}. Amounts: `) +
+            amounts.map((a) => `${amountName[a.g][lang]} ${pct(a.ai)} / ${pct(a.non)}`).join(zh ? "；" : "; ")
+          }
+          source={source}
+          queries={[qDef, qCohorts, qMeasures]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg class">{zh ? "这一届的 AI 公司" : "The class's AI companies"}</span>
+            <span class="lg other">{zh ? "其他各组" : "Every other group"}</span>
+          </p>
+          <div class="pairs">
+            <div class="pair-panel">
+              <p class="geo-title">{zh ? "有记录的融资" : "Has a recorded round"}</p>
+              <BarList
+                label={zh ? "有记录的融资" : "Has a recorded round"}
+                ticks={[0, 0.1, 0.2, 0.3].map((t) => ({ at: t / 0.3, label: pct(t, 0) }))}
+                rows={[
+                  { label: zh ? "这一届：AI 公司" : "The class: AI companies", display: pct(dated("class", "ai")), width: dated("class", "ai") / 0.3, kind: "focus" as const },
+                  { label: zh ? "这一届：其他公司" : "The class: other companies", display: pct(dated("class", "non_ai")), width: dated("class", "non_ai") / 0.3, kind: "other" as const },
+                  { label: zh ? "2019 到 2022 年：AI 公司" : "2019 to 2022: AI companies", display: pct(dated("before", "ai")), width: dated("before", "ai") / 0.3, kind: "other" as const },
+                  { label: zh ? "2019 到 2022 年：其他公司" : "2019 to 2022: other companies", display: pct(dated("before", "non_ai")), width: dated("before", "non_ai") / 0.3, kind: "other" as const },
+                ]}
+              />
+            </div>
+            <div class="pair-panel">
+              <p class="geo-title">
+                {zh ? "美国，这一届，最近一轮金额" : "United States, the class, latest round"}
+                <span>{zh ? `刻度 0 到 ${pct(AMOUNT_MAX, 0)}` : `Scale 0 to ${pct(AMOUNT_MAX, 0)}`}</span>
+              </p>
+              <p class="tw-key" aria-hidden="true">
+                <span class="lg class">{zh ? `AI 公司（${n(amountN.ai_count)} 家）` : `AI companies (${n(amountN.ai_count)})`}</span>
+                <span class="lg other">{zh ? `同龄的其他公司（${n(amountN.non_ai_count)} 家）` : `Other companies the same age (${n(amountN.non_ai_count)})`}</span>
+              </p>
+              <ol class="twin" aria-label={zh ? "金额档位" : "Amount bands"}>
+                {amounts.map((a) => (
+                  <li>
+                    <span class="tw-name">{amountName[a.g][lang]}</span>
+                    <span class="tw-bars" aria-hidden="true">
+                      <i class="ai" style={`width: ${((a.ai / AMOUNT_MAX) * 100).toFixed(2)}%`} />
+                      <i class="non" style={`width: ${((a.non / AMOUNT_MAX) * 100).toFixed(2)}%`} />
+                    </span>
+                    <span class="tw-val">
+                      <b>{pct(a.ai)}</b>
+                      <span class="visually-hidden">{zh ? "，其他公司 " : ", other companies "}</span>
+                      <span>{pct(a.non)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? `这一届 AI 公司最近一轮有日期的比例是 ${pct(dated("class", "ai"))}，其他公司 ${pct(dated("class", "non_ai"))}。在美国，两组最近一轮在 100 万美元以下的都在四成以上（${pct(amounts[0].ai)} 和 ${pct(amounts[0].non)}）。`
+                : `${pct(dated("class", "ai"))} of the class's AI companies have a dated latest round, against ${pct(dated("class", "non_ai"))} of other companies. In the United States, more than four in ten in both groups last raised under $1 million (${pct(amounts[0].ai)} and ${pct(amounts[0].non)}).`
+            }
+            method={
+              zh
+                ? "只有最近一轮：更早的融资不在记录上。记录里没有币种，美国以外的金额常是本币（韩元、日元），所以金额只比美国公司。记录在 2026 年 4 到 5 月刷新，之后的融资还不在记录上。"
+                : "The latest round only: earlier rounds are not on the record. The record has no currency, and amounts outside the United States are often in local currency (won, yen), so amounts compare United States companies only. Records were refreshed in April and May 2026, so later rounds are not on the record yet."
+            }
+          />
+        </Figure>
+
+        <Figure
+          id="roster"
+          level={3}
+          lang={lang}
+          number="06"
+          heading={
+            zh
+              ? `这一届有 ${roster.length} 家美国 AI 公司员工不超过 50 人，最近一轮融资却在 5,000 万美元以上`
+              : `${roster.length} US AI companies in the class have 50 or fewer staff and a latest round of $50 million or more`
+          }
+          sub={
+            zh
+              ? "按最近一轮的金额档位排列，同档内按融资月份从近到远。员工数是公司页面上的数字，金额只取美国公司，因为别国的金额常以本币记录"
+              : "Grouped by the size of the latest round, newest round first within a group. Staff is what the company page reports; amounts are United States companies only, because amounts elsewhere are often in local currency"
+          }
+          alt={roster.map((r) => `${r.company}, ${r.founded_year}, ${staffBand(r.headcount_band)}, ${bandName[r.amount_band][lang]}, ${monthLabel(r.month)}`).join(zh ? "；" : "; ")}
+          source={source}
+          queries={[qDef, qMeasures]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg-plain">
+              {rosterBands.map((b) => `${bandName[b.b][lang]}${zh ? "：" : ": "}${b.rows.length}`).join(" · ")}
+            </span>
+          </p>
+          <div class="roster">
+            {rosterBands.map((band) => (
+              <section class="rs-band" aria-label={bandName[band.b][lang]}>
+                <p class="rs-head">
+                  <span>{bandName[band.b][lang]}</span>
+                  <span class="rs-count">{zh ? `${band.rows.length} 家` : `${band.rows.length}`}</span>
+                </p>
+                <ol class="rs-list">
+                  {band.rows.map((r) => (
+                    <li>
+                      <span class="rs-name">{r.company}</span>
+                      <span class="rs-cap">
+                        {zh ? `${r.founded_year} 年成立` : `Founded ${r.founded_year}`} · {staffBand(r.headcount_band)} ·{" "}
+                        <span class="nowrap">{zh ? `${monthLabel(r.month)}融资` : `round ${monthLabel(r.month)}`}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ))}
+          </div>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? `名单里有模型实验室、AI 基础设施、AI 制药，也有面向企业的应用。另有 ${pre2023.length} 家成立于 2022 年、就在发布之前：${pre2023.map((r) => r.company).join("、")}。`
+                : `The list runs from model labs and AI infrastructure to AI drug discovery and business software. ${pre2023.length} more were founded in 2022, just before the launch: ${pre2023.map((r) => r.company).join(", ")}.`
+            }
+            method={
+              zh
+                ? `宽松标签找到 ${leanCount("loose-headcount-50-amount-50m")} 家 2022 年以后成立、符合条件的美国公司，每条记录都读过；本报告的定义单独只找到其中 ${leanCount("definition-headcount-50-amount-50m")} 家。${leanData.dropped.length} 家按书面规则去掉：金额与团队规模明显不符（当作数据错误）、融资早于成立年份、AI 只是众多标签之一，或者只是一个待售域名。最近一轮只是最近的一次，不是累计融资。公司名只用来指代公司。`
+                : `The loose tags find ${leanCount("loose-headcount-50-amount-50m")} US companies founded since 2022 that fit, and every record was read; this report's definition alone finds ${leanCount("definition-headcount-50-amount-50m")} of them. ${leanData.dropped.length} were dropped by written rules: an amount out of all proportion to the team (taken as a data error), a round dated before the founding year, AI as one tag among many, or a domain for sale. The latest round is the latest only, not the total raised. Names refer to the companies only.`
+            }
+          />
+        </Figure>
+
+        <Chapter lang={lang} part={4} {...parts[3]} />
+
+        <Figure
+          id="staff"
+          level={3}
+          lang={lang}
+          number="07"
+          heading={
+            zh
+              ? `这一届最大的那些 AI 公司，${pct(sOf("class", "big-tech").share ?? 0)} 的可见员工在大型科技公司干过，比老一批同类公司的 ${pct(sOf("baseline", "big-tech").share ?? 0)} 高`
+              : `${pct(sOf("class", "big-tech").share ?? 0)} of visible staff at the class's largest AI companies once worked at big tech, against ${pct(sOf("baseline", "big-tech").share ?? 0)} at the largest founded 2016 to 2019`
+          }
+          sub={
+            zh
+              ? `当前在职的可见个人档案，按以前的雇主（不含实习），占全部档案的比例，刻度 0 到 ${pct(STAFF_MAX, 0)}。一人可以有多个前雇主；最后一行是当前职位，不是雇主`
+              : `Visible profiles with a current job at these companies, by earlier employer (internships left out), as a share of all of them, on a 0 to ${pct(STAFF_MAX, 0)} scale. A person can have several earlier employers; the last row is a current title, not an employer`
+          }
+          alt={staffRows
+            .map((r) => `${employerNames[r.g][lang]} ${r.klass.share !== null ? pct(r.klass.share) : String(r.klass.count)} / ${r.base.share !== null ? pct(r.base.share) : String(r.base.count)}`)
+            .join(zh ? "；" : "; ")}
+          source={sourceBoth}
+          queries={[qDef, qStaff]}
+        >
+          <p class="legend" slot="legend" aria-hidden="true">
+            <span class="lg lg-bar people">{zh ? `这一届最大的公司（${n(staffTotal("class"))} 个档案）` : `The class's largest (${n(staffTotal("class"))} profiles)`}</span>
+            <span class="lg lg-bar other">{zh ? `2016 到 2019 年成立的最大公司（${n(staffTotal("baseline"))} 个）` : `Largest founded 2016 to 2019 (${n(staffTotal("baseline"))})`}</span>
+          </p>
+          <ol class="twin wide" aria-label={zh ? "以前的雇主" : "Earlier employers"}>
+            {staffRows.map((r) => (
+              <li class:list={{ roll: r.g === "big-tech", apart: r.g === "founder-title" }}>
+                <span class="tw-name">{employerNames[r.g][lang]}</span>
+                <span class="tw-bars" aria-hidden="true">
+                  {r.klass.share !== null ? <i class="people" style={`width: ${((r.klass.share / STAFF_MAX) * 100).toFixed(2)}%`} /> : <i class="gap" />}
+                  {r.base.share !== null ? <i class="non" style={`width: ${((r.base.share / STAFF_MAX) * 100).toFixed(2)}%`} /> : <i class="gap" />}
+                </span>
+                <span class="tw-val">
+                  <b>{r.klass.share !== null ? pct(r.klass.share) : String(r.klass.count)}</b>
+                  <span class="visually-hidden">{zh ? "，老一批 " : ", older companies "}</span>
+                  <span>{r.base.share !== null ? pct(r.base.share) : String(r.base.count ?? (zh ? "不公开" : "withheld"))}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <FigNotes
+            slot="notes"
+            lang={lang}
+            shows={
+              zh
+                ? `去掉数据标注平台（它们的可见员工多是外包人员），差距还在：${pct(bigNoLab("class"))} 对 ${pct(bigNoLab("baseline"))}。当前职位写着创始人的，这一届是 ${pct(sOf("class", "founder-title").share ?? 0)}，老一批是 ${pct(sOf("baseline", "founder-title").share ?? 0)}：公司更年轻、团队更小，创始人占比自然更高。`
+                : `Without the data-labeling marketplaces, whose visible staff are mostly contractors, the gap holds: ${pct(bigNoLab("class"))} against ${pct(bigNoLab("baseline"))}. Founder titles are ${pct(sOf("class", "founder-title").share ?? 0)} of the class's profiles and ${pct(sOf("baseline", "founder-title").share ?? 0)} of the older companies': younger, smaller teams carry more founders.`
+            }
+            method={
+              zh
+                ? "每组按员工数取最大的 150 家公司，逐家人工核对：只留以 AI 为产品或核心的公司和数据标注平台，去掉外包、咨询和不是公司的页面；用公司名匹配员工档案，抽查档案里的公司 ID 是否一致。数的是平台上可见的档案，不是员工人数；过时的档案也算在职。1 到 9 人的格子写成“<10”。对照组是 2016 到 2019 年成立的 AI 公司里最大的那些：它们已经站稳，是上一批新 AI 公司。"
+                : "Each group starts from the largest 150 companies by headcount, each read by hand: only companies whose product or core is AI, and data-labeling marketplaces, are kept, while outsourcing houses, consultancies, and pages that are not companies are dropped. Profiles are matched by company name, with a sample checked against the company id on the profile. Counts are profiles visible through the Metix AI Platform, never a headcount, and a profile left out of date still counts as current. Cells of 1 to 9 people show as \"<10\". The comparison is the largest AI companies founded in 2016 to 2019, the previous wave of new AI companies, now established."
+            }
+          />
+        </Figure>
+      </div>
+    </>
+  )
+}
+
+{
+  section === "method" &&
+    (zh ? (
+      <>
+        <h3>公司与定义</h3>
+        <p>
+          {longDate(lang, snapshot)} Metix AI Platform 上的公司记录，排除非营利组织、教育机构和政府机构。AI 公司的定义、每一种对照定义和审计过程都在{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/definition.json`}>queries/definition.json</a>
+          。标签是一串文字，平台逐词匹配、不分顺序，所以一个词组可以由不同标签里的词拼成；审计里见过 deep technology 和 e-learning 被当成 deep learning 的例子。
+        </p>
+        <h3>审计</h3>
+        <p>
+          每次都读完整切片：某个成立年份里、LinkedIn 关注数落在一个窄区间的全部公司，不从搜索结果顶部读，因为搜索按匹配程度排序。设计定义时读了 325 家，验证时另读 215 家，其中 167 家（{pct(167 / 215)}）以 AI 为产品或核心。它在 2016 到 2019、2020 到 2022、2023 到 2025 三个时期抓到的 AI 公司比例相近，都在四成左右，所以不同年份可以比较；只看公司名的定义越往后抓得越多，会夸大增幅，这就是图 01 要把各种定义并排放的原因。
+        </p>
+        <h3>分母和滞后</h3>
+        <p>
+          比例的分母是同一类型的全部公司（同样排除非营利、教育和政府机构），逐年加总不被截断的分段计数。最近几年的记录还在补，所以年份之间只比比例。成立年份只到年，ChatGPT 于 {longDate(lang, new Date(LAUNCH))}发布（<a href={LAUNCH_URL}>OpenAI 的发布页</a>），2022 年算作之前。
+        </p>
+        <h3>局限</h3>
+        <p>
+          标签和成立年份是公司自己写的。标签描述的是公司现在的样子：早年成立、后来转做 AI 的公司也算进它成立的那一年，这会抬高早先年份的比例，所以增幅如果有偏差，是偏小。年度员工增幅和员工数来自公司页面。融资只有最近一轮，而且没有币种。平台上的中国公司很少。员工来源只看最大的那些公司，按公司名匹配；数的是可见档案，不是员工人数。
+        </p>
+      </>
+    ) : (
+      <>
+        <h3>Companies and the definition</h3>
+        <p>
+          Company records on the Metix AI Platform on {longDate(lang, snapshot)}, leaving out nonprofits, educational institutions, and government agencies. The definition of an AI company, every comparison definition, and the audit are in{" "}
+          <a href={`${REPO}/blob/main/cases/${entry.slug}/queries/definition.json`}>queries/definition.json</a>. Tags are free text, and the Platform matches a term word by word in any order, so a phrase can be put together from words in different tags; the audit found deep technology and e-learning read as deep learning.
+        </p>
+        <h3>Audit</h3>
+        <p>
+          Every read was a whole slice: all the companies of one founding year whose LinkedIn following falls in a narrow window, never the top of a search, which ranks by how well a record matches. Designing the definition read 325 companies, and a separate validation read 215, of which 167 ({pct(167 / 215)}) make AI their product or its core. It catches about four in ten AI companies in 2016 to 2019, 2020 to 2022, and 2023 to 2025 alike, so founding years compare; a definition by name alone catches more of each newer year's AI companies and overstates the rise, which is why figure 01 sets the definitions side by side.
+        </p>
+        <h3>The denominator and the lag</h3>
+        <p>
+          Shares are of every company of the same types (nonprofits, educational institutions, and government agencies left out here too), added up each year from counts split so no total is cut off at the Platform's band. Recent years are still filling in, so years compare by share only. A founding year has no month; ChatGPT launched on {longDate(lang, new Date(LAUNCH))} (<a href={LAUNCH_URL}>OpenAI's announcement</a>), so 2022 counts as before.
+        </p>
+        <h3>Limits</h3>
+        <p>
+          Tags and founding years are what companies write. Tags describe a company as it is today, so an older company that took up AI later counts in its founding year; that raises the earlier years' shares, so if anything the rise is understated. Headcount and its change are what company pages report. Funding is the latest round only, with no currency. The Platform holds few Chinese companies. Staff sources cover the largest companies only, matched by name, and count visible profiles, never staff.
+        </p>
+      </>
+    ))
+}
+
+<style>
+  /* ---------- palette: the companies teal ink for the class, grey for everything it is set against */
+  .cl-hero,
+  .report-body {
+    --cl: #07545e;
+    --cl-tint: #9cc9c6;
+    --grey: #858395;
+    --people: #3d36c9;
+    --bl-focus: var(--cl);
+    --key-hl: var(--cl);
+  }
+
+  /* A figure sets its own focus color; in this report it is the companies teal ink. */
+  .report-body :global(.fig) {
+    --bl-focus: var(--cl);
+  }
+
+  /* ---------- hero: a pale mint field, the title and the pair on the halfway line, then the wave */
+  .cl-hero {
+    background: #e6f3f0;
+    color: var(--ink);
+    padding-block: clamp(36px, 6vw, 72px) clamp(40px, 5vw, 64px);
+  }
+
+  .cl-top {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    align-items: end;
+  }
+
+  .cl-eyebrow,
+  .cl-meta {
+    font: 500 12px/1.5 var(--mono);
+    letter-spacing: 0.06em;
+    color: var(--ink-2);
+  }
+
+  .cl-eyebrow {
+    text-transform: uppercase;
+  }
+
+  .cl-eyebrow a,
+  .cl-meta a {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .cl-hero h1 {
+    margin-top: 18px;
+    font: 700 clamp(34px, 4vw, 54px) / 1.05 var(--display);
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  /* Chinese breaks only at the word boundaries titleHtml marks. */
+  .cl-hero h1:lang(zh) {
+    font-size: clamp(30px, 3.3vw, 46px);
+    letter-spacing: 0;
+    line-height: 1.2;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+  }
+
+  .cl-dek {
+    margin-top: 18px;
+    max-width: 58ch;
+    font-size: clamp(16px, 1.4vw, 18px);
+    color: var(--ink-2);
+  }
+
+  .cl-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin-top: 24px;
+  }
+
+  .cl-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--ink);
+    font: 500 13px/1 var(--mono);
+    color: var(--ink);
+    text-decoration: none;
+    transition: background-color 160ms var(--ease);
+  }
+
+  .cl-chip:hover {
+    background: rgb(255 255 255 / 0.7);
+  }
+
+  /* Touch: 44px targets for the chips, the breadcrumb, and the dataset links. */
+  @media (pointer: coarse) {
+    .cl-chip {
+      min-height: 44px;
+    }
+
+    .cl-eyebrow,
+    .cl-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      column-gap: 0.4em;
+    }
+
+    .cl-eyebrow a,
+    .cl-meta a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+
+  .cl-note {
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .cl-side {
+    align-self: start;
+    padding-top: 58px;
+  }
+
+  .cl-pair {
+    display: grid;
+    margin: 0;
+  }
+
+  .cl-pair div {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    column-gap: 20px;
+    padding-block: 14px;
+    border-bottom: 1px solid rgb(11 10 31 / 0.14);
+  }
+
+  .cl-pair div:first-child {
+    border-top: 1px solid var(--ink);
+  }
+
+  .cl-pair dt {
+    font: 700 clamp(48px, 6vw, 84px) / 0.95 var(--display);
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--grey);
+  }
+
+  .cl-pair .focus dt {
+    color: var(--cl);
+  }
+
+  .cl-pair dd {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+
+  .cl-pair-note {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  /* ---------- the wave: one column per founding year; rows on narrow screens */
+  .cl-wave-head {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    align-items: last baseline;
+    margin-top: clamp(40px, 5vw, 64px);
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .cl-wave-title {
+    font: 600 clamp(17px, 1.6vw, 20px) / 1.3 var(--display);
+    letter-spacing: -0.01em;
+  }
+
+  .cl-wave-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .wk::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: -1px;
+  }
+
+  .wk.class::before {
+    background: var(--cl);
+  }
+
+  .wk.before::before {
+    background: var(--grey);
+  }
+
+  /* 2026 is open: a pale fill inside a teal-ink outline, so the mark reaches 3:1 on the field. */
+  .wk.partial::before {
+    background: rgb(7 84 94 / 0.12);
+    box-shadow: inset 0 0 0 1.5px var(--cl);
+  }
+
+  .cl-wave-key:lang(zh),
+  .wv-launch span:lang(zh),
+  .legend:lang(zh) {
+    font-family: var(--sans);
+  }
+
+  /* The row sizes are set here, not in the container query: a container cannot be styled by its
+     own query, only its contents can. */
+  .wave-box {
+    --plot: 220px;
+    --yl: 28px;
+    --g: 6px;
+    --row: 24px;
+    --gap: 4px;
+    position: relative;
+    container-type: inline-size;
+    margin-top: 28px;
+  }
+
+  /* A grid line is a box of no height, so its line sits exactly at the value; the label stands on it. */
+  .wv-grid span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--yl) + var(--t) * var(--plot));
+    height: 0;
+    border-top: 1px solid rgb(11 10 31 / 0.1);
+  }
+
+  .wv-grid em {
+    position: absolute;
+    left: 0;
+    bottom: 4px;
+    font: 12px/1 var(--mono);
+    font-style: normal;
+    color: var(--ink-3);
+  }
+
+  .wv-grid span:first-child {
+    border-top-color: var(--ink);
+  }
+
+  .wave {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(17, minmax(0, 1fr));
+    column-gap: var(--g);
+    align-items: end;
+    height: calc(var(--plot) + var(--yl) + 22px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .wave li {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+  }
+
+  .wv-y {
+    order: 3;
+    height: var(--yl);
+    padding-top: 8px;
+    font: 12px/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    text-align: center;
+  }
+
+  .wv-v {
+    order: 1;
+    margin-bottom: 6px;
+    font: 600 12px/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    white-space: nowrap;
+    color: var(--ink-2);
+  }
+
+  .wv-bar {
+    order: 2;
+    height: calc(var(--v) * var(--plot));
+    border-radius: 3px 3px 0 0;
+    background: var(--grey);
+  }
+
+  .wave .class .wv-bar {
+    background: var(--cl);
+  }
+
+  .wave .class .wv-v {
+    color: var(--cl);
+  }
+
+  .wave .partial .wv-bar {
+    background: rgb(7 84 94 / 0.12);
+    box-shadow: inset 0 0 0 1.5px var(--cl);
+  }
+
+  .wave .class .wv-y {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ChatGPT's launch, eleven twelfths into the 2022 column. */
+  .wv-launch {
+    position: absolute;
+    top: 0;
+    bottom: var(--yl);
+    left: calc((100% - 16 * var(--g)) / 17 * (12 + 11 / 12) + 12 * var(--g));
+    margin: 0;
+    border-left: 1.5px dashed var(--ink);
+    pointer-events: none;
+  }
+
+  .wv-launch span {
+    position: absolute;
+    top: -4px;
+    right: 8px;
+    font: 500 12px/1.3 var(--mono);
+    white-space: nowrap;
+    color: var(--ink);
+    text-align: right;
+  }
+
+  /* Narrow: years as rows, the bar across. */
+  @container (max-width: 700px) {
+    .wv-grid {
+      display: none;
+    }
+
+    .wave {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--gap);
+      height: auto;
+    }
+
+    .wave li {
+      display: grid;
+      grid-template-columns: 3.2em minmax(0, 1fr) 4.4em;
+      align-items: center;
+      column-gap: 10px;
+      height: var(--row);
+    }
+
+    .wv-y {
+      order: 1;
+      height: auto;
+      padding: 0;
+      text-align: left;
+    }
+
+    .wv-bar {
+      order: 2;
+      width: calc(var(--v) * 100%);
+      height: 14px;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .wv-v {
+      order: 3;
+      margin: 0;
+      text-align: right;
+    }
+
+    /* In rows the launch gets its own gap between 2022 and 2023, with its label in it. */
+    .wave li.first {
+      margin-top: 26px;
+    }
+
+    .wv-launch {
+      top: calc(13 * (var(--row) + var(--gap)) + 13px);
+      bottom: auto;
+      left: 0;
+      right: 0;
+      border-left: 0;
+      border-top: 1.5px dashed var(--ink);
+    }
+
+    .wv-launch span {
+      top: -17px;
+      right: 0;
+    }
+  }
+
+  /* ---------- legends */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0;
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .lg::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 6px;
+    border-radius: 2px;
+    vertical-align: -1px;
+  }
+
+  .lg-dot::before {
+    border-radius: 50%;
+  }
+
+  .lg.class::before {
+    background: var(--cl);
+  }
+
+  .lg.before::before,
+  .lg.other::before {
+    background: var(--grey);
+  }
+
+  .lg.people::before {
+    background: var(--people);
+  }
+
+  .lg-ring.before::before {
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: inset 0 0 0 2px var(--grey);
+  }
+
+  .lg-line::before {
+    height: 0;
+    width: 16px;
+    border-radius: 0;
+    border-top: 2px solid var(--grey);
+    vertical-align: 3px;
+  }
+
+  .lg-line.class::before {
+    background: none;
+    border-top-color: var(--cl);
+  }
+
+  .lg-line.before::before {
+    background: none;
+  }
+
+  .lg-line.partial::before {
+    border-top: 2px dashed var(--cl);
+  }
+
+  .lg-one::before {
+    width: 0;
+    height: 12px;
+    border-radius: 0;
+    border-left: 1.5px dashed var(--ink);
+    vertical-align: -2px;
+  }
+
+  .lg-plain {
+    font: 12px/1.5 var(--mono);
+    color: var(--ink-2);
+  }
+
+  /* ---------- 01: the rise under each definition, with 1x drawn through every row */
+  .ratios {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ratios li {
+    display: grid;
+    grid-template-columns: minmax(12rem, 18rem) minmax(0, 1fr) 4rem;
+    align-items: center;
+    column-gap: 16px;
+    padding-block: 8px;
+  }
+
+  .ratios li + li:not(.rt-axis) {
+    border-top: 1px solid var(--line);
+  }
+
+  .rt-axis {
+    padding-block: 0 4px !important;
+  }
+
+  .rt-ticks {
+    position: relative;
+    height: 14px;
+  }
+
+  .rt-ticks em {
+    position: absolute;
+    transform: translateX(-50%);
+    font: 12px/1 var(--mono);
+    font-style: normal;
+    color: var(--ink-3);
+  }
+
+  .rt-ticks em:first-child {
+    transform: none;
+  }
+
+  .rt-name {
+    display: grid;
+    row-gap: 2px;
+  }
+
+  .rt-name b {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .focus .rt-name b {
+    font-weight: 600;
+  }
+
+  .rt-name small {
+    font: 12px/1.35 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .rt-track {
+    position: relative;
+    height: 22px;
+    background: var(--surface-muted);
+    border-radius: 4px;
+  }
+
+  .rt-track u {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-left: 1px solid rgb(11 10 31 / 0.08);
+  }
+
+  .rt-track i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 4px;
+    background: var(--grey);
+  }
+
+  .focus .rt-track i {
+    background: var(--cl);
+  }
+
+  .rt-track s {
+    position: absolute;
+    top: -5px;
+    bottom: -5px;
+    border-left: 1.5px dashed var(--ink);
+  }
+
+  .rt-val {
+    font: 600 13px/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .focus .rt-val {
+    color: var(--cl);
+  }
+
+  /* ---------- 02: two panels of dumbbells */
+  .geo,
+  .pairs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--split-gap);
+    row-gap: 32px;
+  }
+
+  .geo-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ink);
+    font: 600 15px/1.3 var(--display);
+  }
+
+  .geo-title span {
+    font: 12px/1.3 var(--mono);
+    color: var(--ink-3);
+  }
+
+  .dumb,
+  .twin {
+    display: grid;
+    row-gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dumb li {
+    display: grid;
+    grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr) 7.6rem;
+    align-items: center;
+    column-gap: 12px;
+    min-height: 30px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .db-name,
+  .tw-name {
+    font-size: 14px;
+    line-height: 1.3;
+  }
+
+  .db-track {
+    position: relative;
+    height: 14px;
+  }
+
+  .db-track::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px dotted rgb(11 10 31 / 0.2);
+  }
+
+  .db-link {
+    position: absolute;
+    top: calc(50% - 1px);
+    height: 2px;
+    background: var(--grey);
+  }
+
+  .up .db-link {
+    background: var(--cl);
+  }
+
+  .db-dot {
+    position: absolute;
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    margin: -5.5px 0 0 -5.5px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #fff;
+  }
+
+  /* The earlier cohort is an open ring drawn over the class's dot, so it reads through an overlap. */
+  .db-dot.before {
+    background: rgb(255 255 255 / 0.6);
+    box-shadow: inset 0 0 0 2px var(--grey);
+  }
+
+  .db-dot.class {
+    background: var(--cl);
+  }
+
+  .db-val {
+    font: 12px/1.3 var(--mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+    color: var(--ink-3);
+  }
+
+  .db-val .c {
+    font-weight: 600;
+    color: var(--cl);
+  }
+
+  /* ---------- 03: small multiples, one scale */
+  .themes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px var(--split-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .themes li {
+    display: grid;
+    grid-template-rows: auto auto 96px;
+    border-top: 1px solid var(--ink);
+    padding-top: 8px;
+  }
+
+  .th-name {
+    margin: 0;
+    font: 600 15px/1.3 var(--display);
+  }
+
+  .th-vals {
+    display: flex;
+    justify-content: space-between;
+    margin: 2px 0 8px;
+    font: 12px/1.3 var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+  }
+
+  .th-vals b {
+    font-weight: 600;
+    color: var(--cl);
+  }
+
+  .th-plot {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    background: linear-gradient(to top, rgb(11 10 31 / 0.14) 1px, transparent 1px);
+  }
+
+  .th-line {
+    fill: none;
+    stroke: var(--cl);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  .th-line.before {
+    stroke: var(--grey);
+  }
+
+  .th-line.partial {
+    stroke-dasharray: 3 3;
+  }
+
+  .th-launch {
+    stroke: var(--ink);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+  }
+
+  /* ---------- 04, 05, 07: panels and twin bars */
+  .pair-panel {
+    min-width: 0;
+  }
+
+  .twin li {
+    display: grid;
+    grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr) 7rem;
+    align-items: center;
+    column-gap: 12px;
+    padding-block: 5px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .twin.wide li {
+    grid-template-columns: minmax(10rem, 18rem) minmax(0, 1fr) 7rem;
+  }
+
+  .twin .roll .tw-name,
+  .twin .apart .tw-name {
+    font-weight: 600;
+  }
+
+  /* The founder row is a current title, not an employer: set apart. */
+  .twin .apart {
+    margin-top: 14px;
+    border-top: 1px solid var(--ink);
+  }
+
+  .pair-panel .twin li {
+    grid-template-columns: minmax(7rem, 10rem) minmax(0, 1fr) 4.4rem;
+  }
+
+  .tw-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: -2px 0 10px;
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-2);
+  }
+
+  .tw-key:lang(zh) {
+    font-family: var(--sans);
+  }
+
+  .tw-bars {
+    display: grid;
+    row-gap: 3px;
+  }
+
+  .tw-bars i {
+    display: block;
+    height: 8px;
+    min-width: 1px;
+    border-radius: 0 3px 3px 0;
+  }
+
+  .tw-bars .ai {
+    background: var(--cl);
+  }
+
+  .tw-bars .people {
+    background: var(--people);
+  }
+
+  .tw-bars .non {
+    background: var(--grey);
+  }
+
+  .tw-bars .gap {
+    height: 8px;
+    border: 1px dashed var(--grey);
+    border-radius: 0;
+    width: 12px;
+  }
+
+  .tw-val {
+    display: grid;
+    justify-items: end;
+    font: 12px/1.35 var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-3);
+  }
+
+  .tw-val b {
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  /* ---------- 06: the roster, set as a yearbook page */
+  .roster {
+    display: grid;
+    row-gap: 36px;
+  }
+
+  .rs-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--cl);
+    font: 600 13px/1.3 var(--mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--cl);
+  }
+
+  .rs-head:lang(zh) {
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .rs-count {
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+
+  .rs-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 20px var(--split-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .rs-list li {
+    display: grid;
+    align-content: start;
+    row-gap: 4px;
+    padding-left: 12px;
+    border-left: 1px solid var(--line-strong);
+  }
+
+  .rs-name {
+    font: 600 clamp(20px, 2vw, 26px) / 1.1 var(--display);
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+
+  .rs-cap {
+    font: 12px/1.4 var(--mono);
+    color: var(--ink-3);
+  }
+
+  /* The two geography panels stack before their tracks get too short to separate the dots. */
+  @media (max-width: 1099px) {
+    .geo {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ---------- narrow screens */
+  @media (max-width: 899px) {
+    .cl-top,
+    .cl-wave-head,
+    .geo,
+    .pairs {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 20px;
+    }
+
+    .cl-side {
+      padding-top: 24px;
+    }
+
+    .themes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 479px) {
+    .dumb li {
+      grid-template-columns: minmax(0, 1fr) 7.6rem;
+      row-gap: 4px;
+      padding-block: 6px;
+    }
+
+    .db-track {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .twin li,
+    .twin.wide li {
+      grid-template-columns: minmax(0, 1fr) 6rem;
+      row-gap: 4px;
+    }
+
+    .tw-bars {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .themes {
+      gap: 24px 16px;
+    }
+  }
+</style>

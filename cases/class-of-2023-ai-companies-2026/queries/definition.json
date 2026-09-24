@@ -1,0 +1,319 @@
+{
+  "note": "Who counts as an AI company. A company counts when its type is not Nonprofit, Educational, or Government Agency, and either its name carries the word AI and its keywords match one of the loose AI terms, or its keywords match one of the five technical terms. The Platform matches a term word by word, in any order, and ignores case; keywords is a list of tags, and a term can be matched by words from different tags. Every count in this case uses this definition unless a file says otherwise.",
+  "exclude_types": [
+    "Nonprofit",
+    "Educational",
+    "Government Agency"
+  ],
+  "name_word": "AI",
+  "loose_terms": [
+    "AI",
+    "artificial intelligence",
+    "generative AI",
+    "machine learning",
+    "large language models",
+    "LLM",
+    "deep learning",
+    "computer vision",
+    "natural language processing"
+  ],
+  "technical_terms": [
+    "deep learning",
+    "computer vision",
+    "natural language processing",
+    "large language models",
+    "generative AI"
+  ],
+  "where": {
+    "all": [
+      {
+        "not": {
+          "field": "type",
+          "in": [
+            "Nonprofit",
+            "Educational",
+            "Government Agency"
+          ]
+        }
+      },
+      {
+        "any": [
+          {
+            "all": [
+              {
+                "field": "name",
+                "match": "AI"
+              },
+              {
+                "any": [
+                  {
+                    "field": "keywords",
+                    "match": "AI"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "artificial intelligence"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "generative AI"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "machine learning"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "large language models"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "LLM"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "deep learning"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "computer vision"
+                  },
+                  {
+                    "field": "keywords",
+                    "match": "natural language processing"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "field": "keywords",
+            "match": "deep learning"
+          },
+          {
+            "field": "keywords",
+            "match": "computer vision"
+          },
+          {
+            "field": "keywords",
+            "match": "natural language processing"
+          },
+          {
+            "field": "keywords",
+            "match": "large language models"
+          },
+          {
+            "field": "keywords",
+            "match": "generative AI"
+          }
+        ]
+      }
+    ]
+  },
+  "comparisons": {
+    "probe": {
+      "terms": [
+        "artificial intelligence",
+        "generative AI",
+        "machine learning",
+        "large language models"
+      ],
+      "note": "The definition of the feasibility probe: any of four keyword terms. Counted per founding year beside the main definition in wave.json."
+    },
+    "loose": {
+      "terms_from": "loose_terms",
+      "note": "Any of the nine loose terms. The population the definition audit sampled from."
+    },
+    "name_path": {
+      "note": "Only the first branch of the definition: the name carries AI and the keywords match a loose term, types excluded as above."
+    },
+    "technical_neutral": {
+      "terms": [
+        "deep learning",
+        "computer vision",
+        "natural language processing"
+      ],
+      "note": "The technical branch alone with the three terms that were in use long before 2022, types excluded as above. No name and no post-2022 vocabulary enters it, so a naming fashion or a new word cannot drive its rise."
+    },
+    "technical": {
+      "terms_from": "technical_terms",
+      "note": "The technical branch alone with all five terms, types excluded as above."
+    }
+  },
+  "tests": {
+    "eq_vs_match": "keywords is a free-text field, so eq behaves like match. Among companies founded in 2023, every pair below counted the same with eq and with match, in any case: artificial intelligence 11,866; machine learning 4,676; generative ai 2,716; llm 837; large language models 329; ai agents 1,125; AI 24,847; deep learning 635; computer vision 709; natural language processing 525; AI agent 480. Tag capitalisation therefore does not matter and no exact-tag test is possible. There is no stemming: AI agents 1,125 against AI agent 480.",
+    "cross_tag": "Because words may come from different tags, the loose terms pick up companies whose tags never say the phrase: a company tagged deep technology innovation and e-learning matched deep learning, and a repair service tagged washing machine repair and learning system matched machine learning. Both were found in the audit reads.",
+    "website": "website match ai finds nothing, even for sites under the .ai domain: 0 in a slice where 7 of 47 companies have one. A web address is stored as one word, so a domain cannot be used. name match AI finds AI as a separate word only (Mistral AI, not KolateAI).",
+    "sizes": "Among companies founded in 2023, the probe definition counts 15,213, the loose terms 29,821, and the loose terms without a headcount 3,153."
+  },
+  "audit": {
+    "method": "Records were read in whole slices, never from the top of a search, because Search ranks by match quality. A slice is every match of the definition being audited in one founding year with linkedin_followers in a narrow window chosen so the slice held 15 to 50 companies, one slice per founding year from 2016 to 2025. Each company was classified by hand from its name, industry, and tags (there is no description field): Y, AI is the product or the service; V, AI is named as part of the core product in another field (an AI radiology tool, an AI-powered insurance valuation app); G, a generalist software house, agency, or consultancy that lists AI among many services, or a business where AI is incidental; N, AI is peripheral or absent, or the record is not a company (a student club, an association, an event, a journal, a fund). An AI company is Y or V.",
+    "fit": {
+      "population": "loose terms",
+      "read": 325,
+      "labels": {
+        "Y": 87,
+        "V": 52,
+        "G": 75,
+        "N": 111
+      },
+      "precision": {
+        "loose terms": "139 of 325 (42.8%)",
+        "probe definition": "91 of 181 (50.3%)",
+        "artificial intelligence alone": "72 of 135 (53.3%)",
+        "AI alone": "118 of 256 (46.1%)",
+        "name path": "31 of 32 (96.9%)",
+        "definition": "58 of 65 (89.2%)"
+      },
+      "capture": "Of the 139 AI companies among the loose-term matches read, the definition keeps 58 (41.7%): 17 of 40 founded 2016 to 2019, 15 of 34 founded 2020 to 2022, and 26 of 65 founded 2023 to 2025, so the share it keeps does not change much with founding year. The name path alone keeps 5 of 40, 8 of 34, and 18 of 65, which rises with founding year because newer companies put AI in their names; that is why the name is not used alone.",
+      "note": "Rules that reach 90% on these reads either keep only the name path (a naming fashion) or were tuned to these 325 records. The definition was fixed after this step and then audited again on fresh reads (validation)."
+    },
+    "validation": {
+      "population": "the definition",
+      "read": 215,
+      "slices": "One per founding year 2016 to 2025, 16 to 28 companies each, none of them read in the fit step.",
+      "labels": {
+        "Y": 116,
+        "V": 51,
+        "G": 29,
+        "N": 19
+      },
+      "precision": "167 of 215 (77.7%) are AI companies; 116 (54.0%) sell AI itself.",
+      "by_era": {
+        "2016-2019": "69 of 89 (77.5%)",
+        "2020-2022": "46 of 62 (74.2%)",
+        "2023-2025": "52 of 64 (81.3%)"
+      },
+      "by_branch": {
+        "name path": "61 of 71 (85.9%)",
+        "technical terms without the name": "106 of 144 (73.6%)"
+      },
+      "misses": "G: software houses and agencies that list generative AI or computer vision among many services, IT consultancies, a web host, and a marketing agency. N: two venture funds, an awards event, a news site, a tech blog, a podcast, a keynote speaker, and two education projects."
+    },
+    "target": "The target was 90% of matches being AI companies. It was not met: the definition reaches 77.7% on fresh reads. Tags are written by or for each company, generalist firms list AI terms freely, and no filter on the Platform separates them; a stricter rule either keeps a third of AI companies with a bias toward recent names or was fitted to the reads it was measured on.",
+    "false_negatives": "Of the 260 loose-term matches that the definition leaves out (read in the fit step), 81 (31.2%) are AI companies (39 Y, 42 V), mostly companies tagged only artificial intelligence, machine learning, or AI; 107 are N and 72 are G. The definition is a precise core, not a census: on these reads it keeps about 42% of AI companies.",
+    "records": "Audit records are kept outside the repository and in data/raw/.",
+    "false_positives": "Of the 48 non-AI companies in the fresh reads: 29 generalist firms (software houses, IT consultancies, agencies, a web host) and 19 not AI or not companies (two venture funds, an awards event, a news site, a blog, a podcast, a keynote speaker, two education projects). By industry: IT Services and IT Consulting 11, Business Consulting and Services 6, Information Technology & Services 5, Software Development 5, Technology, Information and Internet or Media 6, venture capital 2, marketing 2. They are spread out, so no single exclusion removes most of them."
+  },
+  "industry_note": "The top industries inside the definition are counted in industries.json. industry is free text on the Platform, so a value is matched word by word; each candidate is counted without the candidates whose words contain its words (Software Development without IT System Custom Software Development).",
+  "decision": "The definition was kept because it is the only candidate whose precision and catch are both flat across founding eras: on fresh reads 77.5%, 74.2%, and 81.3% of its matches are AI companies for 2016 to 2019, 2020 to 2022, and 2023 to 2025, and on the fit reads it keeps 17 of 40, 15 of 34, and 26 of 65 AI companies (about 42% each). A before and after share needs both to hold still. The probe's four terms become more precise and catch fewer AI companies in later years (precision 43%, 48%, 67%; catch 90%, 74%, 46%), so they understate the rise (1.60 times); the name path catches more in later years (5 of 40, 8 of 34, 18 of 65), so it overstates it (5.69 times). The two bracket the definition's 2.91 times. Its precision is 77.7% on fresh reads, below the 90% target.",
+  "candidates": [
+    {
+      "rule": "loose: any of the nine loose terms",
+      "class_count": 85823,
+      "precision": "139 of 325 (42.8%)",
+      "catch": "100%",
+      "by_era": "40/119, 34/86, 65/120"
+    },
+    {
+      "rule": "probe: artificial intelligence, generative AI, machine learning, large language models",
+      "class_count": 38156,
+      "precision": "91 of 181 (50.3%)",
+      "catch": "65%",
+      "by_era": "36/84, 25/52, 30/45"
+    },
+    {
+      "rule": "keywords AI",
+      "count_2023": 24847,
+      "precision": "118 of 256 (46.1%)",
+      "catch": "85%",
+      "by_era": "30/80, 27/67, 61/109"
+    },
+    {
+      "rule": "keywords artificial intelligence",
+      "count_2023": 11866,
+      "precision": "72 of 135 (53.3%)",
+      "catch": "52%",
+      "by_era": "27/59, 20/39, 25/37"
+    },
+    {
+      "rule": "keywords machine learning",
+      "count_2023": 4676,
+      "precision": "46 of 83 (55.4%)",
+      "catch": "33%",
+      "by_era": "25/46, 13/24, 8/13"
+    },
+    {
+      "rule": "artificial intelligence and machine learning",
+      "precision": "31 of 43 (72.1%)",
+      "catch": "22%",
+      "by_era": "17/24, 9/12, 5/7"
+    },
+    {
+      "rule": "five technical terms, any",
+      "precision": "32 of 42 (76.2%); 124 of 162 (76.5%) in the fresh reads",
+      "catch": "23%",
+      "by_era": "15/21, 7/8, 10/13"
+    },
+    {
+      "rule": "generative AI",
+      "count_2023": 2716,
+      "precision": "14 of 17 (82%)",
+      "note": "n under 20"
+    },
+    {
+      "rule": "deep learning",
+      "count_2023": 635,
+      "precision": "10 of 13 (77%)",
+      "note": "n under 20"
+    },
+    {
+      "rule": "computer vision",
+      "count_2023": 709,
+      "precision": "9 of 14 (64%)",
+      "note": "n under 20"
+    },
+    {
+      "rule": "natural language processing",
+      "count_2023": 525,
+      "precision": "7 of 7",
+      "note": "n under 20"
+    },
+    {
+      "rule": "LLM",
+      "count_2023": 837,
+      "precision": "1 of 5",
+      "note": "n under 20"
+    },
+    {
+      "rule": "name path: name AI, a loose term, types excluded",
+      "class_count": 9813,
+      "precision": "31 of 32 (96.9%); 61 of 71 (85.9%) in the fresh reads",
+      "catch": "22%",
+      "by_era": "fit 5/5, 8/8, 18/19; fresh 14/16, 14/19, 33/36; catch 5 of 40, 8 of 34, 18 of 65"
+    },
+    {
+      "rule": "definition (name path or five technical terms, types excluded)",
+      "class_count": 17871,
+      "precision": "58 of 65 (89.2%); 167 of 215 (77.7%) in the fresh reads",
+      "catch": "42%",
+      "by_era": "fresh 69/89, 46/62, 52/64"
+    },
+    {
+      "rule": "loose, industry Software Development or Technology, Information and Internet only",
+      "precision": "58 of 91 (63.7%)",
+      "catch": "42%"
+    },
+    {
+      "rule": "definition, IT service industries excluded",
+      "precision": "50 of 57; 134 of 166 (80.7%) in the fresh reads",
+      "catch": "36%"
+    },
+    {
+      "rule": "definition, IT service, consulting, marketing, and advertising industries excluded",
+      "precision": "47 of 54; 125 of 148 (84.5%) in the fresh reads",
+      "catch": "34%; loses a quarter of the definition's AI companies"
+    },
+    {
+      "rule": "name path, IT service industries excluded",
+      "precision": "26 of 27; 53 of 59 (89.8%) in the fresh reads",
+      "catch": "19%"
+    },
+    {
+      "rule": "keyword exclusions (blockchain, web development, digital marketing, SEO, consulting, and others) on the loose base",
+      "precision": "at best 69%",
+      "catch": "63%"
+    }
+  ],
+  "candidates_note": "Counts are for companies founded 2023 to 2025 (class_count) or in 2023 (count_2023). Precision is the share of hand-read matches that are AI companies, from the fit reads unless marked fresh; catch is the share of the 139 AI companies among the fit reads that the rule keeps; by_era gives AI companies over reads for 2016 to 2019, 2020 to 2022, and 2023 to 2025. Rules on fewer than 20 reads are noise. keywords eq counts the same as match, so exact-tag rules cannot be built."
+}

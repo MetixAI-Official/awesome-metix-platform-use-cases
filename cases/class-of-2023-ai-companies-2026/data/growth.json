@@ -1,0 +1,116 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/measures.json",
+  "note": "AI companies with headcount 11 or more, by year-on-year headcount change. share is of all; share_of_stated leaves out not-stated.",
+  "rows": [
+    {
+      "cohort": "before",
+      "group": "below-minus-20",
+      "count": 270,
+      "share": 0.0926,
+      "share_of_stated": 0.1009
+    },
+    {
+      "cohort": "before",
+      "group": "minus-20-to-0",
+      "count": 541,
+      "share": 0.1856,
+      "share_of_stated": 0.2022
+    },
+    {
+      "cohort": "before",
+      "group": "0-to-20",
+      "count": 586,
+      "share": 0.201,
+      "share_of_stated": 0.219
+    },
+    {
+      "cohort": "before",
+      "group": "20-to-50",
+      "count": 699,
+      "share": 0.2398,
+      "share_of_stated": 0.2612
+    },
+    {
+      "cohort": "before",
+      "group": "50-to-100",
+      "count": 343,
+      "share": 0.1177,
+      "share_of_stated": 0.1282
+    },
+    {
+      "cohort": "before",
+      "group": "100-plus",
+      "count": 237,
+      "share": 0.0813,
+      "share_of_stated": 0.0886
+    },
+    {
+      "cohort": "before",
+      "group": "not-stated",
+      "count": 239,
+      "share": 0.082
+    },
+    {
+      "cohort": "before",
+      "group": "total",
+      "count": 2915,
+      "stated_count": 2676
+    },
+    {
+      "cohort": "class",
+      "group": "below-minus-20",
+      "count": 82,
+      "share": 0.0404,
+      "share_of_stated": 0.0492
+    },
+    {
+      "cohort": "class",
+      "group": "minus-20-to-0",
+      "count": 124,
+      "share": 0.061,
+      "share_of_stated": 0.0744
+    },
+    {
+      "cohort": "class",
+      "group": "0-to-20",
+      "count": 172,
+      "share": 0.0846,
+      "share_of_stated": 0.1032
+    },
+    {
+      "cohort": "class",
+      "group": "20-to-50",
+      "count": 294,
+      "share": 0.1447,
+      "share_of_stated": 0.1764
+    },
+    {
+      "cohort": "class",
+      "group": "50-to-100",
+      "count": 300,
+      "share": 0.1476,
+      "share_of_stated": 0.18
+    },
+    {
+      "cohort": "class",
+      "group": "100-plus",
+      "count": 695,
+      "share": 0.342,
+      "share_of_stated": 0.4169
+    },
+    {
+      "cohort": "class",
+      "group": "not-stated",
+      "count": 365,
+      "share": 0.1796
+    },
+    {
+      "cohort": "class",
+      "group": "total",
+      "count": 2032,
+      "stated_count": 1667
+    }
+  ]
+}

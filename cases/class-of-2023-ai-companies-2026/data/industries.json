@@ -1,0 +1,294 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/measures.json",
+  "note": "industry is free text on the Platform (over three hundred values), matched word by word. Each candidate is counted without the candidates whose words include all of its words, so Software Development leaves out IT System Custom Software Development; a longer value outside the list that contains a candidate's words is still counted with it. Candidates are the industries most common in the audit reads; the rest is the cohort minus the listed rows, and companies with no industry are part of it.",
+  "rows": [
+    {
+      "cohort": "before",
+      "group": "Software Development",
+      "count": 2918,
+      "share": 0.2765
+    },
+    {
+      "cohort": "before",
+      "group": "Technology, Information and Internet",
+      "count": 1245,
+      "share": 0.118
+    },
+    {
+      "cohort": "before",
+      "group": "IT Services and IT Consulting",
+      "count": 2050,
+      "share": 0.1943
+    },
+    {
+      "cohort": "before",
+      "group": "Information Technology & Services",
+      "count": 417,
+      "share": 0.0395
+    },
+    {
+      "cohort": "before",
+      "group": "Business Consulting and Services",
+      "count": 319,
+      "share": 0.0302
+    },
+    {
+      "cohort": "before",
+      "group": "Technology, Information and Media",
+      "count": 212,
+      "share": 0.0201
+    },
+    {
+      "cohort": "before",
+      "group": "IT System Custom Software Development",
+      "count": 130,
+      "share": 0.0123
+    },
+    {
+      "cohort": "before",
+      "group": "Research Services",
+      "count": 153,
+      "share": 0.0145
+    },
+    {
+      "cohort": "before",
+      "group": "Hospitals and Health Care",
+      "count": 116,
+      "share": 0.011
+    },
+    {
+      "cohort": "before",
+      "group": "Financial Services",
+      "count": 117,
+      "share": 0.0111
+    },
+    {
+      "cohort": "before",
+      "group": "Marketing Services",
+      "count": 175,
+      "share": 0.0166
+    },
+    {
+      "cohort": "before",
+      "group": "Advertising Services",
+      "count": 95,
+      "share": 0.009
+    },
+    {
+      "cohort": "before",
+      "group": "E-Learning Providers",
+      "count": 109,
+      "share": 0.0103
+    },
+    {
+      "cohort": "before",
+      "group": "Data Infrastructure and Analytics",
+      "count": 159,
+      "share": 0.0151
+    },
+    {
+      "cohort": "before",
+      "group": "Computer and Network Security",
+      "count": 49,
+      "share": 0.0046
+    },
+    {
+      "cohort": "before",
+      "group": "Biotechnology Research",
+      "count": 88,
+      "share": 0.0083
+    },
+    {
+      "cohort": "before",
+      "group": "Professional Training and Coaching",
+      "count": 65,
+      "share": 0.0062
+    },
+    {
+      "cohort": "before",
+      "group": "Robotics Engineering",
+      "count": 39,
+      "share": 0.0037
+    },
+    {
+      "cohort": "before",
+      "group": "Business Intelligence Platforms",
+      "count": 46,
+      "share": 0.0044
+    },
+    {
+      "cohort": "before",
+      "group": "Human Resources Services",
+      "count": 21,
+      "share": 0.002
+    },
+    {
+      "cohort": "before",
+      "group": "Staffing and Recruiting",
+      "count": 65,
+      "share": 0.0062
+    },
+    {
+      "cohort": "before",
+      "group": "Medical Equipment Manufacturing",
+      "count": 59,
+      "share": 0.0056
+    },
+    {
+      "cohort": "before",
+      "group": "rest",
+      "count": 1906,
+      "share": 0.1806
+    },
+    {
+      "cohort": "before",
+      "group": "total",
+      "count": 10553
+    },
+    {
+      "cohort": "class",
+      "group": "Software Development",
+      "count": 3833,
+      "share": 0.2145
+    },
+    {
+      "cohort": "class",
+      "group": "Technology, Information and Internet",
+      "count": 4688,
+      "share": 0.2623
+    },
+    {
+      "cohort": "class",
+      "group": "IT Services and IT Consulting",
+      "count": 2436,
+      "share": 0.1363
+    },
+    {
+      "cohort": "class",
+      "group": "Information Technology & Services",
+      "count": 23,
+      "share": 0.0013
+    },
+    {
+      "cohort": "class",
+      "group": "Business Consulting and Services",
+      "count": 953,
+      "share": 0.0533
+    },
+    {
+      "cohort": "class",
+      "group": "Technology, Information and Media",
+      "count": 692,
+      "share": 0.0387
+    },
+    {
+      "cohort": "class",
+      "group": "IT System Custom Software Development",
+      "count": 348,
+      "share": 0.0195
+    },
+    {
+      "cohort": "class",
+      "group": "Research Services",
+      "count": 181,
+      "share": 0.0101
+    },
+    {
+      "cohort": "class",
+      "group": "Hospitals and Health Care",
+      "count": 152,
+      "share": 0.0085
+    },
+    {
+      "cohort": "class",
+      "group": "Financial Services",
+      "count": 187,
+      "share": 0.0105
+    },
+    {
+      "cohort": "class",
+      "group": "Marketing Services",
+      "count": 478,
+      "share": 0.0267
+    },
+    {
+      "cohort": "class",
+      "group": "Advertising Services",
+      "count": 108,
+      "share": 0.006
+    },
+    {
+      "cohort": "class",
+      "group": "E-Learning Providers",
+      "count": 99,
+      "share": 0.0055
+    },
+    {
+      "cohort": "class",
+      "group": "Data Infrastructure and Analytics",
+      "count": 294,
+      "share": 0.0165
+    },
+    {
+      "cohort": "class",
+      "group": "Computer and Network Security",
+      "count": 86,
+      "share": 0.0048
+    },
+    {
+      "cohort": "class",
+      "group": "Biotechnology Research",
+      "count": 95,
+      "share": 0.0053
+    },
+    {
+      "cohort": "class",
+      "group": "Professional Training and Coaching",
+      "count": 140,
+      "share": 0.0078
+    },
+    {
+      "cohort": "class",
+      "group": "Robotics Engineering",
+      "count": 98,
+      "share": 0.0055
+    },
+    {
+      "cohort": "class",
+      "group": "Business Intelligence Platforms",
+      "count": 119,
+      "share": 0.0067
+    },
+    {
+      "cohort": "class",
+      "group": "Human Resources Services",
+      "count": 49,
+      "share": 0.0027
+    },
+    {
+      "cohort": "class",
+      "group": "Staffing and Recruiting",
+      "count": 84,
+      "share": 0.0047
+    },
+    {
+      "cohort": "class",
+      "group": "Medical Equipment Manufacturing",
+      "count": 21,
+      "share": 0.0012
+    },
+    {
+      "cohort": "class",
+      "group": "rest",
+      "count": 2707,
+      "share": 0.1515
+    },
+    {
+      "cohort": "class",
+      "group": "total",
+      "count": 17871
+    }
+  ]
+}

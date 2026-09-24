@@ -1,0 +1,1658 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/themes.json",
+  "note": "Share of each founding year's AI companies whose tags name the theme (share), and the same inside the loose population, any of the nine loose terms with the same type exclusion (loose_share). Themes overlap. Four themes are also entry terms of the definition, so compare their movement, not their level.",
+  "rows": [
+    {
+      "year": 2016,
+      "group": "generative-ai",
+      "count": 428,
+      "ai_count": 1860,
+      "share": 0.2301,
+      "loose_count": 520,
+      "loose_base_count": 11668,
+      "loose_share": 0.0446
+    },
+    {
+      "year": 2016,
+      "group": "llm",
+      "count": 77,
+      "ai_count": 1860,
+      "share": 0.0414,
+      "loose_count": 200,
+      "loose_base_count": 11668,
+      "loose_share": 0.0171
+    },
+    {
+      "year": 2016,
+      "group": "agents",
+      "count": 101,
+      "ai_count": 1860,
+      "share": 0.0543,
+      "loose_count": 360,
+      "loose_base_count": 11668,
+      "loose_share": 0.0309
+    },
+    {
+      "year": 2016,
+      "group": "computer-vision",
+      "count": 639,
+      "ai_count": 1860,
+      "share": 0.3435,
+      "loose_count": 757,
+      "loose_base_count": 11668,
+      "loose_share": 0.0649
+    },
+    {
+      "year": 2016,
+      "group": "nlp",
+      "count": 458,
+      "ai_count": 1860,
+      "share": 0.2462,
+      "loose_count": 546,
+      "loose_base_count": 11668,
+      "loose_share": 0.0468
+    },
+    {
+      "year": 2016,
+      "group": "machine-learning",
+      "count": 1062,
+      "ai_count": 1860,
+      "share": 0.571,
+      "loose_count": 4375,
+      "loose_base_count": 11668,
+      "loose_share": 0.375
+    },
+    {
+      "year": 2016,
+      "group": "robotics",
+      "count": 130,
+      "ai_count": 1860,
+      "share": 0.0699,
+      "loose_count": 505,
+      "loose_base_count": 11668,
+      "loose_share": 0.0433
+    },
+    {
+      "year": 2016,
+      "group": "data-analytics",
+      "count": 580,
+      "ai_count": 1860,
+      "share": 0.3118,
+      "loose_count": 2848,
+      "loose_base_count": 11668,
+      "loose_share": 0.2441
+    },
+    {
+      "year": 2016,
+      "group": "saas",
+      "count": 209,
+      "ai_count": 1860,
+      "share": 0.1124,
+      "loose_count": 1220,
+      "loose_base_count": 11668,
+      "loose_share": 0.1046
+    },
+    {
+      "year": 2016,
+      "group": "health",
+      "count": 214,
+      "ai_count": 1860,
+      "share": 0.1151,
+      "loose_count": 1231,
+      "loose_base_count": 11668,
+      "loose_share": 0.1055
+    },
+    {
+      "year": 2016,
+      "group": "fintech",
+      "count": 75,
+      "ai_count": 1860,
+      "share": 0.0403,
+      "loose_count": 613,
+      "loose_base_count": 11668,
+      "loose_share": 0.0525
+    },
+    {
+      "year": 2016,
+      "group": "cybersecurity",
+      "count": 67,
+      "ai_count": 1860,
+      "share": 0.036,
+      "loose_count": 688,
+      "loose_base_count": 11668,
+      "loose_share": 0.059
+    },
+    {
+      "year": 2016,
+      "group": "developer-tools",
+      "count": 21,
+      "ai_count": 1860,
+      "share": 0.0113,
+      "loose_count": 132,
+      "loose_base_count": 11668,
+      "loose_share": 0.0113
+    },
+    {
+      "year": 2016,
+      "group": "voice",
+      "count": 87,
+      "ai_count": 1860,
+      "share": 0.0468,
+      "loose_count": 222,
+      "loose_base_count": 11668,
+      "loose_share": 0.019
+    },
+    {
+      "year": 2016,
+      "group": "ai-infrastructure",
+      "count": 44,
+      "ai_count": 1860,
+      "share": 0.0237,
+      "loose_count": 89,
+      "loose_base_count": 11668,
+      "loose_share": 0.0076
+    },
+    {
+      "year": 2017,
+      "group": "generative-ai",
+      "count": 517,
+      "ai_count": 2453,
+      "share": 0.2108,
+      "loose_count": 607,
+      "loose_base_count": 14374,
+      "loose_share": 0.0422
+    },
+    {
+      "year": 2017,
+      "group": "llm",
+      "count": 135,
+      "ai_count": 2453,
+      "share": 0.055,
+      "loose_count": 248,
+      "loose_base_count": 14374,
+      "loose_share": 0.0173
+    },
+    {
+      "year": 2017,
+      "group": "agents",
+      "count": 162,
+      "ai_count": 2453,
+      "share": 0.066,
+      "loose_count": 493,
+      "loose_base_count": 14374,
+      "loose_share": 0.0343
+    },
+    {
+      "year": 2017,
+      "group": "computer-vision",
+      "count": 788,
+      "ai_count": 2453,
+      "share": 0.3212,
+      "loose_count": 893,
+      "loose_base_count": 14374,
+      "loose_share": 0.0621
+    },
+    {
+      "year": 2017,
+      "group": "nlp",
+      "count": 566,
+      "ai_count": 2453,
+      "share": 0.2307,
+      "loose_count": 665,
+      "loose_base_count": 14374,
+      "loose_share": 0.0463
+    },
+    {
+      "year": 2017,
+      "group": "machine-learning",
+      "count": 1429,
+      "ai_count": 2453,
+      "share": 0.5826,
+      "loose_count": 5449,
+      "loose_base_count": 14374,
+      "loose_share": 0.3791
+    },
+    {
+      "year": 2017,
+      "group": "robotics",
+      "count": 153,
+      "ai_count": 2453,
+      "share": 0.0624,
+      "loose_count": 668,
+      "loose_base_count": 14374,
+      "loose_share": 0.0465
+    },
+    {
+      "year": 2017,
+      "group": "data-analytics",
+      "count": 751,
+      "ai_count": 2453,
+      "share": 0.3062,
+      "loose_count": 3463,
+      "loose_base_count": 14374,
+      "loose_share": 0.2409
+    },
+    {
+      "year": 2017,
+      "group": "saas",
+      "count": 269,
+      "ai_count": 2453,
+      "share": 0.1097,
+      "loose_count": 1429,
+      "loose_base_count": 14374,
+      "loose_share": 0.0994
+    },
+    {
+      "year": 2017,
+      "group": "health",
+      "count": 260,
+      "ai_count": 2453,
+      "share": 0.106,
+      "loose_count": 1524,
+      "loose_base_count": 14374,
+      "loose_share": 0.106
+    },
+    {
+      "year": 2017,
+      "group": "fintech",
+      "count": 96,
+      "ai_count": 2453,
+      "share": 0.0391,
+      "loose_count": 789,
+      "loose_base_count": 14374,
+      "loose_share": 0.0549
+    },
+    {
+      "year": 2017,
+      "group": "cybersecurity",
+      "count": 86,
+      "ai_count": 2453,
+      "share": 0.0351,
+      "loose_count": 850,
+      "loose_base_count": 14374,
+      "loose_share": 0.0591
+    },
+    {
+      "year": 2017,
+      "group": "developer-tools",
+      "count": 52,
+      "ai_count": 2453,
+      "share": 0.0212,
+      "loose_count": 169,
+      "loose_base_count": 14374,
+      "loose_share": 0.0118
+    },
+    {
+      "year": 2017,
+      "group": "voice",
+      "count": 102,
+      "ai_count": 2453,
+      "share": 0.0416,
+      "loose_count": 267,
+      "loose_base_count": 14374,
+      "loose_share": 0.0186
+    },
+    {
+      "year": 2017,
+      "group": "ai-infrastructure",
+      "count": 65,
+      "ai_count": 2453,
+      "share": 0.0265,
+      "loose_count": 123,
+      "loose_base_count": 14374,
+      "loose_share": 0.0086
+    },
+    {
+      "year": 2018,
+      "group": "generative-ai",
+      "count": 633,
+      "ai_count": 2772,
+      "share": 0.2284,
+      "loose_count": 740,
+      "loose_base_count": 16043,
+      "loose_share": 0.0461
+    },
+    {
+      "year": 2018,
+      "group": "llm",
+      "count": 156,
+      "ai_count": 2772,
+      "share": 0.0563,
+      "loose_count": 308,
+      "loose_base_count": 16043,
+      "loose_share": 0.0192
+    },
+    {
+      "year": 2018,
+      "group": "agents",
+      "count": 156,
+      "ai_count": 2772,
+      "share": 0.0563,
+      "loose_count": 552,
+      "loose_base_count": 16043,
+      "loose_share": 0.0344
+    },
+    {
+      "year": 2018,
+      "group": "computer-vision",
+      "count": 897,
+      "ai_count": 2772,
+      "share": 0.3236,
+      "loose_count": 1026,
+      "loose_base_count": 16043,
+      "loose_share": 0.064
+    },
+    {
+      "year": 2018,
+      "group": "nlp",
+      "count": 584,
+      "ai_count": 2772,
+      "share": 0.2107,
+      "loose_count": 718,
+      "loose_base_count": 16043,
+      "loose_share": 0.0448
+    },
+    {
+      "year": 2018,
+      "group": "machine-learning",
+      "count": 1547,
+      "ai_count": 2772,
+      "share": 0.5581,
+      "loose_count": 5936,
+      "loose_base_count": 16043,
+      "loose_share": 0.37
+    },
+    {
+      "year": 2018,
+      "group": "robotics",
+      "count": 176,
+      "ai_count": 2772,
+      "share": 0.0635,
+      "loose_count": 693,
+      "loose_base_count": 16043,
+      "loose_share": 0.0432
+    },
+    {
+      "year": 2018,
+      "group": "data-analytics",
+      "count": 830,
+      "ai_count": 2772,
+      "share": 0.2994,
+      "loose_count": 3782,
+      "loose_base_count": 16043,
+      "loose_share": 0.2357
+    },
+    {
+      "year": 2018,
+      "group": "saas",
+      "count": 277,
+      "ai_count": 2772,
+      "share": 0.0999,
+      "loose_count": 1563,
+      "loose_base_count": 16043,
+      "loose_share": 0.0974
+    },
+    {
+      "year": 2018,
+      "group": "health",
+      "count": 288,
+      "ai_count": 2772,
+      "share": 0.1039,
+      "loose_count": 1621,
+      "loose_base_count": 16043,
+      "loose_share": 0.101
+    },
+    {
+      "year": 2018,
+      "group": "fintech",
+      "count": 106,
+      "ai_count": 2772,
+      "share": 0.0382,
+      "loose_count": 824,
+      "loose_base_count": 16043,
+      "loose_share": 0.0514
+    },
+    {
+      "year": 2018,
+      "group": "cybersecurity",
+      "count": 97,
+      "ai_count": 2772,
+      "share": 0.035,
+      "loose_count": 956,
+      "loose_base_count": 16043,
+      "loose_share": 0.0596
+    },
+    {
+      "year": 2018,
+      "group": "developer-tools",
+      "count": 46,
+      "ai_count": 2772,
+      "share": 0.0166,
+      "loose_count": 159,
+      "loose_base_count": 16043,
+      "loose_share": 0.0099
+    },
+    {
+      "year": 2018,
+      "group": "voice",
+      "count": 117,
+      "ai_count": 2772,
+      "share": 0.0422,
+      "loose_count": 316,
+      "loose_base_count": 16043,
+      "loose_share": 0.0197
+    },
+    {
+      "year": 2018,
+      "group": "ai-infrastructure",
+      "count": 66,
+      "ai_count": 2772,
+      "share": 0.0238,
+      "loose_count": 134,
+      "loose_base_count": 16043,
+      "loose_share": 0.0084
+    },
+    {
+      "year": 2019,
+      "group": "generative-ai",
+      "count": 651,
+      "ai_count": 2500,
+      "share": 0.2604,
+      "loose_count": 760,
+      "loose_base_count": 15263,
+      "loose_share": 0.0498
+    },
+    {
+      "year": 2019,
+      "group": "llm",
+      "count": 137,
+      "ai_count": 2500,
+      "share": 0.0548,
+      "loose_count": 275,
+      "loose_base_count": 15263,
+      "loose_share": 0.018
+    },
+    {
+      "year": 2019,
+      "group": "agents",
+      "count": 140,
+      "ai_count": 2500,
+      "share": 0.056,
+      "loose_count": 538,
+      "loose_base_count": 15263,
+      "loose_share": 0.0352
+    },
+    {
+      "year": 2019,
+      "group": "computer-vision",
+      "count": 808,
+      "ai_count": 2500,
+      "share": 0.3232,
+      "loose_count": 921,
+      "loose_base_count": 15263,
+      "loose_share": 0.0603
+    },
+    {
+      "year": 2019,
+      "group": "nlp",
+      "count": 465,
+      "ai_count": 2500,
+      "share": 0.186,
+      "loose_count": 564,
+      "loose_base_count": 15263,
+      "loose_share": 0.037
+    },
+    {
+      "year": 2019,
+      "group": "machine-learning",
+      "count": 1360,
+      "ai_count": 2500,
+      "share": 0.544,
+      "loose_count": 5123,
+      "loose_base_count": 15263,
+      "loose_share": 0.3356
+    },
+    {
+      "year": 2019,
+      "group": "robotics",
+      "count": 128,
+      "ai_count": 2500,
+      "share": 0.0512,
+      "loose_count": 553,
+      "loose_base_count": 15263,
+      "loose_share": 0.0362
+    },
+    {
+      "year": 2019,
+      "group": "data-analytics",
+      "count": 683,
+      "ai_count": 2500,
+      "share": 0.2732,
+      "loose_count": 3190,
+      "loose_base_count": 15263,
+      "loose_share": 0.209
+    },
+    {
+      "year": 2019,
+      "group": "saas",
+      "count": 234,
+      "ai_count": 2500,
+      "share": 0.0936,
+      "loose_count": 1467,
+      "loose_base_count": 15263,
+      "loose_share": 0.0961
+    },
+    {
+      "year": 2019,
+      "group": "health",
+      "count": 304,
+      "ai_count": 2500,
+      "share": 0.1216,
+      "loose_count": 1669,
+      "loose_base_count": 15263,
+      "loose_share": 0.1093
+    },
+    {
+      "year": 2019,
+      "group": "fintech",
+      "count": 78,
+      "ai_count": 2500,
+      "share": 0.0312,
+      "loose_count": 681,
+      "loose_base_count": 15263,
+      "loose_share": 0.0446
+    },
+    {
+      "year": 2019,
+      "group": "cybersecurity",
+      "count": 113,
+      "ai_count": 2500,
+      "share": 0.0452,
+      "loose_count": 883,
+      "loose_base_count": 15263,
+      "loose_share": 0.0579
+    },
+    {
+      "year": 2019,
+      "group": "developer-tools",
+      "count": 37,
+      "ai_count": 2500,
+      "share": 0.0148,
+      "loose_count": 146,
+      "loose_base_count": 15263,
+      "loose_share": 0.0096
+    },
+    {
+      "year": 2019,
+      "group": "voice",
+      "count": 91,
+      "ai_count": 2500,
+      "share": 0.0364,
+      "loose_count": 251,
+      "loose_base_count": 15263,
+      "loose_share": 0.0164
+    },
+    {
+      "year": 2019,
+      "group": "ai-infrastructure",
+      "count": 61,
+      "ai_count": 2500,
+      "share": 0.0244,
+      "loose_count": 120,
+      "loose_base_count": 15263,
+      "loose_share": 0.0079
+    },
+    {
+      "year": 2020,
+      "group": "generative-ai",
+      "count": 761,
+      "ai_count": 2632,
+      "share": 0.2891,
+      "loose_count": 919,
+      "loose_base_count": 17045,
+      "loose_share": 0.0539
+    },
+    {
+      "year": 2020,
+      "group": "llm",
+      "count": 163,
+      "ai_count": 2632,
+      "share": 0.0619,
+      "loose_count": 320,
+      "loose_base_count": 17045,
+      "loose_share": 0.0188
+    },
+    {
+      "year": 2020,
+      "group": "agents",
+      "count": 188,
+      "ai_count": 2632,
+      "share": 0.0714,
+      "loose_count": 708,
+      "loose_base_count": 17045,
+      "loose_share": 0.0415
+    },
+    {
+      "year": 2020,
+      "group": "computer-vision",
+      "count": 720,
+      "ai_count": 2632,
+      "share": 0.2736,
+      "loose_count": 813,
+      "loose_base_count": 17045,
+      "loose_share": 0.0477
+    },
+    {
+      "year": 2020,
+      "group": "nlp",
+      "count": 472,
+      "ai_count": 2632,
+      "share": 0.1793,
+      "loose_count": 596,
+      "loose_base_count": 17045,
+      "loose_share": 0.035
+    },
+    {
+      "year": 2020,
+      "group": "machine-learning",
+      "count": 1282,
+      "ai_count": 2632,
+      "share": 0.4871,
+      "loose_count": 5063,
+      "loose_base_count": 17045,
+      "loose_share": 0.297
+    },
+    {
+      "year": 2020,
+      "group": "robotics",
+      "count": 142,
+      "ai_count": 2632,
+      "share": 0.054,
+      "loose_count": 604,
+      "loose_base_count": 17045,
+      "loose_share": 0.0354
+    },
+    {
+      "year": 2020,
+      "group": "data-analytics",
+      "count": 720,
+      "ai_count": 2632,
+      "share": 0.2736,
+      "loose_count": 3300,
+      "loose_base_count": 17045,
+      "loose_share": 0.1936
+    },
+    {
+      "year": 2020,
+      "group": "saas",
+      "count": 286,
+      "ai_count": 2632,
+      "share": 0.1087,
+      "loose_count": 1692,
+      "loose_base_count": 17045,
+      "loose_share": 0.0993
+    },
+    {
+      "year": 2020,
+      "group": "health",
+      "count": 287,
+      "ai_count": 2632,
+      "share": 0.109,
+      "loose_count": 1855,
+      "loose_base_count": 17045,
+      "loose_share": 0.1088
+    },
+    {
+      "year": 2020,
+      "group": "fintech",
+      "count": 93,
+      "ai_count": 2632,
+      "share": 0.0353,
+      "loose_count": 665,
+      "loose_base_count": 17045,
+      "loose_share": 0.039
+    },
+    {
+      "year": 2020,
+      "group": "cybersecurity",
+      "count": 99,
+      "ai_count": 2632,
+      "share": 0.0376,
+      "loose_count": 957,
+      "loose_base_count": 17045,
+      "loose_share": 0.0561
+    },
+    {
+      "year": 2020,
+      "group": "developer-tools",
+      "count": 36,
+      "ai_count": 2632,
+      "share": 0.0137,
+      "loose_count": 172,
+      "loose_base_count": 17045,
+      "loose_share": 0.0101
+    },
+    {
+      "year": 2020,
+      "group": "voice",
+      "count": 91,
+      "ai_count": 2632,
+      "share": 0.0346,
+      "loose_count": 266,
+      "loose_base_count": 17045,
+      "loose_share": 0.0156
+    },
+    {
+      "year": 2020,
+      "group": "ai-infrastructure",
+      "count": 61,
+      "ai_count": 2632,
+      "share": 0.0232,
+      "loose_count": 157,
+      "loose_base_count": 17045,
+      "loose_share": 0.0092
+    },
+    {
+      "year": 2021,
+      "group": "generative-ai",
+      "count": 902,
+      "ai_count": 2546,
+      "share": 0.3543,
+      "loose_count": 1066,
+      "loose_base_count": 15734,
+      "loose_share": 0.0678
+    },
+    {
+      "year": 2021,
+      "group": "llm",
+      "count": 205,
+      "ai_count": 2546,
+      "share": 0.0805,
+      "loose_count": 392,
+      "loose_base_count": 15734,
+      "loose_share": 0.0249
+    },
+    {
+      "year": 2021,
+      "group": "agents",
+      "count": 183,
+      "ai_count": 2546,
+      "share": 0.0719,
+      "loose_count": 712,
+      "loose_base_count": 15734,
+      "loose_share": 0.0453
+    },
+    {
+      "year": 2021,
+      "group": "computer-vision",
+      "count": 657,
+      "ai_count": 2546,
+      "share": 0.2581,
+      "loose_count": 732,
+      "loose_base_count": 15734,
+      "loose_share": 0.0465
+    },
+    {
+      "year": 2021,
+      "group": "nlp",
+      "count": 423,
+      "ai_count": 2546,
+      "share": 0.1661,
+      "loose_count": 512,
+      "loose_base_count": 15734,
+      "loose_share": 0.0325
+    },
+    {
+      "year": 2021,
+      "group": "machine-learning",
+      "count": 1089,
+      "ai_count": 2546,
+      "share": 0.4277,
+      "loose_count": 4338,
+      "loose_base_count": 15734,
+      "loose_share": 0.2757
+    },
+    {
+      "year": 2021,
+      "group": "robotics",
+      "count": 107,
+      "ai_count": 2546,
+      "share": 0.042,
+      "loose_count": 473,
+      "loose_base_count": 15734,
+      "loose_share": 0.0301
+    },
+    {
+      "year": 2021,
+      "group": "data-analytics",
+      "count": 540,
+      "ai_count": 2546,
+      "share": 0.2121,
+      "loose_count": 2756,
+      "loose_base_count": 15734,
+      "loose_share": 0.1752
+    },
+    {
+      "year": 2021,
+      "group": "saas",
+      "count": 305,
+      "ai_count": 2546,
+      "share": 0.1198,
+      "loose_count": 1602,
+      "loose_base_count": 15734,
+      "loose_share": 0.1018
+    },
+    {
+      "year": 2021,
+      "group": "health",
+      "count": 249,
+      "ai_count": 2546,
+      "share": 0.0978,
+      "loose_count": 1602,
+      "loose_base_count": 15734,
+      "loose_share": 0.1018
+    },
+    {
+      "year": 2021,
+      "group": "fintech",
+      "count": 79,
+      "ai_count": 2546,
+      "share": 0.031,
+      "loose_count": 656,
+      "loose_base_count": 15734,
+      "loose_share": 0.0417
+    },
+    {
+      "year": 2021,
+      "group": "cybersecurity",
+      "count": 84,
+      "ai_count": 2546,
+      "share": 0.033,
+      "loose_count": 849,
+      "loose_base_count": 15734,
+      "loose_share": 0.054
+    },
+    {
+      "year": 2021,
+      "group": "developer-tools",
+      "count": 45,
+      "ai_count": 2546,
+      "share": 0.0177,
+      "loose_count": 163,
+      "loose_base_count": 15734,
+      "loose_share": 0.0104
+    },
+    {
+      "year": 2021,
+      "group": "voice",
+      "count": 86,
+      "ai_count": 2546,
+      "share": 0.0338,
+      "loose_count": 252,
+      "loose_base_count": 15734,
+      "loose_share": 0.016
+    },
+    {
+      "year": 2021,
+      "group": "ai-infrastructure",
+      "count": 65,
+      "ai_count": 2546,
+      "share": 0.0255,
+      "loose_count": 159,
+      "loose_base_count": 15734,
+      "loose_share": 0.0101
+    },
+    {
+      "year": 2022,
+      "group": "generative-ai",
+      "count": 1137,
+      "ai_count": 2875,
+      "share": 0.3955,
+      "loose_count": 1302,
+      "loose_base_count": 17001,
+      "loose_share": 0.0766
+    },
+    {
+      "year": 2022,
+      "group": "llm",
+      "count": 273,
+      "ai_count": 2875,
+      "share": 0.095,
+      "loose_count": 503,
+      "loose_base_count": 17001,
+      "loose_share": 0.0296
+    },
+    {
+      "year": 2022,
+      "group": "agents",
+      "count": 244,
+      "ai_count": 2875,
+      "share": 0.0849,
+      "loose_count": 874,
+      "loose_base_count": 17001,
+      "loose_share": 0.0514
+    },
+    {
+      "year": 2022,
+      "group": "computer-vision",
+      "count": 584,
+      "ai_count": 2875,
+      "share": 0.2031,
+      "loose_count": 646,
+      "loose_base_count": 17001,
+      "loose_share": 0.038
+    },
+    {
+      "year": 2022,
+      "group": "nlp",
+      "count": 416,
+      "ai_count": 2875,
+      "share": 0.1447,
+      "loose_count": 513,
+      "loose_base_count": 17001,
+      "loose_share": 0.0302
+    },
+    {
+      "year": 2022,
+      "group": "machine-learning",
+      "count": 1027,
+      "ai_count": 2875,
+      "share": 0.3572,
+      "loose_count": 3887,
+      "loose_base_count": 17001,
+      "loose_share": 0.2286
+    },
+    {
+      "year": 2022,
+      "group": "robotics",
+      "count": 112,
+      "ai_count": 2875,
+      "share": 0.039,
+      "loose_count": 474,
+      "loose_base_count": 17001,
+      "loose_share": 0.0279
+    },
+    {
+      "year": 2022,
+      "group": "data-analytics",
+      "count": 526,
+      "ai_count": 2875,
+      "share": 0.183,
+      "loose_count": 2532,
+      "loose_base_count": 17001,
+      "loose_share": 0.1489
+    },
+    {
+      "year": 2022,
+      "group": "saas",
+      "count": 311,
+      "ai_count": 2875,
+      "share": 0.1082,
+      "loose_count": 1694,
+      "loose_base_count": 17001,
+      "loose_share": 0.0996
+    },
+    {
+      "year": 2022,
+      "group": "health",
+      "count": 247,
+      "ai_count": 2875,
+      "share": 0.0859,
+      "loose_count": 1530,
+      "loose_base_count": 17001,
+      "loose_share": 0.09
+    },
+    {
+      "year": 2022,
+      "group": "fintech",
+      "count": 69,
+      "ai_count": 2875,
+      "share": 0.024,
+      "loose_count": 584,
+      "loose_base_count": 17001,
+      "loose_share": 0.0344
+    },
+    {
+      "year": 2022,
+      "group": "cybersecurity",
+      "count": 89,
+      "ai_count": 2875,
+      "share": 0.031,
+      "loose_count": 823,
+      "loose_base_count": 17001,
+      "loose_share": 0.0484
+    },
+    {
+      "year": 2022,
+      "group": "developer-tools",
+      "count": 41,
+      "ai_count": 2875,
+      "share": 0.0143,
+      "loose_count": 171,
+      "loose_base_count": 17001,
+      "loose_share": 0.0101
+    },
+    {
+      "year": 2022,
+      "group": "voice",
+      "count": 88,
+      "ai_count": 2875,
+      "share": 0.0306,
+      "loose_count": 270,
+      "loose_base_count": 17001,
+      "loose_share": 0.0159
+    },
+    {
+      "year": 2022,
+      "group": "ai-infrastructure",
+      "count": 74,
+      "ai_count": 2875,
+      "share": 0.0257,
+      "loose_count": 162,
+      "loose_base_count": 17001,
+      "loose_share": 0.0095
+    },
+    {
+      "year": 2023,
+      "group": "generative-ai",
+      "count": 2731,
+      "ai_count": 6436,
+      "share": 0.4243,
+      "loose_count": 3092,
+      "loose_base_count": 28539,
+      "loose_share": 0.1083
+    },
+    {
+      "year": 2023,
+      "group": "llm",
+      "count": 793,
+      "ai_count": 6436,
+      "share": 0.1232,
+      "loose_count": 1285,
+      "loose_base_count": 28539,
+      "loose_share": 0.045
+    },
+    {
+      "year": 2023,
+      "group": "agents",
+      "count": 659,
+      "ai_count": 6436,
+      "share": 0.1024,
+      "loose_count": 1841,
+      "loose_base_count": 28539,
+      "loose_share": 0.0645
+    },
+    {
+      "year": 2023,
+      "group": "computer-vision",
+      "count": 717,
+      "ai_count": 6436,
+      "share": 0.1114,
+      "loose_count": 777,
+      "loose_base_count": 28539,
+      "loose_share": 0.0272
+    },
+    {
+      "year": 2023,
+      "group": "nlp",
+      "count": 673,
+      "ai_count": 6436,
+      "share": 0.1046,
+      "loose_count": 781,
+      "loose_base_count": 28539,
+      "loose_share": 0.0274
+    },
+    {
+      "year": 2023,
+      "group": "machine-learning",
+      "count": 1684,
+      "ai_count": 6436,
+      "share": 0.2617,
+      "loose_count": 5161,
+      "loose_base_count": 28539,
+      "loose_share": 0.1808
+    },
+    {
+      "year": 2023,
+      "group": "robotics",
+      "count": 132,
+      "ai_count": 6436,
+      "share": 0.0205,
+      "loose_count": 543,
+      "loose_base_count": 28539,
+      "loose_share": 0.019
+    },
+    {
+      "year": 2023,
+      "group": "data-analytics",
+      "count": 932,
+      "ai_count": 6436,
+      "share": 0.1448,
+      "loose_count": 3477,
+      "loose_base_count": 28539,
+      "loose_share": 0.1218
+    },
+    {
+      "year": 2023,
+      "group": "saas",
+      "count": 701,
+      "ai_count": 6436,
+      "share": 0.1089,
+      "loose_count": 2621,
+      "loose_base_count": 28539,
+      "loose_share": 0.0918
+    },
+    {
+      "year": 2023,
+      "group": "health",
+      "count": 448,
+      "ai_count": 6436,
+      "share": 0.0696,
+      "loose_count": 2346,
+      "loose_base_count": 28539,
+      "loose_share": 0.0822
+    },
+    {
+      "year": 2023,
+      "group": "fintech",
+      "count": 129,
+      "ai_count": 6436,
+      "share": 0.02,
+      "loose_count": 740,
+      "loose_base_count": 28539,
+      "loose_share": 0.0259
+    },
+    {
+      "year": 2023,
+      "group": "cybersecurity",
+      "count": 186,
+      "ai_count": 6436,
+      "share": 0.0289,
+      "loose_count": 1300,
+      "loose_base_count": 28539,
+      "loose_share": 0.0456
+    },
+    {
+      "year": 2023,
+      "group": "developer-tools",
+      "count": 110,
+      "ai_count": 6436,
+      "share": 0.0171,
+      "loose_count": 274,
+      "loose_base_count": 28539,
+      "loose_share": 0.0096
+    },
+    {
+      "year": 2023,
+      "group": "voice",
+      "count": 242,
+      "ai_count": 6436,
+      "share": 0.0376,
+      "loose_count": 606,
+      "loose_base_count": 28539,
+      "loose_share": 0.0212
+    },
+    {
+      "year": 2023,
+      "group": "ai-infrastructure",
+      "count": 154,
+      "ai_count": 6436,
+      "share": 0.0239,
+      "loose_count": 290,
+      "loose_base_count": 28539,
+      "loose_share": 0.0102
+    },
+    {
+      "year": 2024,
+      "group": "generative-ai",
+      "count": 2432,
+      "ai_count": 6354,
+      "share": 0.3828,
+      "loose_count": 2928,
+      "loose_base_count": 29488,
+      "loose_share": 0.0993
+    },
+    {
+      "year": 2024,
+      "group": "llm",
+      "count": 698,
+      "ai_count": 6354,
+      "share": 0.1099,
+      "loose_count": 1308,
+      "loose_base_count": 29488,
+      "loose_share": 0.0444
+    },
+    {
+      "year": 2024,
+      "group": "agents",
+      "count": 945,
+      "ai_count": 6354,
+      "share": 0.1487,
+      "loose_count": 2766,
+      "loose_base_count": 29488,
+      "loose_share": 0.0938
+    },
+    {
+      "year": 2024,
+      "group": "computer-vision",
+      "count": 633,
+      "ai_count": 6354,
+      "share": 0.0996,
+      "loose_count": 688,
+      "loose_base_count": 29488,
+      "loose_share": 0.0233
+    },
+    {
+      "year": 2024,
+      "group": "nlp",
+      "count": 572,
+      "ai_count": 6354,
+      "share": 0.09,
+      "loose_count": 661,
+      "loose_base_count": 29488,
+      "loose_share": 0.0224
+    },
+    {
+      "year": 2024,
+      "group": "machine-learning",
+      "count": 1410,
+      "ai_count": 6354,
+      "share": 0.2219,
+      "loose_count": 4396,
+      "loose_base_count": 29488,
+      "loose_share": 0.1491
+    },
+    {
+      "year": 2024,
+      "group": "robotics",
+      "count": 130,
+      "ai_count": 6354,
+      "share": 0.0205,
+      "loose_count": 528,
+      "loose_base_count": 29488,
+      "loose_share": 0.0179
+    },
+    {
+      "year": 2024,
+      "group": "data-analytics",
+      "count": 854,
+      "ai_count": 6354,
+      "share": 0.1344,
+      "loose_count": 3291,
+      "loose_base_count": 29488,
+      "loose_share": 0.1116
+    },
+    {
+      "year": 2024,
+      "group": "saas",
+      "count": 665,
+      "ai_count": 6354,
+      "share": 0.1047,
+      "loose_count": 2690,
+      "loose_base_count": 29488,
+      "loose_share": 0.0912
+    },
+    {
+      "year": 2024,
+      "group": "health",
+      "count": 447,
+      "ai_count": 6354,
+      "share": 0.0703,
+      "loose_count": 2359,
+      "loose_base_count": 29488,
+      "loose_share": 0.08
+    },
+    {
+      "year": 2024,
+      "group": "fintech",
+      "count": 123,
+      "ai_count": 6354,
+      "share": 0.0194,
+      "loose_count": 657,
+      "loose_base_count": 29488,
+      "loose_share": 0.0223
+    },
+    {
+      "year": 2024,
+      "group": "cybersecurity",
+      "count": 205,
+      "ai_count": 6354,
+      "share": 0.0323,
+      "loose_count": 1423,
+      "loose_base_count": 29488,
+      "loose_share": 0.0483
+    },
+    {
+      "year": 2024,
+      "group": "developer-tools",
+      "count": 93,
+      "ai_count": 6354,
+      "share": 0.0146,
+      "loose_count": 275,
+      "loose_base_count": 29488,
+      "loose_share": 0.0093
+    },
+    {
+      "year": 2024,
+      "group": "voice",
+      "count": 321,
+      "ai_count": 6354,
+      "share": 0.0505,
+      "loose_count": 821,
+      "loose_base_count": 29488,
+      "loose_share": 0.0278
+    },
+    {
+      "year": 2024,
+      "group": "ai-infrastructure",
+      "count": 138,
+      "ai_count": 6354,
+      "share": 0.0217,
+      "loose_count": 297,
+      "loose_base_count": 29488,
+      "loose_share": 0.0101
+    },
+    {
+      "year": 2025,
+      "group": "generative-ai",
+      "count": 1641,
+      "ai_count": 5081,
+      "share": 0.323,
+      "loose_count": 1940,
+      "loose_base_count": 24429,
+      "loose_share": 0.0794
+    },
+    {
+      "year": 2025,
+      "group": "llm",
+      "count": 527,
+      "ai_count": 5081,
+      "share": 0.1037,
+      "loose_count": 1134,
+      "loose_base_count": 24429,
+      "loose_share": 0.0464
+    },
+    {
+      "year": 2025,
+      "group": "agents",
+      "count": 1043,
+      "ai_count": 5081,
+      "share": 0.2053,
+      "loose_count": 3304,
+      "loose_base_count": 24429,
+      "loose_share": 0.1352
+    },
+    {
+      "year": 2025,
+      "group": "computer-vision",
+      "count": 454,
+      "ai_count": 5081,
+      "share": 0.0894,
+      "loose_count": 488,
+      "loose_base_count": 24429,
+      "loose_share": 0.02
+    },
+    {
+      "year": 2025,
+      "group": "nlp",
+      "count": 401,
+      "ai_count": 5081,
+      "share": 0.0789,
+      "loose_count": 485,
+      "loose_base_count": 24429,
+      "loose_share": 0.0199
+    },
+    {
+      "year": 2025,
+      "group": "machine-learning",
+      "count": 961,
+      "ai_count": 5081,
+      "share": 0.1891,
+      "loose_count": 2884,
+      "loose_base_count": 24429,
+      "loose_share": 0.1181
+    },
+    {
+      "year": 2025,
+      "group": "robotics",
+      "count": 117,
+      "ai_count": 5081,
+      "share": 0.023,
+      "loose_count": 418,
+      "loose_base_count": 24429,
+      "loose_share": 0.0171
+    },
+    {
+      "year": 2025,
+      "group": "data-analytics",
+      "count": 507,
+      "ai_count": 5081,
+      "share": 0.0998,
+      "loose_count": 2108,
+      "loose_base_count": 24429,
+      "loose_share": 0.0863
+    },
+    {
+      "year": 2025,
+      "group": "saas",
+      "count": 684,
+      "ai_count": 5081,
+      "share": 0.1346,
+      "loose_count": 2783,
+      "loose_base_count": 24429,
+      "loose_share": 0.1139
+    },
+    {
+      "year": 2025,
+      "group": "health",
+      "count": 329,
+      "ai_count": 5081,
+      "share": 0.0648,
+      "loose_count": 1728,
+      "loose_base_count": 24429,
+      "loose_share": 0.0707
+    },
+    {
+      "year": 2025,
+      "group": "fintech",
+      "count": 103,
+      "ai_count": 5081,
+      "share": 0.0203,
+      "loose_count": 579,
+      "loose_base_count": 24429,
+      "loose_share": 0.0237
+    },
+    {
+      "year": 2025,
+      "group": "cybersecurity",
+      "count": 142,
+      "ai_count": 5081,
+      "share": 0.0279,
+      "loose_count": 1041,
+      "loose_base_count": 24429,
+      "loose_share": 0.0426
+    },
+    {
+      "year": 2025,
+      "group": "developer-tools",
+      "count": 82,
+      "ai_count": 5081,
+      "share": 0.0161,
+      "loose_count": 255,
+      "loose_base_count": 24429,
+      "loose_share": 0.0104
+    },
+    {
+      "year": 2025,
+      "group": "voice",
+      "count": 293,
+      "ai_count": 5081,
+      "share": 0.0577,
+      "loose_count": 840,
+      "loose_base_count": 24429,
+      "loose_share": 0.0344
+    },
+    {
+      "year": 2025,
+      "group": "ai-infrastructure",
+      "count": 103,
+      "ai_count": 5081,
+      "share": 0.0203,
+      "loose_count": 235,
+      "loose_base_count": 24429,
+      "loose_share": 0.0096
+    },
+    {
+      "year": 2026,
+      "group": "generative-ai",
+      "count": 272,
+      "ai_count": 867,
+      "share": 0.3137,
+      "loose_count": 305,
+      "loose_base_count": 4447,
+      "loose_share": 0.0686
+    },
+    {
+      "year": 2026,
+      "group": "llm",
+      "count": 90,
+      "ai_count": 867,
+      "share": 0.1038,
+      "loose_count": 221,
+      "loose_base_count": 4447,
+      "loose_share": 0.0497
+    },
+    {
+      "year": 2026,
+      "group": "agents",
+      "count": 237,
+      "ai_count": 867,
+      "share": 0.2734,
+      "loose_count": 783,
+      "loose_base_count": 4447,
+      "loose_share": 0.1761
+    },
+    {
+      "year": 2026,
+      "group": "computer-vision",
+      "count": 71,
+      "ai_count": 867,
+      "share": 0.0819,
+      "loose_count": 77,
+      "loose_base_count": 4447,
+      "loose_share": 0.0173
+    },
+    {
+      "year": 2026,
+      "group": "nlp",
+      "count": 54,
+      "ai_count": 867,
+      "share": 0.0623,
+      "loose_count": 65,
+      "loose_base_count": 4447,
+      "loose_share": 0.0146
+    },
+    {
+      "year": 2026,
+      "group": "machine-learning",
+      "count": 145,
+      "ai_count": 867,
+      "share": 0.1672,
+      "loose_count": 381,
+      "loose_base_count": 4447,
+      "loose_share": 0.0857
+    },
+    {
+      "year": 2026,
+      "group": "robotics",
+      "count": 11,
+      "ai_count": 867,
+      "share": 0.0127,
+      "loose_count": 69,
+      "loose_base_count": 4447,
+      "loose_share": 0.0155
+    },
+    {
+      "year": 2026,
+      "group": "data-analytics",
+      "count": 64,
+      "ai_count": 867,
+      "share": 0.0738,
+      "loose_count": 297,
+      "loose_base_count": 4447,
+      "loose_share": 0.0668
+    },
+    {
+      "year": 2026,
+      "group": "saas",
+      "count": 107,
+      "ai_count": 867,
+      "share": 0.1234,
+      "loose_count": 516,
+      "loose_base_count": 4447,
+      "loose_share": 0.116
+    },
+    {
+      "year": 2026,
+      "group": "health",
+      "count": 50,
+      "ai_count": 867,
+      "share": 0.0577,
+      "loose_count": 280,
+      "loose_base_count": 4447,
+      "loose_share": 0.063
+    },
+    {
+      "year": 2026,
+      "group": "fintech",
+      "count": 14,
+      "ai_count": 867,
+      "share": 0.0161,
+      "loose_count": 81,
+      "loose_base_count": 4447,
+      "loose_share": 0.0182
+    },
+    {
+      "year": 2026,
+      "group": "cybersecurity",
+      "count": 21,
+      "ai_count": 867,
+      "share": 0.0242,
+      "loose_count": 142,
+      "loose_base_count": 4447,
+      "loose_share": 0.0319
+    },
+    {
+      "year": 2026,
+      "group": "developer-tools",
+      "count": 18,
+      "ai_count": 867,
+      "share": 0.0208,
+      "loose_count": 60,
+      "loose_base_count": 4447,
+      "loose_share": 0.0135
+    },
+    {
+      "year": 2026,
+      "group": "voice",
+      "count": 49,
+      "ai_count": 867,
+      "share": 0.0565,
+      "loose_count": 163,
+      "loose_base_count": 4447,
+      "loose_share": 0.0367
+    },
+    {
+      "year": 2026,
+      "group": "ai-infrastructure",
+      "count": 34,
+      "ai_count": 867,
+      "share": 0.0392,
+      "loose_count": 60,
+      "loose_base_count": 4447,
+      "loose_share": 0.0135
+    }
+  ]
+}

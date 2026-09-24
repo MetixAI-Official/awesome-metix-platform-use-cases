@@ -1,0 +1,668 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/measures.json",
+  "note": "AI companies by size band and founding year; none has no band.",
+  "rows": [
+    {
+      "year": 2016,
+      "group": "Myself Only",
+      "count": 78,
+      "share": 0.0419
+    },
+    {
+      "year": 2016,
+      "group": "1-10",
+      "count": 715,
+      "share": 0.3844
+    },
+    {
+      "year": 2016,
+      "group": "11-50",
+      "count": 723,
+      "share": 0.3887
+    },
+    {
+      "year": 2016,
+      "group": "51-200",
+      "count": 267,
+      "share": 0.1435
+    },
+    {
+      "year": 2016,
+      "group": "201-500",
+      "count": 49,
+      "share": 0.0263
+    },
+    {
+      "year": 2016,
+      "group": "501-1000",
+      "count": 15,
+      "share": 0.0081
+    },
+    {
+      "year": 2016,
+      "group": "1001-5000",
+      "count": 8,
+      "share": 0.0043
+    },
+    {
+      "year": 2016,
+      "group": "5001-10,000",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2016,
+      "group": "10,001+",
+      "count": 2,
+      "share": 0.0011
+    },
+    {
+      "year": 2016,
+      "group": "none",
+      "count": 3,
+      "share": 0.0016
+    },
+    {
+      "year": 2017,
+      "group": "Myself Only",
+      "count": 84,
+      "share": 0.0342
+    },
+    {
+      "year": 2017,
+      "group": "1-10",
+      "count": 1008,
+      "share": 0.4109
+    },
+    {
+      "year": 2017,
+      "group": "11-50",
+      "count": 957,
+      "share": 0.3901
+    },
+    {
+      "year": 2017,
+      "group": "51-200",
+      "count": 322,
+      "share": 0.1313
+    },
+    {
+      "year": 2017,
+      "group": "201-500",
+      "count": 52,
+      "share": 0.0212
+    },
+    {
+      "year": 2017,
+      "group": "501-1000",
+      "count": 13,
+      "share": 0.0053
+    },
+    {
+      "year": 2017,
+      "group": "1001-5000",
+      "count": 8,
+      "share": 0.0033
+    },
+    {
+      "year": 2017,
+      "group": "5001-10,000",
+      "count": 1,
+      "share": 0.0004
+    },
+    {
+      "year": 2017,
+      "group": "10,001+",
+      "count": 2,
+      "share": 0.0008
+    },
+    {
+      "year": 2017,
+      "group": "none",
+      "count": 6,
+      "share": 0.0024
+    },
+    {
+      "year": 2018,
+      "group": "Myself Only",
+      "count": 101,
+      "share": 0.0364
+    },
+    {
+      "year": 2018,
+      "group": "1-10",
+      "count": 1243,
+      "share": 0.4484
+    },
+    {
+      "year": 2018,
+      "group": "11-50",
+      "count": 1009,
+      "share": 0.364
+    },
+    {
+      "year": 2018,
+      "group": "51-200",
+      "count": 329,
+      "share": 0.1187
+    },
+    {
+      "year": 2018,
+      "group": "201-500",
+      "count": 65,
+      "share": 0.0234
+    },
+    {
+      "year": 2018,
+      "group": "501-1000",
+      "count": 11,
+      "share": 0.004
+    },
+    {
+      "year": 2018,
+      "group": "1001-5000",
+      "count": 7,
+      "share": 0.0025
+    },
+    {
+      "year": 2018,
+      "group": "5001-10,000",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2018,
+      "group": "10,001+",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2018,
+      "group": "none",
+      "count": 7,
+      "share": 0.0025
+    },
+    {
+      "year": 2019,
+      "group": "Myself Only",
+      "count": 113,
+      "share": 0.0452
+    },
+    {
+      "year": 2019,
+      "group": "1-10",
+      "count": 1139,
+      "share": 0.4556
+    },
+    {
+      "year": 2019,
+      "group": "11-50",
+      "count": 957,
+      "share": 0.3828
+    },
+    {
+      "year": 2019,
+      "group": "51-200",
+      "count": 243,
+      "share": 0.0972
+    },
+    {
+      "year": 2019,
+      "group": "201-500",
+      "count": 32,
+      "share": 0.0128
+    },
+    {
+      "year": 2019,
+      "group": "501-1000",
+      "count": 9,
+      "share": 0.0036
+    },
+    {
+      "year": 2019,
+      "group": "1001-5000",
+      "count": 3,
+      "share": 0.0012
+    },
+    {
+      "year": 2019,
+      "group": "5001-10,000",
+      "count": 1,
+      "share": 0.0004
+    },
+    {
+      "year": 2019,
+      "group": "10,001+",
+      "count": 2,
+      "share": 0.0008
+    },
+    {
+      "year": 2019,
+      "group": "none",
+      "count": 1,
+      "share": 0.0004
+    },
+    {
+      "year": 2020,
+      "group": "Myself Only",
+      "count": 124,
+      "share": 0.0471
+    },
+    {
+      "year": 2020,
+      "group": "1-10",
+      "count": 1266,
+      "share": 0.481
+    },
+    {
+      "year": 2020,
+      "group": "11-50",
+      "count": 985,
+      "share": 0.3742
+    },
+    {
+      "year": 2020,
+      "group": "51-200",
+      "count": 209,
+      "share": 0.0794
+    },
+    {
+      "year": 2020,
+      "group": "201-500",
+      "count": 37,
+      "share": 0.0141
+    },
+    {
+      "year": 2020,
+      "group": "501-1000",
+      "count": 4,
+      "share": 0.0015
+    },
+    {
+      "year": 2020,
+      "group": "1001-5000",
+      "count": 4,
+      "share": 0.0015
+    },
+    {
+      "year": 2020,
+      "group": "5001-10,000",
+      "count": 1,
+      "share": 0.0004
+    },
+    {
+      "year": 2020,
+      "group": "10,001+",
+      "count": 2,
+      "share": 0.0008
+    },
+    {
+      "year": 2020,
+      "group": "none",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2021,
+      "group": "Myself Only",
+      "count": 117,
+      "share": 0.046
+    },
+    {
+      "year": 2021,
+      "group": "1-10",
+      "count": 1270,
+      "share": 0.4988
+    },
+    {
+      "year": 2021,
+      "group": "11-50",
+      "count": 948,
+      "share": 0.3723
+    },
+    {
+      "year": 2021,
+      "group": "51-200",
+      "count": 179,
+      "share": 0.0703
+    },
+    {
+      "year": 2021,
+      "group": "201-500",
+      "count": 21,
+      "share": 0.0082
+    },
+    {
+      "year": 2021,
+      "group": "501-1000",
+      "count": 6,
+      "share": 0.0024
+    },
+    {
+      "year": 2021,
+      "group": "1001-5000",
+      "count": 2,
+      "share": 0.0008
+    },
+    {
+      "year": 2021,
+      "group": "5001-10,000",
+      "count": 1,
+      "share": 0.0004
+    },
+    {
+      "year": 2021,
+      "group": "10,001+",
+      "count": 2,
+      "share": 0.0008
+    },
+    {
+      "year": 2021,
+      "group": "none",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2022,
+      "group": "Myself Only",
+      "count": 174,
+      "share": 0.0605
+    },
+    {
+      "year": 2022,
+      "group": "1-10",
+      "count": 1590,
+      "share": 0.553
+    },
+    {
+      "year": 2022,
+      "group": "11-50",
+      "count": 940,
+      "share": 0.327
+    },
+    {
+      "year": 2022,
+      "group": "51-200",
+      "count": 139,
+      "share": 0.0483
+    },
+    {
+      "year": 2022,
+      "group": "201-500",
+      "count": 26,
+      "share": 0.009
+    },
+    {
+      "year": 2022,
+      "group": "501-1000",
+      "count": 4,
+      "share": 0.0014
+    },
+    {
+      "year": 2022,
+      "group": "1001-5000",
+      "count": 2,
+      "share": 0.0007
+    },
+    {
+      "year": 2022,
+      "group": "5001-10,000",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2022,
+      "group": "10,001+",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2022,
+      "group": "none",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2023,
+      "group": "Myself Only",
+      "count": 492,
+      "share": 0.0764
+    },
+    {
+      "year": 2023,
+      "group": "1-10",
+      "count": 4173,
+      "share": 0.6484
+    },
+    {
+      "year": 2023,
+      "group": "11-50",
+      "count": 1525,
+      "share": 0.2369
+    },
+    {
+      "year": 2023,
+      "group": "51-200",
+      "count": 203,
+      "share": 0.0315
+    },
+    {
+      "year": 2023,
+      "group": "201-500",
+      "count": 33,
+      "share": 0.0051
+    },
+    {
+      "year": 2023,
+      "group": "501-1000",
+      "count": 2,
+      "share": 0.0003
+    },
+    {
+      "year": 2023,
+      "group": "1001-5000",
+      "count": 4,
+      "share": 0.0006
+    },
+    {
+      "year": 2023,
+      "group": "5001-10,000",
+      "count": 1,
+      "share": 0.0002
+    },
+    {
+      "year": 2023,
+      "group": "10,001+",
+      "count": 3,
+      "share": 0.0005
+    },
+    {
+      "year": 2023,
+      "group": "none",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2024,
+      "group": "Myself Only",
+      "count": 531,
+      "share": 0.0836
+    },
+    {
+      "year": 2024,
+      "group": "1-10",
+      "count": 4362,
+      "share": 0.6865
+    },
+    {
+      "year": 2024,
+      "group": "11-50",
+      "count": 1267,
+      "share": 0.1994
+    },
+    {
+      "year": 2024,
+      "group": "51-200",
+      "count": 161,
+      "share": 0.0253
+    },
+    {
+      "year": 2024,
+      "group": "201-500",
+      "count": 19,
+      "share": 0.003
+    },
+    {
+      "year": 2024,
+      "group": "501-1000",
+      "count": 8,
+      "share": 0.0013
+    },
+    {
+      "year": 2024,
+      "group": "1001-5000",
+      "count": 4,
+      "share": 0.0006
+    },
+    {
+      "year": 2024,
+      "group": "5001-10,000",
+      "count": 1,
+      "share": 0.0002
+    },
+    {
+      "year": 2024,
+      "group": "10,001+",
+      "count": 1,
+      "share": 0.0002
+    },
+    {
+      "year": 2024,
+      "group": "none",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2025,
+      "group": "Myself Only",
+      "count": 603,
+      "share": 0.1187
+    },
+    {
+      "year": 2025,
+      "group": "1-10",
+      "count": 3694,
+      "share": 0.727
+    },
+    {
+      "year": 2025,
+      "group": "11-50",
+      "count": 717,
+      "share": 0.1411
+    },
+    {
+      "year": 2025,
+      "group": "51-200",
+      "count": 54,
+      "share": 0.0106
+    },
+    {
+      "year": 2025,
+      "group": "201-500",
+      "count": 6,
+      "share": 0.0012
+    },
+    {
+      "year": 2025,
+      "group": "501-1000",
+      "count": 2,
+      "share": 0.0004
+    },
+    {
+      "year": 2025,
+      "group": "1001-5000",
+      "count": 2,
+      "share": 0.0004
+    },
+    {
+      "year": 2025,
+      "group": "5001-10,000",
+      "count": 2,
+      "share": 0.0004
+    },
+    {
+      "year": 2025,
+      "group": "10,001+",
+      "count": 1,
+      "share": 0.0002
+    },
+    {
+      "year": 2025,
+      "group": "none",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2026,
+      "group": "Myself Only",
+      "count": 162,
+      "share": 0.1869
+    },
+    {
+      "year": 2026,
+      "group": "1-10",
+      "count": 627,
+      "share": 0.7232
+    },
+    {
+      "year": 2026,
+      "group": "11-50",
+      "count": 68,
+      "share": 0.0784
+    },
+    {
+      "year": 2026,
+      "group": "51-200",
+      "count": 7,
+      "share": 0.0081
+    },
+    {
+      "year": 2026,
+      "group": "201-500",
+      "count": 2,
+      "share": 0.0023
+    },
+    {
+      "year": 2026,
+      "group": "501-1000",
+      "count": 1,
+      "share": 0.0012
+    },
+    {
+      "year": 2026,
+      "group": "1001-5000",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2026,
+      "group": "5001-10,000",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2026,
+      "group": "10,001+",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "year": 2026,
+      "group": "none",
+      "count": 0,
+      "share": 0.0
+    }
+  ]
+}

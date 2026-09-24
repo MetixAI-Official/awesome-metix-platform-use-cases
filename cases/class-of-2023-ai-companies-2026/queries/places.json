@@ -1,0 +1,278 @@
+{
+  "note": "Where the companies are, by headquarters. headquarters.country takes an English name and is compared whole; headquarters.city is matched word by word, so every metro is a country, a list of city names, and where a name is ambiguous a state that is either the one named or missing. A metro count is a count of companies whose headquarters city is in the list; companies with no city are in no metro, so every metro share is of the whole cohort and the share with a city is published beside it.",
+  "countries": [
+    "United States",
+    "India",
+    "United Kingdom",
+    "Canada",
+    "Germany",
+    "France",
+    "Netherlands",
+    "Spain",
+    "Italy",
+    "Brazil",
+    "Australia",
+    "Singapore",
+    "United Arab Emirates",
+    "Israel",
+    "Switzerland",
+    "Sweden",
+    "Turkey",
+    "Pakistan",
+    "Hong Kong",
+    "China",
+    "Japan",
+    "South Korea",
+    "Nigeria",
+    "South Africa",
+    "Mexico",
+    "Poland",
+    "Portugal",
+    "Ireland",
+    "Belgium",
+    "Denmark",
+    "Finland",
+    "Norway",
+    "Austria",
+    "Estonia",
+    "Ukraine",
+    "Romania",
+    "Indonesia",
+    "Vietnam",
+    "Philippines",
+    "Malaysia",
+    "Bangladesh",
+    "Egypt",
+    "Kenya",
+    "Saudi Arabia",
+    "Argentina",
+    "Colombia",
+    "Chile",
+    "New Zealand",
+    "Greece",
+    "Czech Republic",
+    "Taiwan",
+    "Thailand",
+    "Lithuania",
+    "Morocco",
+    "Ghana",
+    "Sri Lanka",
+    "Nepal",
+    "Qatar",
+    "Luxembourg",
+    "Cyprus"
+  ],
+  "countries_note": "Candidates for the top 15, drawn from every country seen in the audit reads and the larger markets. Each is counted; the top 15 of each cohort are published and the rest is the cohort's companies with a country minus those 15. fetch.py checks that the candidates it did not publish, and the companies in no candidate country, are each below the 15th, so no country outside the list could have ranked.",
+  "china_note": "Chinese companies are thin on the Platform: among AI companies founded 2023 to 2025, 19 are headquartered in China and 3 each in Beijing, Shanghai, and Shenzhen (exploration counts). coverage in countries.json counts all companies headquartered in China per founding year for scale.",
+  "metros": [
+    {
+      "id": "sf-bay-area",
+      "country": "United States",
+      "state": "California",
+      "cities": [
+        "San Francisco",
+        "Palo Alto",
+        "Mountain View",
+        "Menlo Park",
+        "Redwood City",
+        "San Mateo",
+        "Sunnyvale",
+        "Santa Clara",
+        "San Jose",
+        "Cupertino",
+        "Berkeley",
+        "Oakland",
+        "Fremont",
+        "Burlingame",
+        "Los Altos",
+        "Foster City",
+        "San Bruno",
+        "Emeryville",
+        "Milpitas",
+        "Pleasanton",
+        "San Carlos",
+        "Belmont",
+        "Los Gatos",
+        "Campbell",
+        "Walnut Creek",
+        "Alameda",
+        "Hayward",
+        "San Ramon",
+        "Livermore",
+        "Union City",
+        "Millbrae",
+        "Saratoga",
+        "Atherton",
+        "Woodside",
+        "Half Moon Bay",
+        "Daly City",
+        "San Leandro",
+        "San Rafael",
+        "Mill Valley",
+        "Sausalito",
+        "Novato"
+      ],
+      "note": "South San Francisco is matched by San Francisco. A city in cities counts when the state is California or missing (165 of the 891 class companies in San Francisco have no state); a city in strict_cities, a name shared with places elsewhere in the United States, counts only with the state.",
+      "strict_cities": [
+        "Dublin",
+        "Newark",
+        "Richmond",
+        "Albany"
+      ]
+    },
+    {
+      "id": "new-york-city",
+      "country": "United States",
+      "state": "New York",
+      "cities": [
+        "New York",
+        "Brooklyn",
+        "Manhattan",
+        "Queens",
+        "Bronx",
+        "Staten Island",
+        "Long Island City"
+      ],
+      "note": "New York also matches New York City. 110 of the 541 class companies in New York have no state, so a missing state is kept."
+    },
+    {
+      "id": "london",
+      "country": "United Kingdom",
+      "cities": [
+        "London"
+      ]
+    },
+    {
+      "id": "paris",
+      "country": "France",
+      "cities": [
+        "Paris"
+      ]
+    },
+    {
+      "id": "berlin",
+      "country": "Germany",
+      "cities": [
+        "Berlin"
+      ]
+    },
+    {
+      "id": "toronto",
+      "country": "Canada",
+      "cities": [
+        "Toronto"
+      ]
+    },
+    {
+      "id": "bengaluru",
+      "country": "India",
+      "cities": [
+        "Bengaluru",
+        "Bangalore"
+      ],
+      "note": "Both spellings are in use: 211 and 169 class companies."
+    },
+    {
+      "id": "tel-aviv",
+      "country": "Israel",
+      "cities": [
+        "Tel Aviv",
+        "Tel-Aviv"
+      ],
+      "note": "Tel Aviv-Yafo is matched by Tel Aviv."
+    },
+    {
+      "id": "singapore",
+      "country": "Singapore",
+      "cities": null,
+      "note": "A city-state: the whole country, because only 55 of its 221 class companies give Singapore as the city."
+    },
+    {
+      "id": "beijing",
+      "country": "China",
+      "cities": [
+        "Beijing"
+      ]
+    },
+    {
+      "id": "shanghai",
+      "country": "China",
+      "cities": [
+        "Shanghai"
+      ]
+    },
+    {
+      "id": "shenzhen",
+      "country": "China",
+      "cities": [
+        "Shenzhen"
+      ]
+    },
+    {
+      "id": "hangzhou",
+      "country": "China",
+      "cities": [
+        "Hangzhou"
+      ]
+    },
+    {
+      "id": "seattle",
+      "country": "United States",
+      "state": "Washington",
+      "cities": [
+        "Seattle",
+        "Bellevue",
+        "Redmond",
+        "Kirkland"
+      ]
+    },
+    {
+      "id": "boston",
+      "country": "United States",
+      "state": "Massachusetts",
+      "cities": [
+        "Boston",
+        "Somerville"
+      ],
+      "note": "Cambridge needs the state, to leave out Cambridge in England.",
+      "strict_cities": [
+        "Cambridge"
+      ]
+    },
+    {
+      "id": "austin",
+      "country": "United States",
+      "state": "Texas",
+      "cities": [
+        "Austin"
+      ]
+    },
+    {
+      "id": "los-angeles",
+      "country": "United States",
+      "state": "California",
+      "cities": [
+        "Los Angeles",
+        "Santa Monica",
+        "Culver City",
+        "Pasadena",
+        "Burbank",
+        "Beverly Hills",
+        "West Hollywood",
+        "Playa Vista",
+        "El Segundo"
+      ],
+      "strict_cities": [
+        "Venice"
+      ]
+    },
+    {
+      "id": "dubai",
+      "country": "United Arab Emirates",
+      "cities": [
+        "Dubai"
+      ]
+    }
+  ],
+  "metros_rule": "A company is in a metro when its headquarters.country is the metro's country and its headquarters.city matches one of cities with headquarters.state matching the metro's state or missing, or one of strict_cities with the state. A metro with no state takes the city in its country. The metros do not overlap."
+}

@@ -1,0 +1,344 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/places.json",
+  "note": "AI companies by headquarters country, top 15 per cohort; rest and no-country complete each cohort. before: a country outside the top 15 could tie or rank; check the list before: the largest candidate not shown has 121; companies in no candidate country: 455 class: a country outside the top 15 could tie or rank; check the list class: the largest candidate not shown has 131; companies in no candidate country: 521",
+  "coverage": [
+    {
+      "year": 2016,
+      "all_count": 5468,
+      "ai_count": 25
+    },
+    {
+      "year": 2017,
+      "all_count": 4786,
+      "ai_count": 31
+    },
+    {
+      "year": 2018,
+      "all_count": 4168,
+      "ai_count": 20
+    },
+    {
+      "year": 2019,
+      "all_count": 3145,
+      "ai_count": 13
+    },
+    {
+      "year": 2020,
+      "all_count": 2502,
+      "ai_count": 5
+    },
+    {
+      "year": 2021,
+      "all_count": 1856,
+      "ai_count": 7
+    },
+    {
+      "year": 2022,
+      "all_count": 954,
+      "ai_count": 5
+    },
+    {
+      "year": 2023,
+      "all_count": 820,
+      "ai_count": 8
+    },
+    {
+      "year": 2024,
+      "all_count": 540,
+      "ai_count": 6
+    },
+    {
+      "year": 2025,
+      "all_count": 333,
+      "ai_count": 5
+    },
+    {
+      "year": 2026,
+      "all_count": 39,
+      "ai_count": 0
+    }
+  ],
+  "coverage_note": "All companies and AI companies headquartered in China, by founding year.",
+  "rows": [
+    {
+      "cohort": "before",
+      "group": "United States",
+      "rank": 1,
+      "count": 3151,
+      "share": 0.2986,
+      "share_of_known": 0.314
+    },
+    {
+      "cohort": "before",
+      "group": "India",
+      "rank": 2,
+      "count": 1335,
+      "share": 0.1265,
+      "share_of_known": 0.133
+    },
+    {
+      "cohort": "before",
+      "group": "United Kingdom",
+      "rank": 3,
+      "count": 666,
+      "share": 0.0631,
+      "share_of_known": 0.0664
+    },
+    {
+      "cohort": "before",
+      "group": "Canada",
+      "rank": 4,
+      "count": 419,
+      "share": 0.0397,
+      "share_of_known": 0.0417
+    },
+    {
+      "cohort": "before",
+      "group": "Germany",
+      "rank": 5,
+      "count": 406,
+      "share": 0.0385,
+      "share_of_known": 0.0405
+    },
+    {
+      "cohort": "before",
+      "group": "France",
+      "rank": 6,
+      "count": 299,
+      "share": 0.0283,
+      "share_of_known": 0.0298
+    },
+    {
+      "cohort": "before",
+      "group": "Australia",
+      "rank": 7,
+      "count": 240,
+      "share": 0.0227,
+      "share_of_known": 0.0239
+    },
+    {
+      "cohort": "before",
+      "group": "Netherlands",
+      "rank": 8,
+      "count": 186,
+      "share": 0.0176,
+      "share_of_known": 0.0185
+    },
+    {
+      "cohort": "before",
+      "group": "Spain",
+      "rank": 9,
+      "count": 176,
+      "share": 0.0167,
+      "share_of_known": 0.0175
+    },
+    {
+      "cohort": "before",
+      "group": "Pakistan",
+      "rank": 10,
+      "count": 174,
+      "share": 0.0165,
+      "share_of_known": 0.0173
+    },
+    {
+      "cohort": "before",
+      "group": "Brazil",
+      "rank": 11,
+      "count": 160,
+      "share": 0.0152,
+      "share_of_known": 0.0159
+    },
+    {
+      "cohort": "before",
+      "group": "Italy",
+      "rank": 12,
+      "count": 158,
+      "share": 0.015,
+      "share_of_known": 0.0157
+    },
+    {
+      "cohort": "before",
+      "group": "Singapore",
+      "rank": 13,
+      "count": 157,
+      "share": 0.0149,
+      "share_of_known": 0.0156
+    },
+    {
+      "cohort": "before",
+      "group": "Israel",
+      "rank": 14,
+      "count": 149,
+      "share": 0.0141,
+      "share_of_known": 0.0148
+    },
+    {
+      "cohort": "before",
+      "group": "United Arab Emirates",
+      "rank": 15,
+      "count": 145,
+      "share": 0.0137,
+      "share_of_known": 0.0144
+    },
+    {
+      "cohort": "before",
+      "group": "rest",
+      "count": 2215,
+      "share": 0.2099,
+      "share_of_known": 0.2207
+    },
+    {
+      "cohort": "before",
+      "group": "no-country",
+      "count": 517,
+      "share": 0.049
+    },
+    {
+      "cohort": "before",
+      "group": "total",
+      "count": 10553,
+      "known_count": 10036
+    },
+    {
+      "cohort": "class",
+      "group": "United States",
+      "rank": 1,
+      "count": 5671,
+      "share": 0.3173,
+      "share_of_known": 0.3839
+    },
+    {
+      "cohort": "class",
+      "group": "India",
+      "rank": 2,
+      "count": 1776,
+      "share": 0.0994,
+      "share_of_known": 0.1202
+    },
+    {
+      "cohort": "class",
+      "group": "United Kingdom",
+      "rank": 3,
+      "count": 1206,
+      "share": 0.0675,
+      "share_of_known": 0.0816
+    },
+    {
+      "cohort": "class",
+      "group": "Canada",
+      "rank": 4,
+      "count": 581,
+      "share": 0.0325,
+      "share_of_known": 0.0393
+    },
+    {
+      "cohort": "class",
+      "group": "Australia",
+      "rank": 5,
+      "count": 407,
+      "share": 0.0228,
+      "share_of_known": 0.0276
+    },
+    {
+      "cohort": "class",
+      "group": "Germany",
+      "rank": 6,
+      "count": 403,
+      "share": 0.0226,
+      "share_of_known": 0.0273
+    },
+    {
+      "cohort": "class",
+      "group": "United Arab Emirates",
+      "rank": 7,
+      "count": 332,
+      "share": 0.0186,
+      "share_of_known": 0.0225
+    },
+    {
+      "cohort": "class",
+      "group": "France",
+      "rank": 8,
+      "count": 325,
+      "share": 0.0182,
+      "share_of_known": 0.022
+    },
+    {
+      "cohort": "class",
+      "group": "Netherlands",
+      "rank": 9,
+      "count": 294,
+      "share": 0.0165,
+      "share_of_known": 0.0199
+    },
+    {
+      "cohort": "class",
+      "group": "Pakistan",
+      "rank": 10,
+      "count": 235,
+      "share": 0.0131,
+      "share_of_known": 0.0159
+    },
+    {
+      "cohort": "class",
+      "group": "Singapore",
+      "rank": 11,
+      "count": 221,
+      "share": 0.0124,
+      "share_of_known": 0.015
+    },
+    {
+      "cohort": "class",
+      "group": "Spain",
+      "rank": 12,
+      "count": 217,
+      "share": 0.0121,
+      "share_of_known": 0.0147
+    },
+    {
+      "cohort": "class",
+      "group": "Brazil",
+      "rank": 13,
+      "count": 185,
+      "share": 0.0104,
+      "share_of_known": 0.0125
+    },
+    {
+      "cohort": "class",
+      "group": "Italy",
+      "rank": 14,
+      "count": 172,
+      "share": 0.0096,
+      "share_of_known": 0.0116
+    },
+    {
+      "cohort": "class",
+      "group": "Switzerland",
+      "rank": 15,
+      "count": 146,
+      "share": 0.0082,
+      "share_of_known": 0.0099
+    },
+    {
+      "cohort": "class",
+      "group": "rest",
+      "count": 2600,
+      "share": 0.1455,
+      "share_of_known": 0.176
+    },
+    {
+      "cohort": "class",
+      "group": "no-country",
+      "count": 3100,
+      "share": 0.1735
+    },
+    {
+      "cohort": "class",
+      "group": "total",
+      "count": 17871,
+      "known_count": 14771
+    }
+  ]
+}

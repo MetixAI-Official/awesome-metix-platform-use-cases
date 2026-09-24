@@ -1,0 +1,296 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/measures.json",
+  "note": "AI companies headquartered in the United States, founded 2022 or later, with a headcount of 50 or less and a latest round of 50,000,000 or more that pass the checks in queries/measures.json. Bands and months only; names refer to the company.",
+  "counts": [
+    {
+      "group": "definition-headcount-10-amount-50m",
+      "definition": "definition",
+      "headcount_max": 10,
+      "amount_min": 50000000,
+      "count": 2
+    },
+    {
+      "group": "definition-headcount-10-amount-100m",
+      "definition": "definition",
+      "headcount_max": 10,
+      "amount_min": 100000000,
+      "count": 2
+    },
+    {
+      "group": "definition-headcount-50-amount-50m",
+      "definition": "definition",
+      "headcount_max": 50,
+      "amount_min": 50000000,
+      "count": 14
+    },
+    {
+      "group": "definition-headcount-50-amount-100m",
+      "definition": "definition",
+      "headcount_max": 50,
+      "amount_min": 100000000,
+      "count": 6
+    },
+    {
+      "group": "definition-headcount-100-amount-50m",
+      "definition": "definition",
+      "headcount_max": 100,
+      "amount_min": 50000000,
+      "count": 29
+    },
+    {
+      "group": "definition-headcount-100-amount-100m",
+      "definition": "definition",
+      "headcount_max": 100,
+      "amount_min": 100000000,
+      "count": 16
+    },
+    {
+      "group": "loose-headcount-10-amount-50m",
+      "definition": "loose",
+      "headcount_max": 10,
+      "amount_min": 50000000,
+      "count": 3
+    },
+    {
+      "group": "loose-headcount-10-amount-100m",
+      "definition": "loose",
+      "headcount_max": 10,
+      "amount_min": 100000000,
+      "count": 2
+    },
+    {
+      "group": "loose-headcount-50-amount-50m",
+      "definition": "loose",
+      "headcount_max": 50,
+      "amount_min": 50000000,
+      "count": 29
+    },
+    {
+      "group": "loose-headcount-50-amount-100m",
+      "definition": "loose",
+      "headcount_max": 50,
+      "amount_min": 100000000,
+      "count": 10
+    },
+    {
+      "group": "loose-headcount-100-amount-50m",
+      "definition": "loose",
+      "headcount_max": 100,
+      "amount_min": 50000000,
+      "count": 65
+    },
+    {
+      "group": "loose-headcount-100-amount-100m",
+      "definition": "loose",
+      "headcount_max": 100,
+      "amount_min": 100000000,
+      "count": 28
+    }
+  ],
+  "dropped": [
+    {
+      "company": "Lightwheel",
+      "reason": "a 1,000,000,000 round for a team of 35: amount taken as a data error"
+    },
+    {
+      "company": "HOMI AI",
+      "reason": "a 1,200,000,000 round for a team of 7: amount taken as a data error"
+    },
+    {
+      "company": "Rebellion Defense",
+      "reason": "the round (2021) predates the founding year on the record (2025)"
+    },
+    {
+      "company": "LootMogul",
+      "reason": "a sports and gaming platform; AI is one tag among many"
+    },
+    {
+      "company": "Moonwalk Biosciences",
+      "reason": "an epigenetics biotech; AI is one tag among many"
+    },
+    {
+      "company": "PRINS AI TECHNOLOGY LTD",
+      "reason": "a domain listing for sale, one employee"
+    },
+    {
+      "company": "Empress Therapeutics",
+      "reason": "a drug discovery biotech; no tag names AI as its method"
+    },
+    {
+      "company": "Real Messenger",
+      "reason": "a real estate messaging app; AI is one tag among many"
+    }
+  ],
+  "rows": [
+    {
+      "company": "Mind Robotics",
+      "founded_year": 2025,
+      "headcount_band": "11-25",
+      "hq_country": "United States",
+      "amount_band": "250m-1b",
+      "month": "2026-03"
+    },
+    {
+      "company": "Accrual",
+      "founded_year": 2024,
+      "headcount_band": "11-25",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2026-02"
+    },
+    {
+      "company": "WhiteFiber",
+      "founded_year": 2024,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "100m-250m",
+      "month": "2026-01"
+    },
+    {
+      "company": "Ricursive Intelligence",
+      "founded_year": 2025,
+      "headcount_band": "11-25",
+      "hq_country": "United States",
+      "amount_band": "250m-1b",
+      "month": "2026-01"
+    },
+    {
+      "company": "Inferact",
+      "founded_year": 2025,
+      "headcount_band": "11-25",
+      "hq_country": "United States",
+      "amount_band": "100m-250m",
+      "month": "2026-01"
+    },
+    {
+      "company": "Gyde",
+      "founded_year": 2025,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2026-01"
+    },
+    {
+      "company": "General Intuition",
+      "founded_year": 2025,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "100m-250m",
+      "month": "2025-11"
+    },
+    {
+      "company": "Arbiter",
+      "founded_year": 2025,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-11"
+    },
+    {
+      "company": "ZeroClick",
+      "founded_year": 2025,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-09"
+    },
+    {
+      "company": "Titan",
+      "founded_year": 2024,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-09"
+    },
+    {
+      "company": "Majestic Labs ai",
+      "founded_year": 2023,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-09"
+    },
+    {
+      "company": "Slingshot AI",
+      "founded_year": 2022,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-08"
+    },
+    {
+      "company": "Radical AI",
+      "founded_year": 2024,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-08"
+    },
+    {
+      "company": "Nous Research",
+      "founded_year": 2023,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-05"
+    },
+    {
+      "company": "Rhino.ai",
+      "founded_year": 2023,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2025-01"
+    },
+    {
+      "company": "Protect AI",
+      "founded_year": 2022,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2024-08"
+    },
+    {
+      "company": "Kimia Therapeutics",
+      "founded_year": 2023,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2023-12"
+    },
+    {
+      "company": "Essential AI",
+      "founded_year": 2023,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2023-12"
+    },
+    {
+      "company": "Deep Apple Therapeutics",
+      "founded_year": 2022,
+      "headcount_band": "26-50",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2023-12"
+    },
+    {
+      "company": "Cortex EP",
+      "founded_year": 2023,
+      "headcount_band": "11-25",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2023-12"
+    },
+    {
+      "company": "Black Ore",
+      "founded_year": 2022,
+      "headcount_band": "1-10",
+      "hq_country": "United States",
+      "amount_band": "50m-100m",
+      "month": "2023-11"
+    }
+  ]
+}

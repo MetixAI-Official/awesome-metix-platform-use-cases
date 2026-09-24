@@ -1,0 +1,31 @@
+slug: class-of-2023-ai-companies-2026
+type: study
+format: report
+status: published
+title:
+  en: After ChatGPT, AI companies' share of new companies tripled; counted by the older AI tags, it rose about a fifth
+  zh: ChatGPT 之后，新公司里 AI 公司的比例升到约三倍；只看旧的 AI 标签，只多了约五分之一
+dek:
+  en: Companies on the Metix AI Platform that describe themselves as AI companies, by founding year from 2010 to 2026, with where they are, what they build, their size and funding against all companies, and where the staff of the largest came from, on September 23, 2026.
+  zh: 2026 年 9 月 23 日 Metix AI Platform 上自述为 AI 公司的企业，按 2010 到 2026 年的成立年份统计：分布在哪里、做什么、与全部公司对比的规模和融资，以及规模最大的那些公司的员工从哪里来。
+datasets: [companies, people]
+integration: [rest]
+topics: [ai-companies, ai-startups, ai-talent, funding]
+regions: [global]
+snapshot: 2026-09-23
+published: 2026-09-23
+exploration_credits: 10481
+agent_run: { low: 2400, high: 2800, cap: 3000 }
+highlights:
+  - value: "1.63%"
+    label:
+      en: of companies founded 2023 to 2025 are AI companies by this case's definition, against 0.56% of those founded 2019 to 2022
+      zh: 2023 到 2025 年成立的公司中按本案定义属于 AI 公司的比例；2019 到 2022 年成立的是 0.56%
+  - value: "1.18×"
+    label:
+      en: the rise in that share counting only the older tags (deep learning, computer vision, natural language processing), against 2.9× for the full definition
+      zh: 只看深度学习、计算机视觉、自然语言处理这三个旧标签时，这一比例的增幅；按完整定义是 2.9 倍
+  - value: "21%"
+    label:
+      en: of AI companies founded in 2025 tag themselves with AI agents, against 7% of those founded in 2021
+      zh: 2025 年成立的 AI 公司中标签写有 AI agents 的比例；2021 年成立的是 7%

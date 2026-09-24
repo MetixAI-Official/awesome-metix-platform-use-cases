@@ -1,0 +1,430 @@
+{
+  "note": "Where the staff of the largest new AI companies worked before. For each company, the people with a current job entry at it (experience.company.name eq the company name and experience.is_current eq true, in one has_experience entry). The Platform cannot filter people by company id, so the join is by name and checked against ids on records. Counts are profiles visible through the Metix AI Platform, never a company's headcount.",
+  "cohorts": {
+    "class": {
+      "from": 2023,
+      "to": 2025,
+      "headcount_min": 60,
+      "top": 150
+    },
+    "baseline": {
+      "from": 2016,
+      "to": 2019,
+      "headcount_min": 200,
+      "top": 150
+    }
+  },
+  "selection": "The AI companies (definition.json) founded in the cohort's years with a headcount of at least headcount_min are read, sorted by headcount, and the largest 150 are kept. Nothing further down can rank: a company outside the read has a smaller headcount than every company in it.",
+  "screen": {
+    "max_ratio": 1.5,
+    "note": "A name that returns more current profiles than 1.5 times the company's headcount is shared with other employers (Cube, Agency, Aeon, Mission, Pearl) and is dropped. The screen also drops some real companies whose names are common words (Decagon, Cohere, Runway, Cresta)."
+  },
+  "not_companies": {
+    "class": {
+      "Microsoft AI": "a division of Microsoft, not a new company",
+      "RBC Borealis": "a bank's research lab",
+      "Ellison Institute of Technology Oxford": "a research institute",
+      "Women Defining AI": "a community",
+      "AI Salon": "an events community",
+      "Retail AI Council": "an industry council",
+      "AI Forge": "an incubator",
+      "Generative AI Tutorials, Prompts, & Tools": "a content page",
+      "AI & ChatGPT Use Cases": "a content page",
+      "New Vision Institute of Technology": "a training institute"
+    },
+    "baseline": {
+      "Peraton": "a defense IT contractor, not an AI company; with 13,400 staff it would outweigh the rest",
+      "Toyota Research Institute": "a carmaker's research lab",
+      "Karate Combat": "a sports league",
+      "Data Science Nigeria": "a nonprofit community",
+      "Future Robot Technology/Edge Computing": "a hardware reseller"
+    }
+  },
+  "id_check": {
+    "note": "Each cohort's kept names are read in one whole slice: every current profile at any kept company whose total_experience_months is in a narrow window (arbitrary with respect to employer), with experience.company.id. A profile passes when a current entry matching one of the names carries that company's id. A name is dropped when its sampled profiles are two or more and fewer than half pass. The pass rate is published in staff.json.",
+    "class_window": [
+      100,
+      103
+    ],
+    "baseline_window": [
+      100,
+      100
+    ],
+    "exploration": "Class: 176 of 181 profiles passed (97.2%); Dify failed 0 of 4 (profiles at DIFY Agency and other Difys) and is dropped. Baseline: 231 of 244 passed (94.7%); most failures are the same company under another id (SymphonyAI units, Rezolve AI)."
+  },
+  "past": "An earlier job is a job entry at the employer that is not current (experience.is_current eq false) and not an internship (experience.seniority is not Intern and experience.title does not match intern), in one has_experience entry.",
+  "employers": [
+    {
+      "id": "google",
+      "names": [
+        "Google"
+      ],
+      "note": "Also matches Google DeepMind entries."
+    },
+    {
+      "id": "deepmind",
+      "names": [
+        "DeepMind"
+      ]
+    },
+    {
+      "id": "meta",
+      "names": [
+        "Meta",
+        "Facebook"
+      ]
+    },
+    {
+      "id": "openai",
+      "names": [
+        "OpenAI"
+      ]
+    },
+    {
+      "id": "anthropic",
+      "names": [
+        "Anthropic"
+      ]
+    },
+    {
+      "id": "microsoft",
+      "names": [
+        "Microsoft"
+      ]
+    },
+    {
+      "id": "amazon",
+      "names": [
+        "Amazon"
+      ],
+      "note": "Also matches Amazon Web Services."
+    },
+    {
+      "id": "apple",
+      "names": [
+        "Apple"
+      ]
+    },
+    {
+      "id": "nvidia",
+      "names": [
+        "NVIDIA"
+      ]
+    },
+    {
+      "id": "stripe",
+      "names": [
+        "Stripe"
+      ]
+    },
+    {
+      "id": "uber",
+      "names": [
+        "Uber"
+      ]
+    },
+    {
+      "id": "airbnb",
+      "names": [
+        "Airbnb"
+      ]
+    },
+    {
+      "id": "salesforce",
+      "names": [
+        "Salesforce"
+      ]
+    },
+    {
+      "id": "palantir",
+      "names": [
+        "Palantir"
+      ]
+    },
+    {
+      "id": "databricks",
+      "names": [
+        "Databricks"
+      ]
+    },
+    {
+      "id": "scale-ai",
+      "names": [
+        "Scale AI"
+      ],
+      "not_for": [
+        "baseline"
+      ],
+      "note": "Scale AI is itself a baseline company, so its current staff's earlier Scale AI entries would count as coming from it; the baseline row is withheld."
+    }
+  ],
+  "rollups": {
+    "big-tech": [
+      "google",
+      "meta",
+      "microsoft",
+      "amazon",
+      "apple",
+      "nvidia"
+    ],
+    "frontier-lab": [
+      "openai",
+      "anthropic",
+      "deepmind"
+    ]
+  },
+  "founder": {
+    "field": "current_title",
+    "match": "founder",
+    "note": "Co-founder is matched too: the word founder in any order."
+  },
+  "privacy": "Profiles: a count from 1 to 9 is published as <10, a share needs a base of 30, and fetch.py withholds a rollup when it minus the sum of its shown members, or a shown member minus nothing, would leave 1 to 9 people. Rows overlap (one person can have worked at several), so rows are not added.",
+  "not_companies_note": "Names are compared whole with the name on the record. In the replays before the hand classification, two entries above were shorter than the record's name and stayed in; the hand verdicts now exclude both (N).",
+  "verdicts": {
+    "class": {
+      "Mistral AI": "Y",
+      "Soul AI": "L",
+      "Flowmingo AI": "V",
+      "UnifyApps": "G",
+      "Base44": "Y",
+      "Generative AI Tutorials, Prompts & Use Cases for Gemini, DeepSeek, Claude, OpenAI | ChatGPT Central": "N",
+      "Hippocratic AI": "Y",
+      "Higgsfield AI": "Y",
+      "MagicSchool AI": "V",
+      "AI CERTs®": "N",
+      "Technovert": "G",
+      "Nexthop AI": "V",
+      "Ema Unlimited": "Y",
+      "Jump - Advisor AI": "V",
+      "Adaptive Security": "V",
+      "ITSOLERA PVT LTD": "G",
+      "Norm Ai": "Y",
+      "INDUSTRIAL DESIGN & ANIMATIONS": "G",
+      "WP SEO AI": "G",
+      "Autonoma AI": "Y",
+      "Airia - Enterprise AI Simplified": "Y",
+      "Sakana AI": "Y",
+      "Upscale AI": "V",
+      "Moonshot AI": "Y",
+      "Xcelore": "G",
+      "Lyzr AI": "Y",
+      "DeepSeek AI": "Y",
+      "BeatpulseLabs": "L",
+      "HappyRobot": "Y",
+      "ProductSquads": "G",
+      "Demand AI": "V",
+      "Holisticon Poland": "G",
+      "CyArt": "G",
+      "Aivar Innovations": "Y",
+      "Blueflame AI": "Y",
+      "Nexaminds": "Y",
+      "Moonvalley": "Y",
+      "TensorWave": "Y",
+      "RepRally": "G",
+      "Chemin AI": "L",
+      "Jeeva AI": "Y",
+      "Emergence AI": "Y",
+      "GC AI": "Y",
+      "Rubick AI": "V",
+      "Dailoqa": "G",
+      "Liquid AI": "Y",
+      "Salesforge 🔥": "V",
+      "Harmattan AI": "V",
+      "Hyperbots Inc.": "Y",
+      "Retell AI": "Y",
+      "Wordsmith AI": "Y",
+      "GrowthX AI": "G",
+      "InstaLILY AI": "Y",
+      "Soft Robotics Inc.": "V",
+      "Xtract.io": "V",
+      "Maven AGI": "Y",
+      "OneByZero": "Y",
+      "WisdomAI": "Y",
+      "Grexa AI": "G",
+      "smallest.ai": "Y",
+      "Jeen.ai": "Y",
+      "Black Forest Labs": "Y",
+      "VinDynamics": "V",
+      "Atombit": "V",
+      "MINDFULAI": "G",
+      "Sahara AI": "Y",
+      "Ycotek": "G",
+      "NC AI": "Y",
+      "Tavily": "Y",
+      "Diverger": "Y",
+      "Louisa AI": "V",
+      "ProRata.ai": "Y",
+      "Digital Nexus AI": "G",
+      "Series Entertainment": "V",
+      "ThoughtMinds": "Y",
+      "Glam AI": "Y",
+      "DataCrumbs": "N",
+      "Darwin AI": "V",
+      "Skild AI": "Y",
+      "Peec AI": "V",
+      "Saras AI Institute": "N",
+      "Metafusion": "Y",
+      "Skywork AI": "Y",
+      "Techtics.AI": "Y",
+      "Promtior": "Y",
+      "throxy (yc x25)": "V",
+      "NeoSpace AI": "Y",
+      "Whilter.AI": "Y",
+      "Listen Labs": "Y",
+      "Sola Security": "V",
+      "Persona AI Inc": "V",
+      "Elite Global AI": "V",
+      "Mihira AI": "Y",
+      "JazzX AI": "Y",
+      "Generative Bionics": "V",
+      "Fractional AI": "Y",
+      "David AI": "L",
+      "Synthflow AI": "Y",
+      "StackAI": "Y",
+      "ShopOS": "Y",
+      "Positron AI": "Y",
+      "GreyLabs AI": "Y",
+      "BrandLovrs": "G",
+      "Code Metal": "Y",
+      "Dropzone AI": "Y",
+      "World Labs": "Y",
+      "AIxBlock": "L",
+      "BLUESENSE": "Y",
+      "IntelliAM AI PLC": "V",
+      "TWG AI": "Y",
+      "Aurasell AI": "Y",
+      "Clover Security": "V",
+      "NeuroDiscovery AI": "V",
+      "Clinizone Business Solutions": "G",
+      "Harmonic Security": "V"
+    },
+    "baseline": {
+      "Scale AI": "L",
+      "Verkada": "V",
+      "SymphonyAI": "Y",
+      "MathCo": "V",
+      "Call Center Studio": "G",
+      "Metropolis Technologies": "V",
+      "Verbit.ai": "V",
+      "Glean": "Y",
+      "Objectways": "L",
+      "Flock Safety": "V",
+      "VAST Data": "G",
+      "Tenstorrent": "Y",
+      "Snorkel AI": "Y",
+      "Indodana": "N",
+      "Annova Solutions": "N",
+      "Wayve": "Y",
+      "Yellow.ai": "Y",
+      "Techolas Technologies": "N",
+      "Rubixe -  AI Solutions Company": "G",
+      "ConcertAI": "V",
+      "Artlist": "N",
+      "Synthesia": "Y",
+      "NewVision Software": "G",
+      "Hugging Face": "Y",
+      "Photoroom": "V",
+      "Particular Audience": "V",
+      "Trenser Technology Solutions (P) Ltd.": "G",
+      "Graphcore": "Y",
+      "Armsoftech Private Limited": "G",
+      "SightSpectrum": "G",
+      "Abridge": "Y",
+      "Starburst": "G",
+      "DeepLearning.AI": "V",
+      "Accelirate Inc.": "G",
+      "Detect Technologies": "V",
+      "TestMu AI": "V",
+      "NeuraFlash": "G",
+      "Wirestock": "V",
+      "Meero": "G",
+      "Intellectt Inc": "G",
+      "Temporal Technologies": "G",
+      "Wakeb_Data": "V",
+      "Labelbox": "L",
+      "Parloa": "Y",
+      "WeRide.ai": "Y",
+      "Replit": "V",
+      "Pixis": "Y",
+      "Future Robot Technology/Edge Computing, Machine Vision, Motion Control": "N",
+      "Aera Technology": "V",
+      "Ritech International AG": "G",
+      "Nfinite": "V",
+      "Rezolve Ai": "V",
+      "Horizon3.ai": "V",
+      "株式会社FLUX": "V",
+      "Qure.ai": "Y",
+      "Omdena": "L",
+      "DATAECONOMY": "G",
+      "SambaNova Systems": "Y",
+      "Buildots": "V",
+      "Snappr": "V",
+      "Draup": "V",
+      "Blackstraw.ai": "Y",
+      "ParallelDots": "V",
+      "Globsyn-3rdLife": "G",
+      "Krisp": "V",
+      "Proper AI": "V",
+      "Smartcat": "V",
+      "Vyro": "Y",
+      "Observe.AI": "Y",
+      "Clarity AI": "V",
+      "Aleph Alpha": "Y",
+      "Groq": "Y",
+      "Anota AI": "V",
+      "Lucidya | لوسيديا": "V",
+      "Shorthills AI": "Y",
+      "Spyne": "V",
+      "IQGeo": "G",
+      "Abaka AI": "L",
+      "Cast AI": "V",
+      "BOOM imagestudio": "N",
+      "Cloud Destinations": "G",
+      "RandomTrees": "V",
+      "Oooh": "N",
+      "Viz.ai": "Y",
+      "Weights & Biases": "Y",
+      "Cognigy": "Y",
+      "Ditstek Innovations Pvt. Ltd. (DITS)": "G",
+      "Kopius, Inc.": "G",
+      "NucleusTeq": "G",
+      "株式会社エクサウィザーズ/ExaWizards Inc.": "Y",
+      "Rizzle": "V",
+      "Opporture": "L",
+      "Addo AI": "Y",
+      "Aeva": "V",
+      "Music AI": "Y",
+      "Pomvom [ TASE: PMVM ]": "V",
+      "Ganit Inc.": "G",
+      "Core Scientific": "G",
+      "Centelon Solutions": "G",
+      "isahit": "L",
+      "d-Matrix": "Y",
+      "Auditoria.AI": "V",
+      "Leena AI": "Y",
+      "IELEKTRON TECHNOLOGIES PVT. LTD.": "G",
+      "Inspirit AI": "V",
+      "Workcog Inc": "G",
+      "PathAI": "Y",
+      "Infrrd": "Y",
+      "5C Network": "V",
+      "Syntiant Corp.": "Y",
+      "Aisera": "Y",
+      "Jarvis Consulting Group": "G",
+      "Crimson Phoenix": "V",
+      "MetaMap": "V",
+      "Bear Robotics": "V",
+      "AI Rudder": "Y",
+      "ManyMangoes 🥭": "N",
+      "Deepen AI": "V",
+      "Netomi": "Y",
+      "FiftyFive Technologies": "G",
+      "Future WorkForce": "G",
+      "AGNEXT": "V",
+      "Rad AI": "Y",
+      "TOPS Infosolutions Pvt. Ltd.": "G",
+      "Silo AI": "Y"
+    }
+  },
+  "verdict_rule": "Every company kept by the screen and the id check was classified by hand from its name, industry, and tags with the scheme of the definition audit: Y, AI is the product or service; V, AI is part of the core product in another field; G, a generalist software house, IT consultancy, staffing or outsourcing firm, or agency; N, not a company or not AI (a content page, a certification body, a training institute, a lender, a sports or social app). A fifth label, L, marks data-labeling and data-collection marketplaces whose visible staff are mostly contractors or contributors (Scale AI, Soul AI, Objectways, Labelbox, Omdena, isahit, Abaka AI, Opporture, Chemin AI, David AI, AIxBlock, BeatpulseLabs). Only Y, V, and L are joined; staff.json gives every figure with L (set all) and without it (set without-labeling). A company that is not in this list, because a later replay picks it up, is left out and named in staff_companies.json."
+}

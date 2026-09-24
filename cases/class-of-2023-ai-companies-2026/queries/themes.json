@@ -1,0 +1,140 @@
+{
+  "note": "What AI companies say they build: the share of each founding year's AI companies whose keywords match any term of a theme. Themes overlap (one company can carry several), so shares do not add up. Terms are matched word by word across tags, which is why short or two-word terms that pair common words were removed after the audit.",
+  "themes": [
+    {
+      "id": "generative-ai",
+      "terms": [
+        "generative AI",
+        "GenAI",
+        "gen AI"
+      ]
+    },
+    {
+      "id": "llm",
+      "terms": [
+        "large language models",
+        "large language model",
+        "LLM",
+        "LLMs"
+      ]
+    },
+    {
+      "id": "agents",
+      "terms": [
+        "AI agents",
+        "AI agent",
+        "agentic"
+      ]
+    },
+    {
+      "id": "computer-vision",
+      "terms": [
+        "computer vision",
+        "image recognition",
+        "machine vision",
+        "object detection",
+        "facial recognition"
+      ]
+    },
+    {
+      "id": "nlp",
+      "terms": [
+        "natural language processing",
+        "NLP",
+        "natural language understanding"
+      ]
+    },
+    {
+      "id": "machine-learning",
+      "terms": [
+        "machine learning",
+        "ML"
+      ]
+    },
+    {
+      "id": "robotics",
+      "terms": [
+        "robotics",
+        "robot",
+        "robots",
+        "humanoid"
+      ],
+      "exclude": [
+        "process automation",
+        "RPA"
+      ]
+    },
+    {
+      "id": "data-analytics",
+      "terms": [
+        "data analytics",
+        "big data",
+        "data science"
+      ]
+    },
+    {
+      "id": "saas",
+      "terms": [
+        "SaaS",
+        "software as a service"
+      ]
+    },
+    {
+      "id": "health",
+      "terms": [
+        "healthcare",
+        "health care",
+        "health",
+        "medical",
+        "healthtech",
+        "medtech"
+      ]
+    },
+    {
+      "id": "fintech",
+      "terms": [
+        "fintech"
+      ]
+    },
+    {
+      "id": "cybersecurity",
+      "terms": [
+        "cybersecurity",
+        "cyber security"
+      ]
+    },
+    {
+      "id": "developer-tools",
+      "terms": [
+        "developer tools",
+        "developer tool",
+        "developer platform",
+        "code generation"
+      ]
+    },
+    {
+      "id": "voice",
+      "terms": [
+        "speech recognition",
+        "text to speech",
+        "speech to text",
+        "voice AI",
+        "voice agents",
+        "voice assistant",
+        "voice assistants"
+      ]
+    },
+    {
+      "id": "ai-infrastructure",
+      "terms": [
+        "GPU",
+        "GPUs",
+        "inference",
+        "MLOps",
+        "LLMOps"
+      ]
+    }
+  ],
+  "audit": "Each theme was read in one whole slice of AI companies founded in 2024 (linkedin_followers in a window from 200, 7 to 14 companies each, 158 in all), and the tags that triggered it were checked. Changes made: robotics first took robotic process automation (4 of 8 in its slice), so robotic was dropped and process automation and RPA are excluded; fintech dropped financial technology, which matched financial markets plus information technology across tags (4 of 11); cybersecurity dropped information security and network security for the same reason (security plus information technology); developer-tools dropped devops, which marked IT service firms offering cloud and devops (6 of 14); ai-infrastructure dropped AI infrastructure, which matched any infrastructure tag plus AI (3 of 9). After the changes the slices read as intended: generative-ai, llm, agents, computer-vision, nlp, machine-learning, saas, and health tags name the theme; voice includes voice AI tags that pair voice with any AI tag (2 of 8 were chat and voice agents rather than speech products); data-analytics is broad by design.",
+  "loose_population": "Each theme is also counted inside the loose population (any of the nine loose terms, same type exclusion), because companies that enter the definition by name alone may carry fewer technical tags."
+}

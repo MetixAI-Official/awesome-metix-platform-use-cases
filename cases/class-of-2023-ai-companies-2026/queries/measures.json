@@ -1,0 +1,165 @@
+{
+  "size": {
+    "field": "size",
+    "bands": [
+      "Myself Only",
+      "1-10",
+      "11-50",
+      "51-200",
+      "201-500",
+      "501-1000",
+      "1001-5000",
+      "5001-10,000",
+      "10,001+"
+    ],
+    "note": "The headcount band on the company page, one of nine closed values; a company without one is counted as none. Bands per founding year 2016 to 2026 for AI companies."
+  },
+  "growth": {
+    "field": "headcount_growth_yoy_pct",
+    "min_headcount": 11,
+    "bands": [
+      {
+        "id": "below-minus-20",
+        "lt": -20
+      },
+      {
+        "id": "minus-20-to-0",
+        "gte": -20,
+        "lt": 0
+      },
+      {
+        "id": "0-to-20",
+        "gte": 0,
+        "lt": 20
+      },
+      {
+        "id": "20-to-50",
+        "gte": 20,
+        "lt": 50
+      },
+      {
+        "id": "50-to-100",
+        "gte": 50,
+        "lt": 100
+      },
+      {
+        "id": "100-plus",
+        "gte": 100
+      }
+    ],
+    "note": "Year-on-year change in headcount, in percent, as the Platform reports it. Counted only for companies with a headcount of 11 or more: at 10 or fewer, one hire moves the figure by 10% or more (a company going from 5 to 30 people shows 500%), and for a company founded in the last year there is no year-ago figure to compare. Companies with no growth figure are counted as not stated.",
+    "validation": "46 records were read in two whole slices (AI companies founded in 2023 with headcount 30 to 32, and founded in 2019 with headcount 40 to 41, each with a growth figure). Every value is a plausible percentage (from -23.8 to 500), consistent with a change between two whole headcounts a year apart: 500 means a company went from 5 to 30. The year-ago base is not always the headcount field today, since the two were observed at different times. Every record in both slices was refreshed between 2026-04-21 and 2026-05-03."
+  },
+  "funding": {
+    "fields": [
+      "last_funding.date",
+      "last_funding.amount"
+    ],
+    "note": "last_funding is the most recent funding round only: its date and amount. A company whose latest round was small but earlier rounds were large shows the small one, and a company with no known round has neither field. Rounds before a company's latest are not on the record.",
+    "quarters": [
+      "2023Q1",
+      "2026Q3"
+    ],
+    "amount_bands": [
+      {
+        "id": "under-1m",
+        "lt": 1000000
+      },
+      {
+        "id": "1m-5m",
+        "gte": 1000000,
+        "lt": 5000000
+      },
+      {
+        "id": "5m-20m",
+        "gte": 5000000,
+        "lt": 20000000
+      },
+      {
+        "id": "20m-50m",
+        "gte": 20000000,
+        "lt": 50000000
+      },
+      {
+        "id": "50m-100m",
+        "gte": 50000000,
+        "lt": 100000000
+      },
+      {
+        "id": "100m-1b",
+        "gte": 100000000,
+        "lt": 1000000000
+      },
+      {
+        "id": "1b-plus",
+        "gte": 1000000000
+      }
+    ],
+    "amount_country": "United States",
+    "currency": "Amounts are not all in US dollars, and the record has no currency field. Reading every AI company founded since 2022 with headcount 50 or less and a latest round of 50,000,000 or more (70 records) found South Korean companies of 8 to 36 people with rounds of 3,000,000,000 to 60,000,000,000, and Japanese ones of 1 to 22 people with 50,000,000 to 460,000,000: amounts in won and yen, not dollars. Amount bands and the small-team list are therefore limited to companies headquartered in the United States, where amounts read as dollars. The date fields have no such problem and cover every country.",
+    "quarters_cut": "Latest rounds stop after 2026Q1 (3 in 2026Q2, none in 2026Q3) because the company records were last refreshed in April and May 2026. A chart ends at 2026Q1, which may itself be incomplete."
+  },
+  "lean": {
+    "note": "Small teams with big rounds: AI companies founded in 2022 or later with headcount 50 or less and a latest round of 50,000,000 or more, headquartered in the United States (see funding.currency). Counts use the definition in definition.json and, for comparison, the loose terms. The list reads every company that matches the loose terms, so no AI company is missed by the stricter definition, and keeps a company only when it passes the checks below.",
+    "founded_from": 2022,
+    "headcount_max": 50,
+    "amount_min": 50000000,
+    "also_counted": {
+      "headcount_max": [
+        10,
+        50,
+        100
+      ],
+      "amount_min": [
+        50000000,
+        100000000
+      ]
+    },
+    "checks": [
+      "The round is dated no earlier than the founding year; a round dated before the company was founded means the founding year or the round belongs to another company.",
+      "The amount is below 1,000,000,000; a round of a billion dollars or more for a team of 50 or fewer was treated as a data error unless a public source was checked, and none was.",
+      "The tags make AI the product or part of the core product (Y or V in definition.json); companies that name AI once among other tags are left out.",
+      "The record is a company, not a domain listing or a page for sale."
+    ],
+    "excluded": {
+      "HOMI AI": "a 1,200,000,000 round for a team of 7: amount taken as a data error",
+      "Lightwheel": "a 1,000,000,000 round for a team of 35: amount taken as a data error",
+      "PRINS AI TECHNOLOGY LTD": "a domain listing for sale, one employee",
+      "Rebellion Defense": "the round (2021) predates the founding year on the record (2025)",
+      "LootMogul": "a sports and gaming platform; AI is one tag among many",
+      "Moonwalk Biosciences": "an epigenetics biotech; AI is one tag among many",
+      "Empress Therapeutics": "a drug discovery biotech; no tag names AI as its method",
+      "Real Messenger": "a real estate messaging app; AI is one tag among many"
+    }
+  },
+  "industries": {
+    "candidates": [
+      "Software Development",
+      "Technology, Information and Internet",
+      "IT Services and IT Consulting",
+      "Information Technology & Services",
+      "Business Consulting and Services",
+      "Technology, Information and Media",
+      "IT System Custom Software Development",
+      "Research Services",
+      "Hospitals and Health Care",
+      "Financial Services",
+      "Marketing Services",
+      "Advertising Services",
+      "E-Learning Providers",
+      "Data Infrastructure and Analytics",
+      "Computer and Network Security",
+      "Biotechnology Research",
+      "Professional Training and Coaching",
+      "Robotics Engineering",
+      "Business Intelligence Platforms",
+      "Human Resources Services",
+      "Staffing and Recruiting",
+      "Medical Equipment Manufacturing"
+    ],
+    "note": "industry is free text on the Platform (over three hundred values), matched word by word. Each candidate is counted without the candidates whose words include all of its words, so Software Development leaves out IT System Custom Software Development; a longer value outside the list that contains a candidate's words is still counted with it. Candidates are the industries most common in the audit reads; the rest is the cohort minus the listed rows, and companies with no industry are part of it."
+  },
+  "controls": {
+    "note": "The growth, funding coverage, US amount, and size measures repeated for every company of the same types (Nonprofit, Educational, and Government Agency excluded) with no AI filter, written to controls.json beside the AI figures and all minus AI. Cohort totals are counted one founding year at a time and split when banded."
+  }
+}

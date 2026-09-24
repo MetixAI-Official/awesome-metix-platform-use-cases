@@ -1,0 +1,642 @@
+{
+  "unit": "profiles",
+  "snapshot": "2026-09-23",
+  "query": "queries/staff.json",
+  "note": "People with a current job at the largest AI companies of each cohort, by earlier employer. set all joins every kept company; set without-labeling leaves out the data-labeling marketplaces (queries/staff.json). Rows overlap and are not added. Counts are profiles visible through the Metix AI Platform, never a headcount. class without-labeling google: withheld, it differs from the all set by 5 class without-labeling deepmind: withheld, it differs from the all set by 1 class without-labeling meta: withheld, it differs from the all set by 2 class without-labeling microsoft: withheld, it differs from the all set by 4 class without-labeling apple: withheld, it differs from the all set by 2 class without-labeling nvidia: withheld, it differs from the all set by 1 class without-labeling stripe: withheld, it differs from the all set by 1 class without-labeling uber: withheld, it differs from the all set by 3 class without-labeling databricks: withheld, it differs from the all set by 1 class without-labeling frontier-lab: withheld, it differs from the all set by 1 baseline all frontier-lab: withheld, it differs from its shown members by 8 baseline without-labeling stripe: withheld, it differs from the all set by 9 baseline without-labeling databricks: withheld, it differs from the all set by 6",
+  "id_check": [
+    {
+      "cohort": "class",
+      "id_sample_count": 158,
+      "id_pass_count": 157,
+      "id_pass_share": 0.9937
+    },
+    {
+      "cohort": "baseline",
+      "id_sample_count": 189,
+      "id_pass_count": 178,
+      "id_pass_share": 0.9418
+    }
+  ],
+  "rows": [
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "google",
+      "kind": "employer",
+      "count": 237,
+      "share": 0.0242
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "deepmind",
+      "kind": "employer",
+      "count": 22,
+      "share": 0.0022
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "meta",
+      "kind": "employer",
+      "count": 137,
+      "share": 0.014
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "openai",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "anthropic",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "microsoft",
+      "kind": "employer",
+      "count": 154,
+      "share": 0.0157
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "amazon",
+      "kind": "employer",
+      "count": 225,
+      "share": 0.023
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "apple",
+      "kind": "employer",
+      "count": 63,
+      "share": 0.0064
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "nvidia",
+      "kind": "employer",
+      "count": 35,
+      "share": 0.0036
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "stripe",
+      "kind": "employer",
+      "count": 18,
+      "share": 0.0018
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "uber",
+      "kind": "employer",
+      "count": 35,
+      "share": 0.0036
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "airbnb",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "salesforce",
+      "kind": "employer",
+      "count": 48,
+      "share": 0.0049
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "palantir",
+      "kind": "employer",
+      "count": 18,
+      "share": 0.0018
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "databricks",
+      "kind": "employer",
+      "count": 14,
+      "share": 0.0014
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "scale-ai",
+      "kind": "employer",
+      "count": 28,
+      "share": 0.0029
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "big-tech",
+      "kind": "rollup",
+      "count": 747,
+      "share": 0.0763
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "frontier-lab",
+      "kind": "rollup",
+      "count": 34,
+      "share": 0.0035
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "founder-title",
+      "kind": "current-title",
+      "count": 288,
+      "share": 0.0294
+    },
+    {
+      "cohort": "class",
+      "set": "all",
+      "group": "total",
+      "kind": "total",
+      "count": 9792
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "google",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "deepmind",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "meta",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "openai",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "anthropic",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "microsoft",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "amazon",
+      "kind": "employer",
+      "count": 212,
+      "share": 0.0237
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "apple",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "nvidia",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "stripe",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "uber",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "airbnb",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "salesforce",
+      "kind": "employer",
+      "count": 48,
+      "share": 0.0054
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "palantir",
+      "kind": "employer",
+      "count": 18,
+      "share": 0.002
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "databricks",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "scale-ai",
+      "kind": "employer",
+      "count": 10,
+      "share": 0.0011
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "big-tech",
+      "kind": "rollup",
+      "count": 722,
+      "share": 0.0807
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "frontier-lab",
+      "kind": "rollup",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "founder-title",
+      "kind": "current-title",
+      "count": 270,
+      "share": 0.0302
+    },
+    {
+      "cohort": "class",
+      "set": "without-labeling",
+      "group": "total",
+      "kind": "total",
+      "count": 8949
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "google",
+      "kind": "employer",
+      "count": 588,
+      "share": 0.0147
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "deepmind",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "meta",
+      "kind": "employer",
+      "count": 358,
+      "share": 0.0089
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "openai",
+      "kind": "employer",
+      "count": 19,
+      "share": 0.0005
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "anthropic",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "microsoft",
+      "kind": "employer",
+      "count": 487,
+      "share": 0.0121
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "amazon",
+      "kind": "employer",
+      "count": 700,
+      "share": 0.0175
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "apple",
+      "kind": "employer",
+      "count": 269,
+      "share": 0.0067
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "nvidia",
+      "kind": "employer",
+      "count": 106,
+      "share": 0.0026
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "stripe",
+      "kind": "employer",
+      "count": 29,
+      "share": 0.0007
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "uber",
+      "kind": "employer",
+      "count": 154,
+      "share": 0.0038
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "airbnb",
+      "kind": "employer",
+      "count": 36,
+      "share": 0.0009
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "salesforce",
+      "kind": "employer",
+      "count": 219,
+      "share": 0.0055
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "palantir",
+      "kind": "employer",
+      "count": 43,
+      "share": 0.0011
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "databricks",
+      "kind": "employer",
+      "count": 32,
+      "share": 0.0008
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "big-tech",
+      "kind": "rollup",
+      "count": 2257,
+      "share": 0.0563
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "frontier-lab",
+      "kind": "rollup",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "founder-title",
+      "kind": "current-title",
+      "count": 454,
+      "share": 0.0113
+    },
+    {
+      "cohort": "baseline",
+      "set": "all",
+      "group": "total",
+      "kind": "total",
+      "count": 40097
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "google",
+      "kind": "employer",
+      "count": 500,
+      "share": 0.015
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "deepmind",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "meta",
+      "kind": "employer",
+      "count": 279,
+      "share": 0.0084
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "openai",
+      "kind": "employer",
+      "count": "<10",
+      "share": null
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "anthropic",
+      "kind": "employer",
+      "count": 0,
+      "share": 0.0
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "microsoft",
+      "kind": "employer",
+      "count": 430,
+      "share": 0.0129
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "amazon",
+      "kind": "employer",
+      "count": 538,
+      "share": 0.0162
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "apple",
+      "kind": "employer",
+      "count": 240,
+      "share": 0.0072
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "nvidia",
+      "kind": "employer",
+      "count": 90,
+      "share": 0.0027
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "stripe",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "uber",
+      "kind": "employer",
+      "count": 107,
+      "share": 0.0032
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "airbnb",
+      "kind": "employer",
+      "count": 26,
+      "share": 0.0008
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "salesforce",
+      "kind": "employer",
+      "count": 202,
+      "share": 0.0061
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "palantir",
+      "kind": "employer",
+      "count": 20,
+      "share": 0.0006
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "databricks",
+      "kind": "employer",
+      "count": null,
+      "share": null
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "big-tech",
+      "kind": "rollup",
+      "count": 1865,
+      "share": 0.0561
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "frontier-lab",
+      "kind": "rollup",
+      "count": 14,
+      "share": 0.0004
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "founder-title",
+      "kind": "current-title",
+      "count": 394,
+      "share": 0.0118
+    },
+    {
+      "cohort": "baseline",
+      "set": "without-labeling",
+      "group": "total",
+      "kind": "total",
+      "count": 33263
+    }
+  ]
+}

@@ -1,0 +1,366 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/places.json",
+  "note": "AI companies by headquarters metro. share is of the whole cohort, share_of_city of the companies that give a city; city_share is how many give one. comparison repeats the SF Bay Area, the city of San Francisco, and London under the probe and loose definitions.",
+  "comparison": [
+    {
+      "definition": "definition",
+      "cohort": "before",
+      "count": 10553,
+      "city_count": 8560,
+      "sf-bay-area_count": 717,
+      "sf-bay-area_share": 0.0679,
+      "sf-bay-area_share_of_city": 0.0838,
+      "san-francisco-city_count": 380,
+      "san-francisco-city_share": 0.036,
+      "san-francisco-city_share_of_city": 0.0444,
+      "london_count": 375,
+      "london_share": 0.0355,
+      "london_share_of_city": 0.0438
+    },
+    {
+      "definition": "definition",
+      "cohort": "class",
+      "count": 17871,
+      "city_count": 13006,
+      "sf-bay-area_count": 1358,
+      "sf-bay-area_share": 0.076,
+      "sf-bay-area_share_of_city": 0.1044,
+      "san-francisco-city_count": 891,
+      "san-francisco-city_share": 0.0499,
+      "san-francisco-city_share_of_city": 0.0685,
+      "london_count": 757,
+      "london_share": 0.0424,
+      "london_share_of_city": 0.0582
+    },
+    {
+      "definition": "probe",
+      "cohort": "before",
+      "count": 41184,
+      "city_count": 33251,
+      "sf-bay-area_count": 2061,
+      "sf-bay-area_share": 0.05,
+      "sf-bay-area_share_of_city": 0.062,
+      "san-francisco-city_count": 1102,
+      "san-francisco-city_share": 0.0268,
+      "san-francisco-city_share_of_city": 0.0331,
+      "london_count": 1503,
+      "london_share": 0.0365,
+      "london_share_of_city": 0.0452
+    },
+    {
+      "definition": "probe",
+      "cohort": "class",
+      "count": 38156,
+      "city_count": 28762,
+      "sf-bay-area_count": 2694,
+      "sf-bay-area_share": 0.0706,
+      "sf-bay-area_share_of_city": 0.0937,
+      "san-francisco-city_count": 1869,
+      "san-francisco-city_share": 0.049,
+      "san-francisco-city_share_of_city": 0.065,
+      "london_count": 1491,
+      "london_share": 0.0391,
+      "london_share_of_city": 0.0518
+    },
+    {
+      "definition": "loose",
+      "cohort": "before",
+      "count": 68589,
+      "city_count": 54183,
+      "sf-bay-area_count": 2966,
+      "sf-bay-area_share": 0.0432,
+      "sf-bay-area_share_of_city": 0.0547,
+      "san-francisco-city_count": 1591,
+      "san-francisco-city_share": 0.0232,
+      "san-francisco-city_share_of_city": 0.0294,
+      "london_count": 2518,
+      "london_share": 0.0367,
+      "london_share_of_city": 0.0465
+    },
+    {
+      "definition": "loose",
+      "cohort": "class",
+      "count": 85823,
+      "city_count": 60714,
+      "sf-bay-area_count": 4320,
+      "sf-bay-area_share": 0.0503,
+      "sf-bay-area_share_of_city": 0.0712,
+      "san-francisco-city_count": 2868,
+      "san-francisco-city_share": 0.0334,
+      "san-francisco-city_share_of_city": 0.0472,
+      "london_count": 3293,
+      "london_share": 0.0384,
+      "london_share_of_city": 0.0542
+    }
+  ],
+  "rows": [
+    {
+      "cohort": "before",
+      "group": "sf-bay-area",
+      "count": 717,
+      "share": 0.0679,
+      "share_of_city": 0.0838
+    },
+    {
+      "cohort": "before",
+      "group": "new-york-city",
+      "count": 341,
+      "share": 0.0323,
+      "share_of_city": 0.0398
+    },
+    {
+      "cohort": "before",
+      "group": "london",
+      "count": 375,
+      "share": 0.0355,
+      "share_of_city": 0.0438
+    },
+    {
+      "cohort": "before",
+      "group": "paris",
+      "count": 133,
+      "share": 0.0126,
+      "share_of_city": 0.0155
+    },
+    {
+      "cohort": "before",
+      "group": "berlin",
+      "count": 106,
+      "share": 0.01,
+      "share_of_city": 0.0124
+    },
+    {
+      "cohort": "before",
+      "group": "toronto",
+      "count": 129,
+      "share": 0.0122,
+      "share_of_city": 0.0151
+    },
+    {
+      "cohort": "before",
+      "group": "bengaluru",
+      "count": 274,
+      "share": 0.026,
+      "share_of_city": 0.032
+    },
+    {
+      "cohort": "before",
+      "group": "tel-aviv",
+      "count": 74,
+      "share": 0.007,
+      "share_of_city": 0.0086
+    },
+    {
+      "cohort": "before",
+      "group": "singapore",
+      "count": 157,
+      "share": 0.0149,
+      "share_of_city": 0.0183
+    },
+    {
+      "cohort": "before",
+      "group": "beijing",
+      "count": 5,
+      "share": 0.0005,
+      "share_of_city": 0.0006
+    },
+    {
+      "cohort": "before",
+      "group": "shanghai",
+      "count": 6,
+      "share": 0.0006,
+      "share_of_city": 0.0007
+    },
+    {
+      "cohort": "before",
+      "group": "shenzhen",
+      "count": 5,
+      "share": 0.0005,
+      "share_of_city": 0.0006
+    },
+    {
+      "cohort": "before",
+      "group": "hangzhou",
+      "count": 2,
+      "share": 0.0002,
+      "share_of_city": 0.0002
+    },
+    {
+      "cohort": "before",
+      "group": "seattle",
+      "count": 90,
+      "share": 0.0085,
+      "share_of_city": 0.0105
+    },
+    {
+      "cohort": "before",
+      "group": "boston",
+      "count": 93,
+      "share": 0.0088,
+      "share_of_city": 0.0109
+    },
+    {
+      "cohort": "before",
+      "group": "austin",
+      "count": 108,
+      "share": 0.0102,
+      "share_of_city": 0.0126
+    },
+    {
+      "cohort": "before",
+      "group": "los-angeles",
+      "count": 131,
+      "share": 0.0124,
+      "share_of_city": 0.0153
+    },
+    {
+      "cohort": "before",
+      "group": "dubai",
+      "count": 103,
+      "share": 0.0098,
+      "share_of_city": 0.012
+    },
+    {
+      "cohort": "before",
+      "group": "total",
+      "count": 10553,
+      "city_count": 8560,
+      "city_share": 0.8111
+    },
+    {
+      "cohort": "class",
+      "group": "sf-bay-area",
+      "count": 1358,
+      "share": 0.076,
+      "share_of_city": 0.1044
+    },
+    {
+      "cohort": "class",
+      "group": "new-york-city",
+      "count": 573,
+      "share": 0.0321,
+      "share_of_city": 0.0441
+    },
+    {
+      "cohort": "class",
+      "group": "london",
+      "count": 757,
+      "share": 0.0424,
+      "share_of_city": 0.0582
+    },
+    {
+      "cohort": "class",
+      "group": "paris",
+      "count": 197,
+      "share": 0.011,
+      "share_of_city": 0.0151
+    },
+    {
+      "cohort": "class",
+      "group": "berlin",
+      "count": 125,
+      "share": 0.007,
+      "share_of_city": 0.0096
+    },
+    {
+      "cohort": "class",
+      "group": "toronto",
+      "count": 197,
+      "share": 0.011,
+      "share_of_city": 0.0151
+    },
+    {
+      "cohort": "class",
+      "group": "bengaluru",
+      "count": 380,
+      "share": 0.0213,
+      "share_of_city": 0.0292
+    },
+    {
+      "cohort": "class",
+      "group": "tel-aviv",
+      "count": 64,
+      "share": 0.0036,
+      "share_of_city": 0.0049
+    },
+    {
+      "cohort": "class",
+      "group": "singapore",
+      "count": 221,
+      "share": 0.0124,
+      "share_of_city": 0.017
+    },
+    {
+      "cohort": "class",
+      "group": "beijing",
+      "count": 3,
+      "share": 0.0002,
+      "share_of_city": 0.0002
+    },
+    {
+      "cohort": "class",
+      "group": "shanghai",
+      "count": 3,
+      "share": 0.0002,
+      "share_of_city": 0.0002
+    },
+    {
+      "cohort": "class",
+      "group": "shenzhen",
+      "count": 3,
+      "share": 0.0002,
+      "share_of_city": 0.0002
+    },
+    {
+      "cohort": "class",
+      "group": "hangzhou",
+      "count": 1,
+      "share": 0.0001,
+      "share_of_city": 0.0001
+    },
+    {
+      "cohort": "class",
+      "group": "seattle",
+      "count": 174,
+      "share": 0.0097,
+      "share_of_city": 0.0134
+    },
+    {
+      "cohort": "class",
+      "group": "boston",
+      "count": 123,
+      "share": 0.0069,
+      "share_of_city": 0.0095
+    },
+    {
+      "cohort": "class",
+      "group": "austin",
+      "count": 175,
+      "share": 0.0098,
+      "share_of_city": 0.0135
+    },
+    {
+      "cohort": "class",
+      "group": "los-angeles",
+      "count": 194,
+      "share": 0.0109,
+      "share_of_city": 0.0149
+    },
+    {
+      "cohort": "class",
+      "group": "dubai",
+      "count": 252,
+      "share": 0.0141,
+      "share_of_city": 0.0194
+    },
+    {
+      "cohort": "class",
+      "group": "total",
+      "count": 17871,
+      "city_count": 13006,
+      "city_share": 0.7278
+    }
+  ]
+}

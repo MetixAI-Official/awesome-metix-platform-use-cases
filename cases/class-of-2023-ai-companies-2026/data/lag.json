@@ -1,0 +1,140 @@
+{
+  "unit": "companies",
+  "snapshot": "2026-09-23",
+  "query": "queries/cohorts.json",
+  "note": "AI companies by founding year: when the record was last refreshed (updated_at month), and how many carry a headcount, and one of 11 or more.",
+  "rows": [
+    {
+      "year": 2016,
+      "ai_count": 1860,
+      "updated_before_2026_04_count": 4,
+      "updated_2026_04_count": 1555,
+      "updated_2026_05_count": 301,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 1629,
+      "headcount_11_count": 673,
+      "headcount_share": 0.8758,
+      "headcount_11_share": 0.3618
+    },
+    {
+      "year": 2017,
+      "ai_count": 2453,
+      "updated_before_2026_04_count": 2,
+      "updated_2026_04_count": 2089,
+      "updated_2026_05_count": 362,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 2155,
+      "headcount_11_count": 829,
+      "headcount_share": 0.8785,
+      "headcount_11_share": 0.338
+    },
+    {
+      "year": 2018,
+      "ai_count": 2772,
+      "updated_before_2026_04_count": 7,
+      "updated_2026_04_count": 2344,
+      "updated_2026_05_count": 421,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 2453,
+      "headcount_11_count": 931,
+      "headcount_share": 0.8849,
+      "headcount_11_share": 0.3359
+    },
+    {
+      "year": 2019,
+      "ai_count": 2500,
+      "updated_before_2026_04_count": 7,
+      "updated_2026_04_count": 2155,
+      "updated_2026_05_count": 338,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 2227,
+      "headcount_11_count": 778,
+      "headcount_share": 0.8908,
+      "headcount_11_share": 0.3112
+    },
+    {
+      "year": 2020,
+      "ai_count": 2632,
+      "updated_before_2026_04_count": 17,
+      "updated_2026_04_count": 2222,
+      "updated_2026_05_count": 393,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 2349,
+      "headcount_11_count": 745,
+      "headcount_share": 0.8925,
+      "headcount_11_share": 0.2831
+    },
+    {
+      "year": 2021,
+      "ai_count": 2546,
+      "updated_before_2026_04_count": 9,
+      "updated_2026_04_count": 2188,
+      "updated_2026_05_count": 349,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 2303,
+      "headcount_11_count": 737,
+      "headcount_share": 0.9046,
+      "headcount_11_share": 0.2895
+    },
+    {
+      "year": 2022,
+      "ai_count": 2875,
+      "updated_before_2026_04_count": 19,
+      "updated_2026_04_count": 2416,
+      "updated_2026_05_count": 440,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 2600,
+      "headcount_11_count": 655,
+      "headcount_share": 0.9043,
+      "headcount_11_share": 0.2278
+    },
+    {
+      "year": 2023,
+      "ai_count": 6436,
+      "updated_before_2026_04_count": 56,
+      "updated_2026_04_count": 5441,
+      "updated_2026_05_count": 939,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 5754,
+      "headcount_11_count": 1021,
+      "headcount_share": 0.894,
+      "headcount_11_share": 0.1586
+    },
+    {
+      "year": 2024,
+      "ai_count": 6354,
+      "updated_before_2026_04_count": 47,
+      "updated_2026_04_count": 5423,
+      "updated_2026_05_count": 884,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 5813,
+      "headcount_11_count": 739,
+      "headcount_share": 0.9149,
+      "headcount_11_share": 0.1163
+    },
+    {
+      "year": 2025,
+      "ai_count": 5081,
+      "updated_before_2026_04_count": 23,
+      "updated_2026_04_count": 4341,
+      "updated_2026_05_count": 717,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 4832,
+      "headcount_11_count": 272,
+      "headcount_share": 0.951,
+      "headcount_11_share": 0.0535
+    },
+    {
+      "year": 2026,
+      "ai_count": 867,
+      "updated_before_2026_04_count": 1,
+      "updated_2026_04_count": 725,
+      "updated_2026_05_count": 141,
+      "updated_after_2026_05_count": 0,
+      "headcount_count": 833,
+      "headcount_11_count": 14,
+      "headcount_share": 0.9608,
+      "headcount_11_share": 0.0161
+    }
+  ]
+}

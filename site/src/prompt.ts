@@ -25,7 +25,8 @@ export async function parsePrompt(prompt: PromptModule, slug: string, lang: Lang
   const file = `cases/${slug}/PROMPT${lang === "zh" ? ".zh" : ""}.md`;
   const raw = prompt.rawContent().match(/```text\n([\s\S]*?)\n```/)?.[1];
   if (!raw) throw new Error(`${file} has no text block`);
-  if (cap !== undefined && !raw.includes(`${cap} Credits`)) {
+  // A ceiling of 1,000 or more is written with a thousands comma, as every number in a prompt is.
+  if (cap !== undefined && ![String(cap), cap.toLocaleString("en-US")].some((c) => raw.includes(`${c} Credits`))) {
     throw new Error(`${file} never says it stops at ${cap} Credits, the cap in case.yaml`);
   }
   const [question, ...paragraphs] = raw.split(/\n{2,}/);
