@@ -16,11 +16,12 @@ another host, or a storage key the Casebook does not own.
 
 ## Run in the cluster
 
-`deploy/k8s.yaml` has the Deployment and a ClusterIP Service named `casebook`.
-Put them in the namespace of the platform's web app, then set on that app:
+`deploy/k8s.yaml` has the Deployment and a ClusterIP Service named
+`job-platform-casebook`. Put them in the namespace of the platform's web app,
+which reads this from its committed `.env`:
 
 ```
-CASEBOOK_ORIGIN=http://casebook:80
+CASEBOOK_ORIGIN=http://job-platform-casebook:80
 ```
 
 Without `CASEBOOK_ORIGIN`, `/casebook` answers 404 and nothing else changes,

@@ -1,23 +1,23 @@
-# The Casebook origin: one Deployment and a ClusterIP Service named `casebook`,
-# in the same namespace as the platform's web app, which reaches it at
-# http://casebook:80 (CASEBOOK_ORIGIN). Nothing here is exposed outside the
-# cluster; there is deliberately no Ingress.
+# The Casebook origin: one Deployment and a ClusterIP Service named
+# `job-platform-casebook`, in the same namespace as the platform's web app,
+# which reaches it at http://job-platform-casebook:80 (CASEBOOK_ORIGIN).
+# Nothing here is exposed outside the cluster; there is deliberately no Ingress.
 #
 # Replace NAMESPACE and the image tag. The pods are stateless and small: the
 # whole site is a few megabytes of static files.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: casebook
+  name: job-platform-casebook
   namespace: NAMESPACE
   labels:
-    app: casebook
+    app: job-platform-casebook
 spec:
   replicas: 2
   revisionHistoryLimit: 5
   selector:
     matchLabels:
-      app: casebook
+      app: job-platform-casebook
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -26,10 +26,10 @@ spec:
   template:
     metadata:
       labels:
-        app: casebook
+        app: job-platform-casebook
     spec:
       containers:
-        - name: casebook
+        - name: job-platform-casebook
           image: harbor.openjobs-ai.com/openjobs-ai/casebook:TAG
           ports:
             - name: http
@@ -55,14 +55,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: casebook
+  name: job-platform-casebook
   namespace: NAMESPACE
   labels:
-    app: casebook
+    app: job-platform-casebook
 spec:
   type: ClusterIP
   selector:
-    app: casebook
+    app: job-platform-casebook
   ports:
     - name: http
       port: 80
