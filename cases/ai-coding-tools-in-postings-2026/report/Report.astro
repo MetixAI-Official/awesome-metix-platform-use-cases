@@ -23,10 +23,12 @@ interface Props {
   lang: Lang;
   section: "card" | "body" | "method";
   size?: "compact" | "full";
+  cardSummary?: string;
+  cardNote?: string;
   entry: { slug: string; snapshot?: Date; exploration_credits?: number };
 }
 
-const { lang, section, size = "compact", entry } = Astro.props;
+const { lang, section, size = "compact", entry, cardSummary, cardNote } = Astro.props;
 const zh = lang === "zh";
 const snapshot = entry.snapshot ?? new Date(tools.snapshot);
 
@@ -64,9 +66,9 @@ const lowestUs = byUs[byUs.length - 1];
     <div class={`card-body size-${size}`}>
       <p class="big-number">{number(lang, lead.count)}</p>
       <p class="big-label">
-        {zh
+        {cardSummary ?? (zh
           ? `个在招岗位的职位描述里提到 Claude Code，共 ${number(lang, any)} 个岗位至少提到五个工具之一。`
-          : `open postings name Claude Code in the description. ${number(lang, any)} name at least one of the five tools.`}
+          : `open postings name Claude Code in the description. ${number(lang, any)} name at least one of the five tools.`)}
       </p>
       <ul class="mini-bars" aria-label={zh ? "各工具被提到的岗位数" : "Postings naming each tool"}>
         {rows.map((r) => (
@@ -80,7 +82,7 @@ const lowestUs = byUs[byUs.length - 1];
         ))}
       </ul>
       <p class="mb-key">
-        {zh ? "斜线条是严格计数：只在同时提到另一个 AI 编程工具时才计入。条形按最长的一条缩放" : "Hatched bars are strict counts, made only when another AI coding tool is named too. Bars are scaled to the largest"}
+        {cardNote ?? (zh ? "斜线条是严格计数：只在同时提到另一个 AI 编程工具时才计入。条形按最长的一条缩放" : "Hatched bars are strict counts, made only when another AI coding tool is named too. Bars are scaled to the largest")}
       </p>
     </div>
   )

@@ -1,0 +1,184 @@
+---
+import "@fontsource-variable/geist";
+import { asset } from "@site/i18n";
+const base = asset("");
+const openjobsPreview = "http://127.0.0.1:3000/";
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>项目预览 · Casebook 与 Metix AI Platform</title>
+  </head>
+  <body data-project="casebook" data-mode="split" data-device="desktop" data-base={base} data-openjobs-url={openjobsPreview}>
+    <header class="review-bar">
+      <div class="review-title"><span class="review-icon" aria-hidden="true">C</span><div><label class="project-switch"><span class="sr-only">预览项目</span><select id="project"><option value="casebook">Casebook</option><option value="openjobs">Metix AI Platform</option></select></label><span id="review-subtitle">首页设计对比</span></div></div>
+      <div class="view-modes" role="group" aria-label="对比方式">
+        <button data-mode-button="original" aria-pressed="false">原版</button>
+        <button data-mode-button="optimized" aria-pressed="false">优化版</button>
+        <button data-mode-button="split" aria-pressed="true">并排对比</button>
+        <button data-mode-button="all" aria-pressed="false">全部项目</button>
+        <button data-mode-button="unified" aria-pressed="false">统一风格版</button>
+      </div>
+      <div class="review-options">
+        <label><span class="sr-only">预览尺寸</span><select id="device"><option value="desktop">桌面 · 1280</option><option value="mobile">手机 · 375</option></select></label>
+        <label class="casebook-language"><span class="sr-only">页面语言</span><select id="language"><option value="en">English</option><option value="zh">中文</option></select></label>
+        <a class="open-link" id="open-preview" href={`${base}design-preview/optimized/en/`} target="_blank" rel="noopener">独立预览 ↗</a>
+      </div>
+    </header>
+    <nav class="section-nav" aria-label="对照页面区域"><span>定位区域</span><button data-section="top">首屏</button><button data-section="featured">精选案例</button><button data-section="index">全部案例</button><button data-section="start">使用指南</button><button data-section="next">即将发布</button><button data-section="footer">页脚</button><a class="review-hint" href={asset("design-preview/brand-pairing/")} target="_blank" rel="noopener">Logo 搭配预览 ↗</a></nav>
+    <main class="panes">
+      <section class="pane original-pane" aria-label="原版预览"><header class="pane-label"><strong><i></i> 原版</strong><span>当前页面</span><span class="scale-label" data-scale="original"></span></header><div class="frame-viewport"><iframe id="original" title="Casebook 原版首页" src={base}></iframe></div></section>
+      <section class="pane optimized-pane" aria-label="优化版预览"><header class="pane-label"><strong><i></i> <span id="optimized-label">优化版</span></strong><span id="optimized-caption">编辑式排版 · 品牌配色 · 原版字体</span><span class="scale-label" data-scale="optimized"></span></header><div class="frame-viewport"><iframe id="optimized" title="Casebook 优化版首页" src={`${base}design-preview/optimized/en/`}></iframe></div></section>
+      <section class="pane openjobs-pane" aria-label="Metix AI Platform 项目预览"><header class="pane-label"><strong><i></i> <span id="platform-label">Metix AI Platform</span></strong><span id="platform-caption">本地项目预览</span><span class="scale-label" data-scale="openjobs"></span></header><div class="frame-viewport"><iframe id="openjobs" title="Metix AI Platform 本地预览" allow="clipboard-write"></iframe></div></section>
+    </main>
+    <script>
+      const base = document.body.dataset.base!;
+      const params = new URLSearchParams(location.search);
+      const project = document.querySelector<HTMLSelectElement>("#project")!;
+      project.value = params.get("project") === "openjobs" ? "openjobs" : "casebook";
+      const openjobsUrl = document.body.dataset.openjobsUrl!;
+      let mode = params.get("mode") || (matchMedia("(max-width: 760px)").matches ? "optimized" : "split");
+      if (!["original", "optimized", "split", "all", "unified"].includes(mode)) mode = "split";
+      if (mode === "all") project.value = "casebook";
+      const device = document.querySelector<HTMLSelectElement>("#device")!;
+      const language = document.querySelector<HTMLSelectElement>("#language")!;
+      device.value = params.get("device") === "mobile" ? "mobile" : "desktop";
+      language.value = params.get("lang") === "zh" ? "zh" : "en";
+      const original = document.querySelector<HTMLIFrameElement>("#original")!;
+      const optimized = document.querySelector<HTMLIFrameElement>("#optimized")!;
+      const openjobs = document.querySelector<HTMLIFrameElement>("#openjobs")!;
+      const casebookFrames = [original, optimized];
+      const frames = [...casebookFrames, openjobs];
+      const urls = () => ({ original: base + (language.value === "zh" ? "zh/" : ""), optimized: `${base}design-preview/optimized/${language.value}/` });
+      const update = () => {
+        const isOpenjobs = project.value === "openjobs" && mode !== "all" && mode !== "unified";
+        const isAll = mode === "all";
+        const isUnified = mode === "unified";
+        document.body.dataset.project = project.value;
+        document.body.dataset.mode = mode;
+        document.querySelector(".review-icon")!.textContent = isOpenjobs ? "M" : isAll ? "3" : "C";
+        document.querySelector("#review-subtitle")!.textContent = isOpenjobs ? "本地项目预览" : isAll ? "三个项目视图 · 统一品牌风格" : isUnified ? "共用字体与表面 · Platform 延展 Metix 品牌色" : "首页设计对比";
+        document.title = isOpenjobs ? "Metix AI Platform · 本地项目预览" : isAll ? "全部项目 · 统一预览" : isUnified ? "Casebook × Platform · 统一风格预览" : "Casebook · 原版与优化版对比";
+        document.querySelector("#optimized-label")!.textContent = isUnified ? "Casebook · 统一风格" : "优化版";
+        document.querySelector("#optimized-caption")!.textContent = isUnified ? "保留案例内容 · 共用字体与中性表面" : "编辑式排版 · 品牌配色 · 原版字体";
+        document.querySelector("#platform-label")!.textContent = isUnified ? "Platform · 品牌延展" : "Metix AI Platform";
+        document.querySelector("#platform-caption")!.textContent = isUnified ? "保留平台内容 · Metix 紫青品牌色" : "本地项目预览";
+        if ((isOpenjobs || isAll || isUnified) && !openjobs.getAttribute("src")) openjobs.src = openjobsUrl;
+        document.body.dataset.device = device.value;
+        document.querySelectorAll<HTMLButtonElement>("[data-mode-button]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.modeButton === mode)));
+        document.querySelector<HTMLAnchorElement>("#open-preview")!.href = isOpenjobs || isUnified ? openjobsUrl : mode === "original" ? urls().original : urls().optimized;
+        document.querySelector<HTMLAnchorElement>("#open-preview")!.textContent = isUnified ? "Platform 独立预览 ↗" : "独立预览 ↗";
+        const next = new URLSearchParams({ mode, lang: language.value, device: device.value });
+        if (isOpenjobs) next.set("project", "openjobs");
+        history.replaceState(null, "", `${location.pathname}?${next}`);
+        resize();
+      };
+      const resize = () => {
+        const width = device.value === "mobile" ? 375 : 1280;
+        for (const frame of frames) {
+          const holder = frame.parentElement!;
+          if (!holder.clientWidth) continue;
+          const scale = Math.min(1, holder.clientWidth / width);
+          frame.style.width = `${width}px`;
+          frame.style.height = `${Math.ceil(holder.clientHeight / scale)}px`;
+          frame.style.left = `${(holder.clientWidth - width * scale) / 2}px`;
+          frame.style.transform = `scale(${scale})`;
+          document.querySelector(`[data-scale="${frame.id}"]`)!.textContent = `${width} px · ${Math.round(scale * 100)}%`;
+        }
+      };
+      const loadLanguage = () => {
+        const next = urls();
+        for (const frame of casebookFrames) {
+          const url = next[frame.id as keyof typeof next];
+          if (frame.getAttribute("src") !== url) frame.src = url;
+        }
+        update();
+      };
+      document.querySelectorAll<HTMLButtonElement>("[data-mode-button]").forEach(button => button.addEventListener("click", () => { mode = button.dataset.modeButton!; update(); }));
+      project.addEventListener("change", update);
+      device.addEventListener("change", update);
+      language.addEventListener("change", loadLanguage);
+      const sections: Record<string, string> = { top: "body", featured: '[aria-labelledby="featured-title"]', index: "#index", start: "#start", next: "#next", footer: ".site-footer" };
+      document.querySelectorAll<HTMLButtonElement>("[data-section]").forEach(button => button.addEventListener("click", () => {
+        for (const frame of casebookFrames) {
+          try { frame.contentDocument?.querySelector(sections[button.dataset.section!])?.scrollIntoView({ block: "start", behavior: "instant" }); } catch { /* A reader may have followed an external link. */ }
+        }
+      }));
+      const observer = new ResizeObserver(resize);
+      frames.forEach(frame => {
+        observer.observe(frame.parentElement!);
+        frame.addEventListener("load", () => {
+          resize();
+          if (frame === openjobs) return;
+          // Keep both editions aligned when a reader uses a header language link.
+          try {
+            frame.contentDocument?.addEventListener("click", event => {
+              const link = (event.target as Element | null)?.closest?.("a[hreflang]") as HTMLAnchorElement | null;
+              const lang = link?.hreflang;
+              if (!link || (lang !== "en" && lang !== "zh")) return;
+              const target = new URL(link.href);
+              const home = base + (lang === "zh" ? "zh/" : "");
+              const refined = `${base}design-preview/optimized/${lang}/`;
+              if (target.origin !== location.origin || ![home, refined].includes(target.pathname)) return;
+              event.preventDefault();
+              language.value = lang;
+              loadLanguage();
+            });
+          } catch { /* External destinations keep their ordinary navigation. */ }
+        });
+      });
+      loadLanguage();
+    </script>
+  </body>
+</html>
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(body) { margin: 0; background: #e7e8ee; color: #17162e; font-family: "Geist Variable", "PingFang SC", sans-serif; font-size: 12px; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+  button, select, a { font: inherit; }
+  button, select { cursor: pointer; }
+  button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid #6759e8; outline-offset: 3px; }
+  .review-bar { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-height: 66px; padding: 12px 24px; background: #fff; border-bottom: 1px solid #e7e6ee; flex-wrap: wrap; flex-shrink: 0; }
+  .review-title { display: flex; gap: 10px; align-items: center; }
+  .review-icon { display: grid; place-items: center; width: 28px; height: 28px; background: #18142f; color: #e4e0ff; border-radius: 7px; font-size: 18px; font-weight: 500; }
+  .review-title div { display: flex; gap: 12px; align-items: baseline; }
+  .project-switch select { border: 1px solid #e0e3ec; border-radius: 6px; padding: 6px 24px 6px 9px; background: #fff; color: #292238; font-size: 13px; font-weight: 600; }
+  .pane.openjobs-pane { display: none; }
+  :global(body[data-project="openjobs"]) :is(.original-pane, .optimized-pane, .view-modes, .section-nav, .casebook-language) { display: none; }
+  :global(body[data-project="openjobs"]) .openjobs-pane { display: flex; }
+  .openjobs-pane .pane-label i { background: #2e8b80; }
+  :global(body[data-project="casebook"][data-mode="all"]) .panes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  :global(body[data-project="casebook"][data-mode="all"]) .openjobs-pane { display: flex; }
+  :global(body[data-project="casebook"][data-mode="unified"]) .panes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :global(body[data-project="casebook"][data-mode="unified"]) .original-pane { display: none; }
+  :global(body[data-project="casebook"][data-mode="unified"]) :is(.optimized-pane, .openjobs-pane) { display: flex; }
+  .review-title div > span { color: #7b768d; font-size: 11px; }
+  .view-modes { display: flex; gap: 3px; background: #f0eff5; border: 1px solid #e9e7f0; padding: 3px; border-radius: 8px; }
+  .view-modes button { border: 0; border-radius: 5px; padding: 7px 15px; color: #787189; background: transparent; white-space: nowrap; }
+  .view-modes button[aria-pressed="true"] { background: #fff; color: #292238; box-shadow: 0 1px 4px #1d16421a; }
+  .review-options { display: flex; align-items: center; gap: 10px; }
+  .review-options select { border: 1px solid #e3e1eb; border-radius: 6px; padding: 7px 9px; background: #fff; font-size: 11px; color: #5b536c; }
+  .open-link { padding: 8px 12px; border-radius: 6px; background: #f0edff; color: #5c45b7; text-decoration: none; font-size: 11px; white-space: nowrap; }
+  .section-nav { display: flex; align-items: center; gap: 3px; padding: 7px 24px; background: #fafafe; border-bottom: 1px solid #dddde7; flex-shrink: 0; overflow-x: auto; white-space: nowrap; }
+  .section-nav > span:first-child { color: #8b839c; font-size: 10px; margin-right: 14px; }
+  .section-nav button { border: 0; border-radius: 4px; background: transparent; color: #6f667e; font-size: 10px; padding: 5px 10px; }
+  .section-nav button:hover { background: #eeebf8; color: #5b45bb; }
+  .review-hint { margin-left: auto; color: #9890a4; font-size: 10px; }
+  .panes { display: flex; gap: 12px; flex: 1; min-height: 0; padding: 12px; }
+  .pane { flex: 1; min-width: 0; display: flex; flex-direction: column; border: 1px solid #d9dae3; border-radius: 8px; overflow: hidden; background: #fff; }
+  .pane-label { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #fff; border-bottom: 1px solid #e5e3ed; flex-shrink: 0; }
+  .pane-label strong { display: flex; gap: 6px; align-items: center; font-size: 11px; font-weight: 500; }
+  .pane-label i { width: 5px; height: 5px; border-radius: 50%; background: #a19ba9; }
+  .optimized-pane .pane-label i { background: #7765e9; }
+  .pane-label > span { font-size: 9px; color: #92899f; }
+  .pane-label .scale-label { margin-left: auto; }
+  .frame-viewport { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #eeeef3; }
+  iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: top left; background: #fff; }
+  :global(body[data-mode="original"]) .optimized-pane, :global(body[data-mode="optimized"]) .original-pane { display: none; }
+  :global(body[data-device="mobile"]) .frame-viewport { background: #e9e9f0; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  @media (max-width: 1050px) { .review-title div > span { display: none; } .review-bar { padding-inline: 16px; gap: 10px; } .review-options { gap: 6px; } .review-hint { display: none; } }
+  @media (max-width: 760px) { .review-bar { gap: 10px; padding: 10px 12px; } .review-title { flex: 1; } .view-modes { order: 2; width: 100%; overflow-x: auto; } .view-modes button { flex: 1 0 auto; padding: 6px 5px; font-size: 10px; } .review-options select { max-width: 105px; font-size: 10px; padding: 6px; } .open-link { font-size: 10px; padding: 6px 8px; } .review-title strong { font-size: 12px; } .review-icon { display: none; } .section-nav { padding-inline: 8px; } .section-nav > span:first-child { display: none; } .panes { padding: 6px; gap: 6px; } .pane-label { padding: 8px; gap: 6px; } .pane-label > span:not(.scale-label) { display: none; } :global(body[data-project="casebook"][data-mode="all"]) .panes, :global(body[data-project="casebook"][data-mode="unified"]) .panes { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; } :global(body[data-project="casebook"][data-mode="all"]) .pane, :global(body[data-project="casebook"][data-mode="unified"]) .pane { flex: 0 0 calc(100vw - 12px); scroll-snap-align: start; } }
+</style>

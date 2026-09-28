@@ -1,0 +1,42 @@
+---
+import { asset } from "@site/i18n";
+interface Props { size?: "large" | "regular" | "compact" }
+const { size = "regular" } = Astro.props;
+---
+<span class:list={["bp-signature", size]} role="img" aria-label="Metix AI Platform · Casebook">
+  <img src={asset("brand/metix-logo.svg")} alt="" width="129" height="24" />
+  <span class="bp-divider" aria-hidden="true"></span>
+  <span class="bp-publication" aria-hidden="true">
+    <span class="bp-platform">Platform</span>
+    <span class="bp-casebook">Casebook</span>
+  </span>
+</span>
+<style>
+  .bp-signature { display: inline-flex; align-items: center; gap: 24px; white-space: nowrap; color: #100d35; }
+  img { display: block; flex-shrink: 0; width: 129px; height: 24px; }
+  .bp-divider { flex-shrink: 0; width: 1px; height: 39px; background: #d7d5e8; }
+  .bp-publication { display: flex; flex-direction: column; gap: 6px; }
+  .bp-platform { font: 600 10px/1 "Geist Mono Variable", monospace; text-transform: uppercase; letter-spacing: .18em; color: #5147b5; }
+  .bp-casebook { font: 700 24px/1 "Sora Variable", sans-serif; letter-spacing: -.045em; }
+  .large { gap: 36px; }
+  .large img { width: 172px; height: 32px; }
+  .large .bp-divider { height: 55px; }
+  .large .bp-publication { gap: 9px; }
+  .large .bp-platform { font-size: 12px; }
+  .large .bp-casebook { font-size: 38px; }
+  .compact { gap: 24px; }
+  .compact .bp-casebook { font-size: 22px; }
+  @media (max-width: 620px) {
+    .large { gap: 24px; }
+    .large img { width: 129px; height: 24px; }
+    .large .bp-divider { height: 39px; }
+    .large .bp-publication { gap: 6px; }
+    .large .bp-platform { font-size: 10px; }
+    .large .bp-casebook { font-size: 22px; }
+  }
+  @media (max-width: 360px) {
+    .bp-signature { flex-direction: column; gap: 24px; }
+    .bp-divider { display: none; }
+    .bp-publication { align-items: center; }
+  }
+</style>

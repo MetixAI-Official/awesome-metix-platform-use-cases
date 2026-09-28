@@ -1,0 +1,102 @@
+---
+import "@fontsource-variable/geist";
+import spaceGrotesk from "../../assets/brand-study/space-grotesk-variable.ttf?url";
+import instrumentSerif from "../../assets/brand-study/instrument-serif-regular.ttf?url";
+import BrandConcept from "../../components/BrandConcept.astro";
+import { href } from "../../i18n";
+
+const concepts = [
+  { id: "A", variant: "inline" as const, title: "几何科技", english: "Geometric / Precise", font: "Space Grotesk", source: "https://github.com/google/fonts/tree/main/ofl/spacegrotesk", weight: "MEDIUM + SEMIBOLD", description: "用 Space Grotesk 的几何轮廓呼应标志。Platform 轻一些，Casebook 稍重，以细斜线和精准间距连接，保留完整的单行节奏。", tags: ["几何字形", "紧凑字距", "轻重有序"], note: "推荐用于产品导航：统一、利落，小尺寸下依然清晰。" },
+  { id: "B", variant: "stacked" as const, title: "编辑刊物", english: "Editorial / Expressive", font: "Instrument Serif", source: "https://github.com/google/fonts/tree/main/ofl/instrumentserif", weight: "REGULAR", description: "Casebook 换成 Instrument Serif，以纤细衬线和笔画反差建立刊物气质。上方的小号 Platform 拉开字距，形成清楚而紧凑的层级。", tags: ["纤细衬线", "笔画反差", "刊物气质"], note: "适合突出案例与研究内容，让 Casebook 更有独立辨识度。" },
+];
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <link rel="preload" href={spaceGrotesk} as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href={instrumentSerif} as="font" type="font/ttf" crossorigin />
+    <title>品牌字体精修 · 两个设计方向</title>
+  </head>
+  <body>
+    <main>
+      <header class="intro">
+        <div><p class="eyebrow">Metix AI Platform <span> / </span> TYPOGRAPHY STUDY <b>02</b></p><h1>从排版统一，到字体有性格。</h1><p class="lead">两种字体方向，精修字重、间距与比例。看放大字样，也看实际导航。</p></div>
+        <a class="back" href={href("en")}>返回当前首页 <span aria-hidden="true">↗</span></a>
+      </header>
+      <div class="concepts">
+        {concepts.map(concept => <section class:list={["concept", concept.variant]}>
+          <header class="concept-heading"><span class="letter">{concept.id}</span><div><h2>{concept.title}</h2><p>{concept.english}</p></div></header>
+          <div class="board">
+            <p class="board-label">01 <span>实际导航 · 原尺寸</span></p>
+            <div class="sample"><BrandConcept variant={concept.variant} /></div>
+            <div class="type-study">
+              <div class="type-meta"><span>02 <span class="type-meta-label">字体细节</span></span><span>Aa / 0123</span></div>
+              <p class="specimen">Casebook<span class="period">.</span></p>
+              <div class="font-credit"><a href={concept.source}>{concept.font} <span aria-hidden="true">↗</span></a><span>{concept.weight}</span></div>
+            </div>
+          </div>
+          <div class="description"><p>{concept.description}</p><ul>{concept.tags.map(tag => <li>{tag}</li>)}</ul></div>
+          <div class="mobile-wrap"><p class="sample-label">03 <span>窄屏 · 375 PX</span></p><div class="phone"><div class="sample"><BrandConcept variant={concept.variant} /></div><div class="phone-nav"><span>案例与研究</span><a href={href("zh")}>中文 <span aria-hidden="true">↗</span></a></div></div></div>
+          <p class="note">{concept.note}</p>
+        </section>)}
+      </div>
+      <footer><span>共同规范</span><p>官方原版 Logo · 深海军蓝 · 24 px 标志高度 · 本地字体</p><span>02 / TYPOGRAPHY REFINEMENT</span></footer>
+    </main>
+  </body>
+</html>
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(body) { margin: 0; background: #f7f7f9; color: #100d35; font-family: "Geist Variable", "PingFang SC", sans-serif; -webkit-font-smoothing: antialiased; }
+  :global(a:focus-visible) { outline: 2px solid #5b54ef; outline-offset: 5px; }
+  main { max-width: 1200px; margin: auto; padding: 48px 40px 28px; }
+  p, h1, h2 { margin: 0; }
+  .intro { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 36px; }
+  .eyebrow { display: flex; align-items: center; gap: 10px; color: #6b647c; font-family: "Space Grotesk", sans-serif; font-size: 10px; letter-spacing: .04em; font-weight: 500; margin-bottom: 18px; }
+  .eyebrow > span { color: #b2abba; }
+  .eyebrow b { font-size: 9px; font-weight: 500; padding: 2px 5px; border: 1px solid #d7d2e1; border-radius: 3px; letter-spacing: 0; }
+  h1 { font-size: clamp(25px, 3vw, 34px); font-weight: 500; letter-spacing: -.045em; line-height: 1.4; }
+  .lead { color: #716c81; font-size: 14px; margin-top: 10px; line-height: 1.7; }
+  .back { color: #534d69; text-decoration: none; font-size: 12px; white-space: nowrap; padding-bottom: 3px; }
+  .back span { margin-left: 12px; }
+  .concepts { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .concept { min-width: 0; background: #fff; border: 1px solid #e3e0e9; border-radius: 12px; overflow: hidden; }
+  .concept-heading { padding: 24px 26px; display: flex; align-items: center; gap: 16px; }
+  .letter { font-family: "Space Grotesk", sans-serif; font-size: 34px; line-height: 1; font-weight: 400; letter-spacing: -.06em; }
+  .stacked .letter { font-family: "Instrument Serif", serif; font-size: 40px; }
+  h2 { font-size: 17px; font-weight: 500; }
+  .concept-heading p { margin-top: 5px; color: #716980; font-family: "Space Grotesk", sans-serif; font-size: 10px; letter-spacing: .02em; }
+  .board { margin: 0 18px; background: #eef0f4; border: 1px solid #e1e3eb; border-radius: 6px; overflow: hidden; }
+  .board-label { padding: 16px 24px 0; color: #716980; font-size: 9px; font-family: "Space Grotesk", "PingFang SC", sans-serif; }
+  .board-label > span, .sample-label > span { margin-left: 12px; }
+  .sample { container: brand-sample / inline-size; min-height: 86px; display: flex; align-items: center; padding: 22px 24px; border-bottom: 1px solid rgb(16 13 53 / 10%); }
+  .type-study { padding: 18px 24px 20px; }
+  .type-meta { display: flex; justify-content: space-between; color: #716980; font-family: "Space Grotesk", "PingFang SC", sans-serif; font-size: 9px; }
+  .type-meta-label { margin-left: 12px; }
+  .specimen { display: flex; align-items: baseline; font-family: "Space Grotesk", sans-serif; font-size: clamp(48px, 5.8vw, 74px); font-weight: 500; letter-spacing: -.065em; line-height: 1; margin: 28px 0 24px; font-synthesis: none; }
+  .stacked .specimen { font-family: "Instrument Serif", Georgia, serif; font-size: clamp(64px, 6.7vw, 86px); font-weight: 400; letter-spacing: -.04em; margin-top: 16px; }
+  .period { color: #5b54ef; }
+  .font-credit { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; border-top: 1px solid rgb(16 13 53 / 10%); padding-top: 14px; font-family: "Space Grotesk", sans-serif; }
+  .font-credit a { text-decoration: none; color: #4c445f; font-size: 11px; }
+  .font-credit a span { margin-left: 4px; color: #716980; }
+  .font-credit a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .font-credit > span { font-size: 8px; letter-spacing: .06em; color: #716980; }
+  .description { padding: 22px 26px; }
+  .description p { font-size: 13px; line-height: 1.9; color: #615a72; min-height: 75px; }
+  ul { display: flex; gap: 8px; padding: 0; margin: 16px 0 0; list-style: none; flex-wrap: wrap; }
+  li { font-size: 10px; border-radius: 3px; background: #f4f3f8; color: #6c627f; padding: 5px 8px; }
+  .mobile-wrap { padding: 0 26px; }
+  .sample-label { font-family: "Space Grotesk", "PingFang SC", sans-serif; font-size: 9px; letter-spacing: .04em; color: #716980; margin-bottom: 12px; }
+  .phone { width: 375px; max-width: 100%; border: 1px solid #e2e0e9; border-radius: 6px; overflow: hidden; background: #fff; }
+  .phone .sample { min-height: 80px; padding: 18px 16px; }
+  .phone-nav { display: flex; justify-content: space-between; padding: 10px 16px; font-size: 10px; color: #81798f; }
+  .phone-nav a { color: #534d69; text-decoration: none; }
+  .note { padding: 18px 26px 24px; font-size: 11px; line-height: 1.7; color: #716980; }
+  footer { display: flex; align-items: center; gap: 20px; padding-top: 24px; color: #716980; font-size: 10px; line-height: 1.8; }
+  footer > span:first-child { color: #615a72; white-space: nowrap; }
+  footer > span:last-child { margin-left: auto; font-size: 9px; white-space: nowrap; letter-spacing: .08em; }
+  @media (max-width: 1050px) { .concepts { grid-template-columns: 1fr; } .description p { min-height: 0; } }
+  @media (max-width: 600px) { main { padding: 30px 12px 24px; } .intro { display: block; padding: 0 10px; margin-bottom: 26px; } .back { display: inline-block; margin-top: 20px; } .concept-heading { padding: 22px 20px; } .board { margin: 0 10px; } .sample { padding: 24px 16px; } .description, .mobile-wrap { padding: 20px 16px; } .mobile-wrap { padding-top: 0; padding-bottom: 0; } .note { padding: 18px 16px 22px; } footer { flex-wrap: wrap; gap: 6px 16px; padding: 24px 10px 0; } footer > span:last-child { display: none; } }
+</style>

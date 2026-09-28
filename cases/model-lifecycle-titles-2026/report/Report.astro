@@ -20,10 +20,11 @@ interface Props {
   lang: Lang;
   section: "card" | "body" | "method";
   size?: "compact" | "full";
+  cardSummary?: string;
   entry: { slug: string; snapshot?: Date; exploration_credits?: number };
 }
 
-const { lang, section, size = "compact", entry } = Astro.props;
+const { lang, section, size = "compact", entry, cardSummary } = Astro.props;
 const zh = lang === "zh";
 const snapshot = entry.snapshot ?? new Date(stages.snapshot);
 
@@ -61,9 +62,9 @@ const rows = order.map((r) => ({
         <small>×</small>
       </p>
       <p class="big-label">
-        {zh
+        {cardSummary ?? (zh
           ? `标题写推理的在招岗位是写预训练的 ${number(lang, ratio, 1)} 倍（${inf.count} 比 ${preT.count}）。`
-          : `as many open postings name inference in the title as pre-training (${inf.count} to ${preT.count}).`}
+          : `as many open postings name inference in the title as pre-training (${inf.count} to ${preT.count}).`)}
       </p>
       <ul class="mini-bars" aria-label={zh ? "各阶段岗位数" : "Postings by stage"}>
         {order.map((r) => (

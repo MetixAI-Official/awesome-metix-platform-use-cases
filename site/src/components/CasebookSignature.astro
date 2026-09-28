@@ -1,0 +1,20 @@
+---
+import { asset } from "@site/i18n";
+---
+<span class="cb-signature" role="img" aria-label="Casebook, Metix AI Platform">
+  <span class="cb-wordmark" aria-hidden="true">Casebook</span>
+  <span class="cb-signature-rule" aria-hidden="true"></span>
+  <span class="cb-endorsement" aria-hidden="true">
+    <img src={asset("brand/metix-logo.svg")} alt="" width="129" height="24" />
+    <span>Platform</span>
+  </span>
+</span>
+<style>
+  .cb-signature { display: inline-flex; align-items: center; gap: 22px; white-space: nowrap; color: #100d35; }
+  .cb-wordmark { font: 600 27px/1 "Syne", sans-serif; letter-spacing: -.055em; font-synthesis: none; }
+  .cb-signature-rule { width: 1px; height: 27px; background: #d8d7e1; }
+  .cb-endorsement { display: flex; flex-direction: column; gap: 3px; }
+  img { display: block; width: 129px; height: 24px; }
+  .cb-endorsement > span { padding-left: 40px; font: 500 8px/1 "Geist Variable", sans-serif; text-transform: uppercase; letter-spacing: .2em; color: #656078; }
+  @media (max-width: 520px) { .cb-signature { gap: 15px; } .cb-wordmark { font-size: 24px; } }
+</style>

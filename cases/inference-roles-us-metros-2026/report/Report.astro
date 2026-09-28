@@ -22,10 +22,12 @@ interface Props {
   lang: Lang;
   section: "card" | "body" | "method";
   size?: "compact" | "full";
+  cardSummary?: string;
+  cardNote?: string;
   entry: { slug: string; snapshot?: Date; exploration_credits?: number };
 }
 
-const { lang, section, size = "compact", entry } = Astro.props;
+const { lang, section, size = "compact", entry, cardSummary, cardNote } = Astro.props;
 const zh = lang === "zh";
 
 const count = (group: string) => context.rows.find((r) => r.group === group)?.count ?? 0;
@@ -103,9 +105,9 @@ const altText = zh
         <small>%</small>
       </p>
       <p class="big-label">
-        {zh
+        {cardSummary ?? (zh
           ? `美国 ${number(lang, distinct)} 个推理岗位（合并重复发布后）中，有 ${bay.count} 个在旧金山湾区。`
-          : `${bay.count} of ${number(lang, distinct)} distinct US inference postings are in the San Francisco Bay Area.`}
+          : `${bay.count} of ${number(lang, distinct)} distinct US inference postings are in the San Francisco Bay Area.`)}
       </p>
       <ul class="mini-bars half" aria-label={zh ? "按都市区的占比" : "Share by metro"}>
         {miniRows.map((r) => (
@@ -118,7 +120,7 @@ const altText = zh
           </li>
         ))}
       </ul>
-      <p class="mb-key">{zh ? "条形按占全部岗位（合并重复发布后）的比例画，虚线是一半" : "Bars are shares of all distinct postings; the dashed line is half"}</p>
+      <p class="mb-key">{cardNote ?? (zh ? "条形按占全部岗位（合并重复发布后）的比例画，虚线是一半" : "Bars are shares of all distinct postings; the dashed line is half")}</p>
     </div>
   )
 }

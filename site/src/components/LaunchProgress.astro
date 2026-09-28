@@ -1,0 +1,165 @@
+---
+import type { Lang } from "@site/i18n";
+interface Props { lang: Lang }
+const zh = Astro.props.lang === "zh";
+---
+<div class="launch-checklist" data-launch-checklist data-lang={Astro.props.lang} hidden>
+  <div class="launch-orbit" aria-hidden="true">
+    <span class="launch-arrow">↗</span>
+    {Array.from({ length: 8 }, (_, i) => <i class="launch-spark" style={`--angle:${i * 45}deg`} />)}
+  </div>
+  <div class="launch-copy">
+    <span class="launch-label">{zh ? "首次运行清单" : "Your first-run checklist"}</span>
+    <p data-launch-message>{zh ? "每完成一步，点亮一个小目标。" : "One small step. One milestone closer."}</p>
+  </div>
+  <div class="launch-meter">
+    <output data-launch-count aria-live="polite" aria-atomic="true">{zh ? "0 / 4 已完成" : "0 / 4 complete"}</output>
+    <div class="launch-segments" role="progressbar" aria-label={zh ? "手动标记的步骤进度" : "Manually checked steps"} aria-valuemin="0" aria-valuemax="4" aria-valuenow="0">
+      {Array.from({ length: 4 }, () => <span aria-hidden="true" />)}
+    </div>
+  </div>
+</div>
+
+<script>
+  for (const checklist of document.querySelectorAll<HTMLElement>("[data-launch-checklist]")) {
+    const section = checklist.closest(".start");
+    if (!section) continue;
+    const steps = [...section.querySelectorAll<HTMLElement>(".start-step")];
+    const zh = checklist.dataset.lang === "zh";
+    const buttons: HTMLButtonElement[] = [];
+    const counter = checklist.querySelector<HTMLOutputElement>("[data-launch-count]")!;
+    const message = checklist.querySelector<HTMLElement>("[data-launch-message]")!;
+    const meter = checklist.querySelector<HTMLElement>('[role="progressbar"]')!;
+    const segments = [...meter.children];
+    const sync = () => {
+      const count = buttons.filter(button => button.getAttribute("aria-pressed") === "true").length;
+      counter.textContent = zh ? `${count} / ${steps.length} 已完成` : `${count} / ${steps.length} complete`;
+      meter.setAttribute("aria-valuenow", String(count));
+      checklist.classList.toggle("all-done", count === steps.length);
+      message.textContent = count === steps.length
+        ? (zh ? "清单完成！继续探索下一个发现。" : "Checklist complete. On to your next discovery!")
+        : (zh ? "每完成一步，点亮一个小目标。" : "One small step. One milestone closer.");
+      buttons.forEach((button, i) => {
+        const done = button.getAttribute("aria-pressed") === "true";
+        steps[i].classList.toggle("is-complete", done);
+        segments[i]?.classList.toggle("is-complete", done);
+        button.textContent = done ? (zh ? "✓ 已完成" : "✓ Done") : (zh ? "○ 标记已完成" : "○ Mark done");
+        button.setAttribute("aria-label", zh
+          ? (done ? `撤销第 ${i + 1} 步的完成标记` : `标记第 ${i + 1} 步已完成`)
+          : (done ? `Undo completion of step ${i + 1}` : `Mark step ${i + 1} complete`));
+      });
+    };
+    steps.forEach(step => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "step-toggle";
+      button.setAttribute("aria-pressed", "false");
+      button.addEventListener("click", () => {
+        button.setAttribute("aria-pressed", String(button.getAttribute("aria-pressed") !== "true"));
+        sync();
+      });
+      step.querySelector(".start-rail")!.append(button);
+      step.querySelector(".start-n")?.setAttribute("aria-hidden", "true");
+      buttons.push(button);
+    });
+    meter.setAttribute("aria-valuemax", String(steps.length));
+    sync();
+    checklist.hidden = false;
+  }
+</script>
+
+<style is:global>
+  html[data-design="refined"] #start .launch-checklist:not([hidden]) {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 22px 26px;
+    margin-bottom: 24px;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    background: linear-gradient(110deg, #fff, #f8fbff) padding-box,
+      linear-gradient(100deg, #a0e7d9, #c5d9fc 55%, #c9c5f9) border-box;
+    box-shadow: 0 8px 24px -20px #3f659d66;
+  }
+  .launch-orbit {
+    position: relative;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid #cbd3f8;
+    border-radius: 18px;
+    background: radial-gradient(at 0% 0%, #bbf5e6, transparent 80%), #e8e6ff;
+    box-shadow: inset 0 1px #fff;
+    color: #5046b3;
+  }
+  .launch-arrow { font: 500 32px/1 "Sora Variable", sans-serif; transition: transform 240ms ease; }
+  .launch-copy { flex: 1; min-width: 0; }
+  .launch-label { color: #20264b; font-size: 16px; font-weight: 650; }
+  .launch-copy p { margin: 5px 0 0; color: #5b657a; font-size: 13px; line-height: 1.6; }
+  .launch-meter { width: 180px; flex-shrink: 0; }
+  .launch-meter output { display: block; color: #4c458c; font: 500 12px/1.5 "Geist Mono Variable", monospace; text-align: right; }
+  .launch-segments { display: flex; gap: 6px; margin-top: 10px; }
+  .launch-segments > span { flex: 1; height: 6px; border-radius: 8px; background: #e8edf5; }
+  .launch-segments > .is-complete { background: linear-gradient(90deg, #17baa5, #6580ed); }
+  html[data-design="refined"] #start .start-step {
+    position: relative;
+    border-color: #dbe2f0;
+    box-shadow: 0 6px 20px -17px #3c508e55;
+    transition: border-color 220ms ease, box-shadow 220ms ease;
+  }
+  html[data-design="refined"] #start .start-n {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #d7d6f6;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #f2eeff, #e8f7fb);
+    box-shadow: inset 0 1px #fff;
+    color: #5145ac;
+    font-size: 13px;
+    transition: background 200ms ease;
+  }
+  html[data-design="refined"] #start .step-toggle {
+    order: 3;
+    align-self: flex-start;
+    min-height: 40px;
+    margin-top: 18px;
+    padding: 7px 12px;
+    border: 1px solid #d7dcee;
+    border-radius: 999px;
+    background: #fff;
+    color: #57647e;
+    font: 500 12px/1.5 "Geist Variable", sans-serif;
+    cursor: pointer;
+    transition: background 180ms ease, border-color 180ms ease;
+  }
+  html[data-design="refined"] #start .step-toggle:hover { background: #f0f2ff; border-color: #a8a4e6; }
+  html[data-design="refined"] #start .step-toggle:focus-visible { outline: 2px solid #5b54ef; outline-offset: 3px; }
+  html[data-design="refined"] #start .is-complete { border-color: #99d7c9; }
+  html[data-design="refined"] #start .is-complete .start-n { font-size: 0; border-color: #97dccb; background: #dcf7ee; color: #147568; }
+  html[data-design="refined"] #start .is-complete .start-n::after { content: "✓"; font-size: 17px; }
+  html[data-design="refined"] #start .step-toggle[aria-pressed="true"] { color: #147568; border-color: #addfce; background: #eaf9f2; }
+  .launch-spark { position: absolute; top: 24px; left: 25px; width: 5px; height: 8px; border-radius: 2px; opacity: 0; background: #37c5b0; pointer-events: none; }
+  .launch-spark:nth-of-type(even) { background: #8174f3; }
+  .all-done .launch-spark { animation: launch-celebrate 750ms ease-out both; }
+  .all-done .launch-arrow { transform: translate(2px, -2px); }
+  @keyframes launch-celebrate {
+    0% { opacity: 0; transform: rotate(var(--angle)) translateY(-12px) scale(.5); }
+    30% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(var(--angle)) translateY(-52px) scale(.7); }
+  }
+  @media (max-width: 599px) {
+    html[data-design="refined"] #start .launch-checklist:not([hidden]) { flex-wrap: wrap; gap: 14px; padding: 20px; }
+    .launch-orbit { width: 48px; height: 48px; border-radius: 15px; }
+    .launch-meter { width: 100%; }
+    .launch-meter output { text-align: left; }
+    .launch-label { font-size: 14px; }
+    .launch-copy p { font-size: 12px; }
+    html[data-design="refined"] #start .step-toggle { min-height: 44px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .all-done .launch-spark { animation: none; }
+    .launch-arrow, html[data-design="refined"] #start :is(.start-step, .start-n, .step-toggle) { transition: none; }
+  }
+</style>

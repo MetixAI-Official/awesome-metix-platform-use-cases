@@ -17,6 +17,27 @@ interface Props {
 
 const { lang, label, code, wrap = false } = Astro.props;
 const t = ui[lang];
+const isShell = /^(shell|terminal|终端)$/i.test(label.trim());
+const escapeHtml = (value: string) => value
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#39;");
+const highlightedCode = isShell
+  ? escapeHtml(code).replace(/\b(export|claude|mcp)\b|METIX_KEY|metix_[A-Za-z0-9_-]+|https?:\/\/[^\s"'&]+|--[a-z-]+/gi, (token) => {
+      const className = /^(export|claude|mcp)$/i.test(token)
+        ? "syntax-command"
+        : token === "METIX_KEY"
+          ? "syntax-env"
+          : token.startsWith("metix_")
+            ? "syntax-value"
+            : token.startsWith("http")
+              ? "syntax-url"
+              : "syntax-flag";
+      return `<span class="${className}">${token}</span>`;
+    })
+  : undefined;
 ---
 
 <div class="code-block" data-copy-root>
@@ -26,5 +47,5 @@ const t = ui[lang];
       {t.copy}
     </button>
   </div>
-  <pre class:list={["cb-code", { wrap }]}>{code}</pre>
+  <pre class:list={["cb-code", { wrap }]} set:html={highlightedCode}>{!isShell && code}</pre>
 </div>

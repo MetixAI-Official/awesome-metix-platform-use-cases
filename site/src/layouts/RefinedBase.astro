@@ -1,0 +1,227 @@
+---
+import "@fontsource-variable/sora";
+// The display face sets the fitted wordmark and every title; preloaded so they render at their measured width on first paint.
+import soraLatin from "@fontsource-variable/sora/files/sora-latin-wght-normal.woff2?url";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "@site/styles/shell.css";
+import "@site/styles/refined-home.css";
+import "@site/styles/refined-featured.css";
+import PlatformSignature from "@site/components/PlatformSignature.astro";
+import PlatformLockup from "@site/components/PlatformLockup.astro";
+import { REPO, asset, href, ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  /** Path relative to the language root, used by the language switch, e.g. "cases/x/". */
+  path: string;
+  title?: string;
+  description?: string;
+}
+
+const { lang, path, title, description } = Astro.props;
+const t = ui[lang];
+const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.casebook}, ${t.siteName}`;
+---
+
+<!doctype html>
+<html lang={t.htmlLang} class="no-js" data-design="refined">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preload" href={soraLatin} as="font" type="font/woff2" crossorigin />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description ?? t.siteDescription} />
+    <link rel="icon" type="image/png" href={asset("favicon.png")} />
+    <link rel="alternate" hreflang="en" href={new URL(href("en", path), Astro.site)} />
+    <link rel="alternate" hreflang="zh" href={new URL(href("zh", path), Astro.site)} />
+    <meta property="og:title" content={title ?? t.siteName} />
+    <meta property="og:description" content={description ?? t.siteDescription} />
+    <script is:inline>document.documentElement.classList.replace("no-js", "js");</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.skipLink}</a>
+    <header class="site-header">
+      <div class="wrap bar">
+        <a class="brand" href={asset(`design-preview/optimized/${lang}/`)} aria-label={`Metix AI Platform ${t.casebook}`}>
+          <span class="refined-signature"><PlatformSignature /></span>
+          <span class="refined-mobile-brand"><PlatformSignature size="compact" /></span>
+        </a>
+        <div class="header-actions">
+          <div class="lang-switch" role="group" aria-label={t.langLabel}>
+            <a href={asset("design-preview/optimized/en/")} hreflang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>EN</a>
+            <a href={asset("design-preview/optimized/zh/")} hreflang="zh" lang="zh-CN" aria-current={lang === "zh" ? "true" : undefined}>中文</a>
+          </div>
+          <a class="gh-link" href={REPO}>{t.navGithub}</a>
+          <a class="pill" href="https://platform.metix.ai/api-keys">
+            <span class="long">{t.navKey}</span><span class="short">{t.navKeyShort}</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p class="footer-brand" role="img" aria-label="Metix AI Platform"><PlatformLockup /></p>
+        <nav class="links" aria-label="Metix AI Platform">
+          <a href="https://platform.metix.ai">Metix AI Platform</a>
+          <a href="https://platform.metix.ai/docs">{t.footerDocs}</a>
+          <a href="https://platform.metix.ai/api-keys">{t.footerKeys}</a>
+          <a href={`${REPO}/blob/main/docs/public-data-policy.md`}>{t.footerPolicy}</a>
+          <a href={REPO}>{t.footerSource}</a>
+        </nav>
+        <p class="legal">{t.legal}</p>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Copy buttons: data-copy holds a selector inside the nearest [data-copy-root].
+      document.addEventListener("click", async (event) => {
+        const button = event.target.closest("button[data-copy]");
+        if (!button) return;
+        const root = button.closest("[data-copy-root]");
+        const source = root && root.querySelector(button.dataset.copy);
+        if (!source) return;
+        const label = button.dataset.label || button.textContent;
+        button.dataset.label = label;
+        try {
+          // innerText keeps the line breaks between the per-line spans of a code block.
+          await navigator.clipboard.writeText((source.innerText || source.textContent).trim());
+          button.textContent = button.dataset.done;
+        } catch {
+          // The clipboard can be blocked, and the prompt's source is hidden, so selecting
+          // it would copy nothing. Show the text in a box, selected, next to the button.
+          const anchor = button.closest(".code-block, .rs-head, .prompt-foot") || button.parentElement;
+          let box = anchor.nextElementSibling;
+          if (!box || !box.classList.contains("copy-fallback")) {
+            box = document.createElement("textarea");
+            box.className = "copy-fallback";
+            box.readOnly = true;
+            anchor.insertAdjacentElement("afterend", box);
+          }
+          box.value = (source.innerText || source.textContent).trim();
+          box.focus();
+          box.select();
+          const mac = /Mac|iPhone|iPad/.test(navigator.userAgent);
+          button.textContent = button.dataset.fail.replace("Ctrl+C", mac ? "Cmd+C" : "Ctrl+C");
+          clearTimeout(button._reset);
+          button._reset = setTimeout(() => (button.textContent = label), 6000);
+          return;
+        }
+        clearTimeout(button._reset);
+        button._reset = setTimeout(() => (button.textContent = label), 1500);
+      });
+
+      // Run it: the paths are links to their panels; with JavaScript one panel shows at a
+      // time. A hash naming a panel, or anything inside one (#prompt, #step-3), opens it.
+      // A panel is hidden when the browser looks for the hash, so scroll once it shows.
+      const runRoots = [...document.querySelectorAll("[data-run]")];
+      const hashTarget = () => location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      const scrollToHash = () => {
+        const target = hashTarget();
+        if (target && target.closest("[data-run], [data-steps]")) requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+      };
+      // Below the rail breakpoint the paths sit above the panels, so a choice would swap
+      // content out of sight; bring the panel's heading up.
+      const stacked = window.matchMedia("(max-width: 959px)");
+      const showRunPath = (root, key) => {
+        for (const panel of root.querySelectorAll("[data-panel]")) panel.hidden = panel.dataset.panel !== key;
+        for (const link of root.querySelectorAll("[data-path]")) link.setAttribute("aria-current", String(link.dataset.path === key));
+      };
+      const runFromHash = () => {
+        for (const root of runRoots) {
+          const target = hashTarget();
+          const panel = target && root.contains(target) && target.closest("[data-panel]");
+          showRunPath(root, panel ? panel.dataset.panel : root.querySelector("[data-path]").dataset.path);
+        }
+      };
+      for (const root of runRoots) {
+        for (const link of root.querySelectorAll("[data-path]")) {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            showRunPath(root, link.dataset.path);
+            history.replaceState(null, "", `#run-${link.dataset.path}`);
+            if (stacked.matches) document.getElementById(`run-${link.dataset.path}`)?.scrollIntoView({ block: "start" });
+          });
+        }
+      }
+      runFromHash();
+
+      // Agent tabs: arrow keys, Home and End move between them, and the choice carries
+      // across pages however it was made.
+      let savedAgent = null;
+      try {
+        savedAgent = localStorage.getItem("metix-agent");
+      } catch {}
+      for (const box of document.querySelectorAll("[data-agent-setup]")) {
+        const tabs = [...box.querySelectorAll('[role="tab"]')];
+        const select = (key, byUser) => {
+          for (const tab of tabs) {
+            const on = tab.dataset.agent === key;
+            tab.setAttribute("aria-selected", String(on));
+            tab.tabIndex = on ? 0 : -1;
+            if (on && byUser) tab.scrollIntoView({ block: "nearest", inline: "nearest" });
+          }
+          for (const panel of box.querySelectorAll("[data-agent-panel]")) panel.hidden = panel.dataset.agentPanel !== key;
+          if (!byUser) return;
+          try {
+            localStorage.setItem("metix-agent", key);
+          } catch {}
+        };
+        tabs.forEach((tab, i) => {
+          tab.addEventListener("click", () => select(tab.dataset.agent, true));
+          tab.addEventListener("keydown", (event) => {
+            const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[event.key];
+            if (to === undefined) return;
+            event.preventDefault();
+            const next = tabs[(to + tabs.length) % tabs.length];
+            select(next.dataset.agent, true);
+            next.focus();
+          });
+        });
+        select(tabs.some((tab) => tab.dataset.agent === savedAgent) ? savedAgent : tabs[0].dataset.agent);
+      }
+      // A reader who has chosen an agent before has done the setup; fold it away for them.
+      if (savedAgent) for (const fold of document.querySelectorAll("[data-setup-once]")) fold.open = false;
+
+      // Expand all / Collapse all: the label follows the folds, including ones opened by hand.
+      for (const button of document.querySelectorAll("[data-fold-toggle]")) {
+        const list = document.getElementById(button.getAttribute("aria-controls"));
+        if (!list) continue;
+        const folds = () => [...list.querySelectorAll("details")];
+        const sync = () => {
+          const all = folds().every((d) => d.open);
+          button.textContent = all ? button.dataset.collapse : button.dataset.expand;
+          button.setAttribute("aria-expanded", String(all));
+        };
+        button.addEventListener("click", () => {
+          const open = !folds().every((d) => d.open);
+          for (const d of folds()) d.open = open;
+          sync();
+        });
+        list.addEventListener("toggle", sync, true);
+      }
+
+      // A link to a folded step (#step-3) opens it.
+      const openTarget = () => {
+        const target = hashTarget();
+        const fold = target && target.id.startsWith("step-") && target.querySelector("details");
+        if (fold) fold.open = true;
+        const setup = target && target.closest("[data-setup-once]");
+        if (setup) setup.open = true;
+      };
+      openTarget();
+      scrollToHash();
+      window.addEventListener("hashchange", () => {
+        runFromHash();
+        openTarget();
+        scrollToHash();
+      });
+    </script>
+  </body>
+</html>

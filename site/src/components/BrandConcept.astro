@@ -1,0 +1,53 @@
+---
+import { asset } from "@site/i18n";
+import "../styles/brand-study-fonts.css";
+
+interface Props { variant: "inline" | "stacked"; }
+const { variant } = Astro.props;
+---
+
+<span class:list={["brand-concept", variant]} role="img" aria-label="Metix AI Platform Casebook">
+  <img src={asset("brand/metix-logo.svg")} alt="" width="129" height="24" />
+  <span class="divider" aria-hidden="true"></span>
+  <span class="names" aria-hidden="true">
+    <span class="platform">Platform</span>
+    <span class="section-divider"></span>
+    <span class="casebook">Casebook</span>
+  </span>
+</span>
+
+<style>
+  .brand-concept {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 20px;
+    color: #100d35;
+    white-space: nowrap;
+    font-family: "Space Grotesk", sans-serif;
+    font-synthesis: none;
+    font-kerning: normal;
+  }
+  img { display: block; width: 129px; height: 24px; flex-shrink: 0; }
+  .divider { height: 18px; width: 1px; background: rgb(16 13 53 / 16%); flex-shrink: 0; }
+  .names { display: flex; align-items: center; gap: 13px; }
+  .platform, .casebook { font-size: 17px; font-weight: 500; letter-spacing: -.035em; line-height: 24px; }
+  .inline .platform { color: #5a5671; }
+  .inline .casebook { font-weight: 600; }
+  .section-divider { width: 1px; height: 14px; background: rgb(16 13 53 / 24%); transform: rotate(20deg); flex-shrink: 0; }
+  .stacked .divider { height: 28px; }
+  .stacked .names { align-items: flex-start; flex-direction: column; gap: 1px; padding-top: 1px; }
+  .stacked .platform { font-size: 8px; line-height: 11px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: #686078; padding-left: 1px; }
+  .stacked .casebook { font-family: "Instrument Serif", Georgia, serif; font-size: 29px; line-height: 27px; font-weight: 400; letter-spacing: -.025em; }
+  .stacked .section-divider { display: none; }
+  @container brand-sample (max-width: 400px) {
+    .brand-concept { gap: 16px; }
+    .inline .names { gap: 10px; }
+    .inline .platform, .inline .casebook { font-size: 15px; }
+  }
+  @container brand-sample (max-width: 315px) {
+    .brand-concept { gap: 12px; }
+    .inline .names { gap: 7px; }
+    .inline .platform, .inline .casebook { font-size: 13px; letter-spacing: -.025em; }
+  }
+</style>

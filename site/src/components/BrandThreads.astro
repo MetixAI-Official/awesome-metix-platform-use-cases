@@ -1,0 +1,12 @@
+---
+/** Decorative intersecting paths, separate from the official logo artwork. */
+interface Props { class?: string }
+const { class: className } = Astro.props;
+---
+<svg class:list={["brand-threads", className]} viewBox="0 0 320 320" fill="none" aria-hidden="true" focusable="false">
+  <g stroke="currentColor" stroke-width="1.2">
+    <path d="M20 280 160 140 300 280M20 240 160 100 300 240M20 200 160 60 300 200M20 160 160 20 300 160" />
+    <path d="M20 40 160 180 300 40M20 80 160 220 300 80M20 120 160 260 300 120M20 160 160 300 300 160" />
+  </g>
+  <path d="m160 140 20 20-20 20-20-20z" fill="currentColor" />
+</svg>

@@ -1,0 +1,29 @@
+---
+import { asset } from "@site/i18n";
+interface Props { size?: "large" | "regular" | "compact" }
+const { size = "regular" } = Astro.props;
+---
+<span class:list={["platform-signature", size]} role="img" aria-label="Metix AI Platform">
+  <img src={asset("brand/metix-logo.svg")} alt="" width="129" height="24" />
+  <span class="signature-divider" aria-hidden="true"></span>
+  <span class="signature-label" aria-hidden="true">Platform</span>
+</span>
+<style>
+  .platform-signature { display: inline-flex; align-items: center; gap: 20px; white-space: nowrap; }
+  img { display: block; flex-shrink: 0; width: 129px; height: 24px; }
+  .signature-divider { flex-shrink: 0; width: 1px; height: 24px; background: #d9dce5; }
+  .signature-label { color: #62647d; font: 450 14px/1 "Geist Mono Variable", monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .large { gap: 28px; }
+  .large img { width: 172px; height: 32px; }
+  .large .signature-divider { height: 28px; }
+  .large .signature-label { font-size: 18px; }
+  .compact { gap: 8px; }
+  .compact .signature-divider { height: 20px; }
+  .compact .signature-label { font-size: 11px; letter-spacing: .08em; }
+  @media (max-width: 620px) {
+    .large { gap: 20px; }
+    .large img { width: 129px; height: 24px; }
+    .large .signature-divider { height: 24px; }
+    .large .signature-label { font-size: 14px; }
+  }
+</style>
