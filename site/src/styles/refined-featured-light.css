@@ -1,0 +1,21 @@
+/* A lighter finish for the existing optimized edition, preserving its layout. */
+html[data-design="refined"][data-edition="refined"] {
+  .featured-editorial .report-band { border-color: #d8e8ee; background: radial-gradient(ellipse at 95% 0%,#dff4fb,transparent 60%),radial-gradient(ellipse at 0% 100%,#e9edfdb3,transparent 60%),#fafffe; box-shadow: 0 10px 28px -24px #45677845; }
+  .featured-editorial .report-band::before { display: none; }
+  .featured-editorial .report-band .rb-meta { background: #ffffffad; border-color: #d7eae7; color: #3c7580; }
+  .featured-editorial .report-band h3 { color: #213d54; }
+  .featured-editorial .report-band .rb-dek { color: #526b80; }
+  .featured-editorial .report-band .rb-cta { color: #24545c; background: linear-gradient(110deg,#d5f5e9,#e0f3fc); border-color: #c4e8dd; box-shadow: none; }
+  .featured-editorial .rb-highlights { background: #ffffffb3; border-color: #e0eaf1; box-shadow: none; }
+  .featured-editorial .rb-highlights dt { background: linear-gradient(105deg,#12828c,#326bbb); background-clip: text; }
+  .featured-editorial .rb-highlights dd { color: #516981; }
+  .featured-editorial > li:nth-child(n) .card { --f-ink: #23415a; --f-ink-2: #52768c; border-color: #d6e6ed; background: radial-gradient(ellipse at 100% 0%,#e3f5fc,transparent 70%),#f6fcfb; box-shadow: 0 10px 28px -24px #45677845; }
+  .featured-editorial > li:nth-child(3) .card { background: linear-gradient(125deg,#edfaf5,#f3f9ff); }
+  .featured-editorial > li:nth-child(4) .card { background: linear-gradient(125deg,#f2f2fd,#edf7ff); }
+  .featured-editorial .card::before { display: none; }
+  .featured-editorial .card .cf-meta > span:last-child { color: #52768c; border-color: #d9e7ed; background: #ffffffb3; }
+  .featured-editorial .card .cf-body { background: #ffffffba; border-color: transparent; box-shadow: none; }
+  .featured-editorial .card .big-number { color: #24649a; background: none; -webkit-text-fill-color: currentColor; }
+  .featured-editorial .card .cf-stub { background: linear-gradient(105deg,#effaf5,#f3f7ff); border-color: #cadce5; }
+  .featured-editorial .card-link:hover .card, .featured-editorial .report-band:hover { border-color: #afd4e5; box-shadow: 0 12px 30px -23px #497c9d55; }
+}

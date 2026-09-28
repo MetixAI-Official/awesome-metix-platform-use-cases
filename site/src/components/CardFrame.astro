@@ -18,9 +18,10 @@ interface Props {
   title?: string;
   /** Circular navigation cue for the studio preview only. */
   arrow?: boolean;
+  artwork?: boolean;
 }
 
-const { lang, entry, receipt, index, color, title, arrow = false } = Astro.props;
+const { lang, entry, receipt, index, color, title, arrow = false, artwork = false } = Astro.props;
 const t = ui[lang];
 const label = `${t.formats.card} ${String(index).padStart(2, "0")}`;
 ---
@@ -33,6 +34,7 @@ const label = `${t.formats.card} ${String(index).padStart(2, "0")}`;
   </p>
   <h3 class="cf-title" set:html={titleHtml(title ?? entry.title[lang], lang)} />
   <div class="cf-body"><slot /></div>
+  {artwork && <div class={`edition-art edition-art-${index}`} aria-hidden="true"><i /><i /></div>}
   <p class="cf-stub">
     {receipt && <span>{t.toRerun(number(lang, receipt.credits))}</span>}
     {entry.snapshot && <span>{isoDate(entry.snapshot)}</span>}

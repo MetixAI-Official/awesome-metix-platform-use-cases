@@ -8,8 +8,10 @@ import "@site/styles/shell.css";
 import "@site/styles/refined-home.css";
 import "@site/styles/refined-featured.css";
 import "@site/styles/studio-home.css";
+import "@site/styles/explorations.css";
+import "@site/styles/refined-featured-light.css";
+import "@site/styles/refined-unified.css";
 import PlatformSignature from "@site/components/PlatformSignature.astro";
-import PlatformLockup from "@site/components/PlatformLockup.astro";
 import { REPO, asset, href, ui, type Lang } from "@site/i18n";
 
 interface Props {
@@ -18,11 +20,11 @@ interface Props {
   path: string;
   title?: string;
   description?: string;
-  edition?: "refined" | "studio";
+  edition?: "refined" | "studio" | "air" | "spectrum";
 }
 
 const { lang, path, title, description, edition = "refined" } = Astro.props;
-const previewEdition = edition === "studio" ? "studio" : "optimized";
+const previewEdition = edition === "refined" ? "optimized" : edition;
 const t = ui[lang];
 const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.casebook}, ${t.siteName}`;
 ---
@@ -70,7 +72,7 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
 
     <footer class="site-footer">
       <div class="wrap">
-        <p class="footer-brand" role="img" aria-label="Metix AI Platform"><PlatformLockup /></p>
+        <p class="footer-brand"><PlatformSignature /></p>
         <nav class="links" aria-label="Metix AI Platform">
           <a href="https://platform.metix.ai">Metix AI Platform</a>
           <a href="https://platform.metix.ai/docs">{t.footerDocs}</a>

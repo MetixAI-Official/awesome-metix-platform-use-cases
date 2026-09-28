@@ -1,6 +1,6 @@
 /* Studio exploration: quiet surfaces, precise data, and Metix-blue accents.
    Every rule is scoped to the new preview; the saved brand edition is unchanged. */
-html[data-design="refined"][data-edition="studio"] {
+html[data-design="refined"]:is([data-edition="studio"], [data-edition="air"], [data-edition="spectrum"]) {
   --ground: #fff;
   --ink: #202a39;
   --ink-2: #526073;
@@ -122,7 +122,7 @@ html[data-design="refined"][data-edition="studio"] {
   .site-footer { background: #f6f8fb; border-color: #e3e8ef; }
 }
 @media (max-width: 1099px) {
-  html[data-design="refined"][data-edition="studio"] {
+  html[data-design="refined"]:is([data-edition="studio"], [data-edition="air"], [data-edition="spectrum"]) {
     .featured-editorial { grid-template-columns: repeat(2,minmax(0,1fr)); }
     .featured-editorial > li:nth-child(n) { grid-column: auto; }
     .featured-editorial > li.featured-report { grid-column: 1 / -1; }
@@ -135,7 +135,7 @@ html[data-design="refined"][data-edition="studio"] {
   }
 }
 @media (max-width: 759px) {
-  html[data-design="refined"][data-edition="studio"] {
+  html[data-design="refined"]:is([data-edition="studio"], [data-edition="air"], [data-edition="spectrum"]) {
     .site-header .bar { min-height: 64px; }
     .masthead { padding-top: 42px; }
     .mast-title { font-size: 18.5cqi; margin-top: 24px; }
@@ -167,7 +167,7 @@ html[data-design="refined"][data-edition="studio"] {
   }
 }
 @media (prefers-reduced-motion: no-preference) and (hover: hover) {
-  html[data-design="refined"][data-edition="studio"] {
+  html[data-design="refined"]:is([data-edition="studio"], [data-edition="air"], [data-edition="spectrum"]) {
     .card-link:hover .studio-open, .report-band:hover .studio-open { transform: rotate(6deg); }
   }
 }

@@ -1,0 +1,35 @@
+/* The same navy, mist surfaces and brand accents used by the Platform home. */
+html[data-design="refined"][data-edition="refined"] {
+  --ground: #f6f8fb;
+  --ink: #100d35;
+  --ink-2: #4d586c;
+  --ink-3: #657086;
+  --line: #e1e6ef;
+  .site-header { background: #ffffffed; background-image: none; border-color: var(--line); box-shadow: none; }
+  .site-header .bar { min-height: 76px; }
+  .lang-switch { background: #f3f5f8; border-color: var(--line); }
+  .header-actions .pill, .mast-actions .pill { background: #100d35; color: #fff; border: 1px solid #100d35; box-shadow: none; }
+  .header-actions .pill:hover, .mast-actions .pill:hover { background: #2b2948; border-color: #2b2948; }
+  .masthead > .eyebrow { color: #657086; }
+  .mast-stats { background: #fff; border-color: var(--line); border-radius: 20px; box-shadow: 0 8px 24px -20px #100d3520; }
+  .mast-stats dt { color: #100d35; font-weight: 500; }
+  .mast-stats div:first-child { border-color: var(--line); }
+  .shelf-head { border-color: var(--line); }
+  .shelf-head h2 { font-weight: 600; }
+  .featured-editorial .report-band { background: radial-gradient(ellipse at 100% 0%,#eaf5f8,transparent 65%),#fff; border-color: var(--line); border-radius: 20px; }
+  .featured-editorial .report-band h3, .featured-editorial .card .cf-title { color: #100d35; font-weight: 600; }
+  .featured-editorial .rb-highlights { background: #f6f8fb; border-color: var(--line); }
+  .featured-editorial .rb-highlights dt { color: #3e5c90; background: none; -webkit-text-fill-color: currentColor; }
+  .featured-editorial > li:nth-child(n) .card { background: linear-gradient(150deg,#f3f8fa,#fff 65%); border-color: var(--line); border-radius: 20px; }
+  .featured-editorial .card .big-number { color: #263b61; font-weight: 500; }
+  .featured-editorial .card .cf-body { background: #fff; }
+  .featured-editorial .card .cf-stub { background: #f6f8fb; border-color: #dbe2ec; }
+  .case-index { background: #fff; border: 1px solid var(--line); border-radius: 20px; }
+  .tb-seg input:checked + span { background: #100d35; }
+  .make-own, .start { background: #f0f4f8; }
+  .start .sc-cta { background: #100d35; }
+  .site-footer { background: #f6f8fb; border-color: var(--line); }
+}
+@media (max-width: 759px) {
+  html[data-design="refined"][data-edition="refined"] .site-header .bar { min-height: 64px; }
+}

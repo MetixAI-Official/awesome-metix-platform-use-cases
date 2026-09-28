@@ -1,0 +1,8 @@
+---
+import RefinedCatalog from "@site/components/RefinedCatalog.astro";
+export function getStaticPaths() {
+  return ["en", "zh"].map(lang => ({ params: { lang } }));
+}
+const lang = Astro.params.lang === "zh" ? "zh" : "en";
+---
+<RefinedCatalog lang={lang} edition="air" />

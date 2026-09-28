@@ -22,10 +22,17 @@ const openjobsPreview = "http://127.0.0.1:3000/";
         <button data-mode-button="all" aria-pressed="false">全部项目</button>
         <button data-mode-button="unified" aria-pressed="false">统一风格版</button>
         <button data-mode-button="studio" aria-pressed="false">探索新版</button>
+        <select id="exploration" aria-label="新设计方案">
+          <option value="">更多设计方案</option>
+          <option value="air">A · 清透轻盈</option>
+          <option value="spectrum">B · 品牌光谱</option>
+          <option value="directions">A / B 并排对比</option>
+        </select>
       </div>
       <div class="review-options">
         <label><span class="sr-only">预览尺寸</span><select id="device"><option value="desktop">桌面 · 1280</option><option value="mobile">手机 · 375</option></select></label>
         <label class="casebook-language"><span class="sr-only">页面语言</span><select id="language"><option value="en">English</option><option value="zh">中文</option></select></label>
+        <a class="open-link" id="open-left" href={`${base}design-preview/air/en/`} target="_blank" rel="noopener" hidden>A 独立预览 ↗</a>
         <a class="open-link" id="open-preview" href={`${base}design-preview/optimized/en/`} target="_blank" rel="noopener">独立预览 ↗</a>
       </div>
     </header>
@@ -42,7 +49,7 @@ const openjobsPreview = "http://127.0.0.1:3000/";
       project.value = params.get("project") === "openjobs" ? "openjobs" : "casebook";
       const openjobsUrl = document.body.dataset.openjobsUrl!;
       let mode = params.get("mode") || (matchMedia("(max-width: 760px)").matches ? "optimized" : "split");
-      if (!["original", "optimized", "split", "all", "unified", "studio"].includes(mode)) mode = "split";
+      if (!["original", "optimized", "split", "all", "unified", "studio", "air", "spectrum", "directions"].includes(mode)) mode = "split";
       if (mode === "all" || mode === "studio") project.value = "casebook";
       const device = document.querySelector<HTMLSelectElement>("#device")!;
       const language = document.querySelector<HTMLSelectElement>("#language")!;
@@ -53,27 +60,48 @@ const openjobsPreview = "http://127.0.0.1:3000/";
       const openjobs = document.querySelector<HTMLIFrameElement>("#openjobs")!;
       const casebookFrames = [original, optimized];
       const frames = [...casebookFrames, openjobs];
-      const urls = () => ({
+      const exploration = document.querySelector<HTMLSelectElement>("#exploration")!;
+      const directions: Record<string, { left: string; right: string; label: string; caption: string }> = {
+        air: { left: "optimized", right: "air", label: "A · 清透轻盈", caption: "白色面板 · 薄荷点缀 · 步骤时间线" },
+        spectrum: { left: "optimized", right: "spectrum", label: "B · 品牌光谱", caption: "光谱首屏 · 深蓝展区 · 白色案例卡" },
+        directions: { left: "air", right: "spectrum", label: "B · 品牌光谱", caption: "光谱首屏 · 深蓝展区 · 白色案例卡" },
+      };
+      const previewUrl = (edition: string) => `${base}design-preview/${edition}/${language.value}/`;
+      const urls = () => directions[mode] ? {
+        original: previewUrl(directions[mode].left), optimized: previewUrl(directions[mode].right),
+      } : ({
         original: mode === "studio" ? `${base}design-preview/optimized/${language.value}/` : base + (language.value === "zh" ? "zh/" : ""),
         optimized: `${base}design-preview/${mode === "studio" ? "studio" : "optimized"}/${language.value}/`,
       });
       const update = () => {
-        if (mode === "studio") project.value = "casebook";
+        if (mode === "studio" || directions[mode]) project.value = "casebook";
         const isOpenjobs = project.value === "openjobs" && mode !== "all" && mode !== "unified";
         const isAll = mode === "all";
         const isUnified = mode === "unified";
         const isStudio = mode === "studio";
+        const direction = directions[mode];
+        exploration.value = direction ? mode : "";
         document.body.dataset.project = project.value;
         document.body.dataset.mode = mode;
         document.querySelector(".review-icon")!.textContent = isOpenjobs ? "M" : isAll ? "3" : "C";
-        document.querySelector("#review-subtitle")!.textContent = isStudio ? "已保存版本 × 精密数据新版" : isOpenjobs ? "本地项目预览" : isAll ? "三个项目视图 · 统一品牌风格" : isUnified ? "共用字体与表面 · Platform 延展 Metix 品牌色" : "首页设计对比";
+        document.querySelector("#review-subtitle")!.textContent = isStudio ? "品牌优化版 × 精密数据新版" : isOpenjobs ? "本地项目预览" : isAll ? "三个项目视图 · 统一品牌风格" : isUnified ? "共用字体与表面 · Platform 延展 Metix 品牌色" : "首页设计对比";
         document.title = isStudio ? "Casebook · 探索新版设计" : isOpenjobs ? "Metix AI Platform · 本地项目预览" : isAll ? "全部项目 · 统一预览" : isUnified ? "Casebook × Platform · 统一风格预览" : "Casebook · 原版与优化版对比";
-        document.querySelector("#original-label")!.textContent = isStudio ? "已保存 · 品牌优化版" : "原版";
+        document.querySelector("#original-label")!.textContent = isStudio ? "品牌优化版" : "原版";
         document.querySelector("#original-caption")!.textContent = isStudio ? "渐变卡片 · 任务清单" : "当前页面";
         document.querySelector("#optimized-label")!.textContent = isStudio ? "全新设计 · 精密数据" : isUnified ? "Casebook · 统一风格" : "优化版";
         document.querySelector("#optimized-caption")!.textContent = isStudio ? "浅灰白 · 点阵细节 · 模块网格" : isUnified ? "保留案例内容 · 共用字体与中性表面" : "编辑式排版 · 品牌配色 · 原版字体";
-        original.title = isStudio ? "Casebook 已保存优化版" : "Casebook 原版首页";
+        original.title = isStudio ? "Casebook 品牌优化版" : "Casebook 原版首页";
         optimized.title = isStudio ? "Casebook 探索新版" : "Casebook 优化版首页";
+        if (direction) {
+          document.querySelector("#review-subtitle")!.textContent = mode === "directions" ? "两种新方向 · 相同内容" : "品牌优化版 × 新设计方案";
+          document.title = `Casebook · ${mode === "directions" ? "A / B 设计对比" : direction.label}`;
+          document.querySelector("#original-label")!.textContent = mode === "directions" ? "A · 清透轻盈" : "品牌优化版";
+          document.querySelector("#original-caption")!.textContent = mode === "directions" ? directions.air.caption : "简化配色 · 清晰数据";
+          document.querySelector("#optimized-label")!.textContent = direction.label;
+          document.querySelector("#optimized-caption")!.textContent = direction.caption;
+          original.title = mode === "directions" ? "Casebook A 清透轻盈" : "Casebook 品牌优化版";
+          optimized.title = `Casebook ${direction.label}`;
+        }
         const casebookUrls = urls();
         for (const frame of casebookFrames) {
           const url = casebookUrls[frame.id as keyof typeof casebookUrls];
@@ -85,7 +113,10 @@ const openjobsPreview = "http://127.0.0.1:3000/";
         document.body.dataset.device = device.value;
         document.querySelectorAll<HTMLButtonElement>("[data-mode-button]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.modeButton === mode)));
         document.querySelector<HTMLAnchorElement>("#open-preview")!.href = isOpenjobs || isUnified ? openjobsUrl : mode === "original" ? urls().original : urls().optimized;
-        document.querySelector<HTMLAnchorElement>("#open-preview")!.textContent = isUnified ? "Platform 独立预览 ↗" : "独立预览 ↗";
+        document.querySelector<HTMLAnchorElement>("#open-preview")!.textContent = isUnified ? "Platform 独立预览 ↗" : mode === "directions" ? "B 独立预览 ↗" : "独立预览 ↗";
+        const openLeft = document.querySelector<HTMLAnchorElement>("#open-left")!;
+        openLeft.hidden = mode !== "directions";
+        openLeft.href = previewUrl("air");
         const next = new URLSearchParams({ mode, lang: language.value, device: device.value });
         if (isOpenjobs) next.set("project", "openjobs");
         history.replaceState(null, "", `${location.pathname}?${next}`);
@@ -113,8 +144,9 @@ const openjobsPreview = "http://127.0.0.1:3000/";
         update();
       };
       document.querySelectorAll<HTMLButtonElement>("[data-mode-button]").forEach(button => button.addEventListener("click", () => { mode = button.dataset.modeButton!; update(); }));
+      exploration.addEventListener("change", () => { mode = exploration.value || "split"; update(); });
       project.addEventListener("change", () => {
-        if (mode === "studio" && project.value === "openjobs") mode = "original";
+        if ((mode === "studio" || directions[mode]) && project.value === "openjobs") mode = "original";
         update();
       });
       device.addEventListener("change", update);
@@ -139,8 +171,8 @@ const openjobsPreview = "http://127.0.0.1:3000/";
               if (!link || (lang !== "en" && lang !== "zh")) return;
               const target = new URL(link.href);
               const home = base + (lang === "zh" ? "zh/" : "");
-              const refined = `${base}design-preview/optimized/${lang}/`;
-              if (target.origin !== location.origin || ![home, refined].includes(target.pathname)) return;
+              const previews = ["optimized", "studio", "air", "spectrum"].map(edition => `${base}design-preview/${edition}/${lang}/`);
+              if (target.origin !== location.origin || ![home, ...previews].includes(target.pathname)) return;
               event.preventDefault();
               language.value = lang;
               loadLanguage();
@@ -175,6 +207,7 @@ const openjobsPreview = "http://127.0.0.1:3000/";
   .review-title div > span { color: #7b768d; font-size: 11px; }
   .view-modes { display: flex; gap: 3px; background: #f0eff5; border: 1px solid #e9e7f0; padding: 3px; border-radius: 8px; }
   .view-modes button { border: 0; border-radius: 5px; padding: 7px 15px; color: #787189; background: transparent; white-space: nowrap; }
+  #exploration { border: 1px solid #d9d5ed; border-radius: 5px; background: #fff; color: #4d4188; padding: 6px 9px; max-width: 165px; }
   .view-modes button[aria-pressed="true"] { background: #fff; color: #292238; box-shadow: 0 1px 4px #1d16421a; }
   .review-options { display: flex; align-items: center; gap: 10px; }
   .review-options select { border: 1px solid #e3e1eb; border-radius: 6px; padding: 7px 9px; background: #fff; font-size: 11px; color: #5b536c; }
