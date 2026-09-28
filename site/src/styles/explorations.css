@@ -10,8 +10,8 @@ html[data-design="refined"][data-edition="air"] {
   .masthead { grid-template-columns: minmax(0,1.65fr) minmax(0,.75fr); grid-template-areas: "eyebrow stats" "title stats" "lede stats" "actions stats"; justify-items: start; gap: 0 64px; text-align: left; padding-block: 76px 68px; background: none; }
   .masthead::before { display: none; }
   .masthead > .eyebrow { color: #4b6090; background: #fff; border-color: #dce5f4; }
-  .mast-title { font-size: clamp(72px,8.8vw,110px); font-weight: 500; margin-top: 24px; color: #100d35; }
-  .mast-title em { color: #346de0; font-weight: 500; background: var(--air-flow); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .mast-title { font-size: clamp(72px,8.8vw,110px); font-weight: 500; margin-top: 24px; background: var(--air-flow); background-clip: text; -webkit-background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+  .mast-title em { color: inherit; font-weight: inherit; background: none; -webkit-text-fill-color: inherit; }
   .mast-lede { max-width: 63ch; color: #5d6e69; font-size: 16px; }
   .mast-actions { justify-content: flex-start; }
   .mast-actions .pill { background: linear-gradient(110deg,#3d72df,#5b54ef); box-shadow: 0 5px 15px -9px #5157cb88; }
