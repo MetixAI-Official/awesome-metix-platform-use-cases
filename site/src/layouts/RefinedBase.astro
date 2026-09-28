@@ -7,6 +7,7 @@ import "@fontsource-variable/geist-mono";
 import "@site/styles/shell.css";
 import "@site/styles/refined-home.css";
 import "@site/styles/refined-featured.css";
+import "@site/styles/studio-home.css";
 import PlatformSignature from "@site/components/PlatformSignature.astro";
 import PlatformLockup from "@site/components/PlatformLockup.astro";
 import { REPO, asset, href, ui, type Lang } from "@site/i18n";
@@ -17,15 +18,17 @@ interface Props {
   path: string;
   title?: string;
   description?: string;
+  edition?: "refined" | "studio";
 }
 
-const { lang, path, title, description } = Astro.props;
+const { lang, path, title, description, edition = "refined" } = Astro.props;
+const previewEdition = edition === "studio" ? "studio" : "optimized";
 const t = ui[lang];
 const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.casebook}, ${t.siteName}`;
 ---
 
 <!doctype html>
-<html lang={t.htmlLang} class="no-js" data-design="refined">
+<html lang={t.htmlLang} class="no-js" data-design="refined" data-edition={edition}>
   <head>
     <meta charset="utf-8" />
     <link rel="preload" href={soraLatin} as="font" type="font/woff2" crossorigin />
@@ -44,14 +47,14 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
     <a class="skip-link" href="#main">{t.skipLink}</a>
     <header class="site-header">
       <div class="wrap bar">
-        <a class="brand" href={asset(`design-preview/optimized/${lang}/`)} aria-label={`Metix AI Platform ${t.casebook}`}>
+        <a class="brand" href={asset(`design-preview/${previewEdition}/${lang}/`)} aria-label={`Metix AI Platform ${t.casebook}`}>
           <span class="refined-signature"><PlatformSignature /></span>
           <span class="refined-mobile-brand"><PlatformSignature size="compact" /></span>
         </a>
         <div class="header-actions">
           <div class="lang-switch" role="group" aria-label={t.langLabel}>
-            <a href={asset("design-preview/optimized/en/")} hreflang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>EN</a>
-            <a href={asset("design-preview/optimized/zh/")} hreflang="zh" lang="zh-CN" aria-current={lang === "zh" ? "true" : undefined}>中文</a>
+            <a href={asset(`design-preview/${previewEdition}/en/`)} hreflang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>EN</a>
+            <a href={asset(`design-preview/${previewEdition}/zh/`)} hreflang="zh" lang="zh-CN" aria-current={lang === "zh" ? "true" : undefined}>中文</a>
           </div>
           <a class="gh-link" href={REPO}>{t.navGithub}</a>
           <a class="pill" href="https://platform.metix.ai/api-keys">

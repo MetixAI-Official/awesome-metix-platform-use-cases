@@ -37,7 +37,7 @@ const highlightedCode = isShell
               : "syntax-flag";
       return `<span class="${className}">${token}</span>`;
     })
-  : undefined;
+  : escapeHtml(code);
 ---
 
 <div class="code-block" data-copy-root>
@@ -47,5 +47,5 @@ const highlightedCode = isShell
       {t.copy}
     </button>
   </div>
-  <pre class:list={["cb-code", { wrap }]} set:html={highlightedCode}>{!isShell && code}</pre>
+  <pre class:list={["cb-code", { wrap }]} set:html={highlightedCode} />
 </div>

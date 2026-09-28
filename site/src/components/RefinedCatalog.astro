@@ -17,9 +17,10 @@ import { FREE_CREDITS, REPO, dollars, href, isoDate, number, titleHtml, ui, type
 
 interface Props {
   lang: Lang;
+  edition?: "refined" | "studio";
 }
 
-const { lang } = Astro.props;
+const { lang, edition = "refined" } = Astro.props;
 const t = ui[lang];
 const all = await getCollection("cases");
 const published = all.filter((c) => c.data.status === "published").sort(byCatalog);
@@ -54,10 +55,10 @@ const formatCount = (f: string) => rows.filter((r) => !f || r.data.format === f)
 const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d as "jobs")).length;
 ---
 
-<Base lang={lang} path="">
+<Base lang={lang} path="" edition={edition}>
   <section class="wrap masthead" aria-labelledby="mast-title">
     <p class="eyebrow as-written">Metix AI Platform</p>
-    <h1 class="mast-title" id="mast-title"><span>{t.casebook}</span></h1>
+    <h1 class="mast-title" id="mast-title">{edition === "studio" ? <span>Case<em>book</em></span> : <span>{t.casebook}</span>}</h1>
     <dl class="mast-stats">
       <div><dt>{published.length}</dt><dd>{t.home.statCases}</dd></div>
       <div><dt>{cheapest}</dt><dd>{t.home.statCheapest}</dd></div>

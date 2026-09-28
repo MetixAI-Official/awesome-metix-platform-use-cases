@@ -21,6 +21,7 @@ const openjobsPreview = "http://127.0.0.1:3000/";
         <button data-mode-button="split" aria-pressed="true">并排对比</button>
         <button data-mode-button="all" aria-pressed="false">全部项目</button>
         <button data-mode-button="unified" aria-pressed="false">统一风格版</button>
+        <button data-mode-button="studio" aria-pressed="false">云感新版</button>
       </div>
       <div class="review-options">
         <label><span class="sr-only">预览尺寸</span><select id="device"><option value="desktop">桌面 · 1280</option><option value="mobile">手机 · 375</option></select></label>
@@ -30,7 +31,7 @@ const openjobsPreview = "http://127.0.0.1:3000/";
     </header>
     <nav class="section-nav" aria-label="对照页面区域"><span>定位区域</span><button data-section="top">首屏</button><button data-section="featured">精选案例</button><button data-section="index">全部案例</button><button data-section="start">使用指南</button><button data-section="next">即将发布</button><button data-section="footer">页脚</button><a class="review-hint" href={asset("design-preview/brand-pairing/")} target="_blank" rel="noopener">Logo 搭配预览 ↗</a></nav>
     <main class="panes">
-      <section class="pane original-pane" aria-label="原版预览"><header class="pane-label"><strong><i></i> 原版</strong><span>当前页面</span><span class="scale-label" data-scale="original"></span></header><div class="frame-viewport"><iframe id="original" title="Casebook 原版首页" src={base}></iframe></div></section>
+      <section class="pane original-pane" aria-label="对照版预览"><header class="pane-label"><strong><i></i> <span id="original-label">原版</span></strong><span id="original-caption">当前页面</span><span class="scale-label" data-scale="original"></span></header><div class="frame-viewport"><iframe id="original" title="Casebook 原版首页" src={base}></iframe></div></section>
       <section class="pane optimized-pane" aria-label="优化版预览"><header class="pane-label"><strong><i></i> <span id="optimized-label">优化版</span></strong><span id="optimized-caption">编辑式排版 · 品牌配色 · 原版字体</span><span class="scale-label" data-scale="optimized"></span></header><div class="frame-viewport"><iframe id="optimized" title="Casebook 优化版首页" src={`${base}design-preview/optimized/en/`}></iframe></div></section>
       <section class="pane openjobs-pane" aria-label="Metix AI Platform 项目预览"><header class="pane-label"><strong><i></i> <span id="platform-label">Metix AI Platform</span></strong><span id="platform-caption">本地项目预览</span><span class="scale-label" data-scale="openjobs"></span></header><div class="frame-viewport"><iframe id="openjobs" title="Metix AI Platform 本地预览" allow="clipboard-write"></iframe></div></section>
     </main>
@@ -41,8 +42,8 @@ const openjobsPreview = "http://127.0.0.1:3000/";
       project.value = params.get("project") === "openjobs" ? "openjobs" : "casebook";
       const openjobsUrl = document.body.dataset.openjobsUrl!;
       let mode = params.get("mode") || (matchMedia("(max-width: 760px)").matches ? "optimized" : "split");
-      if (!["original", "optimized", "split", "all", "unified"].includes(mode)) mode = "split";
-      if (mode === "all") project.value = "casebook";
+      if (!["original", "optimized", "split", "all", "unified", "studio"].includes(mode)) mode = "split";
+      if (mode === "all" || mode === "studio") project.value = "casebook";
       const device = document.querySelector<HTMLSelectElement>("#device")!;
       const language = document.querySelector<HTMLSelectElement>("#language")!;
       device.value = params.get("device") === "mobile" ? "mobile" : "desktop";
@@ -52,18 +53,32 @@ const openjobsPreview = "http://127.0.0.1:3000/";
       const openjobs = document.querySelector<HTMLIFrameElement>("#openjobs")!;
       const casebookFrames = [original, optimized];
       const frames = [...casebookFrames, openjobs];
-      const urls = () => ({ original: base + (language.value === "zh" ? "zh/" : ""), optimized: `${base}design-preview/optimized/${language.value}/` });
+      const urls = () => ({
+        original: mode === "studio" ? `${base}design-preview/optimized/${language.value}/` : base + (language.value === "zh" ? "zh/" : ""),
+        optimized: `${base}design-preview/${mode === "studio" ? "studio" : "optimized"}/${language.value}/`,
+      });
       const update = () => {
+        if (mode === "studio") project.value = "casebook";
         const isOpenjobs = project.value === "openjobs" && mode !== "all" && mode !== "unified";
         const isAll = mode === "all";
         const isUnified = mode === "unified";
+        const isStudio = mode === "studio";
         document.body.dataset.project = project.value;
         document.body.dataset.mode = mode;
         document.querySelector(".review-icon")!.textContent = isOpenjobs ? "M" : isAll ? "3" : "C";
-        document.querySelector("#review-subtitle")!.textContent = isOpenjobs ? "本地项目预览" : isAll ? "三个项目视图 · 统一品牌风格" : isUnified ? "共用字体与表面 · Platform 延展 Metix 品牌色" : "首页设计对比";
-        document.title = isOpenjobs ? "Metix AI Platform · 本地项目预览" : isAll ? "全部项目 · 统一预览" : isUnified ? "Casebook × Platform · 统一风格预览" : "Casebook · 原版与优化版对比";
-        document.querySelector("#optimized-label")!.textContent = isUnified ? "Casebook · 统一风格" : "优化版";
-        document.querySelector("#optimized-caption")!.textContent = isUnified ? "保留案例内容 · 共用字体与中性表面" : "编辑式排版 · 品牌配色 · 原版字体";
+        document.querySelector("#review-subtitle")!.textContent = isStudio ? "已保存版本 × 云感编辑新版" : isOpenjobs ? "本地项目预览" : isAll ? "三个项目视图 · 统一品牌风格" : isUnified ? "共用字体与表面 · Platform 延展 Metix 品牌色" : "首页设计对比";
+        document.title = isStudio ? "Casebook · 云感新版设计" : isOpenjobs ? "Metix AI Platform · 本地项目预览" : isAll ? "全部项目 · 统一预览" : isUnified ? "Casebook × Platform · 统一风格预览" : "Casebook · 原版与优化版对比";
+        document.querySelector("#original-label")!.textContent = isStudio ? "已保存 · 品牌优化版" : "原版";
+        document.querySelector("#original-caption")!.textContent = isStudio ? "渐变卡片 · 任务清单" : "当前页面";
+        document.querySelector("#optimized-label")!.textContent = isStudio ? "全新设计 · 云感编辑" : isUnified ? "Casebook · 统一风格" : "优化版";
+        document.querySelector("#optimized-caption")!.textContent = isStudio ? "白色留白 · 雾蓝光感 · 轻盈排版" : isUnified ? "保留案例内容 · 共用字体与中性表面" : "编辑式排版 · 品牌配色 · 原版字体";
+        original.title = isStudio ? "Casebook 已保存优化版" : "Casebook 原版首页";
+        optimized.title = isStudio ? "Casebook 云感新版" : "Casebook 优化版首页";
+        const casebookUrls = urls();
+        for (const frame of casebookFrames) {
+          const url = casebookUrls[frame.id as keyof typeof casebookUrls];
+          if (frame.getAttribute("src") !== url) frame.src = url;
+        }
         document.querySelector("#platform-label")!.textContent = isUnified ? "Platform · 品牌延展" : "Metix AI Platform";
         document.querySelector("#platform-caption")!.textContent = isUnified ? "保留平台内容 · Metix 紫青品牌色" : "本地项目预览";
         if ((isOpenjobs || isAll || isUnified) && !openjobs.getAttribute("src")) openjobs.src = openjobsUrl;
@@ -98,7 +113,10 @@ const openjobsPreview = "http://127.0.0.1:3000/";
         update();
       };
       document.querySelectorAll<HTMLButtonElement>("[data-mode-button]").forEach(button => button.addEventListener("click", () => { mode = button.dataset.modeButton!; update(); }));
-      project.addEventListener("change", update);
+      project.addEventListener("change", () => {
+        if (mode === "studio" && project.value === "openjobs") mode = "original";
+        update();
+      });
       device.addEventListener("change", update);
       language.addEventListener("change", loadLanguage);
       const sections: Record<string, string> = { top: "body", featured: '[aria-labelledby="featured-title"]', index: "#index", start: "#start", next: "#next", footer: ".site-footer" };
