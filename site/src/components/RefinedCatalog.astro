@@ -85,6 +85,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
           href={href(lang, `cases/${featuredReport.data.slug}/`)}
           aria-label={`${t.formats.report}: ${featuredReport.data.title[lang]}`}
         >
+          {edition === "studio" && <span class="studio-open" aria-hidden="true">↗</span>}
           <p class="rb-meta">
             {t.formats.report} · {featuredReport.data.datasets.map((d) => t.datasets[d]).join(" · ")}
             {featuredReport.data.snapshot && ` · ${isoDate(featuredReport.data.snapshot)}`}
@@ -120,7 +121,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
                 href={href(lang, `cases/${data.slug}/`)}
                 aria-label={`${t.formats.card} ${String(position + 1).padStart(2, "0")}: ${data.title[lang]}`}
               >
-                <CardFrame lang={lang} entry={data} title={copy?.title} receipt={receipts[data.slug]} index={position + 1} color={fieldColor(data.datasets, position)}>
+                <CardFrame lang={lang} entry={data} title={copy?.title} arrow={edition === "studio"} receipt={receipts[data.slug]} index={position + 1} color={fieldColor(data.datasets, position)}>
                   <Card lang={lang} section="card" size="compact" entry={data} cardSummary={copy?.summary} cardNote={copy?.note} />
                 </CardFrame>
               </a>

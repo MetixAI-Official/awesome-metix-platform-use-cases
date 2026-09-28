@@ -16,14 +16,17 @@ interface Props {
   color: string;
   /** Optional short headline for editorial previews. */
   title?: string;
+  /** Circular navigation cue for the studio preview only. */
+  arrow?: boolean;
 }
 
-const { lang, entry, receipt, index, color, title } = Astro.props;
+const { lang, entry, receipt, index, color, title, arrow = false } = Astro.props;
 const t = ui[lang];
 const label = `${t.formats.card} ${String(index).padStart(2, "0")}`;
 ---
 
 <article class={`card field-${color}`}>
+  {arrow && <span class="studio-open" aria-hidden="true">↗</span>}
   <p class="cf-meta">
     <span>{label}</span>
     <span>{entry.datasets.map((d) => t.datasets[d]).join(" · ")}</span>

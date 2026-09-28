@@ -21,7 +21,7 @@ const openjobsPreview = "http://127.0.0.1:3000/";
         <button data-mode-button="split" aria-pressed="true">并排对比</button>
         <button data-mode-button="all" aria-pressed="false">全部项目</button>
         <button data-mode-button="unified" aria-pressed="false">统一风格版</button>
-        <button data-mode-button="studio" aria-pressed="false">云感新版</button>
+        <button data-mode-button="studio" aria-pressed="false">探索新版</button>
       </div>
       <div class="review-options">
         <label><span class="sr-only">预览尺寸</span><select id="device"><option value="desktop">桌面 · 1280</option><option value="mobile">手机 · 375</option></select></label>
@@ -66,14 +66,14 @@ const openjobsPreview = "http://127.0.0.1:3000/";
         document.body.dataset.project = project.value;
         document.body.dataset.mode = mode;
         document.querySelector(".review-icon")!.textContent = isOpenjobs ? "M" : isAll ? "3" : "C";
-        document.querySelector("#review-subtitle")!.textContent = isStudio ? "已保存版本 × 云感编辑新版" : isOpenjobs ? "本地项目预览" : isAll ? "三个项目视图 · 统一品牌风格" : isUnified ? "共用字体与表面 · Platform 延展 Metix 品牌色" : "首页设计对比";
-        document.title = isStudio ? "Casebook · 云感新版设计" : isOpenjobs ? "Metix AI Platform · 本地项目预览" : isAll ? "全部项目 · 统一预览" : isUnified ? "Casebook × Platform · 统一风格预览" : "Casebook · 原版与优化版对比";
+        document.querySelector("#review-subtitle")!.textContent = isStudio ? "已保存版本 × 精密数据新版" : isOpenjobs ? "本地项目预览" : isAll ? "三个项目视图 · 统一品牌风格" : isUnified ? "共用字体与表面 · Platform 延展 Metix 品牌色" : "首页设计对比";
+        document.title = isStudio ? "Casebook · 探索新版设计" : isOpenjobs ? "Metix AI Platform · 本地项目预览" : isAll ? "全部项目 · 统一预览" : isUnified ? "Casebook × Platform · 统一风格预览" : "Casebook · 原版与优化版对比";
         document.querySelector("#original-label")!.textContent = isStudio ? "已保存 · 品牌优化版" : "原版";
         document.querySelector("#original-caption")!.textContent = isStudio ? "渐变卡片 · 任务清单" : "当前页面";
-        document.querySelector("#optimized-label")!.textContent = isStudio ? "全新设计 · 云感编辑" : isUnified ? "Casebook · 统一风格" : "优化版";
-        document.querySelector("#optimized-caption")!.textContent = isStudio ? "白色留白 · 雾蓝光感 · 轻盈排版" : isUnified ? "保留案例内容 · 共用字体与中性表面" : "编辑式排版 · 品牌配色 · 原版字体";
+        document.querySelector("#optimized-label")!.textContent = isStudio ? "全新设计 · 精密数据" : isUnified ? "Casebook · 统一风格" : "优化版";
+        document.querySelector("#optimized-caption")!.textContent = isStudio ? "浅灰白 · 点阵细节 · 模块网格" : isUnified ? "保留案例内容 · 共用字体与中性表面" : "编辑式排版 · 品牌配色 · 原版字体";
         original.title = isStudio ? "Casebook 已保存优化版" : "Casebook 原版首页";
-        optimized.title = isStudio ? "Casebook 云感新版" : "Casebook 优化版首页";
+        optimized.title = isStudio ? "Casebook 探索新版" : "Casebook 优化版首页";
         const casebookUrls = urls();
         for (const frame of casebookFrames) {
           const url = casebookUrls[frame.id as keyof typeof casebookUrls];
