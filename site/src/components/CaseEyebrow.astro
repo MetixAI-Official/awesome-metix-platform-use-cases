@@ -1,0 +1,62 @@
+---
+/**
+ * The top of every case page, cards and reports alike: where the reader is, the
+ * EN / 中文 switch, then what kind of case it is, which datasets it reads, and the
+ * date its numbers were taken.
+ *
+ * One component, so a card and a report say this the same way. It sits on whatever
+ * ground the case's hero has (a coloured card field or a report's own band), so its
+ * colours come from the ground's ink: currentColor, and --f-focus where a field sets
+ * one.
+ */
+import { href, longDate, ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  slug: string;
+  format: "card" | "report";
+  datasets: readonly ("people" | "jobs" | "companies")[];
+  snapshot?: Date;
+  /** Shown before the datasets, e.g. "Card 04". Defaults to the format's name. */
+  label?: string;
+}
+
+const { lang, slug, format, datasets, snapshot, label } = Astro.props;
+const t = ui[lang];
+const index = href(lang);
+const section = format === "card" ? t.cardsLabel : t.reportsLabel;
+---
+
+<div class="case-eyebrow">
+  <div class="ce-row">
+    <nav class="ce-crumbs" aria-label={t.crumbs}>
+      <a href={index}>{t.casebook}</a>
+      <svg class="ce-sep" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <a href={`${index}?format=${format}#index`}>{section}</a>
+    </nav>
+    <div class="lang-switch" role="group" aria-label={t.langLabel}>
+      <a href={href("en", slug)} hreflang="en" lang="en" aria-current={lang === "en" ? "true" : undefined}>EN</a>
+      <span class="ls-sep" aria-hidden="true">/</span>
+      <a href={href("zh", slug)} hreflang="zh" lang="zh-CN" aria-current={lang === "zh" ? "true" : undefined}>中文</a>
+    </div>
+  </div>
+  <p class="ce-meta">
+    <span class="ce-kind">{label ?? t.formats[format]}</span>
+    {
+      datasets.map((d) => (
+        <a class="ce-tag" href={`${index}?data=${d}#index`}>
+          {t.datasets[d]}
+        </a>
+      ))
+    }
+    {
+      snapshot && (
+        <span class="ce-date">
+          <time datetime={snapshot.toISOString().slice(0, 10)}>{longDate(lang, snapshot)}</time>
+        </span>
+      )
+    }
+  </p>
+</div>

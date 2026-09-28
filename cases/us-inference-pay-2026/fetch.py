@@ -66,7 +66,7 @@ def main() -> int:
         ),
     )
     write_json(HERE, "receipt.json", platform.receipt())
-    print(stated, "of", us_total, rows, f"{platform.spent()} Credits")
+    print(stated, "of", us_total, rows, f"{platform.spent()} API Credits")
     return 0
 
 

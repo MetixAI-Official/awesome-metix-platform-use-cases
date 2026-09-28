@@ -1,6 +1,6 @@
 # Metix AI Platform use cases
 
-Job-market reports made by an AI agent on the [Metix AI Platform](https://platform.metix.ai): professional profiles, job postings, and companies behind one query API. Every report publishes the queries behind its numbers, what those queries cost in Credits, and the prompt that produced it, so you can check the work, run it again on your own key, and change it to answer your own question.
+Job-market reports made by an AI agent on the [Metix AI Platform](https://platform.metix.ai): professional profiles, job postings, and companies behind one query API. Every report publishes the queries behind its numbers, what those queries cost in API Credits, and the prompt that produced it, so you can check the work, run it again on your own key, and change it to answer your own question.
 
 The cases are published as **Casebook** at [metixai-official.github.io/awesome-metix-platform-use-cases](https://metixai-official.github.io/awesome-metix-platform-use-cases/), in English and in [Chinese](https://metixai-official.github.io/awesome-metix-platform-use-cases/zh/).
 
@@ -8,7 +8,7 @@ The cases are published as **Casebook** at [metixai-official.github.io/awesome-m
 
 Reports are long reads with many figures. Cards are one question, one number, one chart.
 
-| Use case | Format | Data | Credits to rerun |
+| Use case | Format | Data | API Credits to rerun |
 | --- | --- | --- | --- |
 | [77% of people who name Meta's superintelligence lab were already at Meta when it formed](cases/meta-superintelligence-labs-2026/) | Report | People, jobs | 105 |
 | [Software and AI postings have the narrowest entry door of twelve US occupation families](cases/entry-level-postings-by-occupation-2026/) | Report | Jobs | 126 |
@@ -28,7 +28,7 @@ An agent answers the question through the public Platform only: the REST API, th
 
 Each case keeps three things:
 
-- **The prompt** (`PROMPT.md`, `PROMPT.zh.md`): one bootstrap prompt precise enough that an agent reproduces the case from it, with a table of the parameters you are most likely to change and the questions to settle before spending Credits.
+- **The prompt** (`PROMPT.md`, `PROMPT.zh.md`): one bootstrap prompt precise enough that an agent reproduces the case from it, with a table of the parameters you are most likely to change and the questions to settle before spending API Credits.
 - **The replay** (`queries/`, `fetch.py`): the queries the agent settled on, and a standard-library script that reruns them without an agent.
 - **The receipt** (`data/receipt.json`): what the replay cost, taken from the Platform's own balance before and after the run.
 
@@ -52,7 +52,7 @@ export METIX_KEY=metix_xxxxxxxxxxxx
 python3 cases/inference-roles-us-metros-2026/fetch.py
 ```
 
-Create a key at [platform.metix.ai/api-keys](https://platform.metix.ai/api-keys). The free plan starts with 100 Credits and needs no card. You can also put `METIX_KEY` in a `.env` file at the repository root; git ignores it. Field names, operators, limits, and prices are defined by the live contract (`GET /contract`) and the [Platform docs](https://platform.metix.ai/docs); if a case and the contract disagree, the contract wins.
+Create a key at [platform.metix.ai/api-keys](https://platform.metix.ai/api-keys). The free plan starts with 100 API Credits and needs no card. You can also put `METIX_KEY` in a `.env` file at the repository root; git ignores it. Field names, operators, limits, and prices are defined by the live contract (`GET /contract`) and the [Platform docs](https://platform.metix.ai/docs); if a case and the contract disagree, the contract wins.
 
 ## How the repository is organized
 

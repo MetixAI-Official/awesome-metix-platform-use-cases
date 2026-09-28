@@ -20,7 +20,7 @@ Metros are the city lists in [`metros.json`](metros.json). A city on no list cou
 
 ## Method
 
-1. Count worldwide matching postings (`queries/world-total.json`, one Credit).
+1. Count worldwide matching postings (`queries/world-total.json`, one API Credit).
 2. Search for US matching postings (`queries/us-postings.json`), then read each one's title, company, city, and state (`queries/us-postings-detail.json`, 100 per request).
 3. Collapse same-city reposts, group by metro, and count companies.
 
@@ -28,7 +28,7 @@ Metros are the city lists in [`metros.json`](metros.json). A city on no list cou
 
 ## How it was made
 
-An AI agent working through the public REST API built this case. Before writing the replay, it spent 111 Credits exploring: 7 on counts to size the question, and 104 to read every matching US posting once. That read found two things the queries now handle. First, 40 of 426 postings were statistics roles ("causal inference", "statistical"), so those terms are excluded. Second, 33 postings repeated a title, company, and city, so reposts are collapsed. It also showed how the index spells cities, and the metro lists were checked against those spellings. A first replay (95 Credits) was later rerun so that its receipt counts calls the same way as every other case, which brings the cost of exploring to about 206 Credits. The published numbers come from the final replay, which cost 96.
+An AI agent working through the public REST API built this case. Before writing the replay, it spent 111 API Credits exploring: 7 on counts to size the question, and 104 to read every matching US posting once. That read found two things the queries now handle. First, 40 of 426 postings were statistics roles ("causal inference", "statistical"), so those terms are excluded. Second, 33 postings repeated a title, company, and city, so reposts are collapsed. It also showed how the index spells cities, and the metro lists were checked against those spellings. A first replay (95 API Credits) was later rerun so that its receipt counts calls the same way as every other case, which brings the cost of exploring to about 206 API Credits. The published numbers come from the final replay, which cost 96.
 
 ## Limits
 
@@ -41,4 +41,4 @@ export METIX_KEY=metix_xxxxxxxxxxxx   # create one at https://platform.metix.ai/
 python3 cases/inference-roles-us-metros-2026/fetch.py
 ```
 
-It needs Python 3.10 or later and nothing else, and stops before reading records if the run would cost more than 150 Credits (`MAX_CREDITS`). The last run's cost is in [`data/receipt.json`](data/receipt.json). To make this case with an agent instead, use [`PROMPT.md`](PROMPT.md).
+It needs Python 3.10 or later and nothing else, and stops before reading records if the run would cost more than 150 API Credits (`MAX_CREDITS`). The last run's cost is in [`data/receipt.json`](data/receipt.json). To make this case with an agent instead, use [`PROMPT.md`](PROMPT.md).

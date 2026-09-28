@@ -19,15 +19,15 @@ export type ParsedPrompt = {
  * Splits a case's PROMPT.md into the parts the page lays out separately. Fails the build
  * when the prompt breaks the template's contract, so a page can never show a prompt that
  * contradicts it: every step reads "N. Title. Body" ("N. 标题。正文" in Chinese), and the
- * prompt names the Credit ceiling the page promises it stops at.
+ * prompt names the API Credit ceiling the page promises it stops at.
  */
 export async function parsePrompt(prompt: PromptModule, slug: string, lang: Lang, cap?: number): Promise<ParsedPrompt> {
   const file = `cases/${slug}/PROMPT${lang === "zh" ? ".zh" : ""}.md`;
   const raw = prompt.rawContent().match(/```text\n([\s\S]*?)\n```/)?.[1];
   if (!raw) throw new Error(`${file} has no text block`);
   // A ceiling of 1,000 or more is written with a thousands comma, as every number in a prompt is.
-  if (cap !== undefined && ![String(cap), cap.toLocaleString("en-US")].some((c) => raw.includes(`${c} Credits`))) {
-    throw new Error(`${file} never says it stops at ${cap} Credits, the cap in case.yaml`);
+  if (cap !== undefined && ![String(cap), cap.toLocaleString("en-US")].some((c) => raw.includes(`${c} API Credits`))) {
+    throw new Error(`${file} never says it stops at ${cap} API Credits, the cap in case.yaml`);
   }
   const [question, ...paragraphs] = raw.split(/\n{2,}/);
   const steps = paragraphs.map((para) => {

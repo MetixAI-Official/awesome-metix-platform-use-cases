@@ -1,5 +1,5 @@
 {
-  "note": "What is counted, all within the population in queries/population.json unless a block says otherwise. Every count is sent with size 1, so it costs 1 Credit, or nothing when it finds no one, and reads no record.",
+  "note": "What is counted, all within the population in queries/population.json unless a block says otherwise. Every count is sent with size 1, so it costs 1 API Credit, or nothing when it finds no one, and reads no record.",
   "first_joined": {
     "edges": [
       "2012-01-01",

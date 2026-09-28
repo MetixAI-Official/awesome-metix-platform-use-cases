@@ -4,7 +4,7 @@
     export METIX_KEY=...   (your key; or put it in the repository's .env)
     python3 cases/entry-level-postings-by-occupation-2026/fetch.py
 
-Count queries only, one Credit each: no posting is read. The families, their
+Count queries only, one API Credit each: no posting is read. The families, their
 order, and their audits are in queries/families.json; what is counted is in
 queries/measures.json. A count of 100,000 or more comes back banded and cannot
 be divided, so a banded count is redone as the sum of the family's title parts
@@ -217,7 +217,7 @@ def main() -> int:
             c[key] = count(p, family, membership(i) + extra + more)
         sub.append(subgroup_row(spec["id"], c, spec["family"], spec["note"]))
 
-        # The rest of the family, by subtraction: the same columns, no extra Credits.
+        # The rest of the family, by subtraction: the same columns, no extra API Credits.
         whole = next(r for r in rows if r["group"] == spec["family"])
         sub.append(
             subgroup_row(
@@ -269,7 +269,7 @@ def main() -> int:
     )
 
     write_json(HERE, "receipt.json", p.receipt())
-    print(f"{p.calls} calls, {p.spent()} Credits")
+    print(f"{p.calls} calls, {p.spent()} API Credits")
     for r in rows:
         print(
             f"{r['group']:18} n={r['total_count']:6} label door {r['label_door_share']}"

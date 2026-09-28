@@ -8,6 +8,7 @@
  * Signature: the two-sided chart. Profiles grow left, postings grow right, from one spine,
  *   so demand and supply for every tool are read on the same scale at a glance.
  */
+import CaseEyebrow from "@site/components/CaseEyebrow.astro";
 import BarList from "@site/components/charts/BarList.astro";
 import Chapter from "@site/components/Chapter.astro";
 import Contents from "@site/components/Contents.astro";
@@ -47,7 +48,7 @@ const dimQuery = [
   { file: "tools.json", endpoint: "POST /v1/jobs/query", spec: tools },
   { file: "dimensions.json", endpoint: "POST /v1/jobs/query", spec: dimensions },
 ];
-const cost = zh ? `整份报告 ${receipt.credits} Credits` : `${receipt.credits} Credits for the whole report`;
+const cost = zh ? `整份报告 ${receipt.credits} API Credits` : `${receipt.credits} API Credits for the whole report`;
 
 const names: Record<string, string> = {
   "claude-code": "Claude Code",
@@ -192,20 +193,13 @@ const industryZh: Record<string, string> = {
       <header class="report-hero">
         <div class="wrap hero-grid">
           <div>
-            <nav class="hero-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
-              <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
-              <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
-            </nav>
-            <p class="hero-meta">
-              {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=jobs#index`}>{zh ? "岗位" : "Jobs"}</a> ·{" "}
-              <a href={`${href(lang)}?data=people#index`}>{zh ? "个人档案" : "Profiles"}</a> · <span class="nowrap">{iso}</span>
-            </p>
+            <CaseEyebrow lang={lang} slug={entry.slug} format="report" datasets={entry.datasets} snapshot={entry.snapshot} />
             <h1 set:html={titleHtml(entry.title[lang], lang)} />
             <p class="hero-dek">{entry.dek[lang]}</p>
             <div class="hero-actions">
               <a class="hero-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
               <a class="hero-chip" href="#run-reproduce">
-                {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+                {zh ? `复现需 ${receipt.credits} API Credits` : `${receipt.credits} API Credits to reproduce`}
               </a>
               <span class="hero-note">{zh ? "复现只计数，不读取任何记录" : "Reproducing reads no records: every number is a count"}</span>
             </div>
@@ -789,7 +783,7 @@ const industryZh: Record<string, string> = {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
     gap: 48px 72px;
     align-items: end;
-    padding-block: clamp(48px, 7vw, 96px) clamp(40px, 6vw, 80px);
+    padding-block: clamp(24px, 3.5vw, 40px) clamp(40px, 6vw, 80px);
   }
 
   .hero-eyebrow {

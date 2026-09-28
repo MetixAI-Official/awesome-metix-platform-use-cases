@@ -22,7 +22,7 @@ Company names, used to refer to the company and nothing more. Counts attached to
 
 Facts from job postings, in aggregate: posting counts, locations, titles grouped into families, and salary ranges stated in the postings.
 
-The run record for each case: when the queries ran, how many calls, results, and records they used, and how many Credits they cost.
+The run record for each case: when the queries ran, how many calls, results, and records they used, and how many API Credits they cost.
 
 Links to public sources (news articles, company pages, research trackers), attributed to their publisher.
 

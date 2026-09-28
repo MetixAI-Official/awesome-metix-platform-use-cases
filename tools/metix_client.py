@@ -1,7 +1,7 @@
 """A small client for the public Metix AI Platform API, shared by every case's fetch.py.
 
 Standard library only. The key comes from METIX_KEY, or from the repository's
-.env, and is never printed. Every call is counted, and the receipt's Credits
+.env, and is never printed. Every call is counted, and the receipt's API Credits
 come from GET /auth/key/status before and after the run.
 """
 
@@ -106,7 +106,7 @@ class Platform:
         # before the worst case of the run could pass the ceiling.
         if self.ceiling_used + most > self.max_credits:
             sys.exit(
-                f"Stopping: this call could take the run past {self.max_credits} Credits "
+                f"Stopping: this call could take the run past {self.max_credits} API Credits "
                 "(set MAX_CREDITS to raise the ceiling)."
             )
         self.ceiling_used += most
@@ -114,7 +114,7 @@ class Platform:
     # -- search and detail ----------------------------------------------
 
     def count(self, entity: str, where: dict) -> int | str:
-        """The match total for a Query Spec, for at most 1 Credit.
+        """The match total for a Query Spec, for at most 1 API Credit.
 
         Exact below the banding threshold on GET /contract; a string such as
         "100000+" above it.
@@ -126,7 +126,7 @@ class Platform:
 
     def search_all(self, entity: str, spec: dict) -> tuple[list[str], int | str]:
         path, _, id_key = ENTITIES[entity]
-        # Count first (1 Credit) so the guard sees what the pages will really return.
+        # Count first (1 API Credit) so the guard sees what the pages will really return.
         total = self.count(entity, spec["where"])
         left = total if isinstance(total, int) else 100_000
         ids: list[str] = []

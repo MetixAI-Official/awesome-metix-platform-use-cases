@@ -1,11 +1,11 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 235 到 265 Credits：发布用的计数 104，建院校列表和核对约 120，公司名、地点和排除词的核对 10 到 40。超过 300 之前它会先停下来问你。发布的每个数字都是计数，读取只用于建列表和核对。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 235 到 265 API Credits：发布用的计数 104，建院校列表和核对约 120，公司名、地点和排除词的核对 10 到 40。超过 300 之前它会先停下来问你。发布的每个数字都是计数，读取只用于建列表和核对。
 
 ```text
 用 Metix AI Platform 回答一个问题：十家大型 AI 机构里，从事 AI 岗位的人有多大比例本科就读于中国大陆院校？有这种背景的 AI 从业者现在的档案写在哪个国家或地区？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
 
-1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.profile 里的字段。同一份工作的条件放在同一个 has_experience 里，同一个学位的条件放在同一个 has_education 里，这样它们说的才是同一份工作、同一个学位。一次查询最多 64 个条件，嵌套最多 6 层。size 1 的计数花 1 Credit，所以每个要发布的数字都按计数来设计。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 300 Credits 之前先停下来问我。
+1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.profile 里的字段。同一份工作的条件放在同一个 has_experience 里，同一个学位的条件放在同一个 has_education 里，这样它们说的才是同一份工作、同一个学位。一次查询最多 64 个条件，嵌套最多 6 层。size 1 的计数花 1 API Credit，所以每个要发布的数字都按计数来设计。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 300 API Credits 之前先停下来问我。
 
 2. 人群。AI 岗位指当前的一份工作（experience.is_current eq true），职位名称 experience.title 匹配以下任意一个：machine learning、research scientist、research engineer、deep learning、member of technical staff、applied scientist、artificial intelligence、AI engineer、AI researcher、LLM、NLP、computer vision。十家机构按这个顺序是 OpenAI、Anthropic、Google DeepMind（公司名 "Google DeepMind" 和 "DeepMind"）、xAI、Meta、NVIDIA、Google、Microsoft、Apple 和 Amazon（加上 "Amazon Web Services (AWS)" 和 "AWS"）。每个公司名和变体都先用计数核对。平台按词匹配公司名称，所以 Google 也会匹配到 Google DeepMind。各行要互不重叠：每家机构只算当前在这里做 AI 岗位、且当前不在顺序更靠前的机构任职的人，这样十家合计就是各行之和。
 
@@ -40,4 +40,4 @@
 2. 哪些岗位？用职位名称里的哪些词？
 3. 看哪个国家的院校？境外校区算不算？
 4. 只看美国、看全球，还是都看？
-5. 建列表和核对读档案最多能花多少 Credits？
+5. 建列表和核对读档案最多能花多少 API Credits？

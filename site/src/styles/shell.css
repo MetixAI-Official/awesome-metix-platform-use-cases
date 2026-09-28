@@ -5,32 +5,37 @@
   color-scheme: light;
   interpolate-size: allow-keywords;
 
-  --ground: #eef0f4;
+  /* Neutrals, ink, and the interface accent are the platform's (platform.metix.ai
+     globals.css), so the Casebook reads as one of its pages. Violet is no longer a
+     link colour here; it survives as one of the dataset fields (--f-bg). */
+  --ground: #f4f6f6;
   --surface: #ffffff;
-  --surface-muted: #f4f5f8;
-  --ink: #0b0a1f;
-  --ink-2: #3f3d56;
-  --ink-3: #6a6880;
+  --surface-muted: #eef1f1;
+  --ink: #161514;
+  --ink-2: #4e4d4b;
+  --ink-3: #6b6a67;
   /* Alpha, so a divider reads the same on the ground and on a surface. */
-  --line: rgb(11 10 31 / 0.13);
+  --line: rgb(22 21 20 / 0.13);
   /* Control borders: 3:1 against the ground. */
-  --line-strong: #84829a;
-  --accent: #5b54ef;
-  --accent-ink: #3d36c9;
+  --line-strong: #858480;
+  --accent: #07545e;
+  --accent-ink: #07545e;
 
   --cjk: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --display: "Sora Variable", "Geist Variable", system-ui, var(--cjk);
   --sans: "Geist Variable", system-ui, -apple-system, var(--cjk);
   --mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, var(--cjk), monospace;
 
-  --page: 1280px;
-  --gutter: clamp(16px, 4vw, 48px);
+  /* The platform's column: 1200px, 20px gutters, 40px from 1024px. The logo in the
+     bar and the first word on the page start on the same line. */
+  --page: 1200px;
+  --gutter: 20px;
   /* the gap of every half-and-half split (masthead, section heads), so their halfway lines match */
   --split-gap: clamp(32px, 4vw, 56px);
   --radius: 14px;
   /* Containers sit on a ring and a soft lift instead of a flat grey border. */
-  --ring: 0 0 0 1px rgb(11 10 31 / 0.08), 0 1px 2px -1px rgb(11 10 31 / 0.08), 0 2px 6px 0 rgb(11 10 31 / 0.04);
-  --ring-hover: 0 0 0 1px rgb(11 10 31 / 0.16), 0 2px 4px -1px rgb(11 10 31 / 0.1), 0 8px 20px -6px rgb(11 10 31 / 0.12);
+  --ring: 0 0 0 1px rgb(22 21 20 / 0.08), 0 1px 2px -1px rgb(22 21 20 / 0.08), 0 2px 6px 0 rgb(22 21 20 / 0.04);
+  --ring-hover: 0 0 0 1px rgb(22 21 20 / 0.16), 0 2px 4px -1px rgb(22 21 20 / 0.1), 0 8px 20px -6px rgb(22 21 20 / 0.12);
   /* Inputs and filters: 40px for a mouse, 44px for a finger. */
   --control: 40px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -39,6 +44,12 @@
 @media (pointer: coarse) {
   :root {
     --control: 44px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 40px;
   }
 }
 
@@ -80,11 +91,6 @@ h3 {
 
 :lang(zh) :is(h1, h2, h3) {
   letter-spacing: 0;
-}
-
-/* "Casebook" is Latin in both editions; it keeps the English tracking on Chinese pages. */
-:lang(zh) .mast-title {
-  letter-spacing: -0.06em;
 }
 
 p {
@@ -168,129 +174,7 @@ main:focus {
   outline: none;
 }
 
-/* Opaque: body text scrolling under a translucent bar reads as noise behind the controls. */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--ground);
-  border-bottom: 1px solid var(--line);
-}
-
-.site-header .bar {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  min-height: 60px;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--ink);
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-/* The Platform lockup, after platform.metix.ai: logo, hairline, then "Platform" in
-   mono caps. The full logo never drops below 24px. Measured at that size, the
-   wordmark's caps are 14.1px tall, its x-height is 10.4px, and its baseline sits
-   19px down the logo; the hairline and the label are fitted to those three. */
-.lockup {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--ink);
-}
-
-.lockup img {
-  display: block;
-  height: 24px;
-  width: auto;
-}
-
-/* As tall as the wordmark's caps. */
-.lockup-rule {
-  width: 1px;
-  height: 14px;
-  background: rgb(16 13 53 / 0.24);
-}
-
-/* Geist Mono caps are 0.75em, so 13.85px caps match the wordmark's x-height. Every
-   part of the lockup shares one vertical center, the logo's (12px into the 24px
-   logo, which is also the wordmark caps' center), so the row reads level. The offset
-   puts the caps' center on it: text snaps to whole pixels, and 0.5 to 1px lands
-   exactly at 2x and 3x. Color is the wordmark's navy. */
-.lockup-platform {
-  position: relative;
-  top: 0.9px;
-  margin-right: -0.14em;
-  font-family: var(--mono);
-  font-size: 13.85px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #100d35;
-}
-
-.brand-name {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 17px;
-  letter-spacing: -0.02em;
-  margin-left: 16px;
-  /* Centers the caps on the logo's center, within the half pixel an odd cap height allows. */
-  position: relative;
-  top: 1px;
-}
-
-.header-actions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.lang-switch {
-  display: inline-flex;
-  padding: 3px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
-}
-
-.lang-switch a {
-  font-family: var(--mono);
-  font-size: 12px;
-  line-height: 1;
-  padding: 7px 11px;
-  border-radius: 999px;
-  color: var(--ink-2);
-  text-decoration: none;
-  transition: background-color 120ms var(--ease), color 120ms var(--ease);
-}
-
-.lang-switch a:hover {
-  color: var(--ink);
-}
-
-.lang-switch a[aria-current="true"] {
-  background: var(--ink);
-  color: #fff;
-}
-
-.gh-link {
-  color: var(--ink-2);
-  text-decoration: none;
-  font-size: 15px;
-}
-
-.gh-link:hover {
-  color: var(--ink);
-}
-
+/* The primary action: the platform's black pill. */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -301,103 +185,21 @@ main:focus {
   color: #fff;
   font-size: 15px;
   font-weight: 500;
+  line-height: 1;
   text-decoration: none;
   white-space: nowrap;
   transition: background-color 120ms var(--ease);
 }
 
 .pill:hover {
-  background: #2a2850;
-}
-
-.pill .short {
-  display: none;
-}
-
-@media (max-width: 720px) {
-  .site-header .bar {
-    gap: 12px;
-  }
-  .gh-link {
-    display: none;
-  }
-  .header-actions {
-    gap: 10px;
-  }
-  .pill {
-    min-height: 36px;
-    padding: 0 14px;
-    font-size: 14px;
-  }
-  .pill .long {
-    display: none;
-  }
-  .pill .short {
-    display: inline;
-  }
-}
-
-/* Phone: the lockup keeps its 24px logo, so the header gives up the rest.
-   The language switch shows only the other language. */
-@media (max-width: 600px) {
-  .brand-name,
-  .lang-switch a[aria-current="true"] {
-    display: none;
-  }
-  .site-header .bar {
-    gap: 8px;
-  }
-  .lockup {
-    gap: 9px;
-  }
-  /* 12px caps are 9px tall, so the best any offset can do is a quarter pixel high. */
-  .lockup-platform {
-    top: 0;
-    margin-right: -0.1em;
-    font-size: 12px;
-    letter-spacing: 0.1em;
-  }
-  .header-actions {
-    gap: 8px;
-  }
-  .pill {
-    padding: 0 12px;
-  }
-}
-
-@media (max-width: 380px) {
-  .lang-switch {
-    padding: 0;
-    border-color: transparent;
-    background: none;
-  }
-  .lang-switch a {
-    padding: 7px 6px;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .pill {
-    padding: 0 10px;
-    font-size: 13px;
-  }
-}
-
-/* Below 340px the key link lives only in the footer. Scoped to the header: the
-   masthead's "Run your first case" is a pill too and must stay. */
-@media (max-width: 340px) {
-  .site-header .pill {
-    display: none;
-  }
+  background: #2e2c2a;
 }
 
 /* ---------- masthead ---------- */
 
-/* The wordmark is fitted to the content column, so its ink runs from one edge to the other;
-   the ratio and the optical offset are measured for Sora 700 at this tracking. Under the
-   wordmark's rule the lede (with the actions) and the three stats share one top line, and
-   the stats end on the column's right edge. Narrow screens stack them. */
+/* Under the title's rule the lede (with the actions) and the three stats share one top
+   line, and the stats end on the column's right edge. Narrow screens stack them. */
 .masthead {
-  container-type: inline-size;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-areas: "eyebrow eyebrow" "title title" "lede stats" "actions stats";
@@ -410,25 +212,25 @@ main:focus {
   grid-area: eyebrow;
 }
 
+/* A section title at the platform's scale (the /integrations hub's h1): the bar above
+   already says where the reader is, so the page does not announce it again. */
 .mast-title {
   grid-area: title;
-  margin-top: 14px;
-  padding-bottom: clamp(18px, 2.4cqi, 30px);
-  border-bottom: 1px solid var(--ink);
+  max-width: 22ch;
+  margin-top: 20px;
+  padding-bottom: clamp(24px, 3vw, 36px);
+  border-bottom: 1px solid var(--line);
   font-family: var(--display);
-  font-weight: 700;
-  font-size: calc(var(--fit) * 1cqi);
-  line-height: 0.8;
-  letter-spacing: -0.06em;
-  white-space: nowrap;
-  overflow: clip;
-  overflow-clip-margin: 0.08em;
-  --fit: 20.78;
+  font-weight: 400;
+  font-size: clamp(36px, 4.4vw, 52px);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
 }
 
-.mast-title span {
-  display: inline-block;
-  margin-left: -0.0432em;
+:lang(zh) .mast-title {
+  max-width: 16em;
+  line-height: 1.2;
+  letter-spacing: 0;
 }
 
 .mast-stats {
@@ -613,7 +415,7 @@ main:focus {
   padding: 10px 18px;
   border-radius: 999px;
   background: #0defc8;
-  color: #0b0a1f;
+  color: #161514;
   font-weight: 600;
   font-size: 15px;
 }
@@ -733,45 +535,45 @@ main:focus {
   --f-bg: #1e79c2;
   --f-ink: #ffffff;
   --f-ink-2: #ffffff;
-  --f-focus: #0b0a1f;
+  --f-focus: #161514;
   --f-mark: #c9f6ff;
   --f-track: rgb(255 255 255 / 0.16);
 }
 
 .field-teal {
   --f-bg: #0defc8;
-  --f-ink: #0b0a1f;
-  --f-ink-2: rgb(11 10 31 / 0.78);
-  --f-focus: #0b0a1f;
+  --f-ink: #161514;
+  --f-ink-2: rgb(22 21 20 / 0.78);
+  --f-focus: #161514;
   --f-mark: #5e5c78;
-  --f-track: rgb(11 10 31 / 0.1);
+  --f-track: rgb(22 21 20 / 0.1);
 }
 
 .field-signal {
   --f-bg: #ff6614;
-  --f-ink: #0b0a1f;
-  --f-ink-2: rgb(11 10 31 / 0.8);
-  --f-focus: #0b0a1f;
+  --f-ink: #161514;
+  --f-ink-2: rgb(22 21 20 / 0.8);
+  --f-focus: #161514;
   --f-mark: #7a2e0b;
-  --f-track: rgb(11 10 31 / 0.12);
+  --f-track: rgb(22 21 20 / 0.12);
 }
 
 .field-sky {
   --f-bg: #a3e4ff;
-  --f-ink: #0b0a1f;
-  --f-ink-2: rgb(11 10 31 / 0.78);
-  --f-focus: #0b0a1f;
+  --f-ink: #161514;
+  --f-ink-2: rgb(22 21 20 / 0.78);
+  --f-focus: #161514;
   --f-mark: #145a93;
-  --f-track: rgb(11 10 31 / 0.1);
+  --f-track: rgb(22 21 20 / 0.1);
 }
 
 .field-periwinkle {
   --f-bg: #b5b5ff;
-  --f-ink: #0b0a1f;
-  --f-ink-2: rgb(11 10 31 / 0.78);
-  --f-focus: #0b0a1f;
+  --f-ink: #161514;
+  --f-ink-2: rgb(22 21 20 / 0.78);
+  --f-focus: #161514;
   --f-mark: #3d3a8c;
-  --f-track: rgb(11 10 31 / 0.1);
+  --f-track: rgb(22 21 20 / 0.1);
 }
 
 /* The card frame */
@@ -1026,7 +828,7 @@ main:focus {
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 40px 72px;
   align-items: end;
-  padding-block: clamp(40px, 6vw, 80px);
+  padding-block: clamp(24px, 3.5vw, 40px) clamp(40px, 6vw, 80px);
 }
 
 .card-hero .ch-meta {
@@ -1178,8 +980,8 @@ main:focus {
 }
 
 .btn-primary:hover {
-  border-color: #2a2850;
-  background: #2a2850;
+  border-color: #2e2c2a;
+  background: #2e2c2a;
 }
 
 .prose {
@@ -1727,37 +1529,6 @@ details.query[open]::details-content {
   details.query summary .q-files {
     display: none;
   }
-}
-
-/* ---------- footer ---------- */
-
-.site-footer {
-  border-top: 1px solid var(--line);
-  background: var(--ground);
-  padding-block: 40px 48px;
-  font-size: 14px;
-  color: var(--ink-3);
-}
-
-.site-footer .links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin-top: 16px;
-}
-
-.site-footer .links a {
-  color: var(--ink-2);
-  text-decoration: none;
-}
-
-.site-footer .links a:hover {
-  color: var(--ink);
-}
-
-.site-footer .legal {
-  margin-top: 24px;
-  max-width: 80ch;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3649,8 +3420,7 @@ details.query[open]::details-content {
 @media (max-width: 640px) {
   .crumbs a,
   .ch-meta a,
-  .chips a,
-  .site-footer .links a {
+  .chips a {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
@@ -3879,22 +3649,11 @@ html:lang(zh) :is(.cost-flag, .pq-label, .hero-chip, .chart-legend, .legend, .st
     min-height: 44px;
   }
 
-  .lang-switch a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 38px;
-  }
-
   .as-docs,
   .links-line a,
   details.query > summary {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
-  }
-
-  /* A pill is already inline-flex; setting display here would undo the 340px rule. */
-  .site-header .pill {
     min-height: 44px;
   }
 }

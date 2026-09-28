@@ -1,11 +1,11 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 211 to 261 Credits: 126 for the published counts, 75 to 105 to read the audit slices, and 10 to 30 for the counts that size slices and exclude words. It stops and asks before 300. Every published number is a count; the reads only audit the title families.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 211 to 261 API Credits: 126 for the published counts, 75 to 105 to read the audit slices, and 10 to 30 for the counts that size slices and exclude words. It stops and asks before 300. Every published number is a count; the reads only audit the title families.
 
 ```text
 Answer one question with the Metix AI Platform: among open US job postings, what share of each occupation's postings is open to someone starting out, and is a narrow entry door specific to software and AI roles or shared by occupations that research calls AI-exposed? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and build every condition from querySpecByEntity.job; read GET /docs/api/jobs (free) too. seniority takes one of seven exact values (Associate, Director, Entry level, Executive, Internship, Mid-Senior level, Not Applicable), is_open is true on every posting in the index, and a total of 100,000 or more comes back as the string "100000+". A query holds at most 64 conditions and nests at most 6 levels. A count with size 1 costs 1 Credit, a search 1 Credit per 25 IDs returned, and a detail read 1 Credit per 5 postings, so plan every published number as a count. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 300 Credits.
+1. Read before querying. Call GET /contract (free) and build every condition from querySpecByEntity.job; read GET /docs/api/jobs (free) too. seniority takes one of seven exact values (Associate, Director, Entry level, Executive, Internship, Mid-Senior level, Not Applicable), is_open is true on every posting in the index, and a total of 100,000 or more comes back as the string "100000+". A query holds at most 64 conditions and nests at most 6 levels. A count with size 1 costs 1 API Credit, a search 1 API Credit per 25 IDs returned, and a detail read 1 API Credit per 5 postings, so plan every published number as a count. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 300 API Credits.
 
 2. Population. Open postings (is_open eq true) with location.country eq "United States". Twelve occupation families, each a list of title terms (title match: every word of a term must appear, in any order): AI and machine learning (machine learning, artificial intelligence, AI, ML, LLM, deep learning; exclude data center, data centers); software engineering (software engineer, software developer); data analyst (data analyst; exclude security, prevention); financial analyst (financial analyst, finance analyst); accountant; paralegal and legal assistant (paralegal, legal assistant); graphic designer (graphic designer, graphic design); marketing; customer service (customer service, customer support, customer care; exclude driver); registered nurse (registered nurse, RN); electrician; truck and CDL driver (truck driver, CDL driver). Ahead of them all, take out AI training and annotation work: an AI term together with trainer, tutor, annotator, annotation, or rater. Count each posting once: it belongs to the first family in this order whose terms it matches and whose exclude words it does not match, and a posting that matches exclude words moves on to the families after it. Write the families, their order, and the reason for each exclude word to a file.
 
@@ -33,7 +33,7 @@ Answer one question with the Metix AI Platform: among open US job postings, what
 | The occupations | Step 2, and audit every new family in step 3 | Pharmacist, teacher, or web developer titles |
 | What counts as the door | Step 4 | 12 months or less, or the Associate label as well |
 | The country | location.country in step 2 | United Kingdom, with its own title words |
-| The Credit ceiling | Steps 1 and 3 | Skip the audit reads to stay near 126 Credits |
+| The API Credit ceiling | Steps 1 and 3 | Skip the audit reads to stay near 126 API Credits |
 
 ## What to ask before running it
 
@@ -42,4 +42,4 @@ When someone brings a looser version of this question, settle these first. Each 
 1. Which occupations, and which title words stand for each?
 2. What counts as open to someone starting out: the source's label, the stated requirement, or both?
 3. Which country?
-4. How many Credits may the audits spend on reads?
+4. How many API Credits may the audits spend on reads?

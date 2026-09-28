@@ -1,11 +1,11 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 95 to 135 Credits: about 15 for the counts and the rest for the audit reads. It stops and asks before 140.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 95 to 135 API Credits: about 15 for the counts and the rest for the audit reads. It stops and asks before 140.
 
 ```text
 Answer one question with the Metix AI Platform: which AI coding tools do job postings name, and how often? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A count with size 1 costs 1 Credit; a search that returns nothing is free. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 140 Credits.
+1. Read before querying. Call GET /contract (free) and use only querySpecByEntity.job fields. A count with size 1 costs 1 API Credit; a search that returns nothing is free. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 140 API Credits.
 
 2. Tools. Claude Code, Cursor, GitHub Copilot, Codex, and Windsurf, matched in the job description (field "description", operator match).
 
@@ -13,7 +13,7 @@ Answer one question with the Metix AI Platform: which AI coding tools do job pos
 
 4. Audit before trusting. For each tool, read 40 to 60 descriptions and check whether the words around the name are about AI coding. If more than 5% are not, count that tool only when the same description names another AI coding tool, and audit the tightened version. Keep the plain-word count as well, so the reader sees how much the definition moves it.
 
-5. Count. Each tool worldwide and with location.country eq "United States", the plain-word count for any tightened tool, and one count for postings naming any of the five. About 15 Credits.
+5. Count. Each tool worldwide and with location.country eq "United States", the plain-word count for any tightened tool, and one count for postings naming any of the five. About 15 API Credits.
 
 6. Clean. Reposts are not collapsed; say so.
 
@@ -39,4 +39,4 @@ Answer one question with the Metix AI Platform: which AI coding tools do job pos
 1. Which tools, and could any of their names mean something else?
 2. Descriptions or titles?
 3. Worldwide, or one country?
-4. How many Credits may the audit spend reading descriptions?
+4. How many API Credits may the audit spend reading descriptions?

@@ -4,7 +4,7 @@
     export METIX_KEY=metix_xxxxxxxxxxxx   (or put it in the repository's .env)
     python3 cases/forward-deployed-engineers-2026/fetch.py
 
-One worldwide count plus one count per country in COUNTRIES, one Credit each.
+One worldwide count plus one count per country in COUNTRIES, one API Credit each.
 Everything not in the list is reported as the rest of the world.
 """
 
@@ -62,7 +62,7 @@ def main() -> int:
         ),
     )
     write_json(HERE, "receipt.json", platform.receipt())
-    print(world, rows[:3], f"{platform.spent()} Credits")
+    print(world, rows[:3], f"{platform.spent()} API Credits")
     return 0
 
 

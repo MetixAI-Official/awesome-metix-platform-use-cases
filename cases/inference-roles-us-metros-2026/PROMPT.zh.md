@@ -1,6 +1,6 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 96 到 110 Credits，大部分用在读取美国岗位上。超过 150 之前它会先停下来问你。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 96 到 110 API Credits，大部分用在读取美国岗位上。超过 150 之前它会先停下来问你。
 
 ```text
 用 Metix AI Platform 回答一个问题：现在美国哪些地方在招模型推理（inference）方向的人？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
@@ -9,9 +9,9 @@
 
 2. 统计范围。在招岗位，标题匹配 "inference"、"model serving"、"llm serving" 中任意一个，并排除标题匹配 "causal" 或 "statistical" 的岗位（这些是统计岗位，不是模型部署）。关键词放在一个 any 节点里，排除词放在一个 not 节点里。
 
-3. 先计数。用 size 1 分别记录全球总数和 location.country eq "United States" 的总数，每次计数花 1 Credit。
+3. 先计数。用 size 1 分别记录全球总数和 location.country eq "United States" 的总数，每次计数花 1 API Credit。
 
-4. 预算。现在和结束时各调用一次 GET /auth/key/status（免费），两次余额之差就是本次花费。如果美国总数少于 1,000，就读取全部美国岗位：先用 size 10000 搜索，再按每批 100 个调用 POST /entity/v1/jobs/detail-by-id，_source 取 ["title", "company.name", "location.city", "location.state"]。任何会让总花费超过 150 Credits 的步骤，先停下来问我。
+4. 预算。现在和结束时各调用一次 GET /auth/key/status（免费），两次余额之差就是本次花费。如果美国总数少于 1,000，就读取全部美国岗位：先用 size 10000 搜索，再按每批 100 个调用 POST /entity/v1/jobs/detail-by-id，_source 取 ["title", "company.name", "location.city", "location.state"]。任何会让总花费超过 150 API Credits 的步骤，先停下来问我。
 
 5. 抽检。列出出现最多的 40 个标题，标出与生产环境模型部署或推理优化无关的。如果无关岗位超过 5%，在第 2 步补充排除词，重跑，并说明改了什么。
 
@@ -33,7 +33,7 @@
 | 岗位 | 第 2 步的标题关键词和排除词，以及第 5 步的抽检规则 | "post-training" 或 "reinforcement learning"，排除 "sales" |
 | 国家 | 第 3 步的国家和第 7 步的都市区列表 | 英国，用伦敦、剑桥、爱丁堡 |
 | 分组方式 | 第 7 步和第 9 步的图表 | 按公司分组，而不是按都市区 |
-| 预算 | 第 4 步的上限 | 20 Credits：只计数，每个都市区一次计数查询，不读记录 |
+| 预算 | 第 4 步的上限 | 20 API Credits：只计数，每个都市区一次计数查询，不读记录 |
 
 ## 运行前先问清楚
 
@@ -43,4 +43,4 @@
 2. 看哪个地理范围，细到什么层级：国家、州，还是都市区？
 3. 看哪些岗位：今天所有在招的，还是只看最近 30 天或 90 天发布的？
 4. 数什么：岗位数、去重后的岗位数，还是公司数？
-5. 这次最多能花多少 Credits？
+5. 这次最多能花多少 API Credits？

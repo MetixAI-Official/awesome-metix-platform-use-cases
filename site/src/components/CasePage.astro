@@ -1,11 +1,13 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
 import Base from "@site/layouts/Base.astro";
+import CaseEyebrow from "@site/components/CaseEyebrow.astro";
 import FoldSections from "@site/components/FoldSections.astro";
 import RunBlock from "@site/components/RunBlock.astro";
 import Receipt from "@site/components/Receipt.astro";
 import { byCatalog, fieldColor, prompts, receipts, reports } from "@site/cases";
 import { href, isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
+import { caseJsonLd } from "@site/seo";
 
 interface Props {
   lang: Lang;
@@ -30,27 +32,20 @@ const next = at >= 0 && at < ordered.length - 1 ? ordered[at + 1].data : undefin
 const indexHref = (query: string) => `${href(lang)}?${query}#index`;
 ---
 
-<Base lang={lang} path={`cases/${data.slug}/`} title={data.title[lang]} description={data.dek[lang]}>
+<Base lang={lang} path={data.slug} title={data.title[lang]} description={data.dek[lang]} jsonLd={caseJsonLd(Astro.site!, lang, data)}>
   {
     data.format === "card" && (
       <header class={`card-hero field-${fieldColor(data.datasets, cardIndex - 1)}`}>
         <div class="wrap card-hero-grid">
           <div>
-            <nav class="crumbs" aria-label={t.crumbs}>
-              <a href={href(lang)}>{t.casebook}</a>
-              <span aria-hidden="true">/</span>
-              <a href={indexHref("format=card")}>{t.cardsLabel}</a>
-            </nav>
-            <p class="ch-meta">
-              {`${t.formats.card} ${String(cardIndex).padStart(2, "0")}`}
-              {data.datasets.map((d) => (
-                <>
-                  {" · "}
-                  <a href={indexHref(`data=${d}`)}>{t.datasets[d]}</a>
-                </>
-              ))}
-              {data.snapshot && <span class="nowrap">{` · ${isoDate(data.snapshot)}`}</span>}
-            </p>
+            <CaseEyebrow
+              lang={lang}
+              slug={data.slug}
+              format="card"
+              datasets={data.datasets}
+              snapshot={data.snapshot}
+              label={`${t.formats.card} ${String(cardIndex).padStart(2, "0")}`}
+            />
             <h1 set:html={titleHtml(data.title[lang], lang)} />
             <p class="ch-dek">{data.dek[lang]}</p>
             <ul class="chips">
@@ -96,7 +91,7 @@ const indexHref = (query: string) => `${href(lang)}?${query}#index`;
         </div>
         <div class:list={["pager", { single: !prev || !next }]}>
           {prev && (
-            <a class="pg-link pg-prev" href={href(lang, `cases/${prev.slug}/`)} rel="prev">
+            <a class="pg-link pg-prev" href={href(lang, `${prev.slug}`)} rel="prev">
               <span class="pg-arrow" aria-hidden="true">←</span>
               <span class="pg-text">
                 <span class="pg-label">{t.caseNav.prev}</span>
@@ -105,7 +100,7 @@ const indexHref = (query: string) => `${href(lang)}?${query}#index`;
             </a>
           )}
           {next && (
-            <a class="pg-link pg-next" href={href(lang, `cases/${next.slug}/`)} rel="next">
+            <a class="pg-link pg-next" href={href(lang, `${next.slug}`)} rel="next">
               <span class="pg-text">
                 <span class="pg-label">{t.caseNav.next}</span>
                 <span class="pg-title" set:html={titleHtml(next.title[lang], lang)} />

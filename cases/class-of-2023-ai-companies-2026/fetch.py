@@ -1270,7 +1270,7 @@ def main() -> int:
         write_json(HERE, name, doc)
     write_json(HERE, "receipt.json", p.receipt())
     print(
-        f"{p.calls} calls, {p.results} results, {p.records} records, {p.spent()} Credits"
+        f"{p.calls} calls, {p.results} results, {p.records} records, {p.spent()} API Credits"
     )
     for r in wave_rows:
         print(r["year"], r["ai_count"], r["all_count"], r["ai_share"])

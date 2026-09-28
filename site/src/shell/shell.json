@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "nav": [
+    {
+      "href": "/docs",
+      "label": "Docs"
+    },
+    {
+      "href": "/docs/api",
+      "label": "API reference"
+    },
+    {
+      "href": "/integrations",
+      "label": "Integrations"
+    },
+    {
+      "href": "/integrations/muse",
+      "label": "Muse",
+      "badge": "New"
+    },
+    {
+      "href": "/casebook",
+      "label": "Casebook",
+      "document": true
+    },
+    {
+      "href": "/docs/credits",
+      "label": "Pricing"
+    }
+  ],
+  "footer": {
+    "columns": [
+      {
+        "title": "Platform",
+        "links": [
+          {
+            "label": "Overview",
+            "href": "/overview"
+          },
+          {
+            "label": "API keys",
+            "href": "/api-keys"
+          },
+          {
+            "label": "Usage",
+            "href": "/usage"
+          },
+          {
+            "label": "Billing",
+            "href": "/billing"
+          },
+          {
+            "label": "Pricing and API Credits",
+            "href": "/docs/credits"
+          }
+        ]
+      },
+      {
+        "title": "Developers",
+        "links": [
+          {
+            "label": "Documentation",
+            "href": "/docs"
+          },
+          {
+            "label": "Quickstart",
+            "href": "/docs/quickstart"
+          },
+          {
+            "label": "API reference",
+            "href": "/docs/api"
+          },
+          {
+            "label": "MCP server",
+            "href": "/docs/mcp"
+          },
+          {
+            "label": "Agent skills",
+            "href": "/docs/skills"
+          },
+          {
+            "label": "Integrations",
+            "href": "/integrations"
+          },
+          {
+            "label": "Casebook",
+            "href": "/casebook",
+            "document": true
+          },
+          {
+            "label": "Error reference",
+            "href": "/docs/reference/errors"
+          },
+          {
+            "label": "Changelog",
+            "href": "/docs/reference/changelog"
+          }
+        ]
+      },
+      {
+        "title": "Account",
+        "links": [
+          {
+            "label": "Sign in",
+            "href": "/signin"
+          },
+          {
+            "label": "Create an account",
+            "href": "/signup"
+          },
+          {
+            "label": "Settings",
+            "href": "/settings"
+          },
+          {
+            "label": "Contact support",
+            "href": "mailto:support@metix.ai",
+            "external": true
+          }
+        ]
+      }
+    ],
+    "tagline": "Programmatic access to people, job and company data, under one key.",
+    "address": [
+      "OpenJobs AI Inc.",
+      "8 The Green, Ste A",
+      "Dover, DE 19901, USA"
+    ],
+    "legal": [
+      {
+        "label": "Terms",
+        "href": "https://metix.ai/terms-of-service",
+        "external": true
+      },
+      {
+        "label": "Privacy",
+        "href": "https://metix.ai/privacy-policy",
+        "external": true
+      },
+      {
+        "label": "support@metix.ai",
+        "href": "mailto:support@metix.ai",
+        "external": true
+      }
+    ],
+    "copyright": "© 2026 OpenJobs AI Inc.",
+    "rail": [
+      {
+        "label": "profiles",
+        "value": 900,
+        "unit": "M"
+      },
+      {
+        "label": "job postings",
+        "value": 90,
+        "unit": "M",
+        "note": "10M active daily"
+      },
+      {
+        "label": "companies",
+        "value": 30,
+        "unit": "M"
+      }
+    ],
+    "apiVersion": "v1 · stable"
+  },
+  "tokens": {
+    "brand": "#161514",
+    "brandHover": "#2E2C2A",
+    "brandForeground": "#FFFFFF",
+    "brandInk": "#07545E",
+    "textPrimary": "#161514",
+    "textSecondary": "#4E4D4B",
+    "textMuted": "#6B6A67",
+    "borderDefault": "#E3E6E6",
+    "bgHover": "#EEF1F1",
+    "bgSubtle": "#F4F6F6",
+    "headerSurface": "rgba(255, 255, 255, 0.92)",
+    "headerBorder": "rgba(22, 21, 20, 0.08)",
+    "headerRule": "rgba(22, 21, 20, 0.14)",
+    "headerSheet": "#FFFFFF",
+    "signal": "#0AA5B8",
+    "signalOnDark": "#7FE7F2",
+    "footerGround": "#161514",
+    "onDarkStrong": "rgba(255,255,255,0.92)",
+    "onDarkBody": "rgba(255,255,255,0.66)",
+    "onDarkMuted": "rgba(255,255,255,0.58)",
+    "onDarkLine": "rgba(255,255,255,0.12)",
+    "onDarkLineSoft": "rgba(255,255,255,0.08)"
+  },
+  "layout": {
+    "page": 1200,
+    "gutter": 20,
+    "gutterWide": 40,
+    "wideFrom": 1024
+  }
+}

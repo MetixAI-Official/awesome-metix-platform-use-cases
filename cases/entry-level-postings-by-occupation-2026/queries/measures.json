@@ -1,5 +1,5 @@
 {
-  "note": "What is counted for each family in queries/families.json. Every count adds base to the family's conditions and is sent with size 1, so it costs 1 Credit and reads no posting.",
+  "note": "What is counted for each family in queries/families.json. Every count adds base to the family's conditions and is sent with size 1, so it costs 1 API Credit and reads no posting.",
   "base": [
     {"field": "is_open", "eq": true},
     {"field": "location.country", "eq": "United States"}

@@ -44,6 +44,9 @@ def aggregate(unit: str, rows: list[dict], **extra: object) -> str:
         "Write to support@metix.ai. Example: someone@example.com.",
         "Visible profiles rose 12.5% to 3,041 on 2026-09-18T09:30:00+00:00.",
         "npx skills add MetixAI-Official/metix-skills",
+        "It cost 104 API Credits; 1 API Credit buys 25 search results.",
+        "API Credits and Mira Credits are not interchangeable.",
+        '"credits": 12, "exploration_credits": 40',
     ],
 )
 def test_clean_text_passes(text: str) -> None:
@@ -73,6 +76,9 @@ def test_clean_text_passes(text: str) -> None:
         ("Met" + "ix AI 平台", "brand"),
         ("Met" + "ix.ai", "brand"),
         ("Open" + "Jobs data", "brand"),
+        ("104 Cred" + "its to reproduce", "credits"),
+        ("one Cred" + "it each", "credits"),
+        ("复现需 12 Cred" + "its", "credits"),
         ("a pause " + chr(0x2014) + " then", "dash"),
         ("pages 3" + chr(0x2013) + "5", "dash"),
     ],

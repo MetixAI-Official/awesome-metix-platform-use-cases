@@ -12,11 +12,11 @@ Open job postings on September 21, 2026 whose title matches "forward deployed". 
 
 ## Method
 
-One worldwide count and one count per country, one Credit each. The rest of the world is the worldwide count minus the twelve. No posting is read in the replay.
+One worldwide count and one count per country, one API Credit each. The rest of the world is the worldwide count minus the twelve. No posting is read in the replay.
 
 ## How it was made
 
-An AI agent built this card through the public REST API. It read 500 postings to see which countries appear and took the twelve largest. Search results come in their own order, so that read was used only to choose countries: it put the US at 51%, while the full count says 64.8%. Exploration cost about 137 Credits, most of it that read; the replay costs 13.
+An AI agent built this card through the public REST API. It read 500 postings to see which countries appear and took the twelve largest. Search results come in their own order, so that read was used only to choose countries: it put the US at 51%, while the full count says 64.8%. Exploration cost about 137 API Credits, most of it that read; the replay costs 13.
 
 ## Limits
 

@@ -4,7 +4,7 @@
     export METIX_KEY=metix_xxxxxxxxxxxx   (or put it in the repository's .env)
     python3 cases/ai-tool-stack-in-hiring-2026/fetch.py
 
-Count queries only, one Credit each: no posting or profile record is read.
+Count queries only, one API Credit each: no posting or profile record is read.
 Tool conditions are in queries/tools.json, the other dimensions in
 queries/dimensions.json. Every count of people passes the small-cell rule.
 """
@@ -141,7 +141,7 @@ def main() -> int:
     )
 
     write_json(HERE, "receipt.json", p.receipt())
-    print(f"{p.calls} calls, {p.spent()} Credits; any assistant: {world}")
+    print(f"{p.calls} calls, {p.spent()} API Credits; any assistant: {world}")
     print({r["group"]: (r["count"], by_id[r["group"]]["family"]) for r in demand})
     print({r["group"]: r["count"] for r in supply})
     return 0

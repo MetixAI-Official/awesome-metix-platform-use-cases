@@ -1,16 +1,16 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about L to H Credits: C for the counts and the rest for the reads the prompt asks for. It stops and asks before CAP. Use the same three numbers as agent_run in case.yaml.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about L to H API Credits: C for the counts and the rest for the reads the prompt asks for. It stops and asks before CAP. Use the same three numbers as agent_run in case.yaml.
 
 Replace every line in the block, keep the order, and keep each step concrete: exact terms, exact fields, exact numbers. The finished prompt is what the case is made from, so a reader who runs it should get the published numbers. See `cases/inference-roles-us-metros-2026/PROMPT.md` for a complete one.
 
 ```text
 Answer one question with the Metix AI Platform: <the question, in one sentence>. Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. <GET /contract, which dataset's fields, and the Credits page.>
+1. Read before querying. <GET /contract, which dataset's fields, and the API Credits page.>
 2. Population. <Exact filters, terms, and exclusions, and how they are composed.>
 3. Count first. <Which totals, with size 1, and what each costs.>
-4. Budget. <Balance before and after, when to read records, the Credit ceiling to stop at.>
+4. Budget. <Balance before and after, when to read records, the API Credit ceiling to stop at.>
 5. Audit. <Which sample to read, what counts as off-topic, and the threshold that triggers a fix.>
 6. Clean. <Duplicates and missing values, and how each is counted.>
 7. Group. <Every group as an explicit definition written to a file, and the leftover buckets.>

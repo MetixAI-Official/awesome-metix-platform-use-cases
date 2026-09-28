@@ -18,11 +18,11 @@ Postings: open job postings on September 21, 2026 whose description names a tool
 
 ## Method
 
-92 counts, one Credit each. No posting and no profile is read. Every count of people passes the small-cell rule. `fetch.py` writes six aggregate files and the receipt to `data/`.
+92 counts, one API Credit each. No posting and no profile is read. Every count of people passes the small-cell rule. `fetch.py` writes six aggregate files and the receipt to `data/`.
 
 ## How it was made
 
-An AI agent built this report through the public REST API. It first checked each tool name against samples of job descriptions (Claude Code and GitHub Copilot 40 of 40, AutoGen 39 of 40; the plain words Cursor, Codex, and Windsurf 55 to 56 of 60, so they were tightened). It first pulled its industry list from the top of one search, saw that the list missed large industries, and replaced it with a wider list marked as selected rather than ranked. Two full runs were replaced along the way, one because the receipt counted free balance reads as calls. Exploration, those runs included, cost about 236 Credits; the replay costs 92.
+An AI agent built this report through the public REST API. It first checked each tool name against samples of job descriptions (Claude Code and GitHub Copilot 40 of 40, AutoGen 39 of 40; the plain words Cursor, Codex, and Windsurf 55 to 56 of 60, so they were tightened). It first pulled its industry list from the top of one search, saw that the list missed large industries, and replaced it with a wider list marked as selected rather than ranked. Two full runs were replaced along the way, one because the receipt counted free balance reads as calls. Exploration, those runs included, cost about 236 API Credits; the replay costs 92.
 
 ## Limits
 

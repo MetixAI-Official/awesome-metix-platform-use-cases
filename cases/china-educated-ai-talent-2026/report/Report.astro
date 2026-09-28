@@ -13,6 +13,7 @@
  *   Nothing here is inferred from names, languages, or nationality. Counts are lower bounds;
  *   shares are ratios within visible profiles and can sit above or below the share among all staff.
  */
+import CaseEyebrow from "@site/components/CaseEyebrow.astro";
 import FigNotes from "@site/components/charts/FigNotes.astro";
 import Figure from "@site/components/charts/Figure.astro";
 import { REPO, href, isoDate, longDate, number, titleHtml, type Lang } from "@site/i18n";
@@ -200,20 +201,13 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
       <header class="cn-hero">
         <div class="wrap cn-grid">
           <div>
-            <nav class="cn-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
-              <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
-              <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
-            </nav>
-            <p class="cn-meta">
-              {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=people#index`}>{zh ? "个人档案" : "Profiles"}</a> ·{" "}
-              <span class="nowrap">{iso}</span>
-            </p>
+            <CaseEyebrow lang={lang} slug={entry.slug} format="report" datasets={entry.datasets} snapshot={entry.snapshot} />
             <h1 set:html={titleHtml(entry.title[lang], lang)} />
             <p class="cn-dek">{entry.dek[lang]}</p>
             <div class="cn-actions">
               <a class="cn-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
               <a class="cn-chip" href="#run-reproduce">
-                {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+                {zh ? `复现需 ${receipt.credits} API Credits` : `${receipt.credits} API Credits to reproduce`}
               </a>
               <span class="cn-note">{zh ? "复现只计数，不读取任何档案" : "Reproducing reads no profiles: every number is a count"}</span>
             </div>
@@ -761,7 +755,7 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
     gap: 48px 72px;
     align-items: end;
-    padding-block: clamp(48px, 7vw, 96px) clamp(40px, 6vw, 80px);
+    padding-block: clamp(24px, 3.5vw, 40px) clamp(40px, 6vw, 80px);
   }
 
   .cn-eyebrow {
@@ -1030,8 +1024,8 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     content: "";
     position: absolute;
     inset: -6px 0;
-    background: linear-gradient(to right, rgb(11 10 31 / 0.07) 1px, transparent 1px) 0 0 / 20% 100% repeat-x;
-    box-shadow: inset -1px 0 0 rgb(11 10 31 / 0.07);
+    background: linear-gradient(to right, rgb(22 21 20 / 0.07) 1px, transparent 1px) 0 0 / 20% 100% repeat-x;
+    box-shadow: inset -1px 0 0 rgb(22 21 20 / 0.07);
   }
 
   .rate-track .bar {
@@ -1247,8 +1241,8 @@ const ticks = [0, 0.1, 0.2, 0.3, 0.4, 0.5];
     content: "";
     position: absolute;
     inset: -5px 0;
-    background: linear-gradient(to right, rgb(11 10 31 / 0.07) 1px, transparent 1px) 0 0 / var(--inst-step, 25%) 100% repeat-x;
-    box-shadow: inset -1px 0 0 rgb(11 10 31 / 0.07);
+    background: linear-gradient(to right, rgb(22 21 20 / 0.07) 1px, transparent 1px) 0 0 / var(--inst-step, 25%) 100% repeat-x;
+    box-shadow: inset -1px 0 0 rgb(22 21 20 / 0.07);
   }
 
   .inst-track .bar {

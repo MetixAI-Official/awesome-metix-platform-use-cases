@@ -1,0 +1,99 @@
+---
+/**
+ * The platform's top bar, drawn from the platform's own data (see shell.ts), so a
+ * reader moving between /docs and /casebook stays on one website: same logo in the
+ * same place, same links, "Casebook" lit.
+ *
+ * Two differences from the platform's React bar, both deliberate. It always shows
+ * Sign in and Get an API key: knowing whether someone is signed in means reading the
+ * login token in localStorage, and Casebook code never touches it (docs/style.md,
+ * "Same origin as the console"). A signed-in reader who clicks Sign in lands in the
+ * console anyway. The Casebook's language switch is not in the bar: it would make the
+ * right column wider than the left and push the nav off the bar's centre, so it sits
+ * at the top of the page instead (Base.astro).
+ * yagni: the menu sheet opens and closes on tap and Escape, without the platform's
+ * drag-to-dismiss; add it if phone readers reach for it.
+ */
+import MetixLogo from "@site/components/MetixLogo.astro";
+import { NAV, SIGNIN, SIGNUP } from "@site/shell";
+import { ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+  path: string;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+---
+
+<header class="pf-bar" data-pf-bar>
+  <div class="pf-bar-row">
+    <a class="pf-home" href="/" aria-label="Metix AI Platform">
+      <MetixLogo id="pf-logo-bar" class="pf-logo" />
+      <span class="pf-rule" aria-hidden="true"></span>
+      <span class="pf-platform" aria-hidden="true">Platform</span>
+    </a>
+
+    <nav class="pf-nav" aria-label="Main">
+      {
+        NAV.map((item) => (
+          <a
+            href={item.href}
+            class="pf-nav-link"
+            aria-current={item.href === "/casebook" ? "page" : undefined}
+          >
+            {item.label}
+            {item.badge && (
+              <span class="pf-badge">
+                <span class="visually-hidden">, </span>
+                {item.badge}
+              </span>
+            )}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="pf-actions">
+      <a class="pf-signin" href={SIGNIN}>Sign in</a>
+      <a class="pf-key" href={SIGNUP}>Get an API key</a>
+      <button class="pf-menu" type="button" aria-expanded="false" aria-controls="pf-sheet" data-pf-menu>
+        <span class="visually-hidden" data-pf-menu-label data-open={t.menuOpen} data-close={t.menuClose}>{t.menuOpen}</span>
+        <svg class="pf-icon-open" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 5h16M4 12h16M4 19h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+        <svg class="pf-icon-close" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="pf-sheet-layer" id="pf-sheet" hidden data-pf-sheet>
+    <button class="pf-scrim" type="button" tabindex="-1" aria-hidden="true" data-pf-scrim></button>
+    <div class="pf-sheet" role="dialog" aria-modal="true" aria-label={t.siteMenu}>
+      <nav class="pf-sheet-nav" aria-label="Site">
+        {
+          NAV.map((item) => (
+            <a href={item.href} aria-current={item.href === "/casebook" ? "page" : undefined}>
+              {item.label}
+              {item.badge && (
+                <span class="pf-badge">
+                  <span class="visually-hidden">, </span>
+                  {item.badge}
+                </span>
+              )}
+            </a>
+          ))
+        }
+      </nav>
+      <div class="pf-sheet-rule"></div>
+      <div class="pf-sheet-actions">
+        <a class="pf-sheet-signin" href={SIGNIN}>Sign in</a>
+        <a class="pf-sheet-key" href={SIGNUP}>Get an API key</a>
+      </div>
+      <div class="pf-grip" aria-hidden="true"></div>
+    </div>
+  </div>
+</header>

@@ -4,7 +4,7 @@
     export METIX_KEY=...   (your key; or put it in the repository's .env)
     python3 cases/meta-superintelligence-labs-2026/fetch.py
 
-Count queries only: each costs 1 Credit, or nothing when it finds no one, and
+Count queries only: each costs 1 API Credit, or nothing when it finds no one, and
 no profile or posting is read. Who counts is in queries/population.json and
 what is counted in queries/measures.json. Every count of people passes the
 small-cell rule; a series of dates merges neighbouring bands that would hold 1
@@ -2010,7 +2010,7 @@ def main() -> int:
         write_json(HERE, name, doc2)
     write_json(HERE, "receipt.json", p.receipt())
 
-    print(f"{p.calls} calls, {p.spent()} Credits")
+    print(f"{p.calls} calls, {p.spent()} API Credits")
     print("cohorts", c, "narrow", nc, "microsoft", mc, "labeling", labeling)
     print(
         "first", list(zip(edges_all, first_all)), "job", list(zip(job_edges, first_job))

@@ -131,7 +131,7 @@ def main() -> int:
     )
     write_json(HERE, "receipt.json", platform.receipt())
     print(
-        f"{len(kept)} distinct US postings; {platform.calls} calls; {platform.spent()} Credits."
+        f"{len(kept)} distinct US postings; {platform.calls} calls; {platform.spent()} API Credits."
     )
     return 0
 

@@ -85,9 +85,14 @@ export function titleHtml(text: string, lang: Lang): string {
 
 const BASE = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 
-/** Site-relative link in a language. `path` is relative to the language root, e.g. "cases/x/". */
+/**
+ * Site-relative link in a language. `path` is relative to the language root, e.g. a
+ * case slug, "x#prompt". No trailing slash anywhere: see astro.config.mjs.
+ */
 export function href(lang: Lang, path = ""): string {
-  return BASE + (lang === "zh" ? "zh/" : "") + path.replace(/^\//, "");
+  const [page, hash] = path.split("#");
+  const joined = (BASE + (lang === "zh" ? "zh/" : "") + page.replace(/^\/|\/$/g, "")).replace(/\/+$/, "");
+  return (joined || "/") + (hash === undefined ? "" : `#${hash}`);
 }
 
 export function asset(path: string): string {
@@ -108,9 +113,9 @@ export function longDate(lang: Lang, date: Date): string {
   return new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "UTC" }).format(date);
 }
 
-/** Pay-as-you-go price on mira-api.metix.ai/docs/credits.md: $1 buys 30 Credits. */
+/** Pay-as-you-go price on mira-api.metix.ai/docs/credits.md: $1 buys 30 API Credits. */
 export const CREDITS_PER_DOLLAR = 30;
-/** New accounts get this many Credits once, valid for 30 days. */
+/** New accounts get this many API Credits once, valid for 30 days. */
 export const FREE_CREDITS = 100;
 
 export function dollars(lang: Lang, credits: number): string {
@@ -127,9 +132,9 @@ export const ui = {
     htmlLang: "en",
     casebook: "Casebook",
     mastLede:
-      "Job-market questions answered by an AI agent on the Metix AI Platform. Every number ships with its query, its cost in Credits, and the prompt that produced it.",
+      "Job-market questions answered by an AI agent on the Metix AI Platform. Every number ships with its query, its cost in API Credits, and the prompt that produced it.",
     mastCases: "published cases",
-    mastCredits: "Credits to rerun them all",
+    mastCredits: "API Credits to rerun them all",
     mastRun: "latest run",
     reportsLabel: "Reports",
     reportsNote: "Long reads, many charts, one question looked at from several sides.",
@@ -138,7 +143,7 @@ export const ui = {
     formats: { card: "Card", report: "Report" },
     readReport: "Read the report",
     openCard: "Open the card",
-    toRerun: (n: string) => `${n} Credits to reproduce`,
+    toRerun: (n: string) => `${n} API Credits to reproduce`,
     seePrompt: "See the prompt",
     makeEyebrow: "Your card",
     makeTitle: "Make your own card",
@@ -150,15 +155,18 @@ export const ui = {
       `Search results are IDs returned by searches, one per count query and one per match on a full search. Records are postings or profiles read in full: ${records === 0 ? "this case reads none" : `${number("en", records)} here`}.`,
     siteName: "Metix AI Platform use cases",
     siteDescription:
-      "Job-market reports made by an AI agent on the Metix AI Platform, each with its queries, its cost in Credits, and the prompt that produced it.",
+      "Job-market reports made by an AI agent on the Metix AI Platform, each with its queries, its cost in API Credits, and the prompt that produced it.",
     navCases: "Use cases",
     navGithub: "GitHub",
     navKey: "Get an API key",
     navKeyShort: "API key",
     langLabel: "Language",
+    menuOpen: "Open menu",
+    menuClose: "Close menu",
+    siteMenu: "Site menu",
     catalogTitle: "Job-market reports, each made by an agent on the Metix AI Platform",
     catalogLede:
-      "Every report shows the queries behind its numbers, what they cost in Credits, and the prompt that produced it, so you can run it again on your own key and change it to fit your own question.",
+      "Every report shows the queries behind its numbers, what they cost in API Credits, and the prompt that produced it, so you can run it again on your own key and change it to fit your own question.",
     published: "Reports",
     comingNext: "Coming next",
     comingNextNote: "Working titles. A published report is titled with its finding.",
@@ -170,15 +178,16 @@ export const ui = {
     calls: "calls",
     records: "records",
     countsOnly: "counts only, no records read",
-    creditsToRerun: "Credits to reproduce",
+    creditsToRerun: "API Credits to reproduce",
     home: {
+      title: "Job-market questions, answered on the API, with the bill attached.",
       lede:
         "Job-market questions answered by AI agents on the Metix AI Platform, a data API for professional profiles, job postings, and companies that agents reach through MCP, skills, or REST. Each case publishes the finding, the queries behind it, what it cost, and the prompt that produced it.",
       ctaStart: "Run your first case",
       ctaBrowse: "Browse all cases",
       statCases: "published cases",
-      statCheapest: "Credits for the cheapest agent run",
-      statFree: "free Credits for a new account",
+      statCheapest: "API Credits for the cheapest agent run",
+      statFree: "free API Credits for a new account",
       featured: "Featured",
       featuredNote: "The newest report and three cards. Every case is in the index below.",
       index: "All cases",
@@ -195,8 +204,8 @@ export const ui = {
       count: (n: number) => (n === 1 ? "1 case" : `${n} cases`),
       noResults: "No case matches these filters.",
       clear: "Clear search and filters",
-      reproduceShort: (n: string) => `reproduce ${n} Credits`,
-      agentShort: (range: string) => `agent run ${range} Credits`,
+      reproduceShort: (n: string) => `reproduce ${n} API Credits`,
+      agentShort: (range: string) => `agent run ${range} API Credits`,
       makeOwn: "Make your own case",
       makeOwnBody: "Start from the prompt template: change the question, keep the ten steps, run it on your key.",
     },
@@ -220,20 +229,20 @@ export const ui = {
         "Your agent follows the prompt step by step: it reads the rules, runs the counts, checks the definitions the prompt asks it to check, and writes the files and charts. Use an agent that can write files, such as Claude Code or Codex.",
       stepKey: "Get a key",
       keyBody:
-        "New accounts get 100 Credits once, valid for 30 days. Set the key in the shell you start your agent from, or add the line to ~/.zshrc or ~/.bashrc so every new terminal has it:",
+        "New accounts get 100 API Credits once, valid for 30 days. Set the key in the shell you start your agent from, or add the line to ~/.zshrc or ~/.bashrc so every new terminal has it:",
       createKey: "Create a key on the Metix AI Platform",
       stepConnect: "Connect your agent",
       stepCheck: "Check the setup",
       checkBody: "Ask this first. It reads your balance and the field list, runs no search, and costs nothing:",
       checkPrompt:
-        "Use the Metix AI Platform to check my key status and read the contract; both are free. Then tell me my Credit balance and which datasets I can query. Do not run any search.",
+        "Use the Metix AI Platform to check my key status and read the contract; both are free. Then tell me my API Credit balance and which datasets I can query. Do not run any search.",
       stepPrompt: "Paste the prompt",
       stepPromptBody: "Start your agent in an empty folder, then paste. It writes its files there.",
       setupOnce: "Set up once",
       setupOnceNote: "Key, connection, and a free check. Skip this if your agent already reaches the Platform.",
       viewSource: "PROMPT.md on GitHub",
       agentGet:
-        "The aggregate files and the chart, a note on what the audits found and what they changed, and the Credits the run spent, read from the balance before and after.",
+        "The aggregate files and the chart, a note on what the audits found and what they changed, and the API Credits the run spent, read from the balance before and after.",
       getLabel: "What you get",
       adaptLede:
         "The prompt is the case. Change the parts in this table and your agent answers your question instead, with the same checks and the same way of reporting cost.",
@@ -244,12 +253,12 @@ export const ui = {
       title: "What it costs",
       reproduce: "Reproduce",
       agent: "Agent run",
-      credits: (lo: number, hi: number = lo) => (lo === hi ? `${number("en", lo)} Credits` : `${number("en", lo)} to ${number("en", hi)} Credits`),
-      capNote: (n: number) => `Your agent stops and asks before spending more than ${number("en", n)} Credits.`,
-      free: "Fits in the 100 free Credits",
-      maybe: "May run past the 100 free Credits",
-      notFree: "More than the 100 free Credits",
-      unitNote: "1 Credit buys 25 search results or 5 full records; $1 buys 30 Credits.",
+      credits: (lo: number, hi: number = lo) => (lo === hi ? `${number("en", lo)} API Credits` : `${number("en", lo)} to ${number("en", hi)} API Credits`),
+      capNote: (n: number) => `Your agent stops and asks before spending more than ${number("en", n)} API Credits.`,
+      free: "Fits in the 100 free API Credits",
+      maybe: "May run past the 100 free API Credits",
+      notFree: "More than the 100 free API Credits",
+      unitNote: "1 API Credit buys 25 search results or 5 full records; $1 buys 30 API Credits.",
     },
     setup: {
       label: "How your agent connects",
@@ -269,7 +278,7 @@ export const ui = {
     start: {
       title: "Run your first case",
       lede: (total: number, reproduce: number, agent: number) =>
-        `Four steps, a few minutes. A new account's 100 free Credits reproduce ${reproduce === total ? `all ${total} cases` : `${reproduce} of the ${total} cases`} and run ${agent} of them end to end in your agent.`,
+        `Four steps, a few minutes. A new account's 100 free API Credits reproduce ${reproduce === total ? `all ${total} cases` : `${reproduce} of the ${total} cases`} and run ${agent} of them end to end in your agent.`,
       stepRun: "Run a case",
       connectBody: "Pick the agent you use. Each tab gives the one step that connects it to the Metix AI Platform.",
       openPrompt: "Open its prompt",
@@ -295,12 +304,12 @@ export const ui = {
     callsLabel: "Calls",
     resultsLabel: "Search results",
     recordsLabel: "Records read",
-    creditsLabel: "Credits",
+    creditsLabel: "API Credits",
     exploration: (n: number) =>
-      `Making this case cost about ${number("en", n)} Credits more: the agent's audits, trial queries, and earlier runs that the published replay replaced. You do not pay that again.`,
+      `Making this case cost about ${number("en", n)} API Credits more: the agent's audits, trial queries, and earlier runs that the published replay replaced. You do not pay that again.`,
     rerun: "Reproduce it",
     caseFolder: "Case folder on GitHub",
-    pricing: "Credits and pricing",
+    pricing: "API Credits and pricing",
     allCases: "All cases",
     skipLink: "Skip to content",
     crumbs: "Breadcrumb",
@@ -311,15 +320,15 @@ export const ui = {
     footerPolicy: "Public data policy",
     footerSource: "Source on GitHub",
     legal:
-      "Copyright 2026 OpenJobs AI Inc. Metix AI Platform is a product of OpenJobs AI Inc. Code under Apache-2.0; text, charts, and data under CC BY 4.0.",
+      "Casebook code is under Apache-2.0; its text, charts, and data are under CC BY 4.0.",
   },
   zh: {
     htmlLang: "zh-CN",
     casebook: "Casebook",
     mastLede:
-      "由 AI agent 在 Metix AI Platform 上回答的就业市场问题。每个数字都附带它的查询、花了多少 Credits，以及生成它的提示词。",
+      "由 AI agent 在 Metix AI Platform 上回答的就业市场问题。每个数字都附带它的查询、花了多少 API Credits，以及生成它的提示词。",
     mastCases: "个已发布案例",
-    mastCredits: "Credits 可全部复现",
+    mastCredits: "API Credits 可全部复现",
     mastRun: "最近一次运行",
     reportsLabel: "报告",
     reportsNote: "长篇，多张图，从几个角度看同一个问题。",
@@ -328,7 +337,7 @@ export const ui = {
     formats: { card: "卡片", report: "报告" },
     readReport: "阅读报告",
     openCard: "打开卡片",
-    toRerun: (n: string) => `复现需 ${n} Credits`,
+    toRerun: (n: string) => `复现需 ${n} API Credits`,
     seePrompt: "查看提示词",
     makeEyebrow: "你的卡片",
     makeTitle: "做一张你自己的卡片",
@@ -339,15 +348,18 @@ export const ui = {
       `搜索结果是搜索返回的 ID 数，每次计数查询算一个，完整搜索按命中数算。记录是完整读取的岗位或档案：${records === 0 ? "这个案例一条都没读" : `这里读了 ${number("zh", records)} 条`}。`,
     siteName: "Metix AI Platform 案例集",
     siteDescription:
-      "由 AI agent 在 Metix AI Platform 上完成的就业市场报告，每份都附带查询、Credits 花费和生成它的提示词。",
+      "由 AI agent 在 Metix AI Platform 上完成的就业市场报告，每份都附带查询、API Credits 花费和生成它的提示词。",
     navCases: "案例",
     navGithub: "GitHub",
     navKey: "获取 API key",
     navKeyShort: "API key",
     langLabel: "语言",
+    menuOpen: "打开菜单",
+    menuClose: "关闭菜单",
+    siteMenu: "网站菜单",
     catalogTitle: "就业市场报告，每一份都由 agent 在 Metix AI Platform 上完成",
     catalogLede:
-      "每份报告都公开数字背后的查询、花了多少 Credits，以及生成它的提示词。你可以用自己的 key 重跑，也可以改成你自己的问题。",
+      "每份报告都公开数字背后的查询、花了多少 API Credits，以及生成它的提示词。你可以用自己的 key 重跑，也可以改成你自己的问题。",
     published: "报告",
     comingNext: "即将发布",
     comingNextNote: "暂定标题。正式发布时标题会换成结论。",
@@ -359,14 +371,15 @@ export const ui = {
     calls: "次调用",
     records: "条记录",
     countsOnly: "只计数，未读取记录",
-    creditsToRerun: "Credits 可复现",
+    creditsToRerun: "API Credits 可复现",
     home: {
+      title: "用 API 回答的就业市场问题，每一个都附上账单。",
       lede: "由 AI agent 在 Metix AI Platform 上回答的就业市场问题。Metix AI Platform 是职业档案、招聘岗位和公司的数据 API，agent 可以通过 MCP、skills 或 REST 访问。每个案例都公开结论、背后的查询、花了多少，以及生成它的提示词。",
       ctaStart: "跑你的第一个案例",
       ctaBrowse: "浏览全部案例",
       statCases: "个已发布案例",
-      statCheapest: "Credits，最便宜的案例交给\u00a0agent\u00a0跑",
-      statFree: "Credits，新账户赠送",
+      statCheapest: "API Credits，最便宜的案例交给\u00a0agent\u00a0跑",
+      statFree: "API Credits，新账户赠送",
       featured: "精选",
       featuredNote: "最新的一份报告和三张卡片。全部案例都在下面的索引里。",
       index: "全部案例",
@@ -383,8 +396,8 @@ export const ui = {
       count: (n: number) => `${n} 个案例`,
       noResults: "没有符合这些筛选条件的案例。",
       clear: "清除搜索和筛选",
-      reproduceShort: (n: string) => `复现 ${n} Credits`,
-      agentShort: (range: string) => `agent 运行 ${range} Credits`,
+      reproduceShort: (n: string) => `复现 ${n} API Credits`,
+      agentShort: (range: string) => `agent 运行 ${range} API Credits`,
       makeOwn: "做你自己的案例",
       makeOwnBody: "从提示词模板开始：换成你的问题，保留十个步骤，用你自己的 key 运行。",
     },
@@ -406,19 +419,19 @@ export const ui = {
       agentLede:
         "你的 agent 按提示词一步步执行：先读规则，再计数，按提示词的要求检查定义，最后写出文件和图表。请使用能写文件的 agent，比如 Claude Code 或 Codex。",
       stepKey: "获取 key",
-      keyBody: "新账户一次性赠送 100 Credits，30 天内有效。在启动 agent 的终端里设置，或者把这一行写进 ~/.zshrc 或 ~/.bashrc，新开的终端也能用：",
+      keyBody: "新账户一次性赠送 100 API Credits，30 天内有效。在启动 agent 的终端里设置，或者把这一行写进 ~/.zshrc 或 ~/.bashrc，新开的终端也能用：",
       createKey: "在 Metix AI Platform 上创建 key",
       stepConnect: "连接你的 agent",
       stepCheck: "检查配置",
-      checkBody: "先问这一句。它只读取余额和字段列表，不做任何搜索，不花 Credits：",
+      checkBody: "先问这一句。它只读取余额和字段列表，不做任何搜索，不花 API Credits：",
       checkPrompt:
-        "使用 Metix AI Platform：查询我的 key 状态并读取 contract，这两项都免费。然后告诉我我的 Credit 余额和可以查询哪些数据集。不要做任何搜索。",
+        "使用 Metix AI Platform：查询我的 key 状态并读取 contract，这两项都免费。然后告诉我我的 API Credit 余额和可以查询哪些数据集。不要做任何搜索。",
       stepPrompt: "粘贴提示词",
       stepPromptBody: "在一个空文件夹里启动 agent，再粘贴。它会把文件写在那里。",
       setupOnce: "一次性配置",
       setupOnceNote: "key、连接和一次免费检查。如果你的 agent 已经接入 Metix AI Platform，可以跳过。",
       viewSource: "GitHub 上的 PROMPT.md",
-      agentGet: "聚合文件和图表，一段说明抽检发现了什么、改了什么，以及这次运行花了多少 Credits（取自运行前后的余额）。",
+      agentGet: "聚合文件和图表，一段说明抽检发现了什么、改了什么，以及这次运行花了多少 API Credits（取自运行前后的余额）。",
       getLabel: "你会得到",
       adaptLede: "提示词就是这个案例本身。改掉下表里的部分，你的 agent 就会回答你的问题，用同样的检查和同样的花费记录方式。",
       adaptCost: "花费取决于你的版本读取多少。在提示词第 1 步里写上你自己的上限。",
@@ -428,12 +441,12 @@ export const ui = {
       title: "花费",
       reproduce: "复现",
       agent: "agent 运行",
-      credits: (lo: number, hi: number = lo) => (lo === hi ? `${number("zh", lo)} Credits` : `${number("zh", lo)} 到 ${number("zh", hi)} Credits`),
-      capNote: (n: number) => `花费超过 ${number("zh", n)} Credits 之前，agent 会先停下来问你。`,
-      free: "新账户赠送的 100 Credits 够用",
-      maybe: "可能超出赠送的 100 Credits",
-      notFree: "超过新账户赠送的 100 Credits",
-      unitNote: "1 Credit 可以买 25 个搜索结果或 5 条完整记录；1 美元可以买 30 Credits。",
+      credits: (lo: number, hi: number = lo) => (lo === hi ? `${number("zh", lo)} API Credits` : `${number("zh", lo)} 到 ${number("zh", hi)} API Credits`),
+      capNote: (n: number) => `花费超过 ${number("zh", n)} API Credits 之前，agent 会先停下来问你。`,
+      free: "新账户赠送的 100 API Credits 够用",
+      maybe: "可能超出赠送的 100 API Credits",
+      notFree: "超过新账户赠送的 100 API Credits",
+      unitNote: "1 API Credit 可以买 25 个搜索结果或 5 条完整记录；1 美元可以买 30 API Credits。",
     },
     setup: {
       label: "连接方式",
@@ -451,7 +464,7 @@ export const ui = {
     start: {
       title: "跑你的第一个案例",
       lede: (total: number, reproduce: number, agent: number) =>
-        `四步，几分钟。新账户赠送的 100 Credits 可以复现${reproduce === total ? `全部 ${total} 个案例` : ` ${total} 个案例中的 ${reproduce} 个`}，并交给 agent 完整跑完其中 ${agent} 个。`,
+        `四步，几分钟。新账户赠送的 100 API Credits 可以复现${reproduce === total ? `全部 ${total} 个案例` : ` ${total} 个案例中的 ${reproduce} 个`}，并交给 agent 完整跑完其中 ${agent} 个。`,
       connectBody: "选你用的 agent。每个标签页给出把它接入 Metix AI Platform 的那一步。",
       stepRun: "跑一个案例",
       openPrompt: "打开它的提示词",
@@ -476,12 +489,12 @@ export const ui = {
     callsLabel: "调用次数",
     resultsLabel: "搜索结果",
     recordsLabel: "读取记录",
-    creditsLabel: "Credits",
+    creditsLabel: "API Credits",
     exploration: (n: number) =>
-      `做这个案例另外花了大约 ${number("zh", n)} Credits：agent 做的抽检、试探性查询，以及被公开复现取代的早先运行。你不需要再花这部分。`,
+      `做这个案例另外花了大约 ${number("zh", n)} API Credits：agent 做的抽检、试探性查询，以及被公开复现取代的早先运行。你不需要再花这部分。`,
     rerun: "复现",
     caseFolder: "GitHub 上的案例目录",
-    pricing: "Credits 与价格",
+    pricing: "API Credits 与价格",
     allCases: "全部案例",
     skipLink: "跳到正文",
     crumbs: "页面路径",
@@ -492,7 +505,7 @@ export const ui = {
     footerPolicy: "公开数据规范",
     footerSource: "GitHub 源码",
     legal:
-      "Copyright 2026 OpenJobs AI Inc. Metix AI Platform 是 OpenJobs AI Inc. 的产品。代码采用 Apache-2.0，文字、图表和数据采用 CC BY 4.0。",
+      "Casebook 的代码采用 Apache-2.0，文字、图表和数据采用 CC BY 4.0。",
   },
 } as const;
 

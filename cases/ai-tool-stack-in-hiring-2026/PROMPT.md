@@ -1,11 +1,11 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 245 to 320 Credits: about 95 for the counts and the rest for the audit reads. It stops and asks before 320. Every published number is a count; the reads are only for the audits.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 245 to 320 API Credits: about 95 for the counts and the rest for the audit reads. It stops and asks before 320. Every published number is a count; the reads are only for the audits.
 
 ```text
 Answer one question with the Metix AI Platform: for the AI coding assistants and agent frameworks that employers name in job postings, how does demand compare with the people who list them as skills? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free). Postings use querySpecByEntity.job and match "description"; profiles use querySpecByEntity.profile and match "skills". A count with size 1 costs 1 Credit, so plan every number as a count. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 320 Credits.
+1. Read before querying. Call GET /contract (free). Postings use querySpecByEntity.job and match "description"; profiles use querySpecByEntity.profile and match "skills". A count with size 1 costs 1 API Credit, so plan every number as a count. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 320 API Credits.
 
 2. Tools. Coding assistants: Claude Code, Cursor, GitHub Copilot, Codex, Windsurf. Agent frameworks and protocols: LangChain, LangGraph, LlamaIndex, CrewAI, AutoGen, DSPy, and the Model Context Protocol (match "model context protocol").
 
@@ -39,4 +39,4 @@ Answer one question with the Metix AI Platform: for the AI coding assistants and
 1. Which tools, and could any name mean something else?
 2. Demand only, or demand against supply? Supply needs profile skills and the small-cell rule.
 3. Which breakdowns matter: countries, industries, pay?
-4. How many Credits may the audits spend reading descriptions?
+4. How many API Credits may the audits spend reading descriptions?

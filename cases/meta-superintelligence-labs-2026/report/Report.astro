@@ -13,6 +13,7 @@
  * Wording: the population is people who chose to name the lab, counted as profiles, not staff.
  *   Neutral verbs for moves (join, leave, return, hire). No one is named.
  */
+import CaseEyebrow from "@site/components/CaseEyebrow.astro";
 import BarList from "@site/components/charts/BarList.astro";
 import Chapter from "@site/components/Chapter.astro";
 import Contents from "@site/components/Contents.astro";
@@ -881,22 +882,14 @@ const parts2 = [
         <div class="wrap">
           <div class="mx-top">
             <div class="mx-text">
-              <nav class="mx-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
-                <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
-                <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
-              </nav>
-              <p class="mx-meta">
-                {zh ? "报告" : "Report"} ·{" "}
-                <a href={`${href(lang)}?data=people#index`}>{zh ? "个人档案" : "Profiles"}</a> ·{" "}
-                <span class="nowrap">{iso}</span>
-              </p>
+              <CaseEyebrow lang={lang} slug={entry.slug} format="report" datasets={entry.datasets} snapshot={entry.snapshot} />
               <h1 set:html={titleHtml(entry.title[lang], lang)} />
               <p class="mx-dek" set:html={titleHtml(entry.dek[lang], lang)} />
               <div class="mx-actions">
                 <a class="mx-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
                 <a class="mx-chip" href="#stage-2">{zh ? "第二阶段：组织地图" : "Stage 2: the map"}</a>
                 <a class="mx-chip" href="#run-reproduce">
-                  {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+                  {zh ? `复现需 ${receipt.credits} API Credits` : `${receipt.credits} API Credits to reproduce`}
                 </a>
                 <span class="mx-note">{zh ? "复现只计数，不读取任何个人档案" : "Reproducing reads no profiles: every number is a count"}</span>
               </div>
@@ -2430,7 +2423,7 @@ const parts2 = [
   .report-body {
     --st: #3d36c9;
     --hb: #7770de;
-    --nw: #0b0a1f;
+    --nw: #161514;
     --ctx: #858395;
   }
 
@@ -2438,7 +2431,7 @@ const parts2 = [
   .mx-hero {
     background: #fff;
     color: var(--ink);
-    padding-block: clamp(36px, 6vw, 72px) clamp(40px, 5vw, 64px);
+    padding-block: clamp(24px, 3.5vw, 40px) clamp(40px, 5vw, 64px);
     border-bottom: 1px solid var(--line);
   }
 
@@ -2538,7 +2531,7 @@ const parts2 = [
     grid-template-columns: subgrid;
     align-items: baseline;
     padding-block: 14px;
-    border-bottom: 1px solid rgb(11 10 31 / 0.14);
+    border-bottom: 1px solid rgb(22 21 20 / 0.14);
   }
 
   .mx-pair div:first-child {
@@ -2707,7 +2700,7 @@ const parts2 = [
   }
 
   .mx-ink {
-    --bl-focus: #0b0a1f;
+    --bl-focus: #161514;
   }
 
   .mx-lists {
@@ -2805,7 +2798,7 @@ const parts2 = [
     position: absolute;
     left: 0;
     right: 0;
-    border-top: 1px solid rgb(11 10 31 / 0.08);
+    border-top: 1px solid rgb(22 21 20 / 0.08);
   }
 
   .mx-sky-area .bar {
@@ -3531,7 +3524,7 @@ const parts2 = [
   }
 
   .og-u:hover {
-    background: rgb(11 10 31 / 0.04);
+    background: rgb(22 21 20 / 0.04);
   }
 
   .og-u[aria-pressed="true"] {
@@ -3855,7 +3848,7 @@ const parts2 = [
     position: relative;
     height: 6px;
     border-radius: 3px;
-    background: rgb(11 10 31 / 0.07);
+    background: rgb(22 21 20 / 0.07);
   }
 
   .og-track i {

@@ -16,6 +16,7 @@
  *   about one in five it counts is not an AI company); counts are companies on the
  *   Metix AI Platform; staff counts are visible profiles, never a headcount.
  */
+import CaseEyebrow from "@site/components/CaseEyebrow.astro";
 import BarList from "@site/components/charts/BarList.astro";
 import FigNotes from "@site/components/charts/FigNotes.astro";
 import Chapter from "@site/components/Chapter.astro";
@@ -380,20 +381,13 @@ for (const d of ["definition", "probe", "loose"]) {
         <div class="wrap">
           <div class="cl-top">
             <div class="cl-text">
-              <nav class="cl-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
-                <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
-                <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
-              </nav>
-              <p class="cl-meta">
-                {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=companies#index`}>{zh ? "公司" : "Companies"}</a> ·{" "}
-                <a href={`${href(lang)}?data=people#index`}>{zh ? "人才" : "Profiles"}</a> · <span class="nowrap">{iso}</span>
-              </p>
+              <CaseEyebrow lang={lang} slug={entry.slug} format="report" datasets={entry.datasets} snapshot={entry.snapshot} />
               <h1 set:html={titleHtml(entry.title[lang], lang)} />
               <p class="cl-dek">{entry.dek[lang]}</p>
               <div class="cl-actions">
                 <a class="cl-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
                 <a class="cl-chip" href="#run-reproduce">
-                  {zh ? `复现需 ${n(receipt.credits)} Credits` : `${n(receipt.credits)} Credits to reproduce`}
+                  {zh ? `复现需 ${n(receipt.credits)} API Credits` : `${n(receipt.credits)} API Credits to reproduce`}
                 </a>
                 <span class="cl-note">
                   {zh
@@ -1089,7 +1083,7 @@ for (const d of ["definition", "probe", "loose"]) {
   .cl-hero {
     background: #e6f3f0;
     color: var(--ink);
-    padding-block: clamp(36px, 6vw, 72px) clamp(40px, 5vw, 64px);
+    padding-block: clamp(24px, 3.5vw, 40px) clamp(40px, 5vw, 64px);
   }
 
   .cl-top {
@@ -1207,7 +1201,7 @@ for (const d of ["definition", "probe", "loose"]) {
     align-items: baseline;
     column-gap: 20px;
     padding-block: 14px;
-    border-bottom: 1px solid rgb(11 10 31 / 0.14);
+    border-bottom: 1px solid rgb(22 21 20 / 0.14);
   }
 
   .cl-pair div:first-child {
@@ -1313,7 +1307,7 @@ for (const d of ["definition", "probe", "loose"]) {
     right: 0;
     bottom: calc(var(--yl) + var(--t) * var(--plot));
     height: 0;
-    border-top: 1px solid rgb(11 10 31 / 0.1);
+    border-top: 1px solid rgb(22 21 20 / 0.1);
   }
 
   .wv-grid em {
@@ -1592,6 +1586,11 @@ for (const d of ["definition", "probe", "loose"]) {
     transform: none;
   }
 
+  /* The last label ends on the axis's right edge instead of hanging past it. */
+  .rt-ticks em:last-child {
+    transform: translateX(-100%);
+  }
+
   .rt-name {
     display: grid;
     row-gap: 2px;
@@ -1622,7 +1621,7 @@ for (const d of ["definition", "probe", "loose"]) {
     position: absolute;
     top: 0;
     bottom: 0;
-    border-left: 1px solid rgb(11 10 31 / 0.08);
+    border-left: 1px solid rgb(22 21 20 / 0.08);
   }
 
   .rt-track i {
@@ -1713,7 +1712,7 @@ for (const d of ["definition", "probe", "loose"]) {
     left: 0;
     right: 0;
     top: 50%;
-    border-top: 1px dotted rgb(11 10 31 / 0.2);
+    border-top: 1px dotted rgb(22 21 20 / 0.2);
   }
 
   .db-link {
@@ -1800,7 +1799,7 @@ for (const d of ["definition", "probe", "loose"]) {
     width: 100%;
     height: 100%;
     overflow: visible;
-    background: linear-gradient(to top, rgb(11 10 31 / 0.14) 1px, transparent 1px);
+    background: linear-gradient(to top, rgb(22 21 20 / 0.14) 1px, transparent 1px);
   }
 
   .th-line {

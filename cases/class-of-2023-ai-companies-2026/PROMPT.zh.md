@@ -1,11 +1,11 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 2,400 到 2,800 Credits：计数约 2,000，为挑选和核对而做的搜索与记录读取约 240（最大的公司、它们员工的一个切片、小团队大额融资的公司），核对环节 150 到 450（定义切片、主题切片、增长字段检查）。超过 3,000 之前它会先停下来问你。发布的每个公司数字都是计数，人员数字也是计数，读取记录只用于挑选和核对。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 2,400 到 2,800 API Credits：计数约 2,000，为挑选和核对而做的搜索与记录读取约 240（最大的公司、它们员工的一个切片、小团队大额融资的公司），核对环节 150 到 450（定义切片、主题切片、增长字段检查）。超过 3,000 之前它会先停下来问你。发布的每个公司数字都是计数，人员数字也是计数，读取记录只用于挑选和核对。
 
 ```text
 用 Metix AI Platform 回答一个问题：ChatGPT 于 2022-11-30 发布；此后几年里成立了多少家自述为 AI 公司的企业？它们在哪里，说自己做什么，长到了多大，融资情况如何，员工之前在哪里工作？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
 
-1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.company 和 querySpecByEntity.profile 里的字段；再读 GET /docs/api/companies 和 GET /docs/api/query-spec（免费）。keywords、name、industry、headquarters.city 都是自由文本：match 和 eq 都表示每个词都出现、顺序不限、不分大小写，in 表示多个这样的值任取其一。size 只取九个固定值。总数达到 100,000 时返回的是字符串 "100000+"。一次查询最多 64 个条件。size 1 的计数花 1 Credit，搜索每返回 25 个 ID 花 1 Credit，读取详情每 5 条记录花 1 Credit。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 3,000 Credits 之前先停下来问我。
+1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.company 和 querySpecByEntity.profile 里的字段；再读 GET /docs/api/companies 和 GET /docs/api/query-spec（免费）。keywords、name、industry、headquarters.city 都是自由文本：match 和 eq 都表示每个词都出现、顺序不限、不分大小写，in 表示多个这样的值任取其一。size 只取九个固定值。总数达到 100,000 时返回的是字符串 "100000+"。一次查询最多 64 个条件。size 1 的计数花 1 API Credit，搜索每返回 25 个 ID 花 1 API Credit，读取详情每 5 条记录花 1 API Credit。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 3,000 API Credits 之前先停下来问我。
 
 2. 范围。AI 公司指：type 不是 Nonprofit、Educational 或 Government Agency，并且满足以下之一：名称里有 AI 这个词，且 keywords 匹配 AI、artificial intelligence、generative AI、machine learning、large language models、LLM、deep learning、computer vision、natural language processing 中任意一个；或者 keywords 匹配 deep learning、computer vision、natural language processing、large language models、generative AI 中任意一个。按 founded_year（只有年份）分组：2019 到 2022 年（之前；发布日是 2022-11-30，所以 2022 年算作之前），2023 到 2025 年（这一届），以及 2026 年至今。把定义和分组写进文件。
 
@@ -34,7 +34,7 @@
 | 从哪次发布算起 | 第 2 步的分组 | 从 GPT-4（2023-03-14）算起需要月份，而 founded_year 没有月份 |
 | 国家 | 第 4 到 8 步的 headquarters.country | 只看英国公司，都市圈用伦敦和剑桥 |
 | 雇主 | 第 8 步的名单 | 加上 xAI、Mistral AI 或字节跳动 |
-| Credit 上限 | 第 1 步和第 8 步 | 跳过员工关联（第 8 步），可省约 530 Credits |
+| API Credit 上限 | 第 1 步和第 8 步 | 跳过员工关联（第 8 步），可省约 530 API Credits |
 
 ## 运行前先问清楚
 

@@ -4,7 +4,7 @@
     export METIX_KEY=metix_xxxxxxxxxxxx   (or put it in the repository's .env)
     python3 cases/model-lifecycle-titles-2026/fetch.py
 
-Eight count queries, one Credit each: every stage worldwide and in the US.
+Eight count queries, one API Credit each: every stage worldwide and in the US.
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def main() -> int:
         aggregate("jobs", platform.snapshot, "queries/<stage>.json", rows),
     )
     write_json(HERE, "receipt.json", platform.receipt())
-    print({row["group"]: row["count"] for row in rows}, f"{platform.spent()} Credits")
+    print({row["group"]: row["count"] for row in rows}, f"{platform.spent()} API Credits")
     return 0
 
 

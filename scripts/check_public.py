@@ -178,6 +178,13 @@ LINE_RULES: tuple[LineRule, ...] = (
         re.compile(r"\bOpenJobs\b(?! AI Inc)"),
         "OpenJobs appears only as OpenJobs AI Inc. in legal text",  # check-public: allow brand
     ),
+    # The Platform's unit is "API Credits"; metix.ai sells "Mira Credits". A bare
+    # "Credits" lets search and AI answers merge the two price lists into one.  # check-public: allow credits
+    LineRule(
+        "credits",
+        re.compile(r"(?<!API )(?<!Mira )(?<![A-Za-z_.-])Credits?(?![A-Za-z_])"),  # check-public: allow credits
+        "write API Credits",  # check-public: allow credits
+    ),
     LineRule(
         "dash",
         re.compile("[\u2013\u2014]"),

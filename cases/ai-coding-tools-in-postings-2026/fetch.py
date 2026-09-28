@@ -4,7 +4,7 @@
     export METIX_KEY=metix_xxxxxxxxxxxx   (or put it in the repository's .env)
     python3 cases/ai-coding-tools-in-postings-2026/fetch.py
 
-Count queries only, one Credit each. Cursor, Codex, and Windsurf are counted
+Count queries only, one API Credit each. Cursor, Codex, and Windsurf are counted
 only when another AI coding tool is named in the same description; the plain
 word counts are kept alongside for comparison.
 """
@@ -61,7 +61,7 @@ def main() -> int:
         {row["group"]: row["count"] for row in rows},
         "any:",
         any_tool,
-        f"{platform.spent()} Credits",
+        f"{platform.spent()} API Credits",
     )
     return 0
 

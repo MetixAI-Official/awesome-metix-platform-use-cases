@@ -1,17 +1,17 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs 6 Credits, all counts. It stops and asks before 10.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs 6 API Credits, all counts. It stops and asks before 10.
 
 ```text
 Answer one question with the Metix AI Platform: what do US inference roles post as their pay floor? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and read the salary rules: a comparison on salary.annual_min needs salary.currency pinned with eq in the same all node, and figures are annualized within one currency, not converted. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 10 Credits.
+1. Read before querying. Call GET /contract (free) and read the salary rules: a comparison on salary.annual_min needs salary.currency pinned with eq in the same all node, and figures are annualized within one currency, not converted. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 10 API Credits.
 
 2. Population. US open postings whose title matches any of "inference", "model serving", or "llm serving", minus titles that match "causal" or "statistical", with salary.currency eq "USD" and salary.annual_min present.
 
 3. Count the denominator too. Count the same title filter in the US without the salary conditions, so the reader knows what share of postings state pay at all.
 
-4. Bands without reading records. Count postings with salary.annual_min gte 150000, 200000, 250000, and 300000. Each band is the difference between two neighboring counts. Six counts, six Credits.
+4. Bands without reading records. Count postings with salary.annual_min gte 150000, 200000, 250000, and 300000. Each band is the difference between two neighboring counts. Six counts, six API Credits.
 
 5. Check. The bands must add up to the number that state pay; if they do not, stop and say so.
 

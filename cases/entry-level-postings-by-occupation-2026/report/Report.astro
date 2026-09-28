@@ -14,6 +14,7 @@
  *   postings, not a trend. Exposure groups are the cited paper's quintiles, not scores, and
  *   nothing here says exposure causes a narrow door.
  */
+import CaseEyebrow from "@site/components/CaseEyebrow.astro";
 import BarList from "@site/components/charts/BarList.astro";
 import FigNotes from "@site/components/charts/FigNotes.astro";
 import Figure from "@site/components/charts/Figure.astro";
@@ -193,20 +194,13 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
         <div class="wrap">
           <div class="ed-top">
             <div class="ed-text">
-              <nav class="ed-eyebrow" aria-label={zh ? "页面路径" : "Breadcrumb"}>
-                <a href={href(lang)}>Casebook</a> <span aria-hidden="true">/</span>{" "}
-                <a href={`${href(lang)}?format=report#index`}>{zh ? "报告" : "Reports"}</a>
-              </nav>
-              <p class="ed-meta">
-                {zh ? "报告" : "Report"} · <a href={`${href(lang)}?data=jobs#index`}>{zh ? "岗位" : "Jobs"}</a> ·{" "}
-                <span class="nowrap">{iso}</span>
-              </p>
+              <CaseEyebrow lang={lang} slug={entry.slug} format="report" datasets={entry.datasets} snapshot={entry.snapshot} />
               <h1 set:html={titleHtml(entry.title[lang], lang)} />
               <p class="ed-dek">{entry.dek[lang]}</p>
               <div class="ed-actions">
                 <a class="ed-chip" href="#run">{zh ? "运行这个案例" : "Run it"}</a>
                 <a class="ed-chip" href="#run-reproduce">
-                  {zh ? `复现需 ${receipt.credits} Credits` : `${receipt.credits} Credits to reproduce`}
+                  {zh ? `复现需 ${receipt.credits} API Credits` : `${receipt.credits} API Credits to reproduce`}
                 </a>
                 <span class="ed-note">{zh ? "复现只计数，不读取任何岗位" : "Reproducing reads no postings: every number is a count"}</span>
               </div>
@@ -833,7 +827,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     --door-2: #5a8abf;
     background: #e6eef7;
     color: var(--ink);
-    padding-block: clamp(36px, 6vw, 72px) clamp(40px, 5vw, 64px);
+    padding-block: clamp(24px, 3.5vw, 40px) clamp(40px, 5vw, 64px);
   }
 
   .ed-top {
@@ -928,7 +922,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     align-items: baseline;
     column-gap: 20px;
     padding-block: 14px;
-    border-bottom: 1px solid rgb(11 10 31 / 0.14);
+    border-bottom: 1px solid rgb(22 21 20 / 0.14);
   }
 
   .ed-pair div:first-child {
@@ -1002,7 +996,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
 
   .wk.off::before {
     background: #fff;
-    box-shadow: inset 0 0 0 1px rgb(11 10 31 / 0.2);
+    box-shadow: inset 0 0 0 1px rgb(22 21 20 / 0.2);
   }
 
   .wk.q::before {
@@ -1140,7 +1134,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     width: 10px;
     border-radius: 50%;
     background: var(--ink);
-    box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgb(11 10 31 / 0.25);
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgb(22 21 20 / 0.25);
   }
 
   .lg-ref::before {
@@ -1226,7 +1220,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     position: absolute;
     top: 0;
     bottom: 0;
-    border-left: 1px solid rgb(11 10 31 / 0.08);
+    border-left: 1px solid rgb(22 21 20 / 0.08);
   }
 
   .dr-track .bar {
@@ -1363,7 +1357,7 @@ const ticks = [0, 0.25, 0.5, 0.75, 1];
     left: 0;
     right: 0;
     top: 50%;
-    border-top: 1px solid rgb(11 10 31 / 0.1);
+    border-top: 1px solid rgb(22 21 20 / 0.1);
   }
 
   .lp-track .stem {

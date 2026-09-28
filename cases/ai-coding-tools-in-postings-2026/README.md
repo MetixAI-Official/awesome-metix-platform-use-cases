@@ -12,11 +12,11 @@ Open job postings on September 21, 2026 whose description names a tool. Claude C
 
 ## Method
 
-Fourteen counts, one Credit each: each tool worldwide and in the US, the three plain words, and postings naming any of the five. No posting is read in the replay.
+Fourteen counts, one API Credit each: each tool worldwide and in the US, the three plain words, and postings naming any of the five. No posting is read in the replay.
 
 ## How it was made
 
-An AI agent built this card through the public REST API. It read 40 to 60 descriptions per tool and checked the words around each name. Claude Code and GitHub Copilot meant the tool in 40 of 40. The plain words held in 55 of 60 for Cursor, 55 of 60 for Codex, and 56 of 60 for Windsurf, past the 5% error line, so their condition was tightened; tightened, Cursor held in 60 of 60. Exploration cost about 152 Credits, most of it reading descriptions; the replay costs 14.
+An AI agent built this card through the public REST API. It read 40 to 60 descriptions per tool and checked the words around each name. Claude Code and GitHub Copilot meant the tool in 40 of 40. The plain words held in 55 of 60 for Cursor, 55 of 60 for Codex, and 56 of 60 for Windsurf, past the 5% error line, so their condition was tightened; tightened, Cursor held in 60 of 60. Exploration cost about 152 API Credits, most of it reading descriptions; the replay costs 14.
 
 ## Limits
 

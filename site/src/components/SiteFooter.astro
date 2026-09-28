@@ -1,0 +1,113 @@
+---
+/**
+ * The platform's footer, from the platform's own data (see shell.ts), plus one line
+ * only the Casebook has: its licences, the public data policy and the source.
+ *
+ * On a phone the link columns fold, as on the platform. Without JavaScript they stay
+ * open, so every link is reachable either way.
+ */
+import MetixLogo from "@site/components/MetixLogo.astro";
+import { FOOTER } from "@site/shell";
+import { REPO, ui, type Lang } from "@site/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const format = (value: number, decimals = 0) =>
+  value.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+---
+
+<footer class="pf-footer">
+  <div class="pf-footer-wrap">
+    {
+      FOOTER.rail.length > 0 ? (
+        <div class="pf-rail" role="group" aria-label="Index size and service figures">
+          <dl style={`--cols:${FOOTER.rail.length}`}>
+            {FOOTER.rail.map((item) => (
+              <div>
+                <span class="pf-rail-tick" aria-hidden="true" />
+                <dd>
+                  {format(item.value, item.decimals ?? 0)}
+                  {item.unit && <span class="pf-rail-unit">{item.unit}</span>}
+                </dd>
+                <dt>
+                  {item.label}
+                  {item.note && <span class="pf-rail-note">{item.note}</span>}
+                </dt>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ) : (
+        <div class="pf-rail" />
+      )
+    }
+
+    <div class="pf-footer-grid">
+      <div class="pf-footer-brand">
+        <a class="pf-footer-home" href="/" aria-label="Metix AI Platform">
+          <MetixLogo id="pf-logo-footer" class="pf-logo" />
+          <span class="pf-rule" aria-hidden="true"></span>
+          <span class="pf-platform" aria-hidden="true">Platform</span>
+        </a>
+        <p class="pf-tagline">{FOOTER.tagline}</p>
+        <a class="pf-out" href="https://metix.ai">
+          metix.ai
+          <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 17 17 7M7 7h10v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </a>
+        <address class="pf-address">
+          {FOOTER.address.map((line, i) => (i > 0 ? [<br />, line] : line))}
+        </address>
+        <div class="pf-chips">
+          <span class="pf-chip">{FOOTER.apiVersion}</span>
+        </div>
+      </div>
+
+      {
+        FOOTER.columns.map((column, i) => (
+          <div class="pf-col" data-pf-col>
+            <button class="pf-col-head" type="button" aria-expanded="false" aria-controls={`pf-col-${i}`}>
+              {column.title}
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+            <ul id={`pf-col-${i}`}>
+              {column.links.map((link) => (
+                <li>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="pf-footer-casebook">
+      <p>{t.legal}</p>
+      <p class="pf-footer-casebook-links">
+        <a href={`${REPO}/blob/main/docs/public-data-policy.md`}>{t.footerPolicy}</a>
+        <a href={REPO}>{t.footerSource}</a>
+      </p>
+    </div>
+
+    <div class="pf-footer-bottom">
+      <p>{FOOTER.copyright}</p>
+      <div class="pf-legal">
+        {
+          FOOTER.legal.map((link) => (
+            <a href={link.href} class={link.href.startsWith("mailto:") ? "pf-as-written" : undefined}>
+              {link.label}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</footer>

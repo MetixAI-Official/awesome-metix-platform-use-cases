@@ -7,7 +7,7 @@ How the repository is organized, what a use case contains, how numbers get from 
 A library of job-market reports, published as a website in English and Chinese, where every report was made by an AI agent working through the public Metix AI Platform. Each report does three things a reader can check:
 
 1. States a finding, with charts built from committed aggregates.
-2. Shows the queries behind every number and what rerunning them costs in Credits.
+2. Shows the queries behind every number and what rerunning them costs in API Credits.
 3. Ships the bootstrap prompt that produced it, so a reader can paste it into their own agent, run it on their own key, and change it to answer their own question.
 
 Two readers matter. Someone who wants the finding reads the report. A developer or analyst deciding whether the Platform can answer their questions reads the prompt, the queries, and the receipt. The page serves the first reader first and keeps the second one a scroll away.
@@ -23,7 +23,7 @@ An agent does the work: it reads the live contract and docs, writes the queries,
 | Type | What it is | Shape |
 | --- | --- | --- |
 | Study | A market question answered with people, jobs, and companies together | 6 to 10 numbered sections, 8 or more charts |
-| Snapshot | One question, one chart | Short, and cheap enough to rerun on the free plan (100 Credits) |
+| Snapshot | One question, one chart | Short, and cheap enough to rerun on the free plan (100 API Credits) |
 | Recipe | A task a developer wants to automate, such as a watchlist or an alert | Runnable code, expected output shape, cost per run |
 | Agent session | A conversation with an agent, published as the prompt, each call it made, and the answer | No raw records |
 
@@ -37,16 +37,16 @@ Every case ships `PROMPT.md` (and `PROMPT.zh.md`): one prompt, precise enough th
 
 1. **The question**, in one sentence.
 2. **Access**: public Platform only, the key in `METIX_KEY`, never printed.
-3. **Read first**: `GET /contract` and the Credits page, before building any query.
+3. **Read first**: `GET /contract` and the API Credits page, before building any query.
 4. **Population**: the exact filters, the exclusions, and an audit step that reads a sample and reports how much of it is off-topic.
-5. **Cost**: count with small pages first; read records only when the question needs a field no filter can express; a hard Credit ceiling; the balance before and after.
+5. **Cost**: count with small pages first; read records only when the question needs a field no filter can express; a hard API Credit ceiling; the balance before and after.
 6. **Cleaning**: duplicates, missing values, and how each is counted.
 7. **Grouping**: every group defined explicitly and written to a file.
 8. **Outputs**: aggregates with a declared unit, the raw records kept private.
 9. **Chart**: the form, the order, direct labels, a title that states the finding.
 10. **Limits**: what the numbers do not show.
 
-Below the prompt, an "Adapt it" table names the parameters a reader is most likely to change (role terms, geography, grouping, Credit ceiling) and the line each one lives on.
+Below the prompt, an "Adapt it" table names the parameters a reader is most likely to change (role terms, geography, grouping, API Credit ceiling) and the line each one lives on.
 
 ## Repository layout
 
@@ -106,8 +106,8 @@ The slug is lowercase words joined by hyphens. Studies and snapshots end with th
 | `regions` | list of ISO country codes, or `global` | |
 | `snapshot` | date | The day the replay ran, as a UTC date: the same day as `ran_at` in `receipt.json`, which the receipt shows without the time |
 | `published` | date | Set when `status` becomes `published` |
-| `exploration_credits` | number | Credits the agent spent exploring before the replay, runs it replaced included, so the full cost of making the case is on record |
-| `agent_run` | `{ low, high, cap }` | What an agent following `PROMPT.md` spends: the counts plus the reads the prompt asks for, and the ceiling the prompt stops at. Required to publish; the prompt must name the same ceiling in Credits, or the build fails |
+| `exploration_credits` | number | API Credits the agent spent exploring before the replay, runs it replaced included, so the full cost of making the case is on record |
+| `agent_run` | `{ low, high, cap }` | What an agent following `PROMPT.md` spends: the counts plus the reads the prompt asks for, and the ceiling the prompt stops at. Required to publish; the prompt must name the same ceiling in API Credits, or the build fails |
 | `highlights` | up to three `value` and `label` pairs | Figures shown on the catalog, copied from the case's aggregates |
 
 The site validates this file at build time and fails on a missing or unknown field. A case's color is not a field: it follows the datasets (see `docs/style.md`).
@@ -150,7 +150,7 @@ A stored share is rounded for reading, so a page never prints one by rounding it
 }
 ```
 
-Credits are the remaining balance reported by `GET /auth/key/status` before the run minus the balance after it. That route is free, and the number is the Platform's own accounting rather than an estimate. Only the balance is read from that response. Run cases with a key nothing else uses at the same time. Nobody edits a receipt by hand.
+API Credits are the remaining balance reported by `GET /auth/key/status` before the run minus the balance after it. That route is free, and the number is the Platform's own accounting rather than an estimate. Only the balance is read from that response. Run cases with a key nothing else uses at the same time. Nobody edits a receipt by hand.
 
 ## From query to page
 
@@ -163,22 +163,23 @@ agent explores the Platform  ─> queries/*.json, <config>.json, PROMPT.md
                                                    │
                      site build: case.yaml + report/Report.astro + data/ + PROMPT*.md
                                                    │
-                                   GitHub Pages: /cases/<slug>/ and /zh/cases/<slug>/
+                                   platform.metix.ai/casebook/<slug> and /casebook/zh/<slug>
 ```
 
-`fetch.py` uses the Python standard library only, reads `METIX_KEY` from the environment or the repository's `.env`, never prints it, and stops before reading records if the run would pass its Credit ceiling. Every Search response carries a `total`, exact below a threshold and a banded string above it (the threshold is on `GET /contract`), so code built on totals must handle the banded form.
+`fetch.py` uses the Python standard library only, reads `METIX_KEY` from the environment or the repository's `.env`, never prints it, and stops before reading records if the run would pass its API Credit ceiling. Every Search response carries a `total`, exact below a threshold and a banded string above it (the threshold is on `GET /contract`), so code built on totals must handle the banded form.
 
-Every `fetch.py` uses `tools/metix_client.py`: it loads the key, counts with `size: 1`, pages a search after counting it first, reads records in batches of 100, applies the small-cell rule, and writes the receipt. It stops before any call whose worst case would take the run past its Credit ceiling, and it counts only search and detail calls, not the free balance reads.
+Every `fetch.py` uses `tools/metix_client.py`: it loads the key, counts with `size: 1`, pages a search after counting it first, reads records in batches of 100, applies the small-cell rule, and writes the receipt. It stops before any call whose worst case would take the run past its API Credit ceiling, and it counts only search and detail calls, not the free balance reads.
 
 ## The site
 
 Astro, built as static HTML and deployed to GitHub Pages from `main`. Astro is what metix.ai is built with; its content collections validate `case.yaml` at build time; and it ships no JavaScript unless a component asks for it. The scripts on the page are small and optional: Copy, the Run it paths, the agent tabs, the folds' Expand all, and the index's search and filters. Without them every panel and the full index are still shown.
 
 - `site/src/content.config.ts` loads every `cases/*/case.yaml` with the `glob()` loader and a schema.
-- Routes: `/` and `/zh/` for the catalog; `/cases/<slug>/` and `/zh/cases/<slug>/` for reports. English is the default locale and has no prefix.
+- Routes, under the `/casebook` base: `/casebook` and `/casebook/zh` for the catalog; `/casebook/<slug>` and `/casebook/zh/<slug>` for cases. English is the default locale and has no prefix. No trailing slashes, and each page is one `.html` file (`build.format: "file"`): the platform's Next server drops a trailing slash with a 308, so a host that added one back would loop.
 - Each case's `report/Report.astro` takes `lang`, `entry`, and a `section`: `card` (the card's number and mini chart, at `size` compact or full), `body` (the figures and findings; a report also renders its own hero here), and `method`. The shell calls each section where it belongs, so every case ends with the same blocks in the same order: Run it, Method and limits, The last replay, then previous and next cases. Shared components (`Figure`, `BarList`, the query disclosure, `RunBlock` with `AgentSetup`, `FoldSections`, the receipt) come from `@site/components/`; `site/src/prompt.ts` splits a `PROMPT.md` into its question, ten steps, and sections, and enforces the template's shape.
 - The order of cards is `CARD_ORDER` in `site/src/cases.ts`; the first three are featured on the home page, and the index lists every case newest first.
-- The default address is `https://metixai-official.github.io/awesome-metix-platform-use-cases/`, so the Astro `base` is the repository name. A custom domain later changes `base` and adds a `CNAME`.
+- The site is served at `https://platform.metix.ai/casebook`: the platform proxies `/casebook/*` to the host this build is deployed to (`CASEBOOK_ORIGIN` in the platform's web app) and adds the security headers. The host must serve `/casebook/x` from `x.html` and `/casebook` from `index.html` without a redirect (Cloudflare's `html_handling: "drop-trailing-slash"`). `node tools/serve-origin.mjs` does the same locally.
+- Built alongside the pages: `/casebook/sitemap.xml` (both editions, with hreflang), `/casebook/llms.txt` (every case with its prompt), and `/casebook/casebook.json` (the published cases as data, for the platform's pages that link here).
 
 The home page's index already has search, filters, and sort, with the state in the URL (`?q=`, `?format=`, `?data=`, `?sort=`), so a tag on a case page links to a filtered list.
 

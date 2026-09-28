@@ -1,11 +1,11 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 235 to 265 Credits: 104 for the published counts, about 120 to build and audit the institution list, and 10 to 40 for the name, location, and exclude-word checks. It stops and asks before 300. Every published number is a count; the reads only build and check the list.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 235 to 265 API Credits: 104 for the published counts, about 120 to build and audit the institution list, and 10 to 40 for the name, location, and exclude-word checks. It stops and asks before 300. Every published number is a count; the reads only build and check the list.
 
 ```text
 Answer one question with the Metix AI Platform: at ten large AI labs, what share of the people in AI roles earned their bachelor's degree at an institution in mainland China, and where do people in AI roles with that background list themselves now? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and build every condition from querySpecByEntity.profile. Conditions about one job go inside one has_experience entry and conditions about one degree inside one has_education entry, so they describe the same job or degree. A query holds at most 64 conditions and nests at most 6 levels deep. A count with size 1 costs 1 Credit, so plan every published number as a count. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 300 Credits.
+1. Read before querying. Call GET /contract (free) and build every condition from querySpecByEntity.profile. Conditions about one job go inside one has_experience entry and conditions about one degree inside one has_education entry, so they describe the same job or degree. A query holds at most 64 conditions and nests at most 6 levels deep. A count with size 1 costs 1 API Credit, so plan every published number as a count. Check the balance with GET /auth/key/status (free) at the start and at the end, and stop and ask before the run passes 300 API Credits.
 
 2. Population. An AI role is a current job (experience.is_current eq true) whose experience.title matches any of: machine learning, research scientist, research engineer, deep learning, member of technical staff, applied scientist, artificial intelligence, AI engineer, AI researcher, LLM, NLP, computer vision. The labs, in this order, are OpenAI, Anthropic, Google DeepMind (company names "Google DeepMind" and "DeepMind"), xAI, Meta, NVIDIA, Google, Microsoft, Apple, and Amazon (with "Amazon Web Services (AWS)" and "AWS"). Check every name and variant with a count first. The Platform matches company names word by word, so Google also matches Google DeepMind. Make the rows disjoint: each lab counts people with a current AI role there and no current job at a lab earlier in the order, so the ten-lab figure is the sum of the rows.
 
@@ -40,4 +40,4 @@ Answer one question with the Metix AI Platform: at ten large AI labs, what share
 2. Which roles, in title words?
 3. Which country's institutions, and do campuses abroad count?
 4. US-based, worldwide, or both?
-5. How many Credits may the list building and the audit spend on reads?
+5. How many API Credits may the list building and the audit spend on reads?

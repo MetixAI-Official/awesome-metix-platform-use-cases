@@ -27,7 +27,7 @@ export METIX_KEY=metix_xxxxxxxxxxxx   # create one at https://platform.metix.ai/
 python3 cases/replace-with-slug-2026/fetch.py
 ```
 
-The last run's calls, results, records, and Credits are in `data/receipt.json`.
+The last run's calls, results, records, and API Credits are in `data/receipt.json`.
 
 ## Also in this folder
 

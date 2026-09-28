@@ -1,11 +1,11 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 245 到 320 Credits：计数约 95，其余是抽检读取。超过 320 之前它会先停下来问你。发布的每个数字都是计数，读取只用于抽检。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 245 到 320 API Credits：计数约 95，其余是抽检读取。超过 320 之前它会先停下来问你。发布的每个数字都是计数，读取只用于抽检。
 
 ```text
 用 Metix AI Platform 回答一个问题：雇主在招聘岗位里点名的 AI 编程助手和 Agent 框架，需求和把它们列为技能的人相比如何？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
 
-1. 先读规则再查询。调用 GET /contract（免费）。岗位用 querySpecByEntity.job，匹配 "description"；档案用 querySpecByEntity.profile，匹配 "skills"。size 1 的计数花 1 Credit，所以每个数字都按计数来设计。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 320 Credits 之前先停下来问我。
+1. 先读规则再查询。调用 GET /contract（免费）。岗位用 querySpecByEntity.job，匹配 "description"；档案用 querySpecByEntity.profile，匹配 "skills"。size 1 的计数花 1 API Credit，所以每个数字都按计数来设计。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 320 API Credits 之前先停下来问我。
 
 2. 工具。编程助手：Claude Code、Cursor、GitHub Copilot、Codex、Windsurf。Agent 框架和协议：LangChain、LangGraph、LlamaIndex、CrewAI、AutoGen、DSPy，以及 Model Context Protocol（匹配 "model context protocol"）。
 
@@ -39,4 +39,4 @@
 1. 看哪些工具？有没有名字会有别的意思？
 2. 只看需求，还是需求和供给对比？供给要用档案技能，并且要过小格子规则。
 3. 哪些拆分维度重要：国家、行业、薪资？
-4. 抽检读描述最多能花多少 Credits？
+4. 抽检读描述最多能花多少 API Credits？

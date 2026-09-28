@@ -12,11 +12,11 @@ US open postings on September 21, 2026 whose title matches "inference", "model s
 
 ## Method
 
-Six counts, one Credit each: postings that state pay, postings at or above $150k, $200k, $250k, and $300k, and the US total without the salary conditions. Each band is the difference between two neighboring counts, so no posting is read.
+Six counts, one API Credit each: postings that state pay, postings at or above $150k, $200k, $250k, and $300k, and the US total without the salary conditions. Each band is the difference between two neighboring counts, so no posting is read.
 
 ## How it was made
 
-An AI agent built this card through the public REST API while exploring the inference questions; it spent about 11 Credits, including a first run it later replaced. The replay costs 6.
+An AI agent built this card through the public REST API while exploring the inference questions; it spent about 11 API Credits, including a first run it later replaced. The replay costs 6.
 
 ## Limits
 

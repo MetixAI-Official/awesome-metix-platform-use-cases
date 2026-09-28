@@ -134,7 +134,7 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
         </p>
         <h3>计数</h3>
         <p>
-          六次计数，每次 1 Credit，不读取岗位。重复发布没有合并。条件在 <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>。
+          六次计数，每次 1 API Credit，不读取岗位。重复发布没有合并。条件在 <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>。
         </p>
         <h3>局限</h3>
         <p>样本小（{stated} 个），只代表写了薪资的岗位。这是快照当天的截面。</p>
@@ -155,7 +155,7 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
         </p>
         <h3>Counting</h3>
         <p>
-          Six counts, one Credit each, and no posting is read. Reposts are not collapsed. The condition is in{" "}
+          Six counts, one API Credit each, and no posting is read. Reposts are not collapsed. The condition is in{" "}
           <a href={`${REPO}/tree/main/cases/${entry.slug}/queries`}>queries/</a>.
         </p>
         <h3>Limits</h3>
@@ -210,7 +210,7 @@ const above250 = rows.filter((r) => r.min_usd >= 250000).reduce((s, r) => s + r.
   }
 
   .col.focus .col-value {
-    color: #0b0a1f;
+    color: #161514;
   }
 
   .mini-cols {

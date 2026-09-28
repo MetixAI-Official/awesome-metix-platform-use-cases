@@ -12,6 +12,7 @@ import CodeBlock from "@site/components/CodeBlock.astro";
 import Base from "@site/layouts/Base.astro";
 import { DATASET_INK, TOPIC_TERMS, byCatalog, fieldColor, receipts, reports } from "@site/cases";
 import { FREE_CREDITS, REPO, dollars, href, isoDate, number, titleHtml, ui, type Lang } from "@site/i18n";
+import { collectionJsonLd } from "@site/seo";
 
 interface Props {
   lang: Lang;
@@ -51,10 +52,10 @@ const formatCount = (f: string) => rows.filter((r) => !f || r.data.format === f)
 const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d as "jobs")).length;
 ---
 
-<Base lang={lang} path="">
+<Base lang={lang} path="" jsonLd={collectionJsonLd(Astro.site!, lang, published.map((c) => c.data))}>
   <section class="wrap masthead" aria-labelledby="mast-title">
-    <p class="eyebrow as-written">Metix AI Platform</p>
-    <h1 class="mast-title" id="mast-title"><span>{t.casebook}</span></h1>
+    <p class="eyebrow">{t.casebook}</p>
+    <h1 class="mast-title" id="mast-title" set:html={titleHtml(t.home.title, lang)} />
     <dl class="mast-stats">
       <div><dt>{published.length}</dt><dd>{t.home.statCases}</dd></div>
       <div><dt>{cheapest}</dt><dd>{t.home.statCheapest}</dd></div>
@@ -108,7 +109,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
             <p>{t.start.runBody}</p>
           </div>
           <div class="start-main">
-            <a class="start-case" href={href(lang, `cases/${cheapestRow.data.slug}/#prompt`)}>
+            <a class="start-case" href={href(lang, `${cheapestRow.data.slug}#prompt`)}>
               <span class="sc-text">
                 <span class="sc-meta">
                   {t.formats[cheapestRow.data.format]} · {cheapestRow.data.datasets.map((d) => t.datasets[d]).join(" · ")}
@@ -138,7 +139,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
       featuredReport && (
         <a
           class="report-band"
-          href={href(lang, `cases/${featuredReport.data.slug}/`)}
+          href={href(lang, `${featuredReport.data.slug}`)}
           aria-label={`${t.formats.report}: ${featuredReport.data.title[lang]}`}
         >
           <p class="rb-meta">
@@ -172,7 +173,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
             <li>
               <a
                 class="card-link"
-                href={href(lang, `cases/${data.slug}/`)}
+                href={href(lang, `${data.slug}`)}
                 aria-label={`${t.formats.card} ${String(position + 1).padStart(2, "0")}: ${data.title[lang]}`}
               >
                 <CardFrame lang={lang} entry={data} receipt={receipts[data.slug]} index={position + 1} color={fieldColor(data.datasets, position)}>
@@ -195,7 +196,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
       <p>{t.home.indexNote}</p>
     </header>
 
-    <form class="toolbar" role="search" data-index-controls onsubmit="return false">
+    <form class="toolbar" role="search" data-index-controls>
       <div class="tb-row">
         <label class="tb-search">
           <span class="visually-hidden">{t.home.search}</span>
@@ -271,7 +272,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
             data-replay={replay}
             data-agent={low}
           >
-            <a class="ci-row" href={href(lang, `cases/${data.slug}/`)}>
+            <a class="ci-row" href={href(lang, `${data.slug}`)}>
               <span class="ci-dots" aria-hidden="true">
                 {data.datasets.map((d) => (
                   <i class="dot" style={`--dot: ${DATASET_INK[d]}`} />
@@ -340,7 +341,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
   }
 </Base>
 
-<script is:inline>
+<script>
   // The index: search, format, data, and sort, mirrored in the URL so a tag on a case
   // page can link straight to a filtered list. Without JavaScript it is the full list.
   (() => {
@@ -348,6 +349,8 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
     const list = document.querySelector("[data-index]");
     if (!form || !list) return;
     const items = [...list.children];
+    // Filtering is live; Enter in the search box must not reload the page.
+    form.addEventListener("submit", (event) => event.preventDefault());
     const count = document.querySelector("[data-index-count]");
     const empty = document.querySelector("[data-index-empty]");
     const normalize = (text) => text.toLowerCase().replace(/[-_/]+/g, " ").replace(/\s+/g, " ").trim();

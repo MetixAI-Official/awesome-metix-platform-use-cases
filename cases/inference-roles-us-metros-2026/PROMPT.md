@@ -1,17 +1,17 @@
 # Bootstrap prompt
 
-Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 96 to 110 Credits, most of it for reading the US postings. It stops and asks before 150.
+Paste the prompt below into an agent that can reach the Metix AI Platform: one with the [metix-skills](https://github.com/MetixAI-Official/metix-skills) installed, the MCP server connected, or plain REST access with `METIX_KEY` set. Followed end to end, it costs about 96 to 110 API Credits, most of it for reading the US postings. It stops and asks before 150.
 
 ```text
 Answer one question with the Metix AI Platform: where in the United States are companies hiring for model inference right now? Work only through the public Platform (REST at https://mira-api.metix.ai, the MCP server, or the metix-skills) with the key in METIX_KEY, and never print the key.
 
-1. Read before querying. Call GET /contract (free) and build every condition from querySpecByEntity.job. Read https://mira-api.metix.ai/docs/credits.md for prices: a search costs ceil(returned IDs / 25) Credits, a detail read costs ceil(found records / 5), and a search that returns nothing is free.
+1. Read before querying. Call GET /contract (free) and build every condition from querySpecByEntity.job. Read https://mira-api.metix.ai/docs/credits.md for prices: a search costs ceil(returned IDs / 25) API Credits, a detail read costs ceil(found records / 5), and a search that returns nothing is free.
 
 2. Population. Open job postings whose title matches any of "inference", "model serving", or "llm serving", minus titles that match "causal" or "statistical" (statistics roles, not model serving). Put the terms in one any node and the exclusions in one not node.
 
-3. Count first. With size 1, record the worldwide total and the total with location.country eq "United States". Each count costs 1 Credit.
+3. Count first. With size 1, record the worldwide total and the total with location.country eq "United States". Each count costs 1 API Credit.
 
-4. Budget. Call GET /auth/key/status (free) now and again at the end, and report the difference as the cost. If the US total is under 1,000, read every US posting: search with size 10000, then POST /entity/v1/jobs/detail-by-id in batches of 100 with _source ["title", "company.name", "location.city", "location.state"]. Stop and ask before anything that would take the run past 150 Credits.
+4. Budget. Call GET /auth/key/status (free) now and again at the end, and report the difference as the cost. If the US total is under 1,000, read every US posting: search with size 10000, then POST /entity/v1/jobs/detail-by-id in batches of 100 with _source ["title", "company.name", "location.city", "location.state"]. Stop and ask before anything that would take the run past 150 API Credits.
 
 5. Audit. List the 40 most common titles and flag any that are not about serving or optimizing models in production. If more than 5% of postings are off-topic, add exclusions to step 2, rerun, and say what you changed.
 
@@ -33,7 +33,7 @@ Answer one question with the Metix AI Platform: where in the United States are c
 | The role | The title terms and exclusions in step 2, and the audit rule in step 5 | "post-training" or "reinforcement learning", excluding "sales" |
 | The country | The country in step 3 and the metro lists in step 7 | United Kingdom, with London, Cambridge, and Edinburgh |
 | The grouping | Step 7 and the chart in step 9 | Group by company instead of by metro |
-| The budget | The ceiling in step 4 | 20 Credits: counts only, one count query per metro, no records |
+| The budget | The ceiling in step 4 | 20 API Credits: counts only, one count query per metro, no records |
 
 ## What to ask before running it
 
@@ -43,4 +43,4 @@ When someone brings a looser version of this question ("where are the inference 
 2. Which geography, and at what level: country, state, or metro?
 3. Which postings: everything open today, or only those posted in the last 30 or 90 days?
 4. What to count: postings, distinct postings, or companies?
-5. How many Credits the run may spend.
+5. How many API Credits the run may spend.

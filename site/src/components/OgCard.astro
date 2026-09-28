@@ -1,0 +1,196 @@
+---
+/**
+ * A 1200x630 share image, drawn with the site's own fonts, colours, and card
+ * components, then screenshotted by tools/og_shots.py after the build. Drawing it
+ * here rather than in a separate image renderer keeps the image and the page it
+ * previews identical, and a new case gets its image with no extra work.
+ *
+ * Only fields that already passed the public check appear: the title, the card's
+ * own figure or the case's first highlight, the datasets, and the snapshot date.
+ * These pages are noindex and not in the sitemap.
+ */
+import "@fontsource-variable/sora";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "@site/styles/shell.css";
+import type { CollectionEntry } from "astro:content";
+import MetixLogo from "@site/components/MetixLogo.astro";
+import { byCatalog, fieldColor, reports } from "@site/cases";
+import { longDate, titleHtml, ui, type Lang } from "@site/i18n";
+import { getCollection } from "astro:content";
+
+interface Props {
+  lang: Lang;
+  entry?: CollectionEntry<"cases">;
+  /** The home page's image: the number of cases and the title. */
+  home?: { cases: number };
+}
+
+const { lang, entry, home } = Astro.props;
+const t = ui[lang];
+const data = entry?.data;
+const cards = (await getCollection("cases", (c) => c.data.status === "published" && c.data.format === "card")).sort(byCatalog);
+const position = data ? cards.findIndex((c) => c.data.slug === data.slug) : 0;
+const field = !data ? "navy" : data.format === "card" ? fieldColor(data.datasets, position) : "navy";
+const Card = data && data.format === "card" ? reports[data.slug] : undefined;
+const highlight = data?.highlights?.[0];
+const title = data ? data.title[lang] : t.home.title;
+---
+
+<!doctype html>
+<html lang={t.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class={`og field-${field} ${data?.format === "report" ? "og-report" : ""}`}>
+      <div class="og-main">
+        <p class="og-eyebrow">
+          {t.casebook}
+          {data && <span>{` · ${data.format === "card" ? t.formats.card : t.formats.report} · ${data.datasets.map((d) => t.datasets[d]).join(" · ")}`}</span>}
+        </p>
+        <h1 set:html={titleHtml(title, lang)} />
+      </div>
+      <div class="og-figure">
+        {Card && <Card lang={lang} section="card" size="full" entry={data} />}
+        {
+          !Card && highlight && (
+            <>
+              <p class="og-num">{highlight.value}</p>
+              <p class="og-label">{highlight.label[lang]}</p>
+            </>
+          )
+        }
+        {
+          !Card && !highlight && home && (
+            <>
+              <p class="og-num">{home.cases}</p>
+              <p class="og-label">{t.home.statCases}</p>
+            </>
+          )
+        }
+      </div>
+      <div class="og-foot">
+        <span class="og-lockup">
+          <MetixLogo id="og-logo" class="og-logo" />
+          <span class="og-rule"></span>
+          <span class="og-platform">Platform</span>
+        </span>
+        <span class="og-url">
+          platform.metix.ai/casebook{data?.snapshot && ` · ${longDate(lang, data.snapshot)}`}
+        </span>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  html,
+  body {
+    margin: 0;
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+  }
+
+  .og {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    column-gap: 56px;
+    width: 1200px;
+    height: 630px;
+    padding: 64px 72px 48px;
+    background: var(--f-bg);
+    color: var(--f-ink);
+  }
+
+  .og-report {
+    background: #14112e;
+    color: #fff;
+  }
+
+  .og-eyebrow {
+    margin: 0 0 24px;
+    font: 500 16px/1.3 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--f-ink-2);
+  }
+
+  .og-report .og-eyebrow {
+    color: rgb(255 255 255 / 0.72);
+  }
+
+  .og h1 {
+    font: 700 54px/1.06 var(--display);
+    letter-spacing: -0.03em;
+    color: inherit;
+    word-break: keep-all;
+  }
+
+  .og h1:lang(zh) {
+    font-size: 50px;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .og-figure {
+    align-self: center;
+  }
+
+  .og-num {
+    margin: 0;
+    font: 700 132px/0.9 var(--display);
+    letter-spacing: -0.05em;
+  }
+
+  .og-label {
+    margin: 20px 0 0;
+    max-width: 30ch;
+    font: 400 22px/1.4 var(--sans);
+    opacity: 0.86;
+  }
+
+  .og-foot {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+    border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  }
+
+  .og-lockup {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .og-logo {
+    height: 44px;
+    width: auto;
+  }
+
+  .og-rule {
+    width: 1px;
+    height: 26px;
+    background: color-mix(in srgb, currentColor 40%, transparent);
+  }
+
+  .og-platform,
+  .og-url {
+    font: 500 17px/1 var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .og-url {
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+</style>

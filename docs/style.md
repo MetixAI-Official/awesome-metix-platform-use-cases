@@ -10,7 +10,7 @@ This site belongs to the **Metix AI Platform** (platform.metix.ai), not to the m
 
 Forms that are never written: Metix AI on its own (it names the company and the main site), Metix on its own, METIX, MetixAI outside the GitHub organization MetixAI-Official, Metix.ai with a capital M, and translations such as Metix AI 平台. No CSS `text-transform` on any element that can contain the name, because uppercase turns it into METIX. `scripts/check_public.py` catches the written forms; nothing catches a transform, so the review checklist does. <!-- check-public: allow brand -->
 
-Write Credits with a capital C. Third-party product names are written the way their makers write them: Claude Code, GitHub Copilot, LangChain, LlamaIndex, CrewAI, AutoGen, DSPy, the Model Context Protocol.
+Write API Credits with a capital C. Third-party product names are written the way their makers write them: Claude Code, GitHub Copilot, LangChain, LlamaIndex, CrewAI, AutoGen, DSPy, the Model Context Protocol.
 
 The Platform has no logo artwork of its own, and Casebook does not make one. The header and footer use the lockup from platform.metix.ai: the official logo file (`site/public/brand/metix-logo.svg`, from the kit at brand.metix.ai), a 1 px hairline as tall as the wordmark's capitals, then "Platform" in the mono face, uppercase, weight 600, in the wordmark's navy `#100D35`. The label's capitals match the wordmark's x-height (13.85 px at the 24 px logo, 12 px on phones). Every part of the header row, the logo, the label, and the site name, shares the logo's vertical center, measured on the rendered capitals rather than on the line boxes, so the row reads level. Never set the mark beside the product name typed out in a font, since brand.metix.ai forbids rebuilding the wordmark and the Platform UI removed exactly that pattern. The logo image carries an empty alt and the element around the lockup carries the accessible name "Metix AI Platform", so a screen reader says the name once. Do not recolor, outline, shadow, stretch, or rotate the logo. Keep clear space of at least the height of the mark's X. Minimum height is 24 px for the full logo at every width, and 16 px for the mark alone, which is what to use when 24 px does not fit.
 
@@ -24,7 +24,7 @@ English is the default at `/`; Chinese lives at `/zh/`, and the language switch 
 
 ## Two formats
 
-**Card.** One question, one number, one small chart. On the catalog a card is a field of color with a meta line, the finding as its title, a big number, a mini chart, and a receipt stub at the bottom (a perforated line with punched notches, then the Credits to reproduce and the date). A card's own page opens with a hero in the same color carrying the number and the finding only, then the full detail chart and the closing blocks, so the chart is never shown twice.
+**Card.** One question, one number, one small chart. On the catalog a card is a field of color with a meta line, the finding as its title, a big number, a mini chart, and a receipt stub at the bottom (a perforated line with punched notches, then the API Credits to reproduce and the date). A card's own page opens with a hero in the same color carrying the number and the finding only, then the full detail chart and the closing blocks, so the chart is never shown twice.
 
 **Report.** A long read with many figures. On the catalog the newest report is a full-width dark band with the finding, three highlight numbers, and a call to read it. A report's page brings its own hero and theme.
 
@@ -32,16 +32,17 @@ English is the default at `/`; Chinese lives at `/zh/`, and the language switch 
 
 ```css
 :root {
-  --ground: #EEF0F4;          /* cool paper, the page behind everything */
+  --ground: #F4F6F6;          /* the platform's subtle ground */
   --surface: #FFFFFF;         /* figures, code, the body of case pages */
-  --surface-muted: #F4F5F8;
-  --ink: #0B0A1F;             /* text, the primary pill */
-  --ink-2: #3F3D56;
-  --ink-3: #6A6880;           /* captions, mono labels (5.3:1 on white) */
-  --line: rgb(11 10 31 / 0.13); /* dividers; alpha, so they read on ground and surface */
-  --line-strong: #84829A;     /* input and filter borders, 3:1 on the ground */
-  --accent: #5B54EF;          /* focus rings, links */
-  --ring: 0 0 0 1px rgb(11 10 31 / 0.08), 0 1px 2px -1px rgb(11 10 31 / 0.08), 0 2px 6px 0 rgb(11 10 31 / 0.04);
+  --surface-muted: #EEF1F1;
+  --ink: #161514;             /* text, the primary pill: the platform's ink */
+  --ink-2: #4E4D4B;
+  --ink-3: #6B6A67;           /* captions, mono labels */
+  --line: rgb(22 21 20 / 0.13); /* dividers; alpha, so they read on ground and surface */
+  --line-strong: #858480;     /* input and filter borders, 3:1 on the ground */
+  --accent: #07545E;          /* focus rings, links: the platform's brand ink */
+  --page: 1200px;             /* the platform's column */
+  --gutter: 20px;             /* 40px from 1024px */
   --control: 40px;            /* 44px under (pointer: coarse) */
 
   --display: "Sora Variable", "Geist Variable", system-ui, var(--cjk);
@@ -51,9 +52,25 @@ English is the default at `/`; Chinese lives at `/zh/`, and the language switch 
 }
 ```
 
-Sora carries titles and big numbers (700 for the masthead and the numbers, 600 for headings), Geist carries reading, and Geist Mono carries anything a developer would scan: labels, meta lines, receipts, queries. Chinese falls back to the system CJK faces in every stack, the mono one included. All numbers use tabular figures.
+Sora carries titles and big numbers (400 for the home page title, as on the platform's section pages; 700 for the big numbers; 600 for headings), Geist carries reading, and Geist Mono carries anything a developer would scan: labels, meta lines, receipts, queries. Chinese falls back to the system CJK faces in every stack, the mono one included. All numbers use tabular figures.
 
-The shell owns the header (logo, Casebook, language switch, GitHub, Get an API key), the footer, the home page, and the blocks every case page ends with.
+The Casebook is served at `platform.metix.ai/casebook` and is one of the platform's pages, so the top bar and the footer are the platform's, not the Casebook's. They are drawn from `site/src/shell/shell.json`, a snapshot of `platform.metix.ai/brand/shell.json` (`node tools/sync-shell.mjs` refreshes it; `--check` says when it is stale), and styled in `site/src/styles/platform-shell.css` with the platform's measured sizes. Change the platform first, then sync. The bar always shows Sign in and Get an API key (`/signup?via=casebook`), never a signed-in state, for the reason in the next section.
+
+Neutrals, ink, links, and focus are the platform's. Violet is not a link colour here: it stays one of the dataset fields, with the other field colours, the charts, the receipt, and the Run it blocks, which are what the Casebook looks like and are left as they were.
+
+The EN / 中文 switch is on case pages only, at the top right of the first screen. It is never in the bar: the bar is the platform's, and the platform has one language.
+
+The Casebook owns the home page and the blocks every case page ends with.
+
+### Same origin as the console
+
+The Casebook shares an origin with the platform's console, and the console keeps its login tokens in `localStorage`. Any script on a Casebook page could read them. So:
+
+- No inline script and no inline event handler. Scripts are files (`site/public/*.js`, or a component's `<script>`, which Astro bundles into a file). The platform serves `/casebook` with `script-src 'self'`, so an inline script would not run anyway.
+- No script, font, or stylesheet from another origin.
+- Storage: one `localStorage` key, `casebook:agent`, through `getItem`, `setItem`, and `removeItem` only. No cookies, no `sessionStorage`, no reading other keys, no `eval`.
+
+`node tools/check-dist.mjs` checks all of this on the built site, and CI runs it on every pull request.
 
 ### Grid, lines, and surfaces
 
@@ -83,7 +100,7 @@ Every case page ends with, in this order: **Run it** (three paths, below), **Met
 
 ### Run it and cost
 
-Every cost the site shows is one the reader can check. A case states two: the replay script's cost, from `data/receipt.json`, and what an agent following `PROMPT.md` spends, recorded as `agent_run: {low, high, cap}` in `case.yaml` (the counts plus the reads the prompt asks for, and the ceiling the prompt stops at). The prompt must name that ceiling in Credits, and the build fails if it does not. Costs are shown in Credits and in dollars at the pay-as-you-go price ($1 buys 30 Credits), with whether they fit the 100 Credits a new account gets once. What making the case cost (the author's exploration) is labelled as that and never presented as the price of a rerun.
+Every cost the site shows is one the reader can check. A case states two: the replay script's cost, from `data/receipt.json`, and what an agent following `PROMPT.md` spends, recorded as `agent_run: {low, high, cap}` in `case.yaml` (the counts plus the reads the prompt asks for, and the ceiling the prompt stops at). The prompt must name that ceiling in API Credits, and the build fails if it does not. Costs are shown in API Credits and in dollars at the pay-as-you-go price ($1 buys 30 API Credits), with whether they fit the 100 API Credits a new account gets once. What making the case cost (the author's exploration) is labelled as that and never presented as the price of a rerun.
 
 Run it offers three paths, as links to their panels so each deep-links and the section works without JavaScript: **Run it in your agent** (key, connect with the shared agent picker, a setup check that runs no search, then the prompt as its question and ten folded steps), **Reproduce the numbers** (clone and run the script), and **Adapt it** (the prompt's own "Adapt it" table and the questions to settle first). The agent picker shows only setups the Platform documents and has run: Claude Code, Codex, the skills installer, and the endpoint and header for any other MCP client. It remembers the reader's choice across pages.
 

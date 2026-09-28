@@ -12,11 +12,11 @@ Open job postings on September 21, 2026. Each stage is a set of title words: pre
 
 ## Method
 
-Eight counts: each stage worldwide and in the US, one Credit each. No posting is read in the replay. `fetch.py` writes `data/stages.json` and `data/receipt.json`.
+Eight counts: each stage worldwide and in the US, one API Credit each. No posting is read in the replay. `fetch.py` writes `data/stages.json` and `data/receipt.json`.
 
 ## How it was made
 
-An AI agent built this card through the public REST API. Its first pre-training query matched "Pre-licensed Training Provided" and "Pharmacy Technician in Training", because a match needs every word present but not side by side. It read all 72 pre-training titles, added the machine-learning requirement and the exclusions, applied them to all four stages, and read the titles again to check. It dropped "RLHF" from post-training after one staffing firm's repeated "RLHF Specialist" postings filled the first page. Exploration cost about 93 Credits; the replay costs 8.
+An AI agent built this card through the public REST API. Its first pre-training query matched "Pre-licensed Training Provided" and "Pharmacy Technician in Training", because a match needs every word present but not side by side. It read all 72 pre-training titles, added the machine-learning requirement and the exclusions, applied them to all four stages, and read the titles again to check. It dropped "RLHF" from post-training after one staffing firm's repeated "RLHF Specialist" postings filled the first page. Exploration cost about 93 API Credits; the replay costs 8.
 
 ## Limits
 

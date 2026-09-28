@@ -1,11 +1,11 @@
 # 启动提示词
 
-把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 211 到 261 Credits：发布用的计数 126，读取核对用的切片 75 到 105，确定切片大小和排除词的计数 10 到 30。超过 300 之前它会先停下来问你。发布的每个数字都是计数，读取只用于核对职位族。
+把下面这段提示词交给一个能访问 Metix AI Platform 的 agent：装好 [metix-skills](https://github.com/MetixAI-Official/metix-skills)、接上 MCP 服务，或者直接用 REST 并设置好 `METIX_KEY` 都可以。完整跑一遍大约花 211 到 261 API Credits：发布用的计数 126，读取核对用的切片 75 到 105，确定切片大小和排除词的计数 10 到 30。超过 300 之前它会先停下来问你。发布的每个数字都是计数，读取只用于核对职位族。
 
 ```text
 用 Metix AI Platform 回答一个问题：在美国仍在招聘的职位里，每个职业有多大比例的职位向刚入行的人开放？入门门槛窄，是软件和 AI 岗位独有的现象，还是研究认定 AI 暴露度较高的职业都一样？只通过公开的 Platform 访问（REST 地址 https://mira-api.metix.ai、MCP 服务或 metix-skills），密钥从 METIX_KEY 读取，任何时候都不要打印密钥。
 
-1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.job 里的字段；再读 GET /docs/api/jobs（免费）。seniority 只取七个固定值之一（Associate、Director、Entry level、Executive、Internship、Mid-Senior level、Not Applicable），索引里每个职位的 is_open 都是 true，总数达到 100,000 时返回的是字符串 "100000+"。一次查询最多 64 个条件，嵌套最多 6 层。size 1 的计数花 1 Credit，搜索每返回 25 个 ID 花 1 Credit，读取详情每 5 个职位花 1 Credit，所以每个要发布的数字都按计数来设计。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 300 Credits 之前先停下来问我。
+1. 先读规则再查询。调用 GET /contract（免费），所有条件只用 querySpecByEntity.job 里的字段；再读 GET /docs/api/jobs（免费）。seniority 只取七个固定值之一（Associate、Director、Entry level、Executive、Internship、Mid-Senior level、Not Applicable），索引里每个职位的 is_open 都是 true，总数达到 100,000 时返回的是字符串 "100000+"。一次查询最多 64 个条件，嵌套最多 6 层。size 1 的计数花 1 API Credit，搜索每返回 25 个 ID 花 1 API Credit，读取详情每 5 个职位花 1 API Credit，所以每个要发布的数字都按计数来设计。开始和结束时各调用一次 GET /auth/key/status（免费）查余额，总花费超过 300 API Credits 之前先停下来问我。
 
 2. 范围。仍在招聘的职位（is_open eq true），且 location.country eq "United States"。按职位名称定义十二个职业族，每个族是一组职位名称词（title match：词组里的每个词都要出现，顺序不限）：AI 与机器学习（machine learning、artificial intelligence、AI、ML、LLM、deep learning；排除 data center、data centers）；软件工程（software engineer、software developer）；数据分析师（data analyst；排除 security、prevention）；财务分析师（financial analyst、finance analyst）；会计（accountant）；律师助理（paralegal、legal assistant）；平面设计（graphic designer、graphic design）；市场营销（marketing）；客户服务（customer service、customer support、customer care；排除 driver）；注册护士（registered nurse、RN）；电工（electrician）；卡车与 CDL 司机（truck driver、CDL driver）。在所有职业族之前，先拿掉 AI 训练和标注类工作：职位名称里有 AI 词，同时有 trainer、tutor、annotator、annotation 或 rater。每个职位只算一次：按上面的顺序，归入第一个匹配其职位名称词、又不匹配其排除词的族；匹配了排除词的职位继续交给后面的族判断。把职业族、顺序和每个排除词的理由写进文件。
 
@@ -33,7 +33,7 @@
 | 职业 | 第 2 步，新加的族都要按第 3 步核对 | 药剂师、教师或网页开发的职位名称 |
 | 入门的口径 | 第 4 步 | 12 个月以内，或把 Associate 标签也算进来 |
 | 国家 | 第 2 步的 location.country | United Kingdom，并换成当地的职位名称用词 |
-| Credit 上限 | 第 1 步和第 3 步 | 不读核对切片，花费约 126 Credits |
+| API Credit 上限 | 第 1 步和第 3 步 | 不读核对切片，花费约 126 API Credits |
 
 ## 运行前先问清楚
 
@@ -42,4 +42,4 @@
 1. 看哪些职业？每个职业用职位名称里的哪些词？
 2. 怎样才算向刚入行的人开放：来源平台的标签、写明的要求，还是两者都看？
 3. 看哪个国家？
-4. 核对读取最多能花多少 Credits？
+4. 核对读取最多能花多少 API Credits？

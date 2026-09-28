@@ -1,0 +1,8 @@
+---
+import { getCollection } from "astro:content";
+import OgCard from "@site/components/OgCard.astro";
+
+const cases = await getCollection("cases", (c) => c.data.status === "published");
+---
+
+<OgCard lang="zh" home={{ cases: cases.length }} />

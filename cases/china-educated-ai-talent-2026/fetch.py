@@ -4,7 +4,7 @@
     export METIX_KEY=...   (your key; or put it in the repository's .env)
     python3 cases/china-educated-ai-talent-2026/fetch.py
 
-Count queries only, one Credit each: no profile record is read. Who counts is
+Count queries only, one API Credit each: no profile record is read. Who counts is
 in queries/population.json, the institution list in queries/institutions.json.
 Every count of people passes the small-cell rule, and the run stops before
 writing anything if a published total would let a reader subtract their way
@@ -324,7 +324,7 @@ def main() -> int:
     write_json(HERE, "context.json", aggregate("profiles", snap, SRC_POP, context))
 
     write_json(HERE, "receipt.json", p.receipt())
-    print(f"{p.calls} calls, {p.spent()} Credits")
+    print(f"{p.calls} calls, {p.spent()} API Credits")
     print({r["group"]: (r["us_mainland_count"], r["us_bachelor_count"]) for r in rows})
     print("ten labs:", total["us_mainland_count"], "of", total["us_bachelor_count"])
     print({r["group"]: r["count"] for r in inst_rows}, "rows sum", row_sum)
