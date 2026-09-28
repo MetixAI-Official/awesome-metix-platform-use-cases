@@ -123,13 +123,18 @@ html[data-design="refined"][data-edition="spectrum"] {
   .featured-editorial > li:nth-child(n) .mb-key { font-size: 11px; }
   .studio-open { top: 24px; right: 24px; width: 32px; height: 32px; border: 0; background: #edf0ff; color: #4e62dc; font-size: 20px; }
   .card-link:hover .studio-open { background: #4e62dc; }
-  .edition-art { position: relative; isolation: isolate; overflow: hidden; height: 56px; flex: 0 0 56px; margin: 0 -26px; background: linear-gradient(110deg,#adf1db,#8edaff 52%,#7377ec); }
-  .edition-art::before { content:""; position: absolute; width: 70%; height: 250%; top: -90%; left: -5%; border: 15px solid #ffffff59; border-radius: 50%; box-shadow: 0 0 0 12px #ffffff15,0 0 0 34px #3346b226; transform: rotate(-25deg); }
-  .edition-art-2 { background: repeating-linear-gradient(115deg,#c9ecec 0 7px,#98c5d9 8px 10px,#6586b5 11px 12px); }
-  .edition-art-2::before { left: 50%; top: -120%; background: #446885; border-color: #b0e5e0; box-shadow: 0 0 0 12px #152a4655,0 0 0 34px #c6fff32e; }
-  .edition-art-3 { background: repeating-linear-gradient(90deg,transparent 0 3px,#ffffff45 3px 4px),linear-gradient(160deg,#bdeef5,#7ab0ed 47%,#6764df); }
+  /* Three quiet material studies, aligned to the content rather than the card edge. */
+  .edition-art { position: relative; isolation: isolate; overflow: hidden; height: 36px; flex: 0 0 36px; margin: 8px 0 18px; border: 1px solid #dce8ef; border-radius: 8px; background: linear-gradient(110deg,#d9f3ed,#dceef8 52%,#e3e3fa); }
+  .edition-art::before { content: ""; position: absolute; width: 78%; height: 240%; top: -170%; left: -8%; border: 1px solid #ffffffdc; border-radius: 50%; box-shadow: 0 0 0 8px #ffffff24,0 0 0 9px #ffffffa6,0 0 0 18px #ffffff1f,0 0 0 19px #ffffff80; transform: rotate(-18deg); }
+  .edition-art-2 { background: repeating-linear-gradient(120deg,transparent 0 8px,#ffffff9c 8px 9px,transparent 9px 16px),linear-gradient(105deg,#e2f3ef,#d4e8f3 55%,#dde2f7); }
+  .edition-art-2::before { width: 55%; left: 68%; top: -160%; background: #ffffff24; border-color: #ffffffb3; box-shadow: 0 0 0 10px #ffffff20,0 0 0 11px #ffffff8c; transform: rotate(25deg); }
+  .edition-art-3 { background: repeating-linear-gradient(90deg,transparent 0 5px,#ffffff8c 5px 6px),linear-gradient(105deg,#daf0f0,#dbe8f7 50%,#dddff6); }
   .edition-art-3::before { display: none; }
-  .featured-editorial .card .cf-stub { margin-inline: -26px; padding: 16px 26px; border: 0; background: #f7f8fc; font-size: 10px; }
+  .featured-editorial .card .cf-stub { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 5px 12px; margin: 0; padding: 16px 0 22px; border: 0; border-top: 1px solid #e9edf4; background: transparent; font-size: 11px; line-height: 1.5; letter-spacing: 0; }
+  .featured-editorial .card .cf-receipt { grid-column: 1; color: #425572; }
+  .featured-editorial .card .cf-date { grid-column: 1; color: #738099; font-size: 10px; font-variant-numeric: tabular-nums; }
+  .featured-editorial .card .cf-stub .open { grid-column: 2; grid-row: 1 / 3; display: flex; align-items: center; gap: 9px; margin: 0; color: #34466d; font-family: var(--sans); font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .cf-open-arrow { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid #e1e7f2; border-radius: 50%; background: #f5f7fc; color: #5866a7; font-size: 15px; line-height: 1; }
   .featured-editorial .card .cf-stub::before, .featured-editorial .card .cf-stub::after { display: none; }
   .case-index { background: #fff; border-radius: 20px; border-color: #e1e6ef; }
   .ci-row { padding-block: 26px; }
@@ -187,6 +192,13 @@ html[data-design="refined"][data-edition="spectrum"] {
     .featured-editorial .rb-highlights dt { font-size: 26px; }
     .featured-editorial > li:nth-child(n) .card { padding-inline: 20px; }
     .featured-editorial > li:nth-child(n) .big-number { font-size: 58px; }
-    .edition-art, .featured-editorial .card .cf-stub { margin-inline: -20px; }
+    .edition-art { height: 30px; flex-basis: 30px; margin-bottom: 16px; }
+    .featured-editorial .card .cf-stub { padding-bottom: 20px; }
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html[data-design="refined"][data-edition="spectrum"] {
+    .cf-open-arrow { transition: color 180ms ease, background 180ms ease, border-color 180ms ease, transform 180ms ease; }
+    .card-link:hover .cf-open-arrow { color: #fff; background: #5363cd; border-color: #5363cd; transform: translate(1px,-1px); }
   }
 }

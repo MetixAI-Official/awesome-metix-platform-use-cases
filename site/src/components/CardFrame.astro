@@ -34,10 +34,10 @@ const label = `${t.formats.card} ${String(index).padStart(2, "0")}`;
   </p>
   <h3 class="cf-title" set:html={titleHtml(title ?? entry.title[lang], lang)} />
   <div class="cf-body"><slot /></div>
-  {artwork && <div class={`edition-art edition-art-${index}`} aria-hidden="true"><i /><i /></div>}
+  {artwork && <div class={`edition-art edition-art-${index}`} aria-hidden="true" />}
   <p class="cf-stub">
-    {receipt && <span>{t.toRerun(number(lang, receipt.credits))}</span>}
-    {entry.snapshot && <span>{isoDate(entry.snapshot)}</span>}
-    <span class="open">{t.openCard} →</span>
+    {receipt && <span class="cf-receipt">{t.toRerun(number(lang, receipt.credits))}</span>}
+    {entry.snapshot && <span class="cf-date">{isoDate(entry.snapshot)}</span>}
+    <span class="open">{t.openCard}{artwork ? <span class="cf-open-arrow" aria-hidden="true">↗</span> : " →"}</span>
   </p>
 </article>
