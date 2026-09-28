@@ -39,5 +39,4 @@ node_modules/
 
 # Site build output
 site/dist/
-site/redirects/
 site/.astro/

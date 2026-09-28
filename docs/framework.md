@@ -209,7 +209,7 @@ Work happens on `feature/<YYYYMMDD>_<slug>` or `fix/<YYYYMMDD>_<slug>` branches 
 
 ## Open decisions
 
-1. Address: keep the github.io address or move to a custom domain.
+1. Address: settled on platform.metix.ai/casebook, served from the image in `Dockerfile` (see `deploy/README.md`).
 2. How this library and metix.ai/reports relate once both exist: redirect, link, or migrate.
 
 Licensing is settled: code under Apache-2.0 (`LICENSE`), written content, charts, and published aggregates under CC BY 4.0 (`LICENSE-CONTENT`).
