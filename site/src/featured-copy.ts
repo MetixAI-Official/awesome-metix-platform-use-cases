@@ -5,13 +5,13 @@ export const featuredCopy: Record<string, Record<Lang, { title: string; summary:
   "class-of-2023-ai-companies-2026": {
     en: {
       title: "AI’s share of new companies tripled after ChatGPT",
-      summary: "2023–25 vs. 2019–22: nearly 3× by today’s AI definition; just 1.18× using older tags.",
-      highlights: ["AI share in the 2023–25 cohort; 0.56% in 2019–22.", "Share ratio using older AI tags; 2.9× with the full definition.", "Of 2025 AI companies mention agents; 7% in 2021."],
+      summary: "2023-25 vs. 2019-22: nearly 3× by today’s AI definition; just 1.18× using older tags.",
+      highlights: ["AI share in the 2023-25 cohort; 0.56% in 2019-22.", "Share ratio using older AI tags; 2.9× with the full definition.", "Of 2025 AI companies mention agents; 7% in 2021."],
     },
     zh: {
       title: "ChatGPT 后，新公司中 AI 公司占比翻三倍",
-      summary: "2023–25 年对比 2019–22 年：按当前 AI 定义约为 3 倍，按旧标签仅为 1.18 倍。",
-      highlights: ["2023–25 年新公司中的 AI 占比；2019–22 年为 0.56%。", "旧 AI 标签下的占比倍数；完整定义下为 2.9 倍。", "2025 年成立的 AI 公司提到 agent 的比例；2021 年为 7%。"],
+      summary: "2023-25 年对比 2019-22 年：按当前 AI 定义约为 3 倍，按旧标签仅为 1.18 倍。",
+      highlights: ["2023-25 年新公司中的 AI 占比；2019-22 年为 0.56%。", "旧 AI 标签下的占比倍数；完整定义下为 2.9 倍。", "2025 年成立的 AI 公司提到 agent 的比例；2021 年为 7%。"],
     },
   },
   "ai-coding-tools-in-postings-2026": {

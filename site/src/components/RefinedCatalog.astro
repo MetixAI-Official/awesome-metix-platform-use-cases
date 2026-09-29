@@ -24,7 +24,7 @@ const { lang, edition = "refined" } = Astro.props;
 const t = ui[lang];
 const previewLede = lang === "zh"
   ? "用 AI agent 探索真实就业数据。每个案例公开结论、查询、成本与提示词，可通过 Metix AI Platform 复现。"
-  : "Job-market insights, backed by real data. Explore the findings, queries, costs, and prompts — then reproduce them with your agent on Metix AI Platform.";
+  : "Job-market insights, backed by real data. Explore the findings, queries, costs, and prompts, then reproduce them with your agent on Metix AI Platform.";
 const all = await getCollection("cases");
 const published = all.filter((c) => c.data.status === "published").sort(byCatalog);
 const reportCases = published.filter((c) => c.data.format === "report");
@@ -118,7 +118,7 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
           const position = cardPosition(data.slug);
           const copy = featuredCopy[data.slug]?.[lang];
           return (
-            <li>
+            <li class:list={edition === "spectrum" ? ["downloadable-case"] : []}>
               <a
                 class="card-link"
                 href={href(lang, `cases/${data.slug}/`)}
@@ -128,6 +128,11 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
                   <Card lang={lang} section="card" size="compact" entry={data} cardSummary={copy?.summary} cardNote={copy?.note} />
                 </CardFrame>
               </a>
+              {edition === "spectrum" && (
+                <button class="download-card" type="button" data-download-card data-download-name={data.slug} aria-label={lang === "zh" ? `下载案例：${copy?.title ?? data.title[lang]}` : `Download case: ${copy?.title ?? data.title[lang]}`} title={lang === "zh" ? "下载 PNG" : "Download PNG"}>
+                  <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 2.5v7m0 0 2.7-2.7M8 9.5 5.3 6.8M3 11.5v2h10v-2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </button>
+              )}
             </li>
           );
         })
@@ -419,5 +424,74 @@ const dataCount = (d: string) => rows.filter((r) => r.data.datasets.includes(d a
       form.q.focus();
     });
     apply();
+  })();
+</script>
+
+<script is:inline>
+  (() => {
+    if (document.documentElement.dataset.edition !== "spectrum") return;
+    const buttons = [...document.querySelectorAll("[data-download-card]")];
+    const inlineStyle = (source, target) => {
+      const computed = getComputedStyle(source);
+      for (const property of computed) target.style.setProperty(property, computed.getPropertyValue(property), computed.getPropertyPriority(property));
+      [...source.children].forEach((child, index) => target.children[index] && inlineStyle(child, target.children[index]));
+      for (const pseudo of ["::before", "::after"]) {
+        const style = getComputedStyle(source, pseudo);
+        if (["none", "normal", "\"\"", ""].includes(style.content)) continue;
+        const decoration = document.createElement("span");
+        for (const property of style) decoration.style.setProperty(property, style.getPropertyValue(property), style.getPropertyPriority(property));
+        pseudo === "::before" ? target.prepend(decoration) : target.append(decoration);
+      }
+    };
+    const save = (blob, name, extension) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `casebook-${name}.${extension}`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    };
+    buttons.forEach((button) => button.addEventListener("click", async () => {
+      const card = button.closest("li")?.querySelector(".card");
+      if (!card) return;
+      const { width: rawWidth, height: rawHeight } = card.getBoundingClientRect();
+      const width = Math.ceil(rawWidth);
+      const height = Math.ceil(rawHeight);
+      const clone = card.cloneNode(true);
+      inlineStyle(card, clone);
+      Object.assign(clone.style, { width: `${width}px`, height: `${height}px`, margin: "0", boxSizing: "border-box" });
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width * 2}" height="${height * 2}" viewBox="0 0 ${width} ${height}"><foreignObject width="${width}" height="${height}"><div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">${clone.outerHTML}</div></foreignObject></svg>`;
+      const name = button.dataset.downloadName || "case";
+      button.disabled = true;
+      try {
+        await document.fonts.ready;
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = width * 2;
+          canvas.height = height * 2;
+          const context = canvas.getContext("2d");
+          if (!context) {
+            save(new Blob([svg], { type: "image/svg+xml" }), name, "svg");
+            button.disabled = false;
+            return;
+          }
+          context.scale(2, 2);
+          context.drawImage(image, 0, 0, width, height);
+          canvas.toBlob((blob) => {
+            save(blob || new Blob([svg], { type: "image/svg+xml" }), name, blob ? "png" : "svg");
+            button.disabled = false;
+          }, "image/png");
+        };
+        image.onerror = () => {
+          save(new Blob([svg], { type: "image/svg+xml" }), name, "svg");
+          button.disabled = false;
+        };
+        image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      } catch {
+        save(new Blob([svg], { type: "image/svg+xml" }), name, "svg");
+        button.disabled = false;
+      }
+    }));
   })();
 </script>

@@ -9,19 +9,19 @@ const { size = "regular" } = Astro.props;
   <span class="signature-label" aria-hidden="true">Platform</span>
 </span>
 <style>
-  .platform-signature { display: inline-flex; align-items: center; gap: 20px; white-space: nowrap; line-height: 1; vertical-align: middle; }
+  .platform-signature { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; line-height: 1; vertical-align: middle; }
   img { display: block; flex-shrink: 0; width: 129px; height: 24px; }
   .signature-divider { flex-shrink: 0; width: 1px; height: 22px; background: #d9dce5; }
-  .signature-label { display: block; color: #62647d; font: 400 14px/1 "Geist Mono Variable", monospace; letter-spacing: .12em; text-transform: uppercase; text-box: trim-both cap alphabetic; }
-  .large { gap: 28px; }
+  .signature-label { display: block; color: #4f526f; font: 500 15px/1 "Geist Mono Variable", monospace; letter-spacing: .1em; text-transform: uppercase; text-box: trim-both cap alphabetic; }
+  .large { gap: 14px; }
   .large img { width: 172px; height: 32px; }
   .large .signature-divider { height: 28px; }
-  .large .signature-label { font-size: 18px; }
-  .compact { gap: 8px; }
+  .large .signature-label { font-size: 19px; }
+  .compact { gap: 4px; }
   .compact .signature-divider { height: 20px; }
-  .compact .signature-label { font-size: 11px; letter-spacing: .08em; }
+  .compact .signature-label { font-size: 12px; letter-spacing: .08em; }
   @media (max-width: 620px) {
-    .large { gap: 20px; }
+    .large { gap: 10px; }
     .large img { width: 129px; height: 24px; }
     .large .signature-divider { height: 24px; }
     .large .signature-label { font-size: 14px; }

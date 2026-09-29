@@ -5,7 +5,7 @@ import soraLatin from "@fontsource-variable/sora/files/sora-latin-wght-normal.wo
 import "@fontsource-variable/geist";
 import "@fontsource-variable/geist-mono";
 import "@site/styles/shell.css";
-import PlatformLockup from "@site/components/PlatformLockup.astro";
+import PlatformSignature from "@site/components/PlatformSignature.astro";
 import { REPO, asset, href, ui, type Lang } from "@site/i18n";
 
 interface Props {
@@ -41,7 +41,7 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
     <header class="site-header">
       <div class="wrap bar">
         <a class="brand" href={href(lang)} aria-label={`Metix AI Platform ${t.casebook}`}>
-          <PlatformLockup />
+          <PlatformSignature />
           <span class="brand-name" aria-hidden="true">{t.casebook}</span>
         </a>
         <div class="header-actions">
@@ -63,7 +63,7 @@ const pageTitle = title ? `${title} · ${t.casebook}, ${t.siteName}` : `${t.case
 
     <footer class="site-footer">
       <div class="wrap">
-        <p class="footer-brand" role="img" aria-label="Metix AI Platform"><PlatformLockup /></p>
+        <p class="footer-brand"><PlatformSignature /></p>
         <nav class="links" aria-label="Metix AI Platform">
           <a href="https://platform.metix.ai">Metix AI Platform</a>
           <a href="https://platform.metix.ai/docs">{t.footerDocs}</a>

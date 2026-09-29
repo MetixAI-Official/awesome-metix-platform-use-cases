@@ -196,6 +196,12 @@ html[data-design="refined"] {
     .mast-lede { margin-top: 20px; font-size: 16px; }
     .mast-actions { margin-top: 24px; }
     .mast-stats { margin-top: 32px; }
+    .mast-stats div, .mast-stats div:first-child { min-width: 0; grid-template-columns: 4.5rem minmax(0,1fr); align-items: center; column-gap: 12px; }
+    .mast-stats dt, .mast-stats dd { min-width: 0; }
+    .mast-stats dd { overflow-wrap: anywhere; line-height: 1.5; }
+    .shelf-head { min-width: 0; gap: 8px; }
+    .shelf-head h2, .shelf-head p { min-width: 0; }
+    .shelf-head p { line-height: 1.65; overflow-wrap: anywhere; }
     .featured-cards { gap: 20px; }
     .ci-row { padding: 20px 16px; gap: 6px 10px; }
     .ci-title { font-size: 16px; }
@@ -303,7 +309,7 @@ html[data-design="refined"] {
   }
 }
 
-/* Metix brand extension: violet and cyan accents over the existing layout. */
+/* Metix AI Platform brand extension: violet and cyan accents over the existing layout. */
 html[data-design="refined"] {
   --brand-cyan: #0defc8;
   --brand-violet-ink: #40399f;
