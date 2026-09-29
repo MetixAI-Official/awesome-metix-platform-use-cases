@@ -18,7 +18,7 @@
 //
 // docs/style.md, "Same origin as the console", explains the rule to contributors.
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const dist = process.argv[2] ?? "site/dist";
@@ -41,6 +41,12 @@ const JS_URL = /\s(?:href|src|action)\s*=\s*["']?\s*javascript:/gi;
 const STORAGE_USE = /localStorage\s*\.\s*(getItem|setItem|removeItem)\s*\(\s*AGENT_KEY\b/g;
 
 for (const file of walk(dist)) {
+  // Every share card page needs its screenshot, or og:image is a 404
+  // (tools/og_shots.py writes them into site/public).
+  if (/(^|\/)og(\/[^/]+)?\.html$/.test(relative(dist, file)) && !existsSync(file.replace(/\.html$/, ".png"))) {
+    findings.push(`${relative(dist, file)}: no ${relative(dist, file).replace(/\.html$/, ".png")}; run tools/og_shots.py`);
+  }
+  if (!/\.(html|js|mjs)$/.test(file)) continue;
   const text = readFileSync(file, "utf8");
   if (file.endsWith(".html")) {
     for (const m of text.matchAll(SCRIPT)) {

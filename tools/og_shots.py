@@ -7,8 +7,13 @@
 Every page under site/dist/og/ and site/dist/zh/og/ is a 1200x630 card drawn with
 the site's own components (site/src/components/OgCard.astro). This opens each one
 in Chromium and writes the PNG next to it: og/<slug>.png for a case, og.png for the
-home page, and the same under zh/. Pages link them as og:image, so run this after
-every build and before deploying.
+home page, and the same under zh/. Pages link them as og:image.
+
+It also writes each image into site/public at the same path, and those copies are
+committed: the image build (Dockerfile) has no browser, so the next `pnpm build`
+takes the images from public/. Run this after changing a case's title, numbers
+or chart, then commit site/public/og*. tools/check-dist.mjs fails a build where
+an og page has no image.
 
 Needs Playwright for Python and its Chromium (python -m playwright install chromium).
 """
@@ -25,6 +30,7 @@ from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "site" / "dist"
+PUBLIC = ROOT / "site" / "public"
 PORT = 4331
 BASE = f"http://localhost:{PORT}/casebook"
 
@@ -61,6 +67,9 @@ def main() -> int:
                 page.goto(f"{BASE}/{path}", wait_until="networkidle")
                 page.evaluate("document.fonts.ready")
                 page.screenshot(path=str(png), clip={"x": 0, "y": 0, "width": 1200, "height": 630})
+                kept = PUBLIC / png.relative_to(DIST)
+                kept.parent.mkdir(parents=True, exist_ok=True)
+                kept.write_bytes(png.read_bytes())
             browser.close()
     finally:
         server.terminate()
